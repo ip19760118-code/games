@@ -33,7 +33,6 @@
     .hub-foot { margin: 12px 0 0; color: #6b7699; font-size: 12px; }
     .hub-ver { margin: 6px 0 0; color: #4d5670; font-size: 10px; font-family: monospace; letter-spacing: 1px; }
     .tag-online { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 10px; background: rgba(124, 255, 196, 0.15); border: 1px solid rgba(124, 255, 196, 0.4); color: #7cffc4; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; vertical-align: middle; }
-    .tag-new { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 10px; background: rgba(255, 209, 102, 0.15); border: 1px solid rgba(255, 209, 102, 0.45); color: #ffd166; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; vertical-align: middle; }
   </style>
 </head>
 <body>
@@ -41,7 +40,7 @@
     <div class="panel">
       <h1>🎮 Игровой центр</h1>
       <p class="hub-subtitle">Мини-игры прямо в Telegram</p>
-      <p class="hub-desc">14 игр в одном боте: аркады, головоломки, классика, онлайн‑партии, match‑3, пасьянс и морской бой. Без установки — нажми и играй.</p>
+      <p class="hub-desc">15 игр в одном боте: аркады, головоломки, классика, онлайн‑партии, match‑3, пасьянс, морской бой и маджонг. Без установки — нажми и играй.</p>
 
       <button class="game-btn" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
       <button class="game-btn" id="lightsOutBtn"><span class="game-emoji">💡</span><span class="game-text"><b>Выключи Свет</b><small>Логическая головоломка: выключи всё поле</small></span></button>
@@ -57,14 +56,15 @@
       <button class="game-btn" id="crystalsBtn"><span class="game-emoji">💎</span><span class="game-text"><b>Кристаллы</b><small>Match‑3: бонусы, молнии, котики, корзины, 4 режима</small></span></button>
       <button class="game-btn" id="solitaireBtn"><span class="game-emoji">♠️</span><span class="game-text"><b>Косынка</b><small>Классический пасьянс: перетаскивание, подсказки, скины</small></span></button>
       <button class="game-btn" id="seabattleBtn"><span class="game-emoji">🚢</span><span class="game-text"><b>Морской бой <span class="tag-online">ONLINE</span></b><small>1 игрок vs ИИ или онлайн‑дуэль по коду комнаты</small></span></button>
+      <button class="game-btn" id="mahjongBtn"><span class="game-emoji">🀄</span><span class="game-text"><b>Маджонг</b><small>Пасьянс: 72/120/180 плиток, наборы, подсказки, отмена</small></span></button>
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.6</p>
+      <p class="hub-ver" id="hubVer">hub v3.7</p>
     </div>
   </div>
   <script>
-    const HUB_VER = '3.6';
+    const HUB_VER = '3.7';
     const tg = window.Telegram?.WebApp;
     if (tg) { try { tg.ready(); tg.expand(); if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#070b16'); if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#070b16'); if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes(); } catch (e) {} }
     function trackEvent(name, params){ try { if (typeof gtag === 'function') gtag('event', name, params); } catch (e) {} }
@@ -84,6 +84,7 @@
     document.getElementById('crystalsBtn').addEventListener('click', () => openGame('./crystals/', 'crystals'));
     document.getElementById('solitaireBtn').addEventListener('click', () => openGame('./solitaire/', 'solitaire'));
     document.getElementById('seabattleBtn').addEventListener('click', () => openGame('./seabattle/', 'seabattle'));
+    document.getElementById('mahjongBtn').addEventListener('click', () => openGame('./mahjong/', 'mahjong'));
     document.getElementById('hubVer').textContent = 'hub v' + HUB_VER;
   </script>
 </body>
