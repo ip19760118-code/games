@@ -7,24 +7,30 @@
 :root{--bg1:#101418;--bg2:#1b2228;--bg3:#0a0d10;--panel:rgba(24,30,36,.92);--text:#eef2f6;--accent:#7cffc4;--cell:30px;--fs:calc(var(--cell)*10);--gl:rgba(110,150,215,.45);--red:#c1121f;--pen:#2440b3}
 [data-skin="classic"]{--pen:#2440b3}[data-skin="graphite"]{--pen:#3a3f45}[data-skin="green"]{--pen:#1b7a3a}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
-body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:8px;padding-top:calc(8px + env(safe-area-inset-top));padding-bottom:calc(8px + env(safe-area-inset-bottom))}
-.wrap{max-width:1000px;width:100%;background:var(--panel);border-radius:20px;padding:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08)}
-.header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-.title{font-size:19px;font-weight:700}
-.hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:30px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit}
-.hud{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;background:rgba(0,0,0,.3);border-radius:12px;padding:6px 10px;margin-bottom:8px;font-size:13px;font-weight:700}
+body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:4px;padding-top:calc(4px + env(safe-area-inset-top));padding-bottom:calc(4px + env(safe-area-inset-bottom))}
+.wrap{max-width:1000px;width:100%;background:var(--panel);border-radius:16px;padding:8px;box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08)}
+.header{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px;margin-bottom:6px}
+.header .title{font-size:17px;font-weight:700;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hgroup{display:flex;gap:5px;justify-content:flex-end}
+.hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:24px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:4px;flex-wrap:wrap;background:rgba(0,0,0,.3);border-radius:10px;padding:5px 8px;margin-bottom:6px;font-size:12px;font-weight:700}
 .hud b{color:var(--accent)}
-#netHud{display:none;align-items:center;gap:6px;background:rgba(124,255,196,.12);border:1px solid rgba(124,255,196,.4);border-radius:20px;padding:3px 10px;color:var(--accent);font-size:12px}
-#netHud b{color:#fff}
-.sheet{position:relative;border-radius:6px;padding:12px;background:#f7f4ee url("img/paper.png") center/cover;box-shadow:0 6px 22px rgba(0,0,0,.45),inset 0 0 30px rgba(0,0,0,.06);overflow:hidden}
-.boards{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
-.bwrap{display:flex;flex-direction:column;align-items:center;gap:4px}
-.btitle{font-family:'Segoe Script','Comic Sans MS',cursive;font-size:calc(var(--cell)*.62);font-weight:700;color:var(--pen)}
+.bar{background:rgba(0,0,0,.25);border-radius:12px;margin-bottom:6px;overflow:hidden}
+.bar-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--accent)}
+.bar-head .arrow{transition:transform .3s}
+.bar.expanded .bar-head .arrow{transform:rotate(180deg)}
+.bar-body{padding:2px 10px 10px;display:none;flex-wrap:wrap;gap:6px;justify-content:center}
+.bar.expanded .bar-body{display:flex}
+.players{width:100%;text-align:left;font-size:12px;line-height:1.7;color:var(--text)}
+.sheet{position:relative;border-radius:6px;padding:10px;background:#f7f4ee url("img/paper.png") center/cover;box-shadow:0 4px 16px rgba(0,0,0,.4),inset 0 0 20px rgba(0,0,0,.05);overflow:hidden}
+.boards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.bwrap{display:flex;flex-direction:column;align-items:center;gap:3px}
+.btitle{font-family:'Segoe Script','Comic Sans MS',cursive;font-size:calc(var(--cell)*.55);font-weight:700;color:var(--pen)}
 .btitle.enemy{color:var(--red)}
-.fleet{display:flex;gap:8px;justify-content:center;font-size:calc(var(--cell)*.42);font-weight:800;color:var(--pen);min-height:calc(var(--cell)*.5)}
+.fleet{display:flex;gap:6px;justify-content:center;font-size:calc(var(--cell)*.38);font-weight:800;color:var(--pen);min-height:calc(var(--cell)*.45)}
 .fleet span.dead{opacity:.35;text-decoration:line-through}
-.bgrid{display:grid;grid-template-columns:auto var(--fs) auto;grid-template-rows:auto var(--fs) auto;gap:2px;align-items:center;justify-items:center}
-.lab{font-family:'Segoe Script','Comic Sans MS',cursive;font-size:calc(var(--cell)*.42);color:var(--pen);opacity:.9;display:flex;align-items:center;justify-content:center}
+.bgrid{display:grid;grid-template-columns:auto var(--fs) auto;grid-template-rows:auto var(--fs) auto;gap:1px;align-items:center;justify-items:center}
+.lab{font-family:'Segoe Script','Comic Sans MS',cursive;font-size:calc(var(--cell)*.38);color:var(--pen);opacity:.9;display:flex;align-items:center;justify-content:center}
 .labcol{display:flex;width:var(--fs);justify-content:space-around}
 .labrow{display:flex;height:var(--fs);flex-direction:column;justify-content:space-around}
 .field{position:relative;width:var(--fs);height:var(--fs);border:2px solid var(--pen);border-radius:3px;cursor:crosshair;touch-action:none;background-image:linear-gradient(var(--gl) 1px,transparent 1px),linear-gradient(90deg,var(--gl) 1px,transparent 1px);background-size:var(--cell) var(--cell)}
@@ -34,6 +40,8 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 [data-skin="graphite"] .ship img,[data-skin="graphite"] .mark.miss img,[data-skin="graphite"] .mark.strike img{filter:grayscale(1) brightness(.8)}
 [data-skin="green"] .ship img,[data-skin="green"] .mark.miss img,[data-skin="green"] .mark.strike img{filter:hue-rotate(-90deg) saturate(1.25)}
 .ship.fb{border:2px solid var(--pen);border-radius:6px;background:rgba(40,70,180,.10)}
+.ship.preview{opacity:.55;animation:blink .9s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:.35}50%{opacity:.95}}
 .mark{position:absolute;pointer-events:none;display:flex;align-items:center;justify-content:center}
 .mark img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
 .mark.miss.fb::after{content:'';width:34%;height:34%;border-radius:50%;background:radial-gradient(circle,var(--pen) 0 30%,transparent 70%)}
@@ -46,71 +54,72 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .hover{position:absolute;pointer-events:none;border:2px dashed rgba(0,0,0,.35);border-radius:4px;display:none}
 .hover.ok{border-color:rgba(27,122,58,.8);background:rgba(27,122,58,.12)}
 .hover.bad{border-color:rgba(193,18,31,.8);background:rgba(193,18,31,.12)}
-.placebar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;align-items:center;margin-top:8px}
-.chips{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
-.chip{min-width:20px;text-align:center;border:1.5px solid var(--pen);color:var(--pen);border-radius:6px;font-size:11px;font-weight:800;padding:1px 5px;background:rgba(255,255,255,.5)}
-.chip.done{opacity:.35;text-decoration:line-through}
-.btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--text);padding:8px 16px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--text);padding:7px 14px;border-radius:24px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
 .btn.primary{background:linear-gradient(135deg,#7cffc4,#33d6ff);color:#061019;border:none}
 .btn.danger{background:rgba(193,18,31,.25);border-color:rgba(193,18,31,.5)}
 .btn:disabled{opacity:.4;cursor:default}
-.actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
-.status{text-align:center;font-size:14px;font-weight:700;margin:8px 0;min-height:20px;color:var(--accent)}
-.ver{text-align:center;font-size:10px;opacity:.45;margin-top:6px;font-family:monospace;letter-spacing:1px}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
+.btn.pulse{animation:pulseB 1.1s infinite}
+@keyframes pulseB{0%,100%{box-shadow:0 0 0 0 rgba(124,255,196,.55)}50%{box-shadow:0 0 0 9px rgba(124,255,196,0)}}
+.status{text-align:center;font-size:13px;font-weight:700;margin:6px 0;min-height:18px;color:var(--accent)}
+.ver{text-align:center;font-size:9px;opacity:.4;margin-top:5px;font-family:monospace;letter-spacing:1px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:12px}
 .overlay.show{display:flex}
-.cardbox{background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:22px;max-width:420px;width:100%;text-align:center;max-height:88vh;overflow-y:auto;color:var(--text)}
-.cardbox h2{font-size:22px;margin-bottom:6px}
-.cardbox .sub{font-size:13px;opacity:.7;margin-bottom:12px}
-.mgrid{display:flex;flex-direction:column;gap:10px}
-.mcard{display:flex;align-items:center;gap:12px;text-align:left;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.05);padding:12px;cursor:pointer;font-family:inherit;color:var(--text);font-size:14px}
-.mcard:active{transform:scale(.98);background:rgba(255,255,255,.1)}
-.mcard .ic{font-size:26px;width:40px;text-align:center;flex-shrink:0}
-.mcard b{display:block;font-size:15px}
-.mcard small{opacity:.7;font-size:12px}
-.jrow{display:flex;gap:8px;margin-top:6px}
-.jrow input{flex:1;padding:9px 12px;border-radius:14px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);color:var(--text);font-size:15px;letter-spacing:2px;text-transform:uppercase;font-family:inherit}
-.codebox{display:flex;align-items:center;gap:8px;justify-content:center;margin:6px 0 2px}
-.codebox .cd{font-family:monospace;font-size:24px;letter-spacing:4px;color:var(--accent);background:rgba(0,0,0,.35);border:1px solid rgba(124,255,196,.4);border-radius:12px;padding:6px 14px}
-.selrow{margin:12px 0 4px;font-size:14px;font-weight:600;text-align:left}
-.selrow select{width:100%;margin-top:6px;padding:7px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);color:var(--text);font-size:14px}
-.selrow label{display:flex;gap:8px;align-items:center}
-.selrow input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
+.cardbox{background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:18px;max-width:400px;width:100%;text-align:center;max-height:85vh;overflow-y:auto;color:var(--text)}
+.cardbox h2{font-size:20px;margin-bottom:5px}
+.cardbox .sub{font-size:12px;opacity:.7;margin-bottom:10px}
+.mgrid{display:flex;flex-direction:column;gap:8px}
+.mcard{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.05);padding:10px;cursor:pointer;font-family:inherit;color:var(--text);font-size:13px}
+.mcard .ic{font-size:22px;width:36px;text-align:center;flex-shrink:0}
+.mcard b{display:block;font-size:14px}
+.mcard small{opacity:.7;font-size:11px}
+.jrow{display:flex;gap:6px;margin-top:6px}
+.jrow input{flex:1;padding:8px 10px;border-radius:12px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);color:var(--text);font-size:14px;letter-spacing:2px;text-transform:uppercase;font-family:inherit}
+.selrow{margin:10px 0 3px;font-size:13px;font-weight:600;text-align:left}
+.selrow select{width:100%;margin-top:5px;padding:6px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);color:var(--text);font-size:13px}
+.selrow label{display:flex;gap:7px;align-items:center}
+.selrow input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
 .selrow input[type=range]{width:100%}
-.stat-row{display:flex;justify-content:space-between;padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.08);font-size:14px}
-.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
-.note{font-size:12px;opacity:.7;line-height:1.45;margin-top:8px;text-align:left}
-.toast{position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(30,150,90,.95);color:#fff;font-weight:800;font-size:13px;padding:9px 18px;border-radius:30px;z-index:600;pointer-events:none;opacity:0;transition:opacity .25s}
+.stat-row{display:flex;justify-content:space-between;padding:4px 2px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
+.btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.note{font-size:11px;opacity:.7;line-height:1.4;margin-top:6px;text-align:left}
+.toast{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(30,150,90,.95);color:#fff;font-weight:800;font-size:12px;padding:8px 16px;border-radius:24px;z-index:600;pointer-events:none;opacity:0;transition:opacity .25s}
 .toast.show{opacity:1}
-@media (max-width:560px){.title{font-size:16px}.hud{font-size:11px}.btn{font-size:12px;padding:7px 12px}}
+@media (max-width:600px){.boards{flex-direction:column;gap:12px}.title{font-size:15px}.hud{font-size:11px}.btn{font-size:11px;padding:6px 12px}.lab{font-size:calc(var(--cell)*.34)}}
 </style></head><body>
 <div class="wrap" id="wrap">
-<div class="header"><button class="hbtn" id="hubBtn">← В меню</button><div class="title">🚢 МОРСКОЙ БОЙ</div><div style="display:flex;gap:6px"><button class="hbtn" id="roomBtn">👥 Комната</button><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
-<div class="hud"><span>⏱ <b id="hTime">00:00</b></span><span>Выстрелы: <b id="hShots">0</b></span><span>Точность: <b id="hAcc">0%</b></span><span id="netHud">👥 <b id="roomCode">------</b> · <b id="roomStat">офлайн</b></span><span><b id="hDiff">Средний</b></span></div>
+<div class="header"><button class="hbtn" id="hubBtn">← В меню</button><div class="title">🚢 МОРСКОЙ БОЙ</div><div class="hgroup"><button class="hbtn" id="roomBtn">👥 Комната</button><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
+<div class="hud"><span>⏱ <b id="hTime">00:00</b></span><span>Выстрелы: <b id="hShots">0</b></span><span>Точность: <b id="hAcc">0%</b></span><span><b id="hDiff">Средний</b></span></div>
+<div class="bar" id="roomBar" style="display:none">
+<div class="bar-head" id="roomBarHead"><span>👥 Комната <b id="rbCode">------</b> · <b id="rbCount">0/2</b></span><span class="arrow">▾</span></div>
+<div class="bar-body"><div class="players" id="rbPlayers"></div>
+<div class="btns"><button class="btn primary" id="rbInvite">📨 Пригласить</button><button class="btn" id="rbCopy">📋 Код</button><button class="btn danger" id="rbGive">🏳️ Сдаться</button><button class="btn" id="rbLeave">🚪 Выйти</button></div></div>
+</div>
+<div class="bar expanded" id="toolbar">
+<div class="bar-head" id="toolbarHead"><span> Инструменты</span><span class="arrow">▾</span></div>
+<div class="bar-body">
+<button class="btn" id="rotBtn">⟲ Повернуть</button><button class="btn" id="autoBtn">🎲 Авто</button><button class="btn" id="clearBtn">🧹 Сброс</button><button class="btn primary" id="startBtn" disabled>⚔️ В бой!</button><button class="btn" id="newBtn">🔄 Новая</button><button class="btn danger" id="giveBtn">🏳️ Сдаться</button>
+</div>
+</div>
 <div class="sheet"><div class="boards">
 <div class="bwrap"><div class="btitle">Твоё поле</div><div class="fleet" id="myFleet"></div>
 <div class="bgrid"><div></div><div class="labcol" id="myTop"></div><div></div><div class="labrow" id="myLeft"></div>
-<div class="field" id="myField"><div class="layer" id="myShips"></div><div class="layer" id="myMarks"></div><div class="layer" id="myFx"></div><div class="hover" id="myHover"></div></div>
+<div class="field" id="myField"><div class="layer" id="myShips"></div><div class="layer" id="myPreview"></div><div class="layer" id="myMarks"></div><div class="layer" id="myFx"></div><div class="hover" id="myHover"></div></div>
 <div class="labrow" id="myRight"></div><div></div><div class="labcol" id="myBot"></div><div></div></div></div>
 <div class="bwrap"><div class="btitle enemy">Противник</div><div class="fleet" id="enFleet"></div>
 <div class="bgrid"><div></div><div class="labcol" id="enTop"></div><div></div><div class="labrow" id="enLeft"></div>
 <div class="field" id="enField"><div class="layer" id="enShips"></div><div class="layer" id="enMarks"></div><div class="layer" id="enFx"></div><div class="hover" id="enHover"></div></div>
 <div class="labrow" id="enRight"></div><div></div><div class="labcol" id="enBot"></div><div></div></div></div>
 </div></div>
-<div class="placebar" id="placebar"><span style="font-size:12px;opacity:.8">Корабли:</span><div class="chips" id="chips"></div>
-<button class="btn" id="rotBtn">⟲ Повернуть</button><button class="btn" id="autoBtn">🎲 Авто</button><button class="btn" id="clearBtn">🧹 Сброс</button><button class="btn primary" id="startBtn" disabled>⚔️ В бой!</button></div>
-<div class="status" id="statusEl">Расставь корабли (или 🎲) и жми «В бой!», либо открой 👥 Комната для игры онлайн</div>
-<div class="actions"><button class="btn" id="newBtn">🔄 Новая</button><button class="btn" id="giveBtn">🏳️ Сдаться</button></div>
-<div class="ver" id="verTag">v4.2</div>
+<div class="status" id="statusEl">Расставь корабли (или 🎲 Авто) и жми «В бой!», либо открой 👥 Комната для игры онлайн</div>
+<div class="ver" id="verTag">v4.4</div>
 </div>
 <div class="overlay" id="modeOverlay"><div class="cardbox"><h2>🚢 Морской бой</h2><div class="sub">Выбери режим игры</div>
 <div class="mgrid">
 <button class="mcard" id="modeAI"><span class="ic">🖥</span><span><b>Против компьютера</b><small>3 уровня сложности, офлайн</small></span></button>
-<button class="mcard" id="modeCreate"><span class="ic">👥</span><span><b>Создать комнату</b><small>Онлайн: получи код и позови друга</small></span></button>
-<button class="mcard" id="modeJoin"><span class="ic">🎯</span><span><b>Зайти по коду</b><small>Уже есть код комнаты от друга</small></span></button>
+<button class="mcard" id="modeCreate"><span class="ic">👥</span><span><b>Играть с другом</b><small>Создать комнату онлайн</small></span></button>
+<button class="mcard" id="modeJoin"><span class="ic">🎯</span><span><b>Зайти по коду</b><small>Уже есть код комнаты</small></span></button>
 </div>
 <div id="joinBox" style="display:none"><div class="jrow"><input id="joinInput" maxlength="6" placeholder="КОД"/><button class="btn primary" id="joinGo">Войти</button></div></div>
-<div id="waitBox" style="display:none"><div class="note" style="text-align:center">Комната создана. Поделись кодом:</div><div class="codebox"><span class="cd" id="waitCode">------</span></div><div class="btns"><button class="btn" id="copyCode">📋 Копировать</button><button class="btn primary" id="inviteBtn">📨 Пригласить</button><button class="btn danger" id="leaveRoom">Выйти</button></div></div>
 <div class="btns"><button class="btn" id="modeCancel">Отмена</button></div>
 </div></div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
@@ -123,23 +132,15 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="stat-row"><span>% побед</span><b id="stPct">0%</b></div>
 <div class="stat-row"><span>Серия / рекорд</span><b id="stStreak">0 / 0</b></div>
 <div class="btns"><button class="btn" id="stReset">Сброс</button><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note">Онлайн работает через Firebase Realtime DB. Убедись, что конфиг вставлен правильно.</div></div></div>
+<div class="note">Онлайн через Firebase (как в Шахматах/Дураке): комната по коду, приглашение ссылкой, шторка с игроками.</div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Поле 10×10, буквы А–К, цифры 1–10.<br>• Флот 1×4,2×3,3×2,4×1; не касаются углами.<br>• Режимы: 1 игрок vs ИИ (3 сложности) или онлайн‑дуэль на разных устройствах (👥 Комната → код).<br>• В онлайне: создай комнату → нажми «Пригласить» → отправь ссылку другу → друг открывает и автоматически присоединяется → оба расставляют корабли и жмут «Готов» → бой.<br>• Попадание = доп. ход; промах = всплеск; убитый = метки по всем клеткам + раскрытый контур.</div>
+<div class="note">• Поле 10×10, буквы А–К, цифры 1–10.<br>• Флот 1×4,2×3,3×2,4×1; не касаются углами.<br>• Расстановка: 1‑е нажатие = мигающее превью, 2‑е = подтвердить; либо 🎲 Авто.<br>• Онлайн: 👥 Комната → «Играть с другом» → код и шторка «1/2»; 📨 Пригласительная ссылка уходит через ТГ; друг открывает и попадает в комнату (станет 2/2). Оба расставляют флот и жмут «⚔️ В бой!» — только тогда начинается бой.<br>• Попадание = доп. ход; промах = всплеск; убитый = метки по всем клеткам + раскрытый контур.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var FB={
-  apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",
-  authDomain:"tg-games-69c06.firebaseapp.com",
-  databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",
-  projectId:"tg-games-69c06",
-  storageBucket:"tg-games-69c06.firebasestorage.app",
-  messagingSenderId:"797878618357",
-  appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"
-};
-var VER='4.2',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30;
-var G=null,tg=null,AC=null,MASTER=null,toastT=null,set=null,ST=null;
+var FB={apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"};
+var VER='4.4',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30;
+var G=null,tg=null,AC=null,MASTER=null,toastT=null,set=null,ST=null,preview=null;
 var FNS={},NET={code:null,role:null,room:null,conn:false,battle:false,lastPend:0,lastRes:0,L:[]};
 function $(i){return document.getElementById(i)}
 function lsGet(k,d){try{var v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}}
@@ -150,15 +151,15 @@ function dName(){return set.diff=='easy'?'Новичок':set.diff=='hard'?'Сл
 function trk(n,p){try{if(typeof gtag=='function')gtag('event',n,p)}catch(e){}}
 function hap(t){try{if(tg&&tg.HapticFeedback){if(t=='success')tg.HapticFeedback.notificationOccurred('success');else if(t=='error')tg.HapticFeedback.notificationOccurred('error');else tg.HapticFeedback.impactOccurred('light')}}catch(e){}}
 function tgBack(){var a=['setOverlay','rulesOverlay','endOverlay','modeOverlay'];for(var i=0;i<a.length;i++){var e=$(a[i]);if(e&&e.classList.contains('show')){e.classList.remove('show');return}}if(NET.conn){netLeave();return}location.href='../'}
-function initTg(){if(!tg)return;try{tg.ready();tg.expand();if(tg.setHeaderColor)tg.setHeaderColor('#101418');if(tg.setBackgroundColor)tg.setBackgroundColor('#101418');if(tg.disableVerticalSwipes)tg.disableVerticalSwipes();if(tg.BackButton){tg.BackButton.show();tg.BackButton.onClick(tgBack)}}catch(e){}}
+function initTg(){if(!tg)return;try{tg.ready();tg.expand();if(tg.setHeaderColor)tg.setHeaderColor('#101418');if(tg.setBackgroundColor)tg.setBackgroundColor('#101418');if(tg.disableVerticalSwipes)tg.disableVerticalSwipes();if(tg.hideHeader)tg.hideHeader();if(tg.BackButton){tg.BackButton.show();tg.BackButton.onClick(tgBack)}}catch(e){}}
 function meInfo(){try{if(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user){var u=tg.initDataUnsafe.user;return{id:u.id,name:(u.first_name||'Игрок')+(u.username?(' @'+u.username):'')}}}catch(e){}return{id:'g'+(Math.random()*1e9|0),name:'Гость'}}
 function aud(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=set.vol;MASTER.connect(AC.destination)}catch(e){}}if(AC&&AC.resume)AC.resume();if(MASTER)MASTER.gain.value=set.vol}
 function tn(f0,f1,d,tp,v){if(!AC)return;var o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;o.type=tp;o.frequency.setValueAtTime(f0,n);o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(MASTER);o.start(n);o.stop(n+d)}
-function nz(d,v,f){if(!AC)return;var n=AC.createBufferSource(),b=AC.createBuffer(1,AC.sampleRate*d|0,AC.sampleRate),a=b.getChannelData(0);for(var i=0;i<a.length;i++)a[i]=(Math.random()*2-1)*Math.exp(-i/(AC.sampleRate*d*.4));n.buffer=b;var bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f;var g=AC.createGain();g.gain.setValueAtTime(v,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);n.connect(bp);bp.connect(g);g.connect(MASTER);n.start()}
+function nz(d,v,f,q){if(!AC)return;var n=AC.createBufferSource(),b=AC.createBuffer(1,AC.sampleRate*d|0,AC.sampleRate),a=b.getChannelData(0);for(var i=0;i<a.length;i++)a[i]=(Math.random()*2-1)*Math.exp(-i/(AC.sampleRate*d*.4));n.buffer=b;var bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f;bp.Q.value=q||1;var g=AC.createGain();g.gain.setValueAtTime(v,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);n.connect(bp);bp.connect(g);g.connect(MASTER);n.start()}
 function sShot(){tn(900,300,.06,'square',.1)}
-function sSplash(){nz(.18,.25,700)}
-function sHit(){tn(300,120,.12,'sawtooth',.2);nz(.15,.2,1500)}
-function sBoom(){nz(.45,.45,180);tn(120,40,.35,'sawtooth',.3)}
+function sSplash(){nz(.28,.4,420,2);setTimeout(function(){nz(.18,.25,650,1.5)},90);setTimeout(function(){nz(.12,.15,900,1.2)},180)}
+function sHit(){tn(300,120,.12,'sawtooth',.2);nz(.15,.25,1500,1)}
+function sBoom(){nz(.55,.55,110,.7);tn(85,28,.45,'sawtooth',.35);setTimeout(function(){nz(.35,.35,190,.9)},110);setTimeout(function(){nz(.25,.2,320,1.1)},240)}
 function sPlace(){tn(600,700,.05,'triangle',.12)}
 function sWin(){[523,659,784,1046].forEach(function(f,i){setTimeout(function(){tn(f,f,.15,'triangle',.16)},i*110)})}
 function sLose(){[400,340,280,220].forEach(function(f,i){setTimeout(function(){tn(f,f,.18,'sawtooth',.14)},i*130)})}
@@ -173,19 +174,34 @@ function canPlace(b,r,c,l,h){for(var k=0;k<l;k++){var rr=h?r:r+k,cc=h?c+k:c;if(r
 function place(b,r,c,l,h){if(!canPlace(b,r,c,l,h))return false;b.ships.push({r:r,c:c,len:l,hor:h,hits:0,dead:false});return true}
 function rndFleet(b){b.ships=[];for(var i=0;i<FLEET.length;i++){var l=FLEET[i],ok=false,g=0;while(!ok&&g++<400)ok=place(b,Math.random()*10|0,Math.random()*10|0,l,Math.random()<.5)}}
 function deadShipOf(b){for(var i=0;i<b.ships.length;i++){var s=b.ships[i];if(s.dead&&s.hits>=s.len)return{r:s.r,c:s.c,len:s.len,hor:s.hor}}return null}
-function layout(){var w=Math.min(innerWidth-40,960),two=w>=620,per=two?(w-40)/2:w;CELL=Math.max(16,Math.min(40,(per-56)/10|0));document.documentElement.style.setProperty('--cell',CELL+'px')}
+function layout(){var w=Math.min(innerWidth-32,960),two=w>=620,per=two?(w-32)/2:w;CELL=Math.max(18,Math.min(36,(per-52)/10|0));document.documentElement.style.setProperty('--cell',CELL+'px')}
 function stopT(){if(G&&G.timer){clearInterval(G.timer);G.timer=null}}
 function startT(){if(!G||G.timer)return;G.timer=setInterval(function(){G.time++;$('hTime').textContent=fmt(G.time)},1000)}
 function buildLabels(){var sides=['my','en'];for(var s=0;s<2;s++){var p=sides[s];var t=$(p+'Top'),b=$(p+'Bot'),l=$(p+'Left'),r=$(p+'Right');if(!t||!b||!l||!r)continue;t.innerHTML='';b.innerHTML='';l.innerHTML='';r.innerHTML='';for(var i=0;i<10;i++){var a=document.createElement('span');a.className='lab';a.textContent=i+1;t.appendChild(a);var bb=document.createElement('span');bb.className='lab';bb.textContent=i+1;b.appendChild(bb);var cc=document.createElement('span');cc.className='lab';cc.textContent=LETTERS[i];l.appendChild(cc);var dd=document.createElement('span');dd.className='lab';dd.textContent=LETTERS[i];r.appendChild(dd)}}}
-function renderChips(){var b=$('chips');if(!b||!G)return;b.innerHTML='';G.queue.forEach(function(q,i){var s=document.createElement('span');s.className='chip'+(i<G.qi?' done':'');s.textContent=q;b.appendChild(s)});if(!G.online)$('startBtn').disabled=G.qi<G.queue.length}
+function refreshStart(){var b=$('startBtn');if(!G||!b)return;
+ if(G.online){var d=NET.room;if(!d){b.style.display='';b.disabled=true;b.textContent='⏳ …';return}
+  if(d.state!='placing'){b.style.display='none';return}
+  b.style.display='';b.classList.remove('pulse');
+  if(!d.guest){b.disabled=true;b.textContent='⏳ Ждём соперника…'}
+  else if(d[NET.role+'Ready']){b.disabled=true;b.textContent='⏳ Ожидание соперника'}
+  else{b.disabled=false;b.textContent='⚔️ В бой!'}
+ }else{b.style.display='';b.textContent='⚔️ В бой!';
+  if(G.phase=='place'&&G.qi>=G.queue.length){b.disabled=false;b.classList.add('pulse');var tb=$('toolbar');tb.classList.add('expanded');tb.classList.remove('collapsed')}
+  else{b.disabled=G.phase!='place';b.classList.remove('pulse')}}}
+function refreshToolbar(){var tb=$('toolbar');if(!G||!tb)return;var pl=G.phase=='place';
+ $('rotBtn').style.display=pl?'':'none';$('autoBtn').style.display=pl?'':'none';$('clearBtn').style.display=pl?'':'none';$('startBtn').style.display=pl?'':'none';
+ $('newBtn').style.display=(!G.online)?'':'none';$('giveBtn').style.display=(!G.online)?'':'none';
+ tb.style.display=(pl||!G.online)?'block':'none'}
+function renderChips(){var b=$('chips');if(!b||!G)return;b.innerHTML='';G.queue.forEach(function(q,i){var s=document.createElement('span');s.className='chip'+(i<G.qi?' done':'');s.textContent=q;b.appendChild(s)});refreshStart()}
 function renderFleetSide(el,b){if(!el)return;el.innerHTML='';[4,3,2,1].forEach(function(l){var tot=0,al=0;b.ships.forEach(function(s){if(s.len==l){tot++;if(!s.dead)al++}});if(!tot)return;var s=document.createElement('span');s.textContent=l+':'+al;if(!al)s.className='dead';el.appendChild(s)})}
 function renderFleet(){if(!G)return;renderFleetSide($('myFleet'),G.my);renderFleetSide($('enFleet'),G.online?G.oppView:G.en)}
 function imgEl(src,fb){var im=document.createElement('img');im.alt='';im.src=IMG+src;im.onerror=function(){if(im.parentNode)im.parentNode.removeChild(im);if(fb)fb()};return im}
-function addShip(layer,sh){var d=document.createElement('div');d.className='ship';var L=sh.len*CELL;if(sh.len==1){d.style.left=sh.c*CELL+'px';d.style.top=sh.r*CELL+'px';d.style.width=CELL+'px';d.style.height=CELL+'px'}else if(sh.hor){d.style.left=sh.c*CELL+'px';d.style.top=sh.r*CELL+'px';d.style.width=L+'px';d.style.height=CELL+'px'}else{d.style.left=(sh.c*CELL-(L-CELL)/2)+'px';d.style.top=(sh.r*CELL+(L-CELL)/2)+'px';d.style.width=L+'px';d.style.height=CELL+'px';d.style.transform='rotate(90deg)'}d.appendChild(imgEl('ship'+sh.len+'.png',function(){d.classList.add('fb')}));layer.appendChild(d)}
+function addShip(layer,sh,isPreview){var d=document.createElement('div');d.className='ship'+(isPreview?' preview':'');var L=sh.len*CELL;if(sh.len==1){d.style.left=sh.c*CELL+'px';d.style.top=sh.r*CELL+'px';d.style.width=CELL+'px';d.style.height=CELL+'px'}else if(sh.hor){d.style.left=sh.c*CELL+'px';d.style.top=sh.r*CELL+'px';d.style.width=L+'px';d.style.height=CELL+'px'}else{d.style.left=(sh.c*CELL-(L-CELL)/2)+'px';d.style.top=(sh.r*CELL+(L-CELL)/2)+'px';d.style.width=L+'px';d.style.height=CELL+'px';d.style.transform='rotate(90deg)'}d.appendChild(imgEl('ship'+sh.len+'.png',function(){if(!isPreview)d.classList.add('fb')}));layer.appendChild(d)}
 function addMark(layer,i,type){var r=i/10|0,c=i%10,d=document.createElement('div');d.className='mark '+type;var sz=type=='hit'?CELL*.92:CELL*.78;d.style.left=(c*CELL+(CELL-sz)/2)+'px';d.style.top=(r*CELL+(CELL-sz)/2)+'px';d.style.width=sz+'px';d.style.height=sz+'px';d.appendChild(imgEl(type+'.png',function(){d.classList.add('fb')}));layer.appendChild(d)}
 function addBoom(layer,i,big){if(!layer)return;var r=i/10|0,c=i%10,d=document.createElement('div');d.className='fx';var sz=CELL*(big?2.2:1.6);d.style.left=(c*CELL+CELL/2-sz/2)+'px';d.style.top=(r*CELL+CELL/2-sz/2)+'px';d.style.width=sz+'px';d.style.height=sz+'px';d.appendChild(imgEl('boom.png',function(){d.classList.add('fb')}));layer.appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},1000)}
-function renderBoard(side){var b=(side=='my')?G.my:(G.online?G.oppView:G.en);var sl=$(side+'Ships'),ml=$(side+'Marks');if(!sl||!b)return;sl.innerHTML='';ml.innerHTML='';b.ships.forEach(function(sh){if(side=='my'||sh.dead)addShip(sl,sh)});for(var k=0;k<100;k++){if(b.shots[k]==1)addMark(ml,k,'miss');else if(b.shots[k]==2)addMark(ml,k,side=='my'?'strike':'hit')}}
-function renderAll(){if(!G)return;renderBoard('my');renderBoard('en');renderFleet();$('hTime').textContent=fmt(G.time);$('hShots').textContent=G.shotsFired;$('hAcc').textContent=(G.shotsFired?Math.round(G.hits/G.shotsFired*100):0)+'%';if(!G.online)$('hDiff').textContent=dName()}
+function clearPreview(){preview=null;var pv=$('myPreview');if(pv)pv.innerHTML=''}
+function renderBoard(side){var b=(side=='my')?G.my:(G.online?G.oppView:G.en);var sl=$(side+'Ships'),ml=$(side+'Marks');if(!sl||!b)return;sl.innerHTML='';ml.innerHTML='';if(side=='my'){clearPreview()}b.ships.forEach(function(sh){if(side=='my'||sh.dead)addShip(sl,sh,false)});for(var k=0;k<100;k++){if(b.shots[k]==1)addMark(ml,k,'miss');else if(b.shots[k]==2)addMark(ml,k,side=='my'?'strike':'hit')}}
+function renderAll(){if(!G)return;renderBoard('my');renderBoard('en');renderFleet();$('hTime').textContent=fmt(G.time);$('hShots').textContent=G.shotsFired;$('hAcc').textContent=(G.shotsFired?Math.round(G.hits/G.shotsFired*100):0)+'%';if(!G.online)$('hDiff').textContent=dName();refreshToolbar()}
 function shot(b,r,c){var i=r*10+c;if(b.shots[i])return null;var sh=shipAt(b,r,c);if(sh){b.shots[i]=2;sh.hits++;if(sh.hits>=sh.len){sh.dead=true;cells(sh).forEach(function(x){b.shots[x]=2});return'dead'}return'hit'}b.shots[i]=1;return'miss'}
 function allDead(b){return b.ships.length&&b.ships.every(function(s){return s.dead})}
 function pShoot(r,c){if(!G||G.over||G.online||G.phase!='battle'||G.turn!='player')return;var i=r*10+c;if(G.en.shots[i])return;aud();sShot();hap('light');var res=shot(G.en,r,c);G.shotsFired++;if(res=='miss')sSplash();if(res=='hit'){G.hits++;sHit();addBoom($('enFx'),i,false)}if(res=='dead'){G.hits++;sBoom();addBoom($('enFx'),i,true);hap('success');say('Корабль потоплен')}renderAll();if(allDead(G.en)){end(true);return}if(res=='miss'){G.turn='ai';setStatus('Ход противника…');setTimeout(aiTurn,700)}else setStatus('Попадание! Ходи ещё.')}
@@ -193,7 +209,7 @@ function aiPick(){var a=G.ai;while(a.queue.length){var c=a.queue.shift();if(!G.m
 function aiAround(i){var r=i/10|0,c=i%10;[[1,0],[-1,0],[0,1],[0,-1]].forEach(function(v){var nr=r+v[0],nc=c+v[1];if(nr<0||nr>9||nc<0||nc>9)return;var ni=nr*10+nc;if(!G.my.shots[ni])G.ai.queue.push(ni)})}
 function aiTurn(){if(!G||G.over||G.online||G.phase!='battle')return;var i=aiPick(),r=i/10|0,c=i%10;sShot();var res=shot(G.my,r,c);if(res=='miss')sSplash();if(res=='hit'){sHit();addBoom($('myFx'),i,false);aiAround(i);hap('error')}if(res=='dead'){sBoom();addBoom($('myFx'),i,true);hap('error');say('Твой корабль потоплен')}renderAll();if(allDead(G.my)){end(false);return}if(res!='miss')setTimeout(aiTurn,650);else{G.turn='player';setStatus('Твой ход: стреляй по полю противника.')}}
 async function loadFb(){if(FNS.ref)return;var a=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');var d=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');var app=a.initializeApp(FB);FNS.db=d.getDatabase(app);FNS.ref=d.ref;FNS.on=d.onValue;FNS.set=d.set;FNS.get=d.get;FNS.upd=d.update;FNS.off=d.off;FNS.od=d.onDisconnect}
-NET.ensure=async function(){if(!FB.apiKey){alert('🔥 Firebase не настроен!\n\nВ файле seabattle/index.html в начале <script> нужно заполнить объект FB значениями firebaseConfig из Firebase Console (Realtime Database).\n\nЕсли у тебя уже работают Шахматы/Дурак — скопируй их конфиг из chess/index.html.\n\nЛокальный режим vs ИИ работает всегда.');throw new Error('no-fb')}await loadFb()};
+NET.ensure=async function(){if(!FB.apiKey){alert('🔥 Firebase не настроен: заполни объект FB в начале скрипта конфигом из Firebase Console.');throw new Error('no-fb')}await loadFb()};
 NET.roomRef=function(){return FNS.ref(FNS.db,'rooms/'+NET.code)};
 NET.patch=function(o){try{FNS.upd(NET.roomRef(),o)}catch(e){}};
 NET.attach=function(path,cb){var r=FNS.ref(FNS.db,path);FNS.on(r,'value',cb);NET.L.push([r,cb])};
@@ -202,52 +218,68 @@ NET.reset=function(){NET.detach();NET.conn=false;NET.room=null;NET.battle=false;
 function genCode(){var s='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',o='';for(var i=0;i<6;i++)o+=s[Math.random()*s.length|0];return o}
 function ourTurn(){return NET.room&&NET.room.turn===NET.role}
 function otherRole(){return NET.role==='host'?'guest':'host'}
-async function netCreate(){try{await NET.ensure()}catch(e){return}NET.reset();NET.code=genCode();NET.role='host';var me=meInfo();await FNS.set(NET.roomRef(),{createdAt:Date.now(),host:me,guest:null,hostOnline:true,guestOnline:false,state:'placing',hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null});try{FNS.od(FNS.ref(FNS.db,'rooms/'+NET.code+'/hostOnline')).set(false)}catch(e){}NET.attach('rooms/'+NET.code,function(s){onRoom(s.val())});NET.conn=true;resetOnlinePlace();$('waitCode').textContent=NET.code;showMode('wait');setStatus('Комната создана · код '+NET.code+' — поделись им');trk('net_create',{role:'host'})}
-async function netJoin(code){code=(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length<4){setStatus('Введи код комнаты (мин. 4 символа)');return}try{await NET.ensure()}catch(e){return}NET.reset();var s=await FNS.get(FNS.ref(FNS.db,'rooms/'+code));if(!s.exists()){setStatus('Комната не найдена: '+code);return}var d=s.val();if(d.guest){setStatus('Комната уже занята другим игроком');return}NET.code=code;NET.role='guest';var me=meInfo();await FNS.set(FNS.ref(FNS.db,'rooms/'+code+'/guest'),me);await FNS.set(FNS.ref(FNS.db,'rooms/'+code+'/guestOnline'),true);try{FNS.od(FNS.ref(FNS.db,'rooms/'+code+'/guestOnline')).set(false)}catch(e){}NET.attach('rooms/'+code,function(sn){onRoom(sn.val())});NET.conn=true;resetOnlinePlace();hideMode();setStatus('Подключено к комнате '+code+' · расставь флот и жми «Готов»');trk('net_join',{role:'guest'})}
+function showRoomBar(){$('roomBar').style.display='block'}
+function hideRoomBar(){$('roomBar').style.display='none'}
+function updateRoomBar(){var d=NET.room;if(!d)return;$('rbCode').textContent=NET.code||'------';var n=(d.host?1:0)+(d.guest?1:0);$('rbCount').textContent=n+'/2';var h='';if(d.host)h+='👤 '+((d.host&&d.host.name)||'Игрок 1')+' · хост '+(d.hostOnline?'🟢 онлайн':'⚪ офлайн')+'<br>';if(d.guest)h+='👤 '+((d.guest&&d.guest.name)||'Игрок 2')+' · гость '+(d.guestOnline?'🟢 онлайн':'⚪ офлайн')+'<br>';if(!d.guest)h+='<i>Ожидание второго игрока… поделись ссылкой кнопкой «Пригласить».</i>';$('rbPlayers').innerHTML=h}
+async function netCreate(){try{await NET.ensure()}catch(e){return}NET.reset();NET.code=genCode();NET.role='host';var me=meInfo();await FNS.set(NET.roomRef(),{createdAt:Date.now(),host:me,guest:null,hostOnline:true,guestOnline:false,state:'placing',hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null});try{FNS.od(FNS.ref(FNS.db,'rooms/'+NET.code+'/hostOnline')).set(false)}catch(e){}NET.attach('rooms/'+NET.code,function(s){onRoom(s.val())});NET.conn=true;resetOnlinePlace();hideMode();showRoomBar();updateRoomBar();setStatus('Комната '+NET.code+' создана · отправь приглашение кнопкой 📨');trk('net_create',{role:'host'})}
+async function netJoin(code){code=(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length<4){toast('Введи код комнаты');return}try{await NET.ensure()}catch(e){return}NET.reset();var s=await FNS.get(FNS.ref(FNS.db,'rooms/'+code));if(!s.exists()){toast('Комната не найдена: '+code);return}var d=s.val();if(d.guest){toast('Комната уже занята');return}NET.code=code;NET.role='guest';var me=meInfo();await FNS.set(FNS.ref(FNS.db,'rooms/'+code+'/guest'),me);await FNS.set(FNS.ref(FNS.db,'rooms/'+code+'/guestOnline'),true);try{FNS.od(FNS.ref(FNS.db,'rooms/'+code+'/guestOnline')).set(false)}catch(e){}NET.attach('rooms/'+code,function(sn){onRoom(sn.val())});NET.conn=true;resetOnlinePlace();hideMode();showRoomBar();updateRoomBar();setStatus('Подключено к комнате '+code+' · расставь флот и жми «⚔️ В бой!»');trk('net_join',{role:'guest'})}
 function netReady(){if(!NET.room)return;var o={};o[NET.role+'Ready']=true;NET.patch(o);setStatus('Ты готов · ожидание соперника…')}
 function netFire(r,c){if(!ourTurn())return;if(NET.room.pending)return;NET.patch({pending:{by:NET.role,r:r,c:c,at:Date.now()}});setStatus('Выстрел отправлен…')}
-function netLeave(){NET.reset();$('netHud').style.display='none';hideMode();newGame()}
-function resetOnlinePlace(){G.online=true;G.phase='place';G.my=eBoard();rndFleet(G.my);G.qi=G.queue.length;G.oppView=eBoard();G.en=eBoard();G.over=false;G.won=false;G.shotsFired=0;G.hits=0;G.time=0;G.turn='player';stopT();buildLabels();renderAll();renderChips();$('startBtn').textContent='✅ Готов';$('startBtn').disabled=false}
+function netLeave(){NET.reset();hideRoomBar();hideMode();newGame()}
+function resetOnlinePlace(){G.online=true;G.phase='place';G.my=eBoard();rndFleet(G.my);G.qi=G.queue.length;G.oppView=eBoard();G.en=eBoard();G.over=false;G.won=false;G.shotsFired=0;G.hits=0;G.time=0;G.turn='player';stopT();buildLabels();renderAll();renderChips()}
 function applyPending(d){if(!(d.pending&&d.pending.by!==NET.role&&d.pending.at!==NET.lastPend))return;NET.lastPend=d.pending.at;var res=shot(G.my,d.pending.r,d.pending.c);var win=false,cs=null;if(res=='dead'){if(allDead(G.my))win=true;else cs=deadShipOf(G.my)}if(res=='miss')sSplash();if(res=='hit'){sHit();addBoom($('myFx'),d.pending.r*10+d.pending.c,false);hap('error')}if(res=='dead'){sBoom();addBoom($('myFx'),d.pending.r*10+d.pending.c,true);hap('error');say(win?'Твой флот потоплен':'Корабль потоплен')}var nt=win?d.pending.by:(res=='miss'?NET.role:d.pending.by);NET.patch({pending:null,resolve:{by:d.pending.by,r:d.pending.r,c:d.pending.c,res:res,cells:cs,win:win,at:Date.now()},turn:nt,state:win?'over':d.state,winner:win?d.pending.by:null});renderAll()}
 function applyResolve(d){if(!(d.resolve&&d.resolve.by===NET.role&&d.resolve.at!==NET.lastRes))return;NET.lastRes=d.resolve.at;var i=d.resolve.r*10+d.resolve.c;if(d.resolve.res=='miss'){G.oppView.shots[i]=1;sSplash()}else{G.oppView.shots[i]=2;if(d.resolve.cells){var sh=d.resolve.cells;G.oppView.ships.push({r:sh.r,c:sh.c,len:sh.len,hor:sh.hor,hits:sh.len,dead:true});cells(sh).forEach(function(x){G.oppView.shots[x]=2})}if(d.resolve.res=='hit'){sHit();addBoom($('enFx'),i,false)}if(d.resolve.res=='dead'){sBoom();addBoom($('enFx'),i,true);hap('success');say('Корабль потоплен')}}renderAll();if(d.resolve.win)end(true)}
-function onRoom(d){if(!d){if(NET.conn){setStatus('Комната закрыта');netLeave()}return}NET.room=d;NET.conn=true;G.online=true;var roleTxt=NET.role==='host'?'Хост':'Гость';var oppOn=(NET.role==='host')?d.guestOnline:d.hostOnline;$('netHud').style.display='flex';$('roomCode').textContent=NET.code;if(d.state=='placing'){$('placebar').style.display='flex';$('startBtn').textContent='✅ Готов';$('startBtn').disabled=!!d[NET.role+'Ready'];$('roomStat').textContent='расстановка';$('hDiff').textContent='онлайн';var both=d.hostReady&&d.guestReady;setStatus(roleTxt+' · '+(both?'оба готовы, старт…':(NET.role=='host'&&!d.guest?'ждём гостя · код '+NET.code:'ждём готовности соперника')));if(both&&!NET.battle){NET.battle=true;NET.patch({state:'battle',turn:'host'})}}else if(d.state=='battle'){$('placebar').style.display='none';$('roomStat').textContent=ourTurn()?'твой ход':'ход соперника';$('hDiff').textContent='онлайн';setStatus(roleTxt+' · '+(ourTurn()?'ТВОЙ ХОД — стреляй по полю соперника':'ход соперника…'+(oppOn?'':' · ⚠️ соперник не в сети')))}else if(d.state=='over'){$('placebar').style.display='none';$('roomStat').textContent='итоги';if(!G.over)end(d.winner===NET.role)}if(d.pending&&d.pending.by!==NET.role)applyPending(d);if(d.resolve&&d.resolve.by===NET.role)applyResolve(d);renderAll()}
+function onRoom(d){if(!d){if(NET.conn){toast('Комната закрыта');netLeave()}return}NET.room=d;NET.conn=true;G.online=true;updateRoomBar();showRoomBar();
+ if(d.state=='placing'){setStatus(NET.role=='host'&&!d.guest?('Ждём соперника · код '+NET.code):((d.hostReady&&d.guestReady)?'Оба готовы — старт!':'Расставь флот и жми «⚔️ В бой!»'))}
+ else if(d.state=='battle'){setStatus(ourTurn()?'ТВОЙ ХОД — стреляй по полю соперника':'Ход соперника…')}
+ else if(d.state=='over'){if(!G.over)end(d.winner===NET.role)}
+ if(d.pending&&d.pending.by!==NET.role)applyPending(d);
+ if(d.resolve&&d.resolve.by===NET.role)applyResolve(d);
+ refreshStart();renderAll()}
 function end(w){if(G.over)return;G.over=true;G.won=w;stopT();if(w){sWin();hap('success');say('Победа!')}else{sLose();hap('error');say('Поражение')}ST.games++;if(w){ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak}else ST.streak=0;saveST();trk('game_end',{game_name:'seabattle',win:w?1:0,time:G.time,shots:G.shotsFired,acc:G.shotsFired?Math.round(G.hits/G.shotsFired*100):0,online:G.online?1:0,difficulty:set.diff});showEnd(w)}
 function share(){var acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;var txt='🚢 Морской бой: '+(G.won?'ПОБЕДА!':'поражение')+'! Время '+fmt(G.time)+', выстрелов '+G.shotsFired+', точность '+acc+'%, '+(G.online?'онлайн‑дуэль':'ИИ: '+dName())+'. Сможешь лучше?';var url=location.href;if(navigator.share){navigator.share({title:'Морской бой',text:txt,url:url}).catch(function(){})}else{try{open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(txt),'_blank')}catch(e){try{navigator.clipboard.writeText(txt+' '+url);toast('Скопировано!')}catch(e2){toast(txt)}}}}
-function invite(){if(!NET.code)return;var url=location.origin+location.pathname+'?room='+NET.code;var txt='🚢 Приглашаю в Морской бой! Нажми на ссылку и автоматически присоединишься:\n'+url;try{if(tg&&tg.switchInlineQuery){tg.switchInlineQuery('seabattle '+NET.code,['users','groups']);toast('Выбери чат для отправки приглашения')}else if(navigator.share){navigator.share({title:'Морской бой',text:txt,url:url}).catch(function(){})}else{try{open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(txt),'_blank')}catch(e){navigator.clipboard.writeText(txt);toast('Ссылка скопирована!')}}}catch(e){toast('Ссылка: '+url)}}
+function invite(){if(!NET.code)return;var url=location.origin+location.pathname+'?room='+NET.code;var txt='🚢 Приглашаю в Морской бой! Открой ссылку — автоматически попадёшь в комнату '+NET.code+':\n'+url;try{if(tg&&tg.switchInlineQuery){tg.switchInlineQuery('🚢 Морской бой, комната '+NET.code+': '+url,['users','groups']);toast('Выбери чат для приглашения')}else if(navigator.share){navigator.share({title:'Морской бой',text:txt,url:url}).catch(function(){})}else{open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(txt),'_blank')}}catch(e){try{navigator.clipboard.writeText(txt);toast('Ссылка скопирована!')}catch(e2){toast(url)}}}
+function copyCode(){if(!NET.code)return;try{navigator.clipboard.writeText(NET.code);toast('Код '+NET.code+' скопирован')}catch(e){toast('Код: '+NET.code)}}
 function ebtn(t,f,p){var b=document.createElement('button');b.className='btn'+(p?' primary':'');b.textContent=t;b.onclick=f;$('endBtns').appendChild(b)}
 function showEnd(w){var ov=$('endOverlay'),acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;$('endTitle').textContent=w?'🏆 Победа!':'💥 Флот потоплен';$('endSub').innerHTML='Время: <b>'+fmt(G.time)+'</b> · Выстрелы: <b>'+G.shotsFired+'</b> · Точность: <b>'+acc+'%</b><br>Режим: '+(G.online?'онлайн‑дуэль':'ИИ ('+dName()+')');$('endBtns').innerHTML='';ebtn('📨 Отправить результат другу',share,true);ebtn('🔄 Сыграть ещё',function(){ov.classList.remove('show');if(G.online)netLeave();else newGame()});ebtn('🏠 В меню',function(){ov.classList.remove('show');if(G.online)NET.reset();location.href='../'});ov.classList.add('show')}
-function tryPlace(r,c){if(!G||G.phase!='place')return;if(G.online&&NET.room&&NET.room[NET.role+'Ready'])return;if(G.qi>=G.queue.length)return;var l=G.queue[G.qi];if(place(G.my,r,c,l,G.hor)){G.qi++;sPlace();renderAll();renderChips();if(!G.online&&G.qi>=G.queue.length)setStatus('Флот готов — жми «В бой!»')}else{tn(150,90,.1,'sawtooth',.1);hap('error')}}
-function autoPlace(){if(!G||G.phase!='place')return;if(G.online&&NET.room&&NET.room[NET.role+'Ready'])return;while(G.qi<G.queue.length){var l=G.queue[G.qi],ok=false,g=0;while(!ok&&g++<400)ok=place(G.my,Math.random()*10|0,Math.random()*10|0,l,Math.random()<.5);if(!ok)break;G.qi++}sPlace();renderAll();renderChips();if(!G.online&&G.qi>=G.queue.length)setStatus('Флот готов — жми «В бой!»')}
-function clearPlace(){if(!G||G.phase!='place')return;if(G.online&&NET.room&&NET.room[NET.role+'Ready'])return;G.my.ships=[];G.qi=0;renderAll();renderChips()}
-function startBattle(){if(!G||G.online)return;if(G.qi<G.queue.length)return;G.phase='battle';G.turn='player';startT();$('placebar').style.display='none';setStatus('Твой ход: стреляй по полю противника.');say('В бой!')}
-function newGame(){stopT();NET.reset();G={phase:'place',online:false,my:eBoard(),en:eBoard(),oppView:null,queue:FLEET.slice(),qi:FLEET.length,hor:true,turn:'player',time:0,timer:null,shotsFired:0,hits:0,over:false,won:false,ai:{queue:[]}};rndFleet(G.my);rndFleet(G.en);$('endOverlay').classList.remove('show');$('placebar').style.display='flex';$('startBtn').textContent='⚔️ В бой!';$('netHud').style.display='none';buildLabels();renderAll();renderChips();setStatus('Расставь корабли (или 🎲) и жми «В бой!», либо открой 👥 Комната для игры онлайн');trk('game_start',{game_name:'seabattle',difficulty:set.diff})}
+function tryPlace(r,c){if(!G||G.phase!='place')return;if(G.online&&NET.room&&(!NET.room.guest||NET.room.state!='placing'||NET.room[NET.role+'Ready']))return;if(G.qi>=G.queue.length)return;var l=G.queue[G.qi];
+ if(preview&&preview.r===r&&preview.c===c){if(place(G.my,r,c,l,preview.hor)){preview=null;$('myPreview').innerHTML='';G.qi++;sPlace();renderAll();renderChips();if(!G.online&&G.qi>=G.queue.length)setStatus('Флот готов — жми «В бой!»')}else{tn(150,90,.1,'sawtooth',.1);hap('error');clearPreview();setStatus('Здесь нельзя поставить — выбери другое место')}return}
+ clearPreview();preview={r:r,c:c,len:l,hor:G.hor};addShip($('myPreview'),preview,true);sPlace();setStatus(canPlace(G.my,r,c,l,G.hor)?'Нажми ещё раз, чтобы подтвердить установку':'Место занято/касается — нажми ещё раз чтобы убрать')}
+function autoPlace(){if(!G||G.phase!='place')return;if(G.online&&NET.room&&(!NET.room.guest||NET.room[NET.role+'Ready']))return;clearPreview();while(G.qi<G.queue.length){var l=G.queue[G.qi],ok=false,g=0;while(!ok&&g++<400)ok=place(G.my,Math.random()*10|0,Math.random()*10|0,l,Math.random()<.5);if(!ok)break;G.qi++}sPlace();renderAll();renderChips();if(!G.online&&G.qi>=G.queue.length)setStatus('Флот готов — жми «В бой!»')}
+function clearPlace(){if(!G||G.phase!='place')return;if(G.online&&NET.room&&NET.room[NET.role+'Ready'])return;clearPreview();G.my.ships=[];G.qi=0;renderAll();renderChips();setStatus('Расставь корабли: 1‑е нажатие превью, 2‑е подтверждение')}
+function startBattle(){if(!G||G.online)return;if(G.qi<G.queue.length)return;G.phase='battle';G.turn='player';startT();setStatus('Твой ход: стреляй по полю противника.');say('В бой!');renderAll()}
+function newGame(){stopT();NET.reset();clearPreview();hideRoomBar();G={phase:'place',online:false,my:eBoard(),en:eBoard(),oppView:null,queue:FLEET.slice(),qi:FLEET.length,hor:true,turn:'player',time:0,timer:null,shotsFired:0,hits:0,over:false,won:false,ai:{queue:[]}};rndFleet(G.my);rndFleet(G.en);$('endOverlay').classList.remove('show');buildLabels();renderAll();renderChips();setStatus('Расставь корабли (1‑е нажатие превью, 2‑е подтверждение, или 🎲 Авто) и жми «В бой!»');trk('game_start',{game_name:'seabattle',difficulty:set.diff})}
 function cellFrom(f,e){var r=f.getBoundingClientRect(),c=(e.clientX-r.left)/CELL|0,rr=(e.clientY-r.top)/CELL|0;return(c<0||c>9||rr<0||rr>9)?null:{r:rr,c:c}}
 function showStats(){$('stGW').textContent=ST.games+' / '+ST.wins;$('stPct').textContent=(ST.games?Math.round(ST.wins/ST.games*100):0)+'%';$('stStreak').textContent=ST.streak+' / '+ST.bestStreak}
 function applySkin(){var w=$('wrap');if(w)w.setAttribute('data-skin',set.skin)}
-function showMode(box){$('modeOverlay').classList.add('show');$('joinBox').style.display=box=='join'?'flex':'none';$('waitBox').style.display=box=='wait'?'block':'none';$('modeAI').style.display=box=='wait'?'none':'flex';$('modeCreate').style.display=box=='wait'?'none':'flex';$('modeJoin').style.display=box=='wait'?'none':'flex'}
+function showMode(box){$('modeOverlay').classList.add('show');$('joinBox').style.display=box=='join'?'flex':'none'}
 function hideMode(){$('modeOverlay').classList.remove('show')}
+function giveUp(){if(!G||G.over)return;if(G.online&&NET.room){NET.patch({state:'over',winner:otherRole()});end(false)}else end(false)}
 function bind(){
 $('myField').addEventListener('click',function(e){var p=cellFrom($('myField'),e);if(p)tryPlace(p.r,p.c)});
-$('enField').addEventListener('click',function(e){if(!G||G.over)return;var p=cellFrom($('enField'),e);if(!p)return;if(G.online){if(G.phase!='battle'||NET.room.state!='battle')return;if(!ourTurn()){toast('Сейчас не твой ход');return}if(NET.room.pending)return;aud();sShot();hap('light');netFire(p.r,p.c)}else pShoot(p.r,p.c)});
-$('myField').addEventListener('pointermove',function(e){var h=$('myHover');if(!G||G.phase!='place'||G.qi>=G.queue.length||(G.online&&NET.room&&NET.room[NET.role+'Ready'])){h.style.display='none';return}var p=cellFrom($('myField'),e);if(!p){h.style.display='none';return}var l=G.queue[G.qi],ok=canPlace(G.my,p.r,p.c,l,G.hor);h.className='hover '+(ok?'ok':'bad');h.style.display='block';h.style.left=p.c*CELL+'px';h.style.top=p.r*CELL+'px';h.style.width=(G.hor?l*CELL:CELL)+'px';h.style.height=(G.hor?CELL:l*CELL)+'px'});
+$('enField').addEventListener('click',function(e){if(!G||G.over)return;var p=cellFrom($('enField'),e);if(!p)return;if(G.online){if(G.phase!='battle'||!NET.room||NET.room.state!='battle')return;if(!ourTurn()){toast('Сейчас не твой ход');return}if(NET.room.pending)return;aud();sShot();hap('light');netFire(p.r,p.c)}else pShoot(p.r,p.c)});
+$('myField').addEventListener('pointermove',function(e){var h=$('myHover');if(!G||G.phase!='place'||G.qi>=G.queue.length){h.style.display='none';return}var p=cellFrom($('myField'),e);if(!p){h.style.display='none';return}var l=G.queue[G.qi],ok=canPlace(G.my,p.r,p.c,l,G.hor);h.className='hover '+(ok?'ok':'bad');h.style.display='block';h.style.left=p.c*CELL+'px';h.style.top=p.r*CELL+'px';h.style.width=(G.hor?l*CELL:CELL)+'px';h.style.height=(G.hor?CELL:l*CELL)+'px'});
 $('myField').addEventListener('pointerleave',function(){$('myHover').style.display='none'});
-$('enField').addEventListener('pointermove',function(e){var h=$('enHover');if(!G||G.over)return;var can=(G.online?(G.phase=='battle'&&NET.room&&NET.room.state=='battle'&&ourTurn()&&!NET.room.pending):(G.phase=='battle'&&G.turn=='player'));if(!can){h.style.display='none';return}var p=cellFrom($('enField'),e);var tb=G.online?G.oppView:G.en;if(!p||tb.shots[p.r*10+p.c]){h.style.display='none';return}h.className='hover ok';h.style.display='block';h.style.left=p.c*CELL+'px';h.style.top=p.r*CELL+'px';h.style.width=CELL+'px';h.style.height=CELL+'px'});
+$('enField').addEventListener('pointermove',function(e){var h=$('enHover');if(!G||G.over||G.phase!='battle'){h.style.display='none';return}var can=G.online?(NET.room&&NET.room.state=='battle'&&ourTurn()&&!NET.room.pending):(G.turn=='player');if(!can){h.style.display='none';return}var p=cellFrom($('enField'),e);var tb=G.online?G.oppView:G.en;if(!p||tb.shots[p.r*10+p.c]){h.style.display='none';return}h.className='hover ok';h.style.display='block';h.style.left=p.c*CELL+'px';h.style.top=p.r*CELL+'px';h.style.width=CELL+'px';h.style.height=CELL+'px'});
 $('enField').addEventListener('pointerleave',function(){$('enHover').style.display='none'});
-$('rotBtn').onclick=function(){if(G&&G.phase=='place'){G.hor=!G.hor;sPlace()}};
+$('toolbarHead').onclick=function(){$('toolbar').classList.toggle('expanded')};
+$('roomBarHead').onclick=function(){$('roomBar').classList.toggle('expanded')};
+$('rotBtn').onclick=function(){if(G&&G.phase=='place'){G.hor=!G.hor;clearPreview();sPlace();setStatus('Ориентация: '+(G.hor?'горизонтально':'вертикально'))}};
 $('autoBtn').onclick=function(){aud();autoPlace()};
 $('clearBtn').onclick=function(){aud();clearPlace()};
-$('startBtn').onclick=function(){aud();if(G&&G.online)netReady();else startBattle()};
-$('newBtn').onclick=function(){aud();if(G&&G.online)netLeave();else newGame()};
-$('giveBtn').onclick=function(){aud();if(!G||G.over)return;if(G.online&&NET.room){NET.patch({state:'over',winner:otherRole()});end(false)}else end(false)};
-$('roomBtn').onclick=function(){aud();if(G&&G.online&&NET.conn){showMode('wait');$('waitCode').textContent=NET.code}else showMode('menu')};
+$('startBtn').onclick=function(){aud();clearPreview();if(G&&G.online)netReady();else startBattle()};
+$('newBtn').onclick=function(){aud();newGame()};
+$('giveBtn').onclick=function(){aud();giveUp()};
+$('rbInvite').onclick=function(){aud();invite()};
+$('rbCopy').onclick=function(){aud();copyCode()};
+$('rbGive').onclick=function(){aud();giveUp()};
+$('rbLeave').onclick=function(){aud();netLeave()};
+$('roomBtn').onclick=function(){aud();if(G&&G.online&&NET.conn){showRoomBar();$('roomBar').classList.add('expanded')}else showMode('menu')};
 $('modeAI').onclick=function(){aud();if(G&&G.online)netLeave();else newGame();hideMode()};
 $('modeCreate').onclick=function(){aud();netCreate()};
 $('modeJoin').onclick=function(){aud();showMode('join');$('joinInput').focus()};
 $('joinGo').onclick=function(){aud();netJoin($('joinInput').value)};
 $('joinInput').addEventListener('keydown',function(e){if(e.key=='Enter')netJoin($('joinInput').value)});
-$('copyCode').onclick=function(){var c=NET.code||'';if(!c)return;try{navigator.clipboard.writeText(c);toast('Код '+c+' скопирован')}catch(e){toast('Код: '+c)}};
-$('inviteBtn').onclick=function(){aud();invite()};
-$('leaveRoom').onclick=function(){aud();netLeave()};
 $('modeCancel').onclick=function(){hideMode()};
 $('setBtn').onclick=function(){aud();$('diffSel').value=set.diff;$('skinSel').value=set.skin;$('voiceChk').checked=!!set.voice;$('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';showStats();$('setOverlay').classList.add('show')};
 $('setClose').onclick=function(){$('setOverlay').classList.remove('show')};
@@ -258,9 +290,9 @@ $('volSlider').oninput=function(e){set.vol=e.target.value/100;$('volV').textCont
 $('stReset').onclick=function(){if(confirm('Сбросить статистику?')){ST={games:0,wins:0,streak:0,bestStreak:0};saveST();showStats()}};
 $('rulesBtn').onclick=function(){$('rulesOverlay').classList.add('show')};
 $('rulesClose').onclick=function(){$('rulesOverlay').classList.remove('show')};
-$('hubBtn').onclick=function(){if(G&&G.online)NET.reset();location.href='../'};
+$('hubBtn').onclick=function(){clearPreview();if(G&&G.online)NET.reset();location.href='../'};
 window.addEventListener('resize',function(){layout();renderAll()});
 window.addEventListener('beforeunload',function(){if(NET.conn&&NET.code){try{FNS.set(FNS.ref(FNS.db,'rooms/'+NET.code+'/'+(NET.role+'Online')),false)}catch(e){}}});}
-function boot(){set=Object.assign({diff:'medium',skin:'classic',vol:.7,voice:true},JSON.parse(lsGet('sb_set','{}')));delete set.mode;ST=Object.assign({games:0,wins:0,streak:0,bestStreak:0},JSON.parse(lsGet('sb_stats','{}')));tg=window.Telegram?window.Telegram.WebApp:null;initTg();applySkin();layout();bind();newGame();$('verTag').textContent='v'+VER;var params=new URLSearchParams(location.search);var room=params.get('room');if(room){setTimeout(function(){netJoin(room)},500)}}
+function boot(){set=Object.assign({diff:'medium',skin:'classic',vol:.7,voice:true},JSON.parse(lsGet('sb_set','{}')));delete set.mode;ST=Object.assign({games:0,wins:0,streak:0,bestStreak:0},JSON.parse(lsGet('sb_stats','{}')));tg=window.Telegram?window.Telegram.WebApp:null;initTg();applySkin();layout();bind();newGame();$('verTag').textContent='v'+VER;var room=new URLSearchParams(location.search).get('room');if(room){setTimeout(function(){netJoin(room)},400)}}
 boot();
 </script></body></html>
