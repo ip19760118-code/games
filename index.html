@@ -4,309 +4,72 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Игровой центр</title>
-
   <meta property="og:title" content="Игровой центр">
   <meta property="og:description" content="Мини-игры прямо в Telegram: выбирай, играй и делись рекордами с друзьями.">
   <meta name="color-scheme" content="light dark">
-
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- Google Analytics 4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-ZD8QE6XKTR', {
-      'page_title': document.title,
-      'page_path': location.pathname
-    });
+    gtag('config', 'G-ZD8QE6XKTR', {'page_title': document.title, 'page_path': location.pathname});
   </script>
-
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-
-    html, body {
-      margin: 0; padding: 0; height: 100%; overflow: hidden;
-      background: #070b16;
-      font-family: system-ui, -apple-system, sans-serif;
-      touch-action: pan-y;
-      user-select: none;
-      -webkit-user-select: none;
-      overscroll-behavior: none;
-    }
-
-    .wrap {
-      width: 100vw; height: 100vh;
-      display: flex;
-      padding: 16px;
-      padding-top: calc(16px + env(safe-area-inset-top));
-      padding-bottom: calc(16px + env(safe-area-inset-bottom));
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .panel {
-      margin: auto;
-      width: 100%;
-      max-width: min(420px, 100%);
-      padding: 22px 16px;
-      border-radius: 24px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
-      text-align: center; color: #eaf0ff;
-      flex-shrink: 0;
-    }
-
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #070b16; font-family: system-ui, -apple-system, sans-serif; touch-action: pan-y; user-select: none; -webkit-user-select: none; overscroll-behavior: none; }
+    .wrap { width: 100vw; height: 100vh; display: flex; padding: 16px; padding-top: calc(16px + env(safe-area-inset-top)); padding-bottom: calc(16px + env(safe-area-inset-bottom)); overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+    .panel { margin: auto; width: 100%; max-width: min(420px, 100%); padding: 22px 16px; border-radius: 24px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28); text-align: center; color: #eaf0ff; flex-shrink: 0; }
     h1 { margin: 0 0 6px; font-size: clamp(24px, 7vw, 32px); color: #7cffc4; }
     .hub-subtitle { margin: 0 0 8px; color: #7cffc4; font-size: clamp(13px, 3.6vw, 15px); font-weight: 700; }
     .hub-desc { margin: 0 0 16px; color: #a8b4d8; font-size: clamp(12px, 3.4vw, 14px); line-height: 1.45; }
-
-    .game-btn {
-      width: 100%;
-      display: flex; align-items: center; gap: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.06);
-      color: #eaf0ff;
-      padding: 12px;
-      margin-bottom: 10px;
-      cursor: pointer; text-align: left;
-      transition: transform 0.08s ease, background 0.15s ease;
-      font-family: inherit; font-size: inherit;
-      touch-action: manipulation;
-      min-width: 0;
-    }
-
-    .game-btn:active {
-      transform: scale(0.98);
-      background: rgba(255, 255, 255, 0.10);
-    }
-
+    .game-btn { width: 100%; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; background: rgba(255, 255, 255, 0.06); color: #eaf0ff; padding: 12px; margin-bottom: 10px; cursor: pointer; text-align: left; transition: transform 0.08s ease, background 0.15s ease; font-family: inherit; font-size: inherit; touch-action: manipulation; min-width: 0; }
+    .game-btn:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.10); }
     .game-btn.disabled { opacity: 0.45; cursor: default; }
-
-    .game-emoji {
-      width: 48px; height: 48px;
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 26px;
-      background: rgba(124, 255, 196, 0.12);
-      border: 1px solid rgba(124, 255, 196, 0.18);
-      flex-shrink: 0;
-    }
-
+    .game-emoji { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; background: rgba(124, 255, 196, 0.12); border: 1px solid rgba(124, 255, 196, 0.18); flex-shrink: 0; }
     .game-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
     .game-text b { font-size: clamp(15px, 4.2vw, 17px); color: #ffffff; }
     .game-text small { font-size: clamp(11px, 3.2vw, 13px); color: #a8b4d8; line-height: 1.25; }
-
     .hub-foot { margin: 12px 0 0; color: #6b7699; font-size: 12px; }
     .hub-ver { margin: 6px 0 0; color: #4d5670; font-size: 10px; font-family: monospace; letter-spacing: 1px; }
-
-    .tag-online {
-      display: inline-block;
-      margin-left: 6px;
-      padding: 1px 7px;
-      border-radius: 10px;
-      background: rgba(124, 255, 196, 0.15);
-      border: 1px solid rgba(124, 255, 196, 0.4);
-      color: #7cffc4;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      vertical-align: middle;
-    }
-    .tag-new {
-      display: inline-block;
-      margin-left: 6px;
-      padding: 1px 7px;
-      border-radius: 10px;
-      background: rgba(255, 209, 102, 0.15);
-      border: 1px solid rgba(255, 209, 102, 0.45);
-      color: #ffd166;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      vertical-align: middle;
-    }
+    .tag-online { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 10px; background: rgba(124, 255, 196, 0.15); border: 1px solid rgba(124, 255, 196, 0.4); color: #7cffc4; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; vertical-align: middle; }
+    .tag-new { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 10px; background: rgba(255, 209, 102, 0.15); border: 1px solid rgba(255, 209, 102, 0.45); color: #ffd166; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; vertical-align: middle; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-
       <h1>🎮 Игровой центр</h1>
       <p class="hub-subtitle">Мини-игры прямо в Telegram</p>
       <p class="hub-desc">14 игр в одном боте: аркады, головоломки, классика, онлайн‑партии, match‑3, пасьянс и морской бой. Без установки — нажми и играй.</p>
 
-      <button class="game-btn" id="trendCatchBtn">
-        <span class="game-emoji">🧺</span>
-        <span class="game-text">
-          <b>Trend Catch</b>
-          <small>Лови тренды интернета и избегай инфошум</small>
-        </span>
-      </button>
-
-      <button class="game-btn" id="lightsOutBtn">
-        <span class="game-emoji"></span>
-        <span class="game-text">
-          <b>Выключи Свет</b>
-          <small>Логическая головоломка: выключи всё поле</small>
-        </span>
-      </button>
-
-      <button class="game-btn" id="arkanoidBtn">
-        <span class="game-emoji"></span>
-        <span class="game-text">
-          <b>Neon Arkanoid 3D</b>
-          <small>Классический арканоид с бонусами и ловушками</small>
-        </span>
-      </button>
-
-      <button class="game-btn" id="dominoBtn">
-        <span class="game-emoji">🧩</span>
-        <span class="game-text">
-          <b>Домино <span class="tag-online">ONLINE</span></b>
-          <small>Классика против бота или онлайн до 4 игроков</small>
-        </span>
-      </button>
-
-      <button class="game-btn" id="shooterBtn">
-        <span class="game-emoji">🔫</span>
-        <span class="game-text">
-          <b>3D Shooter</b>
-          <small>3D-шутер с волнами врагов и тремя видами оружия</small>
-        </span>
-      </button>
-
-      <button class="game-btn" id="fruitSamuraiBtn">
-        <span class="game-emoji">🍉</span>
-        <span class="game-text">
-          <b>Фруктовый самурай</b>
-          <small>Режь фрукты на лету и уворачивайся от бомб</small>
-        </span>
-      </button>
-
-      <button class="game-btn" id="chessBtn">
-        <span class="game-emoji">♟️</span>
-        <span class="game-text">
-          <b>Шахматы <span class="tag-online">ONLINE</span></b>
-          <small>Полные правила: против бота или друга онлайн</small>
-        </span>
-      </button>
-
-      <button class="game-btn" id="durakBtn">
-        <span class="game-emoji">🃏</span>
-        <span class="game-text">
-          <b>Дурак <span class="tag-online">ONLINE</span></b>
-          <small>Подкидной и переводной: боты или онлайн до 4</small>
-        </span>
-      </button>
-
-      <button class="game-btn" id="nardyBtn">
-        <span class="game-emoji">🎲</span>
-        <span class="game-text">
-          <b>Нарды <span class="tag-online">ONLINE</span></b>
-          <small>Классические длинные: бот или онлайн вдвоём</small>
-        </span>
-      </button>
-
-      <button class="game-btn" id="shashkiBtn">
-        <span class="game-emoji"></span>
-        <span class="game-text">
-          <b>Шашки <span class="tag-online">ONLINE</span></b>
-          <small>Русские шашки: бот или онлайн вдвоём</small>
-        </span>
-      </button>
-
-      <button class="game-btn" id="minesBtn">
-        <span class="game-emoji">💣</span>
-        <span class="game-text">
-          <b>Сапёр</b>
-          <small>3 жизни, 3 уровня, скины, очки за жизни</small>
-        </span>
-      </button>
-
-      <button class="game-btn" id="crystalsBtn">
-        <span class="game-emoji">💎</span>
-        <span class="game-text">
-          <b>Кристаллы</b>
-          <small>Match‑3: бонусы, молнии, котики, корзины, 4 режима</small>
-        </span>
-      </button>
-
-      <button class="game-btn" id="solitaireBtn">
-        <span class="game-emoji">♠️</span>
-        <span class="game-text">
-          <b>Косынка</b>
-          <small>Классический пасьянс: перетаскивание, подсказки, скины</small>
-        </span>
-      </button>
-
-      <button class="game-btn" id="seabattleBtn">
-        <span class="game-emoji">🚢</span>
-        <span class="game-text">
-          <b>Морской бой <span class="tag-online">ONLINE</span></b>
-          <small>1 игрок vs ИИ или онлайн‑дуэль по коду комнаты</small>
-        </span>
-      </button>
-
-      <button class="game-btn disabled" disabled>
-        <span class="game-emoji">🚧</span>
-        <span class="game-text">
-          <b>Скоро</b>
-          <small>Здесь появится новая игра</small>
-        </span>
-      </button>
+      <button class="game-btn" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
+      <button class="game-btn" id="lightsOutBtn"><span class="game-emoji">💡</span><span class="game-text"><b>Выключи Свет</b><small>Логическая головоломка: выключи всё поле</small></span></button>
+      <button class="game-btn" id="arkanoidBtn"><span class="game-emoji">🧱</span><span class="game-text"><b>Neon Arkanoid 3D</b><small>Классический арканоид с бонусами и ловушками</small></span></button>
+      <button class="game-btn" id="dominoBtn"><span class="game-emoji">🧩</span><span class="game-text"><b>Домино <span class="tag-online">ONLINE</span></b><small>Классика против бота или онлайн до 4 игроков</small></span></button>
+      <button class="game-btn" id="shooterBtn"><span class="game-emoji">🔫</span><span class="game-text"><b>3D Shooter</b><small>3D-шутер с волнами врагов и тремя видами оружия</small></span></button>
+      <button class="game-btn" id="fruitSamuraiBtn"><span class="game-emoji">🍉</span><span class="game-text"><b>Фруктовый самурай</b><small>Режь фрукты на лету и уворачивайся от бомб</small></span></button>
+      <button class="game-btn" id="chessBtn"><span class="game-emoji">♟️</span><span class="game-text"><b>Шахматы <span class="tag-online">ONLINE</span></b><small>Полные правила: против бота или друга онлайн</small></span></button>
+      <button class="game-btn" id="durakBtn"><span class="game-emoji">🃏</span><span class="game-text"><b>Дурак <span class="tag-online">ONLINE</span></b><small>Подкидной и переводной: боты или онлайн до 4</small></span></button>
+      <button class="game-btn" id="nardyBtn"><span class="game-emoji">🎲</span><span class="game-text"><b>Нарды <span class="tag-online">ONLINE</span></b><small>Классические длинные: бот или онлайн вдвоём</small></span></button>
+      <button class="game-btn" id="shashkiBtn"><span class="game-emoji">⚫</span><span class="game-text"><b>Шашки <span class="tag-online">ONLINE</span></b><small>Русские шашки: бот или онлайн вдвоём</small></span></button>
+      <button class="game-btn" id="minesBtn"><span class="game-emoji">💣</span><span class="game-text"><b>Сапёр</b><small>3 жизни, 3 уровня, скины, очки за жизни</small></span></button>
+      <button class="game-btn" id="crystalsBtn"><span class="game-emoji">💎</span><span class="game-text"><b>Кристаллы</b><small>Match‑3: бонусы, молнии, котики, корзины, 4 режима</small></span></button>
+      <button class="game-btn" id="solitaireBtn"><span class="game-emoji">♠️</span><span class="game-text"><b>Косынка</b><small>Классический пасьянс: перетаскивание, подсказки, скины</small></span></button>
+      <button class="game-btn" id="seabattleBtn"><span class="game-emoji">🚢</span><span class="game-text"><b>Морской бой <span class="tag-online">ONLINE</span></b><small>1 игрок vs ИИ или онлайн‑дуэль по коду комнаты</small></span></button>
+      <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.5</p>
+      <p class="hub-ver" id="hubVer">hub v3.6</p>
     </div>
   </div>
-
   <script>
-    const HUB_VER = '3.5';
-
+    const HUB_VER = '3.6';
     const tg = window.Telegram?.WebApp;
-
-    if (tg) {
-      try {
-        tg.ready();
-        tg.expand();
-        if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#070b16');
-        if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#070b16');
-        if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes();
-      } catch (e) {}
-    }
-
-    function trackEvent(name, params){
-      try {
-        if (typeof gtag === 'function') gtag('event', name, params);
-      } catch (e) {}
-    }
-
-    (function(){
-      try {
-        const k = 'hub_session_tracked';
-        if (!sessionStorage.getItem(k)) {
-          sessionStorage.setItem(k, '1');
-          trackEvent('hub_open', {
-            source: (window.Telegram?.WebApp?.initDataUnsafe?.user) ? 'telegram' : 'browser',
-            ver: HUB_VER
-          });
-        }
-      } catch (e) {}
-    })();
-
-    function openGame(url, gameName) {
-      trackEvent('hub_game_click', { game_name: gameName });
-      try {
-        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-      } catch (e) {}
-      location.href = url;
-    }
-
+    if (tg) { try { tg.ready(); tg.expand(); if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#070b16'); if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#070b16'); if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes(); } catch (e) {} }
+    function trackEvent(name, params){ try { if (typeof gtag === 'function') gtag('event', name, params); } catch (e) {} }
+    (function(){ try { const k = 'hub_session_tracked'; if (!sessionStorage.getItem(k)) { sessionStorage.setItem(k, '1'); trackEvent('hub_open', { source: (window.Telegram?.WebApp?.initDataUnsafe?.user) ? 'telegram' : 'browser', ver: HUB_VER }); } } catch (e) {} })();
+    function openGame(url, gameName) { trackEvent('hub_game_click', { game_name: gameName }); try { if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); } catch (e) {} location.href = url; }
     document.getElementById('trendCatchBtn').addEventListener('click', () => openGame('./trend-catch/', 'trend_catch'));
     document.getElementById('lightsOutBtn').addEventListener('click', () => openGame('./lights-out/', 'lights_out'));
     document.getElementById('arkanoidBtn').addEventListener('click', () => openGame('./arkanoid/', 'arkanoid'));
@@ -321,7 +84,6 @@
     document.getElementById('crystalsBtn').addEventListener('click', () => openGame('./crystals/', 'crystals'));
     document.getElementById('solitaireBtn').addEventListener('click', () => openGame('./solitaire/', 'solitaire'));
     document.getElementById('seabattleBtn').addEventListener('click', () => openGame('./seabattle/', 'seabattle'));
-
     document.getElementById('hubVer').textContent = 'hub v' + HUB_VER;
   </script>
 </body>
