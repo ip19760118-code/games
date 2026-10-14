@@ -6,7 +6,6 @@
 <style>
 :root{--bg1:#101418;--bg2:#1b2228;--bg3:#0a0d10;--panel:rgba(24,30,36,.92);--text:#eef2f6;--accent:#7cffc4;--cell:30px;--fs:calc(var(--cell)*10);--gl:rgba(110,150,215,.45);--red:#c1121f;--pen:#2440b3;color-scheme:light}
 [data-skin="classic"]{--pen:#2440b3}[data-skin="graphite"]{--pen:#3a3f45}[data-skin="green"]{--pen:#1b7a3a}
-/* v4.11: принудительно светлый лист/плитки даже при тёмном режиме WebView */
 html.ls .sheet{background-color:#fbfaf6 !important}
 html.ls .field{background-color:rgba(255,255,255,.6) !important}
 html.ls .tile{background-color:#fdfbf4 !important;background-image:linear-gradient(160deg,#fdfbf4,#e6dfcd) !important}
@@ -33,7 +32,8 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .pill i{width:8px;height:8px;border-radius:50%;background:#ffd166}
 .pill b{font-size:11px;color:#ffd166}
 .pill.g2{border-color:#7cffc4}.pill.g2 i{background:#7cffc4}.pill.g2 b{color:#7cffc4}
-.sheet{position:relative;border-radius:6px;padding:10px;background-color:#fbfaf6;background-image:linear-gradient(rgba(110,150,215,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(110,150,215,.16) 1px,transparent 1px);background-size:14px 14px;box-shadow:0 4px 16px rgba(0,0,0,.35);overflow:hidden}
+/* v4.12: клетка листа = клетке поля и масштабируется вместе с ней */
+.sheet{position:relative;border-radius:6px;padding:10px;background-color:#fbfaf6;background-image:linear-gradient(rgba(110,150,215,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(110,150,215,.16) 1px,transparent 1px);background-size:var(--cell) var(--cell);box-shadow:0 4px 16px rgba(0,0,0,.35);overflow:hidden}
 .boards{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .bwrap{display:flex;flex-direction:column;align-items:center;gap:2px}
 .btitle{font-family:'Segoe Script','Comic Sans MS',cursive;font-size:calc(var(--cell)*.55);font-weight:700;color:var(--pen)}
@@ -110,7 +110,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="statsline" id="statsLine"></div>
 <div class="players" id="rbPlayers" style="display:none"></div>
 <div class="btns" id="barBtns">
-<button class="btn" id="rotBtn">⟲ Повернуть</button><button class="btn" id="autoBtn">🎲 Авто</button><button class="btn" id="clearBtn">🧹 Сброс</button><button class="btn primary" id="startBtn" disabled>⚔️ В бой!</button><button class="btn" id="fitBtn">⛶ Во всю ширину</button><button class="btn" id="newBtn">🔄 Новая</button><button class="btn danger" id="giveBtn">🏳️ Сдаться</button><button class="btn" id="setBtn">⚙️ Настройки</button><button class="btn" id="rulesBtn">📖 Описание</button><button class="btn primary" id="inviteBtn" style="display:none">📨 Пригласить</button><button class="btn" id="copyBtn" style="display:none">📋 Код</button><button class="btn" id="leaveBtn" style="display:none">🚪 Выйти</button>
+<button class="btn" id="rotBtn">⟲ Повернуть</button><button class="btn" id="autoBtn">🎲 Авто</button><button class="btn" id="clearBtn">🧹 Сброс</button><button class="btn primary" id="startBtn" disabled>⚔️ В бой!</button><button class="btn" id="fitBtn">🔲 Вписать в экран</button><button class="btn" id="newBtn">🔄 Новая</button><button class="btn danger" id="giveBtn">🏳️ Сдаться</button><button class="btn" id="setBtn">⚙️ Настройки</button><button class="btn" id="rulesBtn">📖 Описание</button><button class="btn primary" id="inviteBtn" style="display:none">📨 Пригласить</button><button class="btn" id="copyBtn" style="display:none">📋 Код</button><button class="btn" id="leaveBtn" style="display:none">🚪 Выйти</button>
 </div>
 </div>
 </div>
@@ -125,7 +125,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div></div>
 </div></div>
 <div class="status" id="statusEl">Выбери режим игры</div>
-<div class="ver" id="verTag">v4.11</div>
+<div class="ver" id="verTag">v4.12</div>
 </div>
 <div class="overlay" id="modeOverlay"><div class="cardbox"><h2>🚢 Морской бой</h2><div class="sub">Выбери режим игры</div>
 <div class="mgrid">
@@ -146,14 +146,14 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="stat-row"><span>% побед</span><b id="stPct">0%</b></div>
 <div class="stat-row"><span>Серия / рекорд</span><b id="stStreak">0 / 0</b></div>
 <div class="btns"><button class="btn" id="stReset">Сброс</button><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note">Лист принудительно светлый даже при тёмной теме телефона. Кнопка ⛶/ меняет размер поля.</div></div></div>
+<div class="note">Поле по умолчанию во всю ширину; кнопка 🔲 впишет его в экран, ⛶ вернёт полную ширину. Клетка листа всегда равна клетке поля.</div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Поле 10×10, цифры 1–10 сверху, буквы А–К слева.<br>• Флот 1×4,2×3,3×2,4×1; не касаются углами.<br>• Расстановка: 1‑е нажатие = мигающее превью, 2‑е = подтвердить; либо 🎲 Авто.<br>• Онлайн: создай комнату → 📨 Пригласить (ссылка копируется и открывается отправка через ТГ) → друг открывает и попадает в комнату (пилюля станет зелёной с 2) → оба расставляют флот и жмут «⚔️ В бой!».<br>• Над полем противника — легенда: маленькие корабли и сколько осталось; потопленный тип прозрачный.<br>• Попадание = доп. ход; промах = всплеск; убитый = метки по всем клеткам + раскрытый контур.<br>• ⛶ / 🔲 — размер поля по ширине или вписать в экран.</div>
+<div class="note">• Поле 10×10, цифры 1–10 сверху, буквы А–К слева.<br>• Флот 1×4,2×3,3×2,4×1; не касаются углами.<br>• Расстановка: 1‑е нажатие = мигающее превью, 2‑е = подтвердить; либо 🎲 Авто.<br>• Онлайн: создай комнату → 📨 Пригласить (ссылка копируется и открывается отправка через ТГ) → друг открывает и попадает в комнату (пилюля станет зелёной с 2) → оба расставляют флот и жмут «⚔️ В бой!».<br>• Над полем противника — легенда: маленькие корабли и сколько осталось; потопленный тип прозрачный.<br>• Попадание = доп. ход; промах = всплеск; убитый = метки по всем клеткам + раскрытый контур.<br>• Размер поля: по умолчанию во всю ширину; 🔲 — вписать в экран, ⛶ — снова во всю ширину.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
 var FB={apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"};
-var VER='4.11',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=true;
+var VER='4.12',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=false;
 var G=null,tg=null,AC=null,MASTER=null,toastT=null,set=null,ST=null,preview=null;
 var renderedShots={my:new Array(100).fill(0),en:new Array(100).fill(0)};
 var FNS={},NET={code:null,role:null,room:null,conn:false,lastPend:0,lastRes:0,L:[]};
@@ -188,12 +188,13 @@ function shipAt(b,r,c){for(var i=0;i<b.ships.length;i++)if(cells(b.ships[i]).ind
 function canPlace(b,r,c,l,h){for(var k=0;k<l;k++){var rr=h?r:r+k,cc=h?c+k:c;if(rr<0||rr>9||cc<0||cc>9)return false;for(var dr=-1;dr<2;dr++)for(var dc=-1;dc<2;dc++){var nr=rr+dr,nc=cc+dc;if(nr>=0&&nr<10&&nc>=0&&nc<10&&shipAt(b,nr,nc))return false}}return true}
 function place(b,r,c,l,h){if(!canPlace(b,r,c,l,h))return false;b.ships.push({r:r,c:c,len:l,hor:h,hits:0,dead:false});return true}
 function rndFleet(b){b.ships=[];for(var i=0;i<FLEET.length;i++){var l=FLEET[i],ok=false,g=0;while(!ok&&g++<400)ok=place(b,Math.random()*10|0,Math.random()*10|0,l,Math.random()<.5)}}
+/* v4.12: FIT=false по умолчанию (во всю ширину), потолок клетки выше */
 function layout(){var vw=innerWidth,vh=innerHeight;var wide=vw>=700;
  var perBoard=wide?(Math.min(vw,1000)-80)/2:(vw-52);
  var cellW=Math.floor((perBoard-30)/10);
  var stacked=wide?1:2;
  var cellH=FIT?Math.floor((vh-150)/(stacked*11.8)):999;
- CELL=Math.max(14,Math.min(34,Math.min(cellW,cellH)));
+ CELL=Math.max(14,Math.min(FIT?34:40,Math.min(cellW,cellH)));
  document.documentElement.style.setProperty('--cell',CELL+'px')}
 function rescale(){layout();resetRendered();renderAll()}
 function stopT(){if(G&&G.timer){clearInterval(G.timer);G.timer=null}}
@@ -297,7 +298,6 @@ function end(w){if(G.over)return;G.over=true;G.won=w;stopT();if(w){sWin();hap('s
 function share(){var acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;var txt='🚢 Морской бой: '+(G.won?'ПОБЕДА!':'поражение')+'! Время '+fmt(G.time)+', выстрелов '+G.shotsFired+', точность '+acc+'%, '+(G.online?'онлайн‑дуэль':'ИИ: '+dName())+'. Сможешь лучше?';var url=location.href;
  if(navigator.share){navigator.share({title:'Морской бой',text:txt,url:url}).catch(function(){})}
  else{try{open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(txt),'_blank')}catch(e){try{navigator.clipboard.writeText(txt+' '+url);toast('Скопировано!')}catch(e2){toast(txt)}}}}
-/* v4.11: приглашение без switchInlineQuery (он давал Script error на Huawei); ссылка с версией против кэша */
 function invite(){if(!NET.code){toast('Сначала создай комнату');return}
  var url=location.origin+location.pathname+'?room='+NET.code+'&v='+VER;
  var txt='🚢 Морской бой! Комната '+NET.code+'. Открой ссылку и играй: '+url;
