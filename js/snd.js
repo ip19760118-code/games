@@ -1,10 +1,10 @@
-/* tg-games: модуль звуков и озвучки v3.0
-   mp3 декодируются в WebAudio-буферы (assets/snd) — обход блокировок autoplay <audio> (тишина на Huawei).
-   Громкость файлов выровнена с синтезом (TRIM), нет файла/WebAudio -> мгновенная замена (fb/синтез/TTS).
-   API без изменений: play / say / tts / setVol / setMuted / stat / preload. */
+/* tg-games: модуль звуков и озвучки v3.1
+   v3.1: голос и эффекты разделены. setVoice() глушит ТОЛЬКО речь (say/tts),
+   play() (эффекты) от флага голоса не зависит. muted = общий мастер-мьют (не используется тумблером).
+   mp3 декодируются в WebAudio-буферы (assets/snd); нет файла/WebAudio -> мгновенная замена (синтез/TTS). */
 var SND=(function(){
  var BASE='../assets/snd/',TRIM=.55;
- var vol=.7,muted=false,AC=null,buf={},elc={},state={};
+ var vol=.7,muted=false,voice=true,AC=null,buf={},elc={},state={};
  var FILES={shot:'shot.mp3',splash:'splash.mp3',hit:'hit.mp3',boom:'boom.mp3',place:'place.mp3',select:'select.mp3',invalid:'invalid.mp3',shuffle:'shuffle.mp3',win:'win.mp3',lose:'lose.mp3',
   v_new:'v_new.mp3',v_battle:'v_battle.mp3',v_win:'v_win.mp3',v_lose:'v_lose.mp3',v_sunk:'v_sunk.mp3',v_turn:'v_turn.mp3',v_hint:'v_hint.mp3',v_wait:'v_wait.mp3'};
  function src(k){return BASE+(FILES[k]||(k+'.mp3'))}
@@ -29,10 +29,12 @@ var SND=(function(){
  return{FILES:FILES,
   setVol:function(v){vol=v},
   setMuted:function(m){muted=!!m;if(m){try{speechSynthesis.cancel()}catch(e){}}},
+  /* v3.1: только речь */
+  setVoice:function(v){voice=!!v;if(!voice){try{speechSynthesis.cancel()}catch(e){}}},
   play:function(k,vm,fb){if(muted)return;
    if(state[k]==='ok'){if(!fireBuf(k,vm)){if(!fireEl(k,vm,fb)){if(fb)fb()}}}
    else{if(fb)fb()}},
-  say:function(k,t){if(muted)return;
+  say:function(k,t){if(muted||!voice)return;
    if(state[k]==='ok'){if(!fireBuf(k,1)){fireEl(k,1,function(){tts(t)})}}
    else{tts(t)}},
   tts:tts,
