@@ -22,9 +22,10 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .header .title{font-size:16px;font-weight:700;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:24px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .bar{background:rgba(0,0,0,.25);border-radius:12px;margin-bottom:6px;overflow:hidden}
-.bar-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--accent)}
-.bar-head .arrow{transition:transform .3s}
-.bar.expanded .bar-head .arrow{transform:rotate(180deg)}
+/* v4.16: шапка шторки выше, справа понятная кнопка-пилюля вместо мелкого треугольника */
+.bar-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;font-size:13px;font-weight:700;color:var(--accent);min-height:42px}
+.fold{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;background:rgba(124,255,196,.14);border:1px solid rgba(124,255,196,.45);color:var(--accent);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:800;letter-spacing:.3px;transition:transform .1s}
+.bar-head:active .fold{transform:scale(.94)}
 .bar-body{padding:2px 10px 10px;display:none;flex-wrap:wrap;gap:6px;justify-content:center}
 .bar.expanded .bar-body{display:flex}
 .statsline{width:100%;text-align:center;font-size:11px;color:var(--text);opacity:.85;margin-bottom:4px}
@@ -106,7 +107,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="wrap" id="wrap">
 <div class="header"><button class="hbtn" id="hubBtn">← В меню</button><div class="title">🚢 МОРСКОЙ БОЙ</div><button class="hbtn" id="modeBtn">👥 Режим</button></div>
 <div class="bar expanded" id="mainBar">
-<div class="bar-head" id="barHead"><span id="barHeadTxt">🧰 Инструменты</span><span class="arrow">▾</span></div>
+<div class="bar-head" id="barHead"><span id="barHeadTxt">🧰 Инструменты</span><span class="fold" id="barFold">▴ Свернуть</span></div>
 <div class="bar-body">
 <div class="statsline" id="statsLine"></div>
 <div class="players" id="rbPlayers" style="display:none"></div>
@@ -127,7 +128,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div></div>
 </div></div>
 <div class="status" id="statusEl">Выбери режим игры</div>
-<div class="ver" id="verTag">v4.15</div>
+<div class="ver" id="verTag">v4.16</div>
 </div>
 <div class="overlay" id="modeOverlay"><div class="cardbox"><h2>🚢 Морской бой</h2><div class="sub">Выбери режим игры</div>
 <div class="mgrid">
@@ -151,11 +152,11 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="note">Тумблер «🔊 Голос» отключает только речевые подсказки — звуковые эффекты остаются. Звуки берутся из assets/snd (модуль js/snd.js), пока файлов нет — работает синтез. Клетка листа совпадает с клеткой полей.</div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Поле 10×10, цифры 1–10 сверху, буквы А–К слева.<br>• Флот 1×4,2×3,3×2,4×1; не касаются углами.<br>• Расстановка: 1‑е нажатие = мигающее превью, 2‑е = подтвердить; либо 🎲 Авто.<br>• Онлайн: создай комнату → 📨 Пригласить → друг открывает ссылку (пилюля станет зелёной с 2) → оба расставляют флот и жмут «⚔️ В бой!».<br>• Над полем противника — легенда остатка флота; потопленный тип прозрачный.<br>• Попадание = доп. ход; промах = всплеск; убитый = метки по всем клеткам + раскрытый контур.<br>• Размер поля: по умолчанию во всю ширину; 🔲 — вписать в экран, ⛶ — обратно.</div>
+<div class="note">• Поле 10×10, цифры 1–10 сверху, буквы А–К слева.<br>• Флот 1×4,2×3,3×2,4×1; не касаются углами.<br>• Расстановка: 1‑е нажатие = мигающее превью, 2‑е = подтвердить; либо 🎲 Авто.<br>• Онлайн: создай комнату → 📨 Пригласить → друг открывает ссылку (пилюля станет зелёной с 2) → оба расставляют флот и жмут «⚔️ В бой!».<br>• Над полем противника — легенда остатка флота; потопленный тип прозрачный.<br>• Попадание = доп. ход; промах = всплеск; убитый = метки по всем клеткам + раскрытый контур.<br>• Размер поля: по умолчанию во всю ширину; 🔲 — вписать в экран, ⛶ — обратно.<br>• Шторка инструментов/комнаты сворачивается кнопкой «▴ Свернуть / ▾ Развернуть» справа в её шапке.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
 var FB={apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"};
-var VER='4.15',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=false;
+var VER='4.16',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=false;
 var G=null,tg=null,AC=null,MASTER=null,toastT=null,set=null,ST=null,preview=null;
 var renderedShots={my:new Array(100).fill(0),en:new Array(100).fill(0)};
 var FNS={},NET={code:null,role:null,room:null,conn:false,lastPend:0,lastRes:0,L:[]};
@@ -206,11 +207,13 @@ function startT(){if(!G||G.timer)return;G.timer=setInterval(function(){G.time++;
 function buildLabels(){var sides=['my','en'];for(var s=0;s<2;s++){var p=sides[s];var t=$(p+'Top'),l=$(p+'Left');if(!t||!l)continue;t.innerHTML='';l.innerHTML='';for(var i=0;i<10;i++){var a=document.createElement('span');a.className='lab';a.textContent=i+1;t.appendChild(a);var cc=document.createElement('span');cc.className='lab';cc.textContent=LETTERS[i];l.appendChild(cc)}}}
 function updateStats(){if(!G)return;var acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;$('statsLine').textContent='⏱ '+fmt(G.time)+' · Выстрелы: '+G.shotsFired+' · Точность: '+acc+'% · '+(G.online?'онлайн':dName())}
 function updateRoomBar(){var d=NET.room;if(!d)return 1;var onl=(d.hostOnline?1:0)+(d.guestOnline?1:0);var h='';if(d.host)h+='👤 '+((d.host&&d.host.name)||'Игрок 1')+' · хост '+(d.hostOnline?'🟢 онлайн':'⚪ офлайн')+'<br>';if(d.guest)h+='👤 '+((d.guest&&d.guest.name)||'Игрок 2')+' · гость '+(d.guestOnline?'🟢 онлайн':' офлайн')+'<br>';if(!d.guest)h+='<i>Ожидание второго игрока… нажми «📨 Пригласить».</i>';$('rbPlayers').innerHTML=h;return onl}
+/* v4.16: подпись кнопки сворачивания синхронна с состоянием шторки */
+function updateFold(){var f=$('barFold');if(!f)return;f.textContent=$('mainBar').classList.contains('expanded')?'▴ Свернуть':'▾ Развернуть'}
 function refreshBar(){var on=G&&G.online;var ht=$('barHeadTxt');
  if(on){var onl=updateRoomBar();ht.innerHTML='👥 Комната <b>'+(NET.code||'------')+'</b><span class="pill'+(onl>=2?' g2':'')+'"><i></i><b>'+onl+'</b></span>';
   $('rbPlayers').style.display='';$('inviteBtn').style.display='';$('copyBtn').style.display='';$('leaveBtn').style.display='';
  }else{ht.innerHTML='🧰 Инструменты';$('rbPlayers').style.display='none';$('inviteBtn').style.display='none';$('copyBtn').style.display='none';$('leaveBtn').style.display='none'}
- refreshStart();updateStats()}
+ refreshStart();updateStats();updateFold()}
 function refreshStart(){var b=$('startBtn');if(!G||!b)return;var pl=G.phase=='place';
  $('rotBtn').style.display=pl?'':'none';$('autoBtn').style.display=pl?'':'none';$('clearBtn').style.display=pl?'':'none';
  if(G.online){var d=NET.room;
@@ -221,7 +224,8 @@ function refreshStart(){var b=$('startBtn');if(!G||!b)return;var pl=G.phase=='pl
   else{b.disabled=false;b.textContent='⚔️ В бой!'}
  }else{b.style.display='';b.textContent='⚔️ В бой!';
   if(pl&&G.qi>=G.queue.length){b.disabled=false;b.classList.add('pulse');$('mainBar').classList.add('expanded')}
-  else{b.disabled=!pl;b.classList.remove('pulse')}}}
+  else{b.disabled=!pl;b.classList.remove('pulse')}}
+ updateFold()}
 function renderLegend(){var el=$('enLegend');if(!el||!G)return;el.innerHTML='';
  var src=G.online?G.oppView.ships:G.en.ships;
  var totals={};FLEET.forEach(function(l){totals[l]=(totals[l]||0)+1});
@@ -332,7 +336,7 @@ $('myField').addEventListener('pointermove',function(e){var h=$('myHover');if(!G
 $('myField').addEventListener('pointerleave',function(){$('myHover').style.display='none'});
 $('enField').addEventListener('pointermove',function(e){var h=$('enHover');if(!G||G.over||G.phase!='battle'){h.style.display='none';return}var can=G.online?(NET.room&&NET.room.state=='battle'&&ourTurn()&&!NET.room.pending):(G.turn=='player');if(!can){h.style.display='none';return}var p=cellFrom($('enField'),e);var tb=G.online?G.oppView:G.en;if(!p||tb.shots[p.r*10+p.c]){h.style.display='none';return}h.className='hover ok';h.style.display='block';h.style.left=p.c*CELL+'px';h.style.top=p.r*CELL+'px';h.style.width=CELL+'px';h.style.height=CELL+'px'});
 $('enField').addEventListener('pointerleave',function(){$('enHover').style.display='none'});
-$('barHead').onclick=function(){$('mainBar').classList.toggle('expanded')};
+$('barHead').onclick=function(){$('mainBar').classList.toggle('expanded');updateFold();hap('light')};
 $('rotBtn').onclick=function(){if(G&&G.phase=='place'){G.hor=!G.hor;clearPreview();sPlace();setStatus('Ориентация: '+(G.hor?'горизонтально':'вертикально'))}};
 $('autoBtn').onclick=function(){aud();autoPlace()};
 $('clearBtn').onclick=function(){aud();clearPlace()};
@@ -345,7 +349,7 @@ $('rulesBtn').onclick=function(){$('rulesOverlay').classList.add('show')};
 $('inviteBtn').onclick=function(){aud();invite()};
 $('copyBtn').onclick=function(){aud();copyCode()};
 $('leaveBtn').onclick=function(){aud();netLeave()};
-$('modeBtn').onclick=function(){aud();if(G&&G.online){refreshBar();$('mainBar').classList.add('expanded')}else showMode('menu')};
+$('modeBtn').onclick=function(){aud();if(G&&G.online){refreshBar();$('mainBar').classList.add('expanded');updateFold()}else showMode('menu')};
 $('modeAI').onclick=function(){aud();if(G&&G.online)NET.reset();newGame();hideMode()};
 $('modeCreate').onclick=function(){aud();netCreate()};
 $('modeJoin').onclick=function(){aud();showMode('join');$('joinInput').focus()};
@@ -355,7 +359,6 @@ $('modeCancel').onclick=function(){hideMode()};
 $('setClose').onclick=function(){$('setOverlay').classList.remove('show')};
 $('diffSel').onchange=function(e){set.diff=e.target.value;saveSet();renderAll()};
 $('skinSel').onchange=function(e){set.skin=e.target.value;saveSet();applySkin()};
-/* v4.15: тумблер голоса глушит ТОЛЬКО речь (SND.setVoice), эффекты остаются */
 $('voiceChk').onchange=function(e){set.voice=e.target.checked;saveSet();if(window.SND)SND.setVoice(set.voice);if(set.voice)say('Озвучка включена')};
 $('volSlider').oninput=function(e){set.vol=e.target.value/100;$('volV').textContent=e.target.value+'%';saveSet();aud();if(window.SND)SND.setVol(set.vol)};
 $('stReset').onclick=function(){if(confirm('Сбросить статистику?')){ST={games:0,wins:0,streak:0,bestStreak:0};saveST();showStats()}};
@@ -367,7 +370,7 @@ window.addEventListener('beforeunload',function(){if(NET.conn&&NET.code){try{FNS
 function boot(){document.documentElement.classList.add('ls');document.documentElement.style.colorScheme='light';
  set=Object.assign({diff:'medium',skin:'classic',vol:.7,voice:true},JSON.parse(lsGet('sb_set','{}')));delete set.mode;ST=Object.assign({games:0,wins:0,streak:0,bestStreak:0},JSON.parse(lsGet('sb_stats','{}')));
  if(window.SND){SND.setVol(set.vol);SND.setVoice(set.voice)}
- tg=window.Telegram?window.Telegram.WebApp:null;initTg();applySkin();layout();bind();newGame();$('verTag').textContent='v'+VER;
+ tg=window.Telegram?window.Telegram.WebApp:null;initTg();applySkin();layout();bind();newGame();$('verTag').textContent='v'+VER;updateFold();
  var qp=new URLSearchParams(location.search);var room=qp.get('room');if(room){setTimeout(function(){netJoin(room)},400)}else{showMode('menu')}}
 boot();
 </script></body></html>
