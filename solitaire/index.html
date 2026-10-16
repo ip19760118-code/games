@@ -5,30 +5,31 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
 <style>
-:root{--bg1:#0d1a12;--bg2:#16301f;--bg3:#08120c;--panel:rgba(20,32,24,.92);--text:#eef2f6;--accent:#7cffc4;--cw:80px;--ch:112px;--offu:30px;--offd:14px;color-scheme:light}
+:root{--panel:rgba(16,26,18,.92);--text:#eef2f6;--accent:#7cffc4;--cw:80px;--ch:112px;--offu:30px;--offd:14px;color-scheme:light}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
-body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:6px;padding-top:calc(6px + env(safe-area-inset-top));padding-bottom:calc(6px + env(safe-area-inset-bottom))}
+body{min-height:100vh;background:#08120c;font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:6px;padding-top:calc(6px + env(safe-area-inset-top));padding-bottom:calc(6px + env(safe-area-inset-bottom))}
 .wrap{max-width:760px;width:100%;background:var(--panel);border-radius:16px;padding:8px;box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08)}
+.wrap[data-skin="classic"]{--felt1:#0b6623;--felt2:#084a19;--back1:#1d3f8f;--back2:#2a55c0}
+.wrap[data-skin="neon"]{--felt1:#101418;--felt2:#0a0d10;--back1:#3a0f66;--back2:#5a1ba0}
+.wrap[data-skin="pastel"]{--felt1:#9cc0e0;--felt2:#7fa8cc;--back1:#2a55c0;--back2:#4a75e0}
 .header{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px;margin-bottom:6px}
 .title{font-size:16px;font-weight:700;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:24px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .hud{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;background:rgba(0,0,0,.3);border-radius:10px;padding:5px 10px;margin-bottom:8px;font-size:12px;font-weight:700}
 .hud b{color:var(--accent)}
-#hProv{color:#ffd166}
-.toprow{display:flex;gap:6px;justify-content:flex-start;margin-bottom:10px}
+.boardbox{border-radius:12px;padding:10px 8px;background:linear-gradient(160deg,var(--felt1),var(--felt2));box-shadow:inset 0 2px 14px rgba(0,0,0,.45)}
+.toprow{display:flex;gap:6px;margin-bottom:10px}
 .toprow .gap{flex:1}
 .pile,.col{position:relative;width:var(--cw);min-height:var(--ch);border-radius:8px}
-.pile.empty::before,.col.empty::before{content:'';position:absolute;inset:0;border:2px dashed rgba(255,255,255,.22);border-radius:8px}
-.tabrow{display:flex;gap:6px;justify-content:flex-start}
+.pile.empty::before,.col.empty::before{content:'';position:absolute;inset:0;border:2px dashed rgba(255,255,255,.25);border-radius:8px}
+#stock.empty::before{content:'↻';border:none;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cw)*.5);color:rgba(255,255,255,.5)}
+.tabrow{display:flex;gap:6px}
 .card{position:absolute;width:var(--cw);height:var(--ch);border-radius:8px;background:#fdfdf6;border:1px solid #b9b2a0;box-shadow:0 2px 5px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:none}
 .card b{font-size:calc(var(--cw)*.34);font-weight:800;line-height:1}
 .card i{position:absolute;top:4px;left:6px;font-style:normal;font-size:calc(var(--cw)*.2);opacity:.9}
 .card.red b,.card.red i{color:#c1121f}
 .card.blk b,.card.blk i{color:#20242c}
-.card.back{cursor:pointer}
-[data-backs="classic"] .card.back{background:repeating-linear-gradient(45deg,#1d3f8f 0 6px,#2a55c0 6px 12px);border-color:#16306e}
-[data-backs="green"] .card.back{background:repeating-linear-gradient(45deg,#0b6623 0 6px,#128a3a 6px 12px);border-color:#084a19}
-[data-backs="neon"] .card.back{background:repeating-linear-gradient(45deg,#3a0f66 0 6px,#5a1ba0 6px 12px);border-color:#2a0a4a}
+.card.back{background:repeating-linear-gradient(45deg,var(--back1) 0 6px,var(--back2) 6px 12px);border-color:rgba(0,0,0,.4)}
 .card.sel{box-shadow:0 0 0 3px var(--accent),0 4px 10px rgba(0,0,0,.5)}
 .card.hint,.pile.hint::after,.col.hint::after{content:'';position:absolute;inset:-3px;border:3px solid #ffee00;border-radius:10px;box-shadow:0 0 14px rgba(255,238,0,.8);pointer-events:none;animation:hp .7s ease-in-out 2}
 @keyframes hp{50%{opacity:.4}}
@@ -54,44 +55,46 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .toast{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(30,150,90,.95);color:#fff;font-weight:800;font-size:12px;padding:8px 16px;border-radius:24px;z-index:600;pointer-events:none;opacity:0;transition:opacity .25s}
 .toast.show{opacity:1}
 </style></head><body>
-<div class="wrap" id="wrap">
+<div class="wrap" id="wrap" data-skin="classic">
 <div class="header"><button class="hbtn" id="hubBtn">← В меню</button><div class="title">♠️ КОСЫНКА</div><div style="display:flex;gap:5px"><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
-<div class="hud"><span>⏱ <b id="hTime">00:00</b></span><span>Ходы: <b id="hMoves">0</b></span><span>Стопка: <b id="hStock">24</b></span><span id="hProv">решаемый</span></div>
+<div class="hud"><span>⏱ <b id="hTime">00:00</b></span><span>Ходы: <b id="hMoves">0</b></span><span>Очки: <b id="hScore">0</b></span><span><b id="hDiff">Новичок</b></span></div>
+<div class="boardbox">
 <div class="toprow">
 <div class="pile" id="stock" data-pile="stock"></div>
 <div class="pile" id="waste" data-pile="waste"></div>
 <div class="gap"></div>
-<div class="pile" id="f0" data-pile="f0"></div>
-<div class="pile" id="f1" data-pile="f1"></div>
-<div class="pile" id="f2" data-pile="f2"></div>
-<div class="pile" id="f3" data-pile="f3"></div>
+<div class="pile" id="f0" data-pile="f0"></div><div class="pile" id="f1" data-pile="f1"></div><div class="pile" id="f2" data-pile="f2"></div><div class="pile" id="f3" data-pile="f3"></div>
 </div>
 <div class="tabrow" id="tabrow">
 <div class="col" id="t0" data-pile="t0"></div><div class="col" id="t1" data-pile="t1"></div><div class="col" id="t2" data-pile="t2"></div><div class="col" id="t3" data-pile="t3"></div><div class="col" id="t4" data-pile="t4"></div><div class="col" id="t5" data-pile="t5"></div><div class="col" id="t6" data-pile="t6"></div>
 </div>
+</div>
 <div class="status" id="statusEl">Разбери расклад по домам</div>
-<div class="actions"><button class="btn" id="newBtn">🔄 Новая</button><button class="btn" id="undoBtn">↩️ Отмена</button><button class="btn" id="hintBtn">💡 Подсказка</button><button class="btn" id="autoBtn" disabled>🏁 Доиграть</button></div>
-<div class="ver" id="verTag">v2.0</div>
+<div class="actions"><button class="btn" id="newBtn">🔄 Новая</button><button class="btn" id="hintBtn">💡 Подсказка (5)</button><button class="btn" id="undoBtn">↩️ Отмена</button><button class="btn" id="autoBtn" disabled>⚡ Автодоводка</button><button class="btn" id="giveBtn">🏳️ Сдаться</button></div>
+<div class="ver" id="verTag">v2.1</div>
 </div>
 <div id="dragLayer"></div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
-<div class="selrow"><label><input type="checkbox" id="solvChk"> Только решаемые расклады</label></div>
-<div class="selrow">Рубашка карт<select id="backsSel"><option value="classic">Классика</option><option value="green">Зелёная</option><option value="neon">Неон</option></select></div>
-<div class="selrow"><label><input type="checkbox" id="voiceChk"> 🔊 Голос</label></div>
+<div class="selrow">Сложность<select id="diffSel"><option value="easy">Новичок · 1 карта, 5 подсказок</option><option value="medium">Среднее · 3 карты, 3 подсказки</option><option value="hard">Сложное · 3 карты, 1 перезаход, 1 подсказка</option></select></div>
+<div class="selrow"><label><input type="checkbox" id="solvChk" checked> Только решаемые расклады</label></div>
+<div class="selrow">Скин<select id="skinSel"><option value="classic">Классика (зелёное сукно)</option><option value="neon">Неон (тёмный)</option><option value="pastel">Пастель (голубой)</option></select></div>
+<div class="selrow"><label><input type="checkbox" id="voiceChk"> 🔊 Голосовая озвучка</label></div>
 <div class="selrow">Громкость · <span id="volV">70%</span><input type="range" id="volSlider" min="0" max="100" value="70"></div>
 <div class="selrow">📊 Статистика</div>
 <div class="stat-row"><span>Игр / побед</span><b id="stGW">0 / 0</b></div>
-<div class="stat-row"><span>% побед</span><b id="stPct">0%</b></div>
-<div class="stat-row"><span>Серия / рекорд</span><b id="stStreak">0 / 0</b></div>
+<div class="stat-row"><span>Процент побед</span><b id="stPct">0%</b></div>
+<div class="stat-row"><span>Серия побед / рекорд серии</span><b id="stStreak">0 / 0</b></div>
 <div class="stat-row"><span>Лучшее время</span><b id="stTime">—</b></div>
-<div class="btns"><button class="btn" id="stReset">Сброс</button><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note">«Только решаемые» — каждая партия предварительно прогоняется авто‑игроком и принимается, лишь если расклад реально разбирается до конца.</div></div></div>
+<div class="stat-row"><span>Лучший счёт</span><b id="stScore">—</b></div>
+<div class="btns"><button class="btn" id="stReset">Сбросить</button><button class="btn primary" id="setClose">Готово</button></div>
+<div class="note">Подсказки лимитированы сложностью: 5 / 3 / 1 на партию. Скины: Классика, Неон, Пастель. «Только решаемые расклады» (вкл по умолчанию): каждая раздача предварительно проверяется авто‑игроком по текущей сложности; выключи — будут обычные случайные.</div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏆 Победа!</h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Классический пасьянс: 7 столбцов, 4 дома, стопка с резервом.<br>• На стол кладём по убыванию с чередованием цвета, в дом — по возрастанию от туза по масти.<br>• Перетаскивай карту/последовательность или тапни источник → тапни цель; двойной тап = в дом.<br>• Пустой столбец принимает только короля (или последовательность с короля).<br>• ↩️ отмена, 💡 подсказка, 🏁 авто‑доигрывание когда всё открыто.<br>• Расклады по умолчанию гарантированно решаемые.</div>
+<div class="note">• Цель — собрать 4 дома по мастям от туза до короля.<br>• В колоннах кладём по убыванию, чередуя цвета; на пустую колонну — только король.<br>• Из колоды берём по 1 или 3 карты; пустая колода перезаряжается сбросом (на «Сложном» — 1 раз).<br>• Управление: тяни карту/стопку целиком; неверный бросок вернёт её; ИЛИ тап = выбрать, тап = ход.<br>• 💡 Подсказки лимитированы: Новичок 5, Среднее 3, Сложное 1; не зацикливаются на колоде и не предлагают обратные недавним ходы.<br>• Длинные стопки сжимаются, чтобы поле не выходило за экран.<br>• ⚡ Автодоводка появится, когда колода и сброс пусты и все карты открыты.<br>• В Telegram кнопка «Назад» закрывает окна и возвращает в хаб.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='2.0',RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'],SUITS=['♠','♥','♦','♣'];
+var VER='2.1',RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'],SUITS=['♠','♥','♦','♣'];
+var DIFFS={easy:{draw:1,redeals:Infinity,hints:5,name:'Новичок'},medium:{draw:3,redeals:Infinity,hints:3,name:'Среднее'},hard:{draw:3,redeals:1,hints:1,name:'Сложное'}};
 var tg=null,AC=null,MASTER=null,toastT=null,set=null,ST=null,G=null,CW=80,CH=112,OFFU=30,OFFD=14,drag=null,lastTap=null,autoT=null;
 function $(i){return document.getElementById(i)}
 function lsGet(k,d){try{var v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}}
@@ -101,7 +104,7 @@ function saveST(){lsSet('sol_stats',JSON.stringify(ST))}
 function trk(n,p){try{if(typeof gtag=='function')gtag('event',n,p)}catch(e){}}
 function hap(t){try{if(tg&&tg.HapticFeedback){if(t==='success')tg.HapticFeedback.notificationOccurred('success');else if(t==='error')tg.HapticFeedback.notificationOccurred('error');else tg.HapticFeedback.impactOccurred('light')}}catch(e){}}
 function tgBack(){var a=['setOverlay','rulesOverlay','endOverlay'];for(var i=0;i<a.length;i++){var e=$(a[i]);if(e&&e.classList.contains('show')){e.classList.remove('show');return}}location.href='../'}
-function initTg(){if(!tg)return;try{tg.ready();tg.expand();if(tg.setHeaderColor)tg.setHeaderColor('#0d1a12');if(tg.setBackgroundColor)tg.setBackgroundColor('#0d1a12');if(tg.disableVerticalSwipes)tg.disableVerticalSwipes();if(tg.BackButton){tg.BackButton.show();tg.BackButton.onClick(tgBack)}}catch(e){}}
+function initTg(){if(!tg)return;try{tg.ready();tg.expand();if(tg.setHeaderColor)tg.setHeaderColor('#08120c');if(tg.setBackgroundColor)tg.setBackgroundColor('#08120c');if(tg.disableVerticalSwipes)tg.disableVerticalSwipes();if(tg.BackButton){tg.BackButton.show();tg.BackButton.onClick(tgBack)}}catch(e){}}
 function aud(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=set.vol;MASTER.connect(AC.destination)}catch(e){}}if(AC&&AC.resume)AC.resume();if(MASTER)MASTER.gain.value=set.vol}
 function tn(f0,f1,d,tp,v){if(!AC)return;var o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;o.type=tp;o.frequency.setValueAtTime(f0,n);o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(MASTER);o.start(n);o.stop(n+d)}
 function S(k,fb){if(window.SND){SND.play(k,1,fb)}else if(fb){fb()}}
@@ -117,162 +120,216 @@ function fmt(t){var m=t/60|0,s=t%60;return(m<10?'0':'')+m+':'+(s<10?'0':'')+s}
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.random()*(i+1)|0;var t=a[i];a[i]=a[j];a[j]=t}return a}
 function rank(c){return c%13}
 function suit(c){return c/13|0}
-function color(c){var s=suit(c);return s==1||s==2}
-function runOk(t,j){for(var k=j;k<t.length-1;k++){if(!t[k][1]||!t[k+1][1])return false;if(rank(t[k+1][0])!==rank(t[k][0])-1)return false;if(color(t[k+1][0])===color(t[k][0]))return false}return t[j][1]}
-function canTab(c,pile){if(!pile.length)return rank(c)===12;var top=pile[pile.length-1];return top[1]&&rank(c)===rank(top[0])-1&&color(c)!==color(top[0])}
-function canFound(c,f){return f.length===rank(c)}
-function cloneSt(st){return{tab:st.tab.map(function(p){return p.map(function(q){return q.slice()})}),waste:st.waste.slice(),stock:st.stock.slice(),found:st.found.map(function(f){return f.slice()})}}
-function foundTotal(st){return st.found[0].length+st.found[1].length+st.found[2].length+st.found[3].length}
-/* ---------- решатель: доказательство решаемости расклада ---------- */
-function genMoves(st){var M=[],i,j,k,t,c;
- for(i=0;i<7;i++){t=st.tab[i];if(t.length&&t[t.length-1][1]){c=t[t.length-1][0];if(rank(c)===st.found[suit(c)].length)M.push({k:'tf',i:i,sc:100})}}
- if(st.waste.length){c=st.waste[st.waste.length-1];if(rank(c)===st.found[suit(c)].length)M.push({k:'wf',sc:95})}
- for(i=0;i<7;i++){t=st.tab[i];
-  for(j=0;j<t.length;j++){if(!t[j][1]||!runOk(t,j))continue;
-   for(k=0;k<7;k++){if(k===i)continue;var tgt=st.tab[k];if(!canTab(t[j][0],tgt))continue;
-    var reveal=j>0&&!t[j-1][1];var toEmpty=tgt.length===0&&j>0;
-    if(!reveal&&!toEmpty)continue;
-    M.push({k:'tt',i:i,j:j,t:k,sc:(reveal?75:55)+(toEmpty?5:0)})}}}
- if(st.stock.length)M.push({k:'d',sc:1});else if(st.waste.length)M.push({k:'r',sc:1});
- return M}
-function applyMove(st,m){var c;
- if(m.k==='tf'){c=st.tab[m.i].pop();st.found[suit(c)].push(c)}
- else if(m.k==='wf'){c=st.waste.pop();st.found[suit(c)].push(c)}
- else if(m.k==='tt'){var run=st.tab[m.i].splice(m.j);for(var q=0;q<run.length;q++)st.tab[m.t].push(run[q]);var s=st.tab[m.i];if(s.length&&!s[s.length-1][1])s[s.length-1][1]=1}
- else if(m.k==='d'){st.waste.push(st.stock.pop())}
- else if(m.k==='r'){st.stock=st.waste.slice().reverse();st.waste=[]}}
-function trySolve(st){var steps=0,draws=0;
- while(steps++<1500){if(foundTotal(st)===52)return true;
-  var M=genMoves(st);if(!M.length)return false;
-  M.sort(function(a,b){return b.sc-a.sc});
-  var idx=0,r=Math.random();
-  if(r>0.75)idx=Math.min(1,M.length-1);
-  if(r>0.92)idx=Math.random()*M.length|0;
-  var m=M[idx];
-  var prog=m.k==='tf'||m.k==='wf'||(m.k==='tt'&&m.j>0&&!st.tab[m.i][m.j-1][1]);
-  applyMove(st,m);
-  if(prog)draws=0;else if(m.k==='d'||m.k==='r'){draws++;if(draws>140)return false}}
- return false}
-function solveProof(deal){for(var a=0;a<12;a++){if(trySolve(cloneSt(deal)))return true}return false}
-function randomDeal(){var d=shuffle([].concat(Array.from({length:52},function(_,i){return i})));var st={tab:[[],[],[],[],[],[],[]],waste:[],stock:[],found:[[],[],[],[]]};var p=0;
+function color(c){var s=suit(c);return s===1||s===2}
+/* ---------- SOLVABLE: доказательство решаемости по текущей сложности ---------- */
+var SOLVABLE=(function(){
+ function runOk(t,j){for(var k=j;k<t.length-1;k++){if(!t[k][1]||!t[k+1][1])return false;if(rank(t[k+1][0])!==rank(t[k][0])-1)return false;if(color(t[k+1][0])===color(t[k][0]))return false}return !!t[j][1]}
+ function canTab(c,p){if(!p.length)return rank(c)===12;var t=p[p.length-1];return t[1]&&rank(c)===rank(t[0])-1&&color(c)!==color(t[0])}
+ function clone(s){return{tab:s.tab.map(function(p){return p.map(function(q){return q.slice()})}),waste:s.waste.slice(),stock:s.stock.slice(),found:s.found.map(function(f){return f.slice()})}}
+ function total(s){return s.found[0].length+s.found[1].length+s.found[2].length+s.found[3].length}
+ function moves(s,o){var M=[],i,j,k,t,c;
+  for(i=0;i<7;i++){t=s.tab[i];if(t.length&&t[t.length-1][1]){c=t[t.length-1][0];if(rank(c)===s.found[suit(c)].length)M.push({k:'tf',i:i,sc:100})}}
+  if(s.waste.length){c=s.waste[s.waste.length-1];if(rank(c)===s.found[suit(c)].length)M.push({k:'wf',sc:95})}
+  for(i=0;i<7;i++){t=s.tab[i];
+   for(j=0;j<t.length;j++){if(!t[j][1]||!runOk(t,j))continue;
+    for(k=0;k<7;k++){if(k===i)continue;var g=s.tab[k];if(!canTab(t[j][0],g))continue;
+     var rev=j>0&&!t[j-1][1],emp=g.length===0&&j>0;if(!rev&&!emp)continue;
+     M.push({k:'tt',i:i,j:j,t:k,sc:(rev?75:55)+(emp?5:0)})}}}
+  if(s.stock.length)M.push({k:'d',sc:1});
+  else if(s.waste.length&&(s.redeals||0)<o.redeals)M.push({k:'r',sc:1});
+  return M}
+ function apply(s,m,o){var c;
+  if(m.k==='tf'){c=s.tab[m.i].pop();s.found[suit(c)].push(c)}
+  else if(m.k==='wf'){c=s.waste.pop();s.found[suit(c)].push(c)}
+  else if(m.k==='tt'){var r=s.tab[m.i].splice(m.j);for(var q=0;q<r.length;q++)s.tab[m.t].push(r[q]);var p=s.tab[m.i];if(p.length&&!p[p.length-1][1])p[p.length-1][1]=1}
+  else if(m.k==='d'){var n=Math.min(o.draw,s.stock.length);for(var d=0;d<n;d++)s.waste.push(s.stock.pop())}
+  else if(m.k==='r'){s.stock=s.waste.slice().reverse();s.waste=[];s.redeals=(s.redeals||0)+1}}
+ function trySolve(s0,o){var s=clone(s0);s.redeals=0;var steps=0,draws=0;
+  while(steps++<2000){if(total(s)===52)return true;
+   var M=moves(s,o);if(!M.length)return false;
+   M.sort(function(a,b){return b.sc-a.sc});
+   var i=0,r=Math.random();if(r>.75)i=Math.min(1,M.length-1);if(r>.92)i=Math.random()*M.length|0;
+   var m=M[i],prog=m.k==='tf'||m.k==='wf'||(m.k==='tt'&&m.j>0&&!s.tab[m.i][m.j-1][1]);
+   apply(s,m,o);
+   if(prog)draws=0;else if(m.k==='d'||m.k==='r'){draws++;if(draws>300)return false}}
+  return false}
+ return{
+  prove:function(deal,o,att){for(var a=0;a<(att||10);a++)if(trySolve(deal,o))return true;return false},
+  generate:function(baseDeal,o,want){if(!want)return baseDeal();var t0=Date.now(),last=null;
+   for(var d=0;d<6;d++){var dl=baseDeal();last=dl;if(this.prove(dl,o,10))return dl;if(Date.now()-t0>900)break}
+   return last}};
+})();
+/* ---------- игра ---------- */
+function runOkG(t,j){for(var k=j;k<t.length-1;k++){if(!t[k][1]||!t[k+1][1])return false;if(rank(t[k+1][0])!==rank(t[k][0])-1)return false;if(color(t[k+1][0])===color(t[k][0]))return false}return !!t[j][1]}
+function canTabG(c,p){if(!p.length)return rank(c)===12;var t=p[p.length-1];return t[1]&&rank(c)===rank(t[0])-1&&color(c)!==color(t[0])}
+function canFoundG(c,f){return f.length===rank(c)}
+function cloneSt(){return{tab:G.tab.map(function(p){return p.map(function(q){return q.slice()})}),waste:G.waste.slice(),stock:G.stock.slice(),found:G.found.map(function(f){return f.slice()})}}
+function restoreSt(s){G.tab=s.tab;G.waste=s.waste;G.stock=s.stock;G.found=s.found}
+function foundTotal(){return G.found[0].length+G.found[1].length+G.found[2].length+G.found[3].length}
+function baseDeal(){var d=shuffle(Array.from({length:52},function(_,i){return i}));var st={tab:[[],[],[],[],[],[],[]],waste:[],stock:[],found:[[],[],[],[]]};var p=0;
  for(var i=0;i<7;i++)for(var j=0;j<=i;j++)st.tab[i].push([d[p++],j===i?1:0]);
  while(p<52)st.stock.push(d[p++]);
  return st}
-/* v2.0: генератор принимает только доказанно решаемые расклады */
-function generate(){if(!set.solvable)return{st:randomDeal(),proven:false};
- var t0=Date.now(),last=null;
- for(var d=0;d<6;d++){var deal=randomDeal();last=deal;if(solveProof(deal))return{st:deal,proven:true};if(Date.now()-t0>900)break}
- return{st:last,proven:false}}
-/* ---------- игра ---------- */
+function opts(){var D=DIFFS[set.diff];return{draw:D.draw,redeals:D.redeals}}
 function layoutCards(){var vw=Math.min(innerWidth,760);CW=Math.max(38,Math.min(92,Math.floor((vw-24-6*6)/7)));CH=Math.round(CW*1.4);OFFU=Math.round(CH*.28);OFFD=Math.round(CH*.13);
  var r=document.documentElement.style;r.setProperty('--cw',CW+'px');r.setProperty('--ch',CH+'px');r.setProperty('--offu',OFFU+'px');r.setProperty('--offd',OFFD+'px')}
 function mkCard(c,up){var d=document.createElement('div');d.className='card '+(up?(color(c)?'red':'blk'):'back');if(up){d.innerHTML='<b>'+RANKS[rank(c)]+'</b><i>'+SUITS[suit(c)]+'</i>';d.dataset.c=c}d.dataset.up=up?1:0;return d}
-function render(){$('hTime').textContent=fmt(G.time);$('hMoves').textContent=G.moves;$('hStock').textContent=G.stock.length;$('hProv').textContent=G.proven?'решаемый':'случайный';$('hProv').style.opacity=G.proven?1:.45;
- ['stock','waste','f0','f1','f2','f3','t0','t1','t2','t3','t4','t5','t6'].forEach(function(id){$(id).innerHTML=''});
- var sp=mkCard(0,false);if(G.stock.length){sp.style.top='0px';$('stock').appendChild(sp)}else{$('stock').classList.add('empty')}
- if(G.waste.length){var wc=mkCard(G.waste[G.waste.length-1],true);wc.style.top='0px';wc.dataset.pile='waste';wc.dataset.j=G.waste.length-1;bindCard(wc,'waste',G.waste.length-1);$('waste').appendChild(wc)}else $('waste').classList.add('empty');
- for(var s=0;s<4;s++){var f=G.found[s];var el=$('f'+s);if(f.length){var fc=mkCard(f[f.length-1],true);fc.style.top='0px';el.appendChild(fc)}else el.classList.add('empty')}
- for(var i=0;i<7;i++){var col=$('t'+i);col.classList.toggle('empty',!G.tab[i].length);var y=0;
-  for(var j=0;j<G.tab[i].length;j++){var pr=G.tab[i][j];var cd=mkCard(pr[0],!!pr[1]);cd.style.top=y+'px';y+=pr[1]?OFFU:OFFD;
-   if(pr[1]&&runOk(G.tab[i],j))bindCard(cd,'t'+i,j);
-   else if(pr[1]){cd.style.cursor='default'}
+function canAutoFinish(){if(G.over||G.stock.length||G.waste.length)return false;for(var i=0;i<7;i++)for(var j=0;j<G.tab[i].length;j++)if(!G.tab[i][j][1])return false;return true}
+function render(){$('hTime').textContent=fmt(G.time);$('hMoves').textContent=G.moves;$('hScore').textContent=G.score;$('hDiff').textContent=DIFFS[set.diff].name;
+ $('hintBtn').textContent='💡 Подсказка ('+G.hintsLeft+')';$('hintBtn').disabled=G.hintsLeft<=0||G.over;
+ $('undoBtn').disabled=!G.undo.length||G.over;$('autoBtn').disabled=!canAutoFinish();
+ ['stock','waste','f0','f1','f2','f3','t0','t1','t2','t3','t4','t5','t6'].forEach(function(id){$(id).innerHTML='';$(id).classList.remove('empty')});
+ if(G.stock.length){var sb=mkCard(0,false);sb.style.top='0px';$('stock').appendChild(sb)}else $('stock').classList.add('empty');
+ var D=DIFFS[set.diff].draw,wn=Math.min(D,G.waste.length);
+ for(var w=0;w<wn;w++){var wc=mkCard(G.waste[G.waste.length-wn+w],true);wc.style.top='0px';wc.style.left=(w*Math.round(CW*.28))+'px';wc.dataset.pile='waste';
+  if(w===wn-1)bindCard(wc,'waste',G.waste.length-1);$('waste').appendChild(wc)}
+ if(!G.waste.length)$('waste').classList.add('empty');
+ for(var s=0;s<4;s++){var f=G.found[s],el=$('f'+s);
+  if(f.length){var fc=mkCard(f[f.length-1],true);fc.style.top='0px';fc.dataset.pile='f'+s;bindCard(fc,'f'+s,f.length-1);el.appendChild(fc)}else el.classList.add('empty')}
+ var maxH=Math.max(300,innerHeight-330);
+ for(var i=0;i<7;i++){var col=G.tab[i],el2=$('t'+i);el2.classList.toggle('empty',!col.length);
+  var nd=0,nu=0;col.forEach(function(p){if(p[1])nu++;else nd++});
+  var need=nd*OFFD+nu*OFFU+CH,od=OFFD,ou=OFFU;
+  if(need>maxH){var sc=(maxH-CH)/(need-CH);od=Math.max(6,OFFD*sc);ou=Math.max(10,OFFU*sc)}
+  G.colOff[i]={d:od,u:ou};
+  var y=0;for(var j=0;j<col.length;j++){var pr=col[j],cd=mkCard(pr[0],!!pr[1]);cd.style.top=Math.round(y)+'px';y+=pr[1]?ou:od;cd.dataset.pile='t'+i;
+   if(pr[1]&&runOkG(col,j))bindCard(cd,'t'+i,j);else if(pr[1])cd.style.cursor='default';
    if(G.sel&&G.sel.pile==='t'+i&&j>=G.sel.j)cd.classList.add('sel');
-   col.appendChild(cd)}
-  col.style.minHeight=Math.max(CH,y+CH-OFFU)+'px'}
- if(G.sel&&G.sel.pile==='waste'){var w=$('waste').firstChild;if(w)w.classList.add('sel')}
- $('undoBtn').disabled=!G.undo.length;
- $('autoBtn').disabled=!canAutoFinish()}
+   el2.appendChild(cd)}
+  el2.style.minHeight=Math.round(y+CH-(col.length?ou:0))+'px'}
+ if(G.sel&&G.sel.pile==='waste'&&$('waste').lastChild)$('waste').lastChild.classList.add('sel');
+ if(G.sel&&G.sel.pile&&G.sel.pile[0]==='f'&&$(G.sel.pile).lastChild)$(G.sel.pile).lastChild.classList.add('sel')}
 function bindCard(el,pile,j){el.addEventListener('pointerdown',function(e){onDown(e,pile,j,el)})}
-function snapshot(){G.undo.push(cloneSt({tab:G.tab,waste:G.waste,stock:G.stock,found:G.found}));if(G.undo.length>200)G.undo.shift()}
-function doMoveRun(fromPile,j,toPile){snapshot();var cards;
- if(fromPile==='waste'){cards=[[G.waste.pop(),1]]}else{cards=G.tab[+fromPile.slice(1)].splice(j)}
- if(toPile[0]==='f'){G.found[+toPile.slice(1)].push(cards[0][0])}else{var t=G.tab[+toPile.slice(1)];for(var q=0;q<cards.length;q++)t.push(cards[q]);}
- if(fromPile[0]==='t'){var s=G.tab[+fromPile.slice(1)];if(s.length&&!s[s.length-1][1])s[s.length-1][1]=1}
- G.moves++;G.sel=null;sPlace();hap('light');render();checkWin()}
-function drawCard(){snapshot();if(G.stock.length){G.waste.push(G.stock.pop())}else if(G.waste.length){G.stock=G.waste.slice().reverse();G.waste=[]}else{return}
+function snapshot(){G.undo.push(cloneSt());if(G.undo.length>300)G.undo.shift()}
+function addScore(d){G.score=Math.max(0,G.score+d)}
+function doMove(fromPile,j,toPile){snapshot();var cards,su=suit(0);
+ if(fromPile==='waste'){cards=[[G.waste.pop(),1]]}
+ else if(fromPile[0]==='f'){cards=[[G.found[+fromPile.slice(1)].pop(),1]]}
+ else{cards=G.tab[+fromPile.slice(1)].splice(j)}
+ var c0=cards[0][0];
+ if(toPile[0]==='f'){G.found[suit(c0)].push(c0);addScore(fromPile==='waste'?10:10)}
+ else{var t=G.tab[+toPile.slice(1)];for(var q=0;q<cards.length;q++)t.push(cards[q]);if(fromPile==='waste')addScore(5);if(fromPile[0]==='f')addScore(-15)}
+ if(fromPile[0]==='t'){var src=G.tab[+fromPile.slice(1)];if(src.length&&!src[src.length-1][1]){src[src.length-1][1]=1;addScore(5)}}
+ G.lastMove={from:fromPile,to:toPile};G.moves++;G.sel=null;sPlace();hap('light');render();checkWin()}
+function drawCard(){var D=DIFFS[set.diff];
+ if(!G.stock.length&&!(G.waste.length&&G.redealsUsed<D.redeals))return;
+ snapshot();
+ if(G.stock.length){var n=Math.min(D.draw,G.stock.length);for(var i=0;i<n;i++)G.waste.push(G.stock.pop())}
+ else{G.stock=G.waste.slice().reverse();G.waste=[];G.redealsUsed++;addScore(D.draw===1?-100:-20)}
  G.moves++;G.sel=null;sSel();render()}
-function canAutoFinish(){if(G.stock.length||G.waste.length)return false;for(var i=0;i<7;i++)for(var j=0;j<G.tab[i].length;j++)if(!G.tab[i][j][1])return false;return true}
-function autoStep(){var M=genMoves(G).filter(function(m){return m.k==='tf'||m.k==='wf'});if(!M.length||foundTotal(G)===52){if(autoT){clearInterval(autoT);autoT=null}return}applyMove(G,M[0]);G.moves++;sPlace();render();checkWin()}
-function checkWin(){if(foundTotal(G)!==52)return;G.over=true;stopT();if(autoT){clearInterval(autoT);autoT=null}sWin();hap('success');V('v_win','Победа!');
- ST.games++;ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak;if(ST.bestTime==null||G.time<ST.bestTime)ST.bestTime=G.time;saveST();
- trk('game_end',{game_name:'solitaire',win:1,time:G.time,moves:G.moves,solvable:G.proven?1:0});showEnd()}
-function hintMove(){var M=genMoves(G).filter(function(m){return m.k!=='d'&&m.k!=='r'});if(!M.length){toast('Ходов нет — тяни из стопки');return null}M.sort(function(a,b){return b.sc-a.sc});return M[0]}
-function hint(){if(!G||G.over)return;var m=hintMove();if(!m)return;aud();sSel();
+function checkWin(){if(foundTotal()!==52)return;G.over=true;stopT();if(autoT){clearInterval(autoT);autoT=null}
+ sWin();hap('success');V('v_win','Победа!');
+ ST.games++;ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak;
+ if(ST.bestTime==null||G.time<ST.bestTime)ST.bestTime=G.time;
+ if(ST.bestScore==null||G.score>ST.bestScore)ST.bestScore=G.score;saveST();
+ trk('game_end',{game_name:'solitaire',win:1,time:G.time,moves:G.moves,score:G.score,solvable:set.solvable?1:0});showEnd(true)}
+function giveUp(){if(!G||G.over)return;G.over=true;stopT();if(autoT){clearInterval(autoT);autoT=null}
+ ST.games++;ST.streak=0;saveST();trk('game_end',{game_name:'solitaire',win:0,time:G.time,moves:G.moves,score:G.score});showEnd(false)}
+function hintMove(){if(G.hintsLeft<=0)return null;
+ var st=cloneSt();st.redeals=G.redealsUsed;var M=SOLVABLE.prove?null:null;M=genHint(st);
+ if(!M.length)return null;M.sort(function(a,b){return b.sc-a.sc});
+ for(var i=0;i<M.length;i++){var m=M[i],from=m.k==='tf'?'t'+m.i:(m.k==='wf'?'waste':'t'+m.i),to=m.k==='tf'?'f'+suit(G.tab[m.i][G.tab[m.i].length-1][0]):(m.k==='wf'?'f'+suit(G.waste[G.waste.length-1]):'t'+m.t);
+  if(G.lastMove&&G.lastMove.from===to&&G.lastMove.to===from)continue;
+  m.from=from;m.to=to;return m}
+ return null}
+function genHint(st){var M=[],i,j,k,t,c;
+ for(i=0;i<7;i++){t=st.tab[i];if(t.length&&t[t.length-1][1]){c=t[t.length-1][0];if(rank(c)===st.found[suit(c)].length)M.push({k:'tf',i:i,sc:100})}}
+ if(st.waste.length){c=st.waste[st.waste.length-1];if(rank(c)===st.found[suit(c)].length)M.push({k:'wf',sc:95})}
+ for(i=0;i<7;i++){t=st.tab[i];
+  for(j=0;j<t.length;j++){if(!t[j][1]||!runOkG(t,j))continue;
+   for(k=0;k<7;k++){if(k===i)continue;var g=st.tab[k];if(!canTabG(t[j][0],g))continue;
+    var rev=j>0&&!t[j-1][1],emp=g.length===0&&j>0;if(!rev&&!emp)continue;
+    M.push({k:'tt',i:i,j:j,t:k,sc:(rev?75:55)+(emp?5:0)})}}}
+ return M}
+function hint(){if(!G||G.over||G.hintsLeft<=0)return;var m=hintMove();if(!m){toast('Полезных ходов нет — тяни из колоды');return}
+ G.hintsLeft--;aud();sSel();hap('light');
  var src=null,dst=null;
  if(m.k==='tf'){src=$('t'+m.i).lastChild;dst=$('f'+suit(G.tab[m.i][G.tab[m.i].length-1][0]))}
  else if(m.k==='wf'){src=$('waste').lastChild;dst=$('f'+suit(G.waste[G.waste.length-1]))}
- else if(m.k==='tt'){src=$('t'+m.i).children[m.j];dst=$('t'+m.t)}
+ else{src=$('t'+m.i).children[m.j];dst=$('t'+m.t)}
  if(src)src.classList.add('hint');if(dst)dst.classList.add('hint');
- setTimeout(function(){if(src)src.classList.remove('hint');if(dst)dst.classList.remove('hint')},1500)}
-/* ---------- ввод: тап + перетаскивание ---------- */
+ setTimeout(function(){if(src)src.classList.remove('hint');if(dst)dst.classList.remove('hint')},1500);
+ render()}
+function autoStep(){var st=cloneSt();st.redeals=G.redealsUsed;var M=genHint(st).filter(function(m){return m.k==='tf'||m.k==='wf'});
+ if(!M.length||foundTotal()===52){if(autoT){clearInterval(autoT);autoT=null}render();return}
+ var m=M[0];doMove(m.k==='tf'?'t'+m.i:'waste',m.k==='tf'?G.tab[m.i].length-1:G.waste.length-1,'f'+suit(m.k==='tf'?G.tab[m.i][G.tab[m.i].length-1][0]:G.waste[G.waste.length-1]))}
+/* ---------- ввод ---------- */
+function runFrom(pile,j){if(pile==='waste')return[[G.waste[G.waste.length-1],1]];if(pile[0]==='f')return[[G.found[+pile.slice(1)].slice(-1)[0],1]];return G.tab[+pile.slice(1)].slice(j)}
 function onDown(e,pile,j,el){if(!G||G.over)return;aud();e.preventDefault();
- var sx=e.clientX,sy=e.clientY,moved=false,layer=$('dragLayer'),cards=[];
- function mv(ev){if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)>10){moved=true;startDrag()}if(moved){layer.style.display='block';layer.style.left=(ev.clientX-CW/2)+'px';layer.style.top=(ev.clientY-CH/3)+'px'}}
- function startDrag(){cards=[];var src=pile==='waste'?[$('waste').lastChild]:Array.prototype.slice.call($('t'+pile.slice(1)).children,j);
-  src.forEach(function(c,i){if(!c)return;var cl=c.cloneNode(true);cl.style.position='absolute';cl.style.top=(i*OFFU)+'px';cl.style.left='0px';layer.appendChild(cl);cards.push(cl)});
-  layer.style.width=CW+'px';layer.style.height=(cards.length*OFFU+CH)+'px'}
+ var sx=e.clientX,sy=e.clientY,moved=false,layer=$('dragLayer'),srcI=pile[0]==='t'?+pile.slice(1):-1;
+ function mv(ev){if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)>10){moved=true;startDrag()}
+  if(moved){layer.style.display='block';layer.style.left=(ev.clientX-CW/2)+'px';layer.style.top=(ev.clientY-CH/3)+'px'}}
+ function startDrag(){layer.innerHTML='';var run=runFrom(pile,j),off=srcI>=0?(G.colOff[srcI]?G.colOff[srcI].u:OFFU):OFFU;
+  run.forEach(function(cc,i){var cl=mkCard(cc[0],true);cl.style.position='absolute';cl.style.top=(i*off)+'px';cl.style.left='0px';layer.appendChild(cl)});
+  layer.style.width=CW+'px';layer.style.height=(run.length*off+CH)+'px'}
  function up(ev){window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);
   layer.style.display='none';layer.innerHTML='';
-  if(!moved){onTap(pile,j,el);return}
-  var hit=null;var els=document.elementsFromPoint(ev.clientX,ev.clientY);
+  if(!moved){onTap(pile,j);return}
+  var hit=null,els=document.elementsFromPoint(ev.clientX,ev.clientY);
   for(var q=0;q<els.length;q++){if(els[q].dataset&&els[q].dataset.pile){hit=els[q].dataset.pile;break}}
-  if(hit&&hit!==pile){var run=pile==='waste'?[[G.waste[G.waste.length-1],1]]:G.tab[+pile.slice(1)].slice(j);
-   if(hit[0]==='f'){if(run.length===1&&canFound(run[0][0],G.found[+hit.slice(1)])){doMoveRun(pile,j,hit);return}}
-   else if(hit[0]==='t'&&canTab(run[0][0],G.tab[+hit.slice(1)])){doMoveRun(pile,j,hit);return}
+  if(hit&&hit!==pile){var run=runFrom(pile,j);
+   if(hit[0]==='f'){if(run.length===1&&canFoundG(run[0][0],G.found[+hit.slice(1)])){doMove(pile,j,hit);return}}
+   else if(hit[0]==='t'&&canTabG(run[0][0],G.tab[+hit.slice(1)])){doMove(pile,j,hit);return}
    sBad();hap('error');render();return}
   render()}
  window.addEventListener('pointermove',mv);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up)}
-function onTap(pile,j,el){var key=pile+':'+j;var now=Date.now();
+function onTap(pile,j){var key=pile+':'+j,now=Date.now();
  if(lastTap&&lastTap.key===key&&now-lastTap.t<350){lastTap=null;tryAutoFound(pile,j);return}
  lastTap={key:key,t:now};
- var run=pile==='waste'?[[G.waste[G.waste.length-1],1]]:G.tab[+pile.slice(1)].slice(j);
- if(G.sel){if(G.sel.pile===pile&&G.sel.j===j){G.sel=null;render();sSel();return}
-  var srun=G.sel.pile==='waste'?[[G.waste[G.waste.length-1],1]]:G.tab[+G.sel.pile.slice(1)].slice(G.sel.j);
-  if(pile[0]==='t'&&canTab(srun[0][0],G.tab[+pile.slice(1)])){doMoveRun(G.sel.pile,G.sel.j,pile);return}
-  if(pile[0]==='f'&&srun.length===1&&canFound(srun[0][0],G.found[+pile.slice(1)])){doMoveRun(G.sel.pile,G.sel.j,pile);return}}
+ var run=runFrom(pile,j);
+ if(G.sel){if(G.sel.pile===pile&&G.sel.j===j){G.sel=null;sSel();render();return}
+  var srun=runFrom(G.sel.pile,G.sel.j);
+  if(pile[0]==='t'&&canTabG(srun[0][0],G.tab[+pile.slice(1)])){doMove(G.sel.pile,G.sel.j,pile);return}
+  if(pile[0]==='f'&&srun.length===1&&canFoundG(srun[0][0],G.found[+pile.slice(1)])){doMove(G.sel.pile,G.sel.j,pile);return}}
  G.sel={pile:pile,j:j};sSel();hap('light');render()}
-function tryAutoFound(pile,j){var run=pile==='waste'?[[G.waste[G.waste.length-1],1]]:G.tab[+pile.slice(1)].slice(j);
- if(run.length!==1)return;var c=run[0][0];
- for(var s=0;s<4;s++)if(canFound(c,G.found[s])){doMoveRun(pile,j,'f'+s);return}
+function tryAutoFound(pile,j){var run=runFrom(pile,j);if(run.length!==1)return;var c=run[0][0];
+ for(var s=0;s<4;s++)if(canFoundG(c,G.found[s])){doMove(pile,j,'f'+s);return}
  sBad()}
 function stopT(){if(G&&G.timer){clearInterval(G.timer);G.timer=null}}
 function startT(){if(!G||G.timer)return;G.timer=setInterval(function(){G.time++;$('hTime').textContent=fmt(G.time)},1000)}
 function newGame(){stopT();if(autoT){clearInterval(autoT);autoT=null}
- var g=generate();G={tab:g.st.tab,waste:g.st.waste,stock:g.st.stock,found:g.st.found,moves:0,time:0,timer:null,undo:[],sel:null,over:false,proven:g.proven};
- $('endOverlay').classList.remove('show');layoutCards();render();startT();setStatus(g.proven?'Расклад решаемый — удачи!':'Случайный расклад');V('v_new','Новая партия');trk('game_start',{game_name:'solitaire',solvable:g.proven?1:0})}
-function undo(){if(!G||!G.undo.length)return;var st=G.undo.pop();G.tab=st.tab;G.waste=st.waste;G.stock=st.stock;G.found=st.found;G.sel=null;sSel();render()}
-function share(){var txt='♠️ Косынка: '+(G.over?'ПОБЕДА за '+fmt(G.time)+'!':'партия в процессе')+' Ходов: '+G.moves+', расклад: '+(G.proven?'решаемый':'случайный')+'. Сможешь лучше?';var url=location.href;
+ var D=DIFFS[set.diff];
+ var deal=SOLVABLE.generate(baseDeal,{draw:D.draw,redeals:D.redeals},!!set.solvable);
+ G={tab:deal.tab,waste:deal.waste,stock:deal.stock,found:deal.found,moves:0,score:0,time:0,timer:null,undo:[],sel:null,over:false,hintsLeft:D.hints,redealsUsed:0,lastMove:null,colOff:[{},{},{},{},{},{},{}]};
+ $('endOverlay').classList.remove('show');layoutCards();render();startT();setStatus('Сложность: '+D.name+' · разложи по домам');V('v_new','Новая партия');trk('game_start',{game_name:'solitaire',difficulty:set.diff,solvable:set.solvable?1:0})}
+function undo(){if(!G||!G.undo.length||G.over)return;restoreSt(G.undo.pop());G.sel=null;G.moves++;sSel();render()}
+function share(){var txt='♠️ Косынка ('+DIFFS[set.diff].name+'): '+(G.over&&foundTotal()===52?'ПОБЕДА за '+fmt(G.time)+'!':'партия окончена')+' Очки: '+G.score+', ходы: '+G.moves+'. Сможешь лучше?';var url=location.href;
  if(navigator.share){navigator.share({title:'Косынка',text:txt,url:url}).catch(function(){})}
  else{try{open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(txt),'_blank')}catch(e){try{navigator.clipboard.writeText(txt+' '+url);toast('Скопировано!')}catch(e2){toast(txt)}}}}
 function ebtn(t,f,p){var b=document.createElement('button');b.className='btn'+(p?' primary':'');b.textContent=t;b.onclick=f;$('endBtns').appendChild(b)}
-function showEnd(){var ov=$('endOverlay');$('endSub').innerHTML='Время: <b>'+fmt(G.time)+'</b> · Ходы: <b>'+G.moves+'</b><br>Расклад: '+(G.proven?'решаемый':'случайный');
+function showEnd(w){var ov=$('endOverlay');$('endTitle').textContent=w?'🏆 Победа!':'🏳️ Партия окончена';
+ $('endSub').innerHTML='Время: <b>'+fmt(G.time)+'</b> · Ходы: <b>'+G.moves+'</b> · Очки: <b>'+G.score+'</b><br>Сложность: '+DIFFS[set.diff].name;
  $('endBtns').innerHTML='';ebtn('📨 Отправить результат',share,true);ebtn('🔄 Сыграть ещё',function(){ov.classList.remove('show');newGame()});ebtn('🏠 В меню',function(){ov.classList.remove('show');location.href='../'});ov.classList.add('show')}
-function showStats(){$('stGW').textContent=ST.games+' / '+ST.wins;$('stPct').textContent=(ST.games?Math.round(ST.wins/ST.games*100):0)+'%';$('stStreak').textContent=ST.streak+' / '+ST.bestStreak;$('stTime').textContent=ST.bestTime==null?'—':fmt(ST.bestTime)}
+function showStats(){$('stGW').textContent=ST.games+' / '+ST.wins;$('stPct').textContent=(ST.games?Math.round(ST.wins/ST.games*100):0)+'%';$('stStreak').textContent=ST.streak+' / '+ST.bestStreak;$('stTime').textContent=ST.bestTime==null?'—':fmt(ST.bestTime);$('stScore').textContent=ST.bestScore==null?'—':ST.bestScore}
+function applySkin(){var w=$('wrap');if(w)w.setAttribute('data-skin',set.skin)}
 function bind(){
 $('stock').addEventListener('click',function(){if(!G||G.over)return;aud();drawCard()});
-['f0','f1','f2','f3','t0','t1','t2','t3','t4','t5','t6'].forEach(function(id){$(id).addEventListener('click',function(e){if(!G||G.over||!G.sel)return;var run=G.sel.pile==='waste'?[[G.waste[G.waste.length-1],1]]:G.tab[+G.sel.pile.slice(1)].slice(G.sel.j);
- if(id[0]==='f'){if(run.length===1&&canFound(run[0][0],G.found[+id.slice(1)])){doMoveRun(G.sel.pile,G.sel.j,id)}else{sBad();render()}}
- else if(id[0]==='t'){if(canTab(run[0][0],G.tab[+id.slice(1)])){doMoveRun(G.sel.pile,G.sel.j,id)}else{sBad();render()}}})});
+['f0','f1','f2','f3','t0','t1','t2','t3','t4','t5','t6'].forEach(function(id){$(id).addEventListener('click',function(){if(!G||G.over||!G.sel)return;
+ var srun=runFrom(G.sel.pile,G.sel.j);
+ if(id[0]==='f'){if(srun.length===1&&canFoundG(srun[0][0],G.found[+id.slice(1)])){doMove(G.sel.pile,G.sel.j,id)}else{sBad();render()}}
+ else if(id[0]==='t'){if(canTabG(srun[0][0],G.tab[+id.slice(1)])){doMove(G.sel.pile,G.sel.j,id)}else{sBad();render()}}})});
 $('newBtn').onclick=function(){aud();newGame()};
-$('undoBtn').onclick=function(){aud();undo()};
 $('hintBtn').onclick=function(){hint()};
-$('autoBtn').onclick=function(){aud();if(autoT)return;autoT=setInterval(autoStep,220)};
-$('setBtn').onclick=function(){aud();$('solvChk').checked=!!set.solvable;$('backsSel').value=set.backs;$('voiceChk').checked=!!set.voice;$('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';showStats();$('setOverlay').classList.add('show')};
+$('undoBtn').onclick=function(){aud();undo()};
+$('autoBtn').onclick=function(){aud();if(autoT||!canAutoFinish())return;autoT=setInterval(autoStep,220)};
+$('giveBtn').onclick=function(){aud();giveUp()};
+$('setBtn').onclick=function(){aud();$('diffSel').value=set.diff;$('solvChk').checked=!!set.solvable;$('skinSel').value=set.skin;$('voiceChk').checked=!!set.voice;$('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';showStats();$('setOverlay').classList.add('show')};
 $('setClose').onclick=function(){$('setOverlay').classList.remove('show')};
+$('diffSel').onchange=function(e){set.diff=e.target.value;saveSet();newGame()};
 $('solvChk').onchange=function(e){set.solvable=e.target.checked;saveSet();toast(set.solvable?'Только решаемые расклады':'Случайные расклады')};
-$('backsSel').onchange=function(e){set.backs=e.target.value;saveSet();applyBacks()};
+$('skinSel').onchange=function(e){set.skin=e.target.value;saveSet();applySkin()};
 $('voiceChk').onchange=function(e){set.voice=e.target.checked;saveSet();if(window.SND)SND.setVoice(set.voice);if(set.voice)say('Озвучка включена')};
 $('volSlider').oninput=function(e){set.vol=e.target.value/100;$('volV').textContent=e.target.value+'%';saveSet();aud();if(window.SND)SND.setVol(set.vol)};
-$('stReset').onclick=function(){if(confirm('Сбросить статистику?')){ST={games:0,wins:0,streak:0,bestStreak:0,bestTime:null};saveST();showStats()}};
+$('stReset').onclick=function(){if(confirm('Сбросить статистику?')){ST={games:0,wins:0,streak:0,bestStreak:0,bestTime:null,bestScore:null};saveST();showStats()}};
 $('rulesBtn').onclick=function(){$('rulesOverlay').classList.add('show')};
 $('rulesClose').onclick=function(){$('rulesOverlay').classList.remove('show')};
 $('hubBtn').onclick=function(){location.href='../'};
 window.addEventListener('resize',function(){if(!G)return;layoutCards();render()});}
-function applyBacks(){var w=$('wrap');if(w)w.setAttribute('data-backs',set.backs)}
-function boot(){set=Object.assign({solvable:true,backs:'classic',vol:.7,voice:true},JSON.parse(lsGet('sol_set','{}')));
- ST=Object.assign({games:0,wins:0,streak:0,bestStreak:0,bestTime:null},JSON.parse(lsGet('sol_stats','{}')));
+function boot(){set=Object.assign({diff:'easy',skin:'classic',solvable:true,vol:.7,voice:true},JSON.parse(lsGet('sol_set','{}')));
+ if(set.solvable===undefined)set.solvable=true;
+ ST=Object.assign({games:0,wins:0,streak:0,bestStreak:0,bestTime:null,bestScore:null},JSON.parse(lsGet('sol_stats','{}')));
  if(window.SND){SND.setVol(set.vol);SND.setVoice(set.voice)}
- tg=window.Telegram?window.Telegram.WebApp:null;initTg();applyBacks();
+ tg=window.Telegram?window.Telegram.WebApp:null;initTg();applySkin();
  try{if(!sessionStorage.getItem('sol_session')){sessionStorage.setItem('sol_session','1');trk('game_open',{game_name:'solitaire',source:(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)?'telegram':'browser',ver:VER})}}catch(e){}
  bind();newGame();$('verTag').textContent='v'+VER}
 boot();
