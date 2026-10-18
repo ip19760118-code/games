@@ -12,6 +12,7 @@
   gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
 :root{--bg1:#0d1b2a;--bg2:#1b263b;--bg3:#070d15;--panel:rgba(20,32,48,.88);--text:#e0e1dd;--accent:#ffd166;--red:#e63946;--felt:#14532d;--cw:clamp(46px,11.5vw,64px)}
@@ -132,9 +133,9 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <button class="btn primary" id="finishBtn" style="display:none">🏁 Завершить</button>
 <button class="btn" id="menuBtn" style="display:none">🏠 В меню игр</button>
 </div>
-<div class="ver" id="verTag">v3.4</div>
+<div class="ver" id="verTag">v3.5</div>
 </div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v3.4</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>2–4 игрока, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока, старт вручную</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v3.5</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>2–4 игрока, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока, старт вручную</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="lobbyOverlay"><div class="cardbox"><h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2><div class="sub">Ожидание игроков (2–4). Хост запускает партию кнопкой «▶ Начать».</div><div class="lobby-list" id="lobbyList"></div><div class="btns"><button class="btn" id="lobbyInvite">📤 Пригласить</button><button class="btn primary" id="lobbyStart">▶ Начать</button><button class="btn" id="lobbyLeave">🚪 Выйти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="setOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">⚙️ Настройки</h2>
@@ -151,12 +152,19 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div>
 <div class="note">Когда бот собирается сказать «Бито» или завершить взятие, игра даёт время подкинуть карты и подсвечивает их. Игрок без карт становится наблюдателем только после того, как колода опустеет.</div>
 <div class="btns"><button class="btn primary" id="setClose">Готово</button></div></div></div>
-<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила</h2><div class="sub">• Козырь — масть последней карты колоды; первый ход — у младшего козыря.<br>• Атакующий кладёт карту, отбивающийся бьёт её старшей той же масти или козырем.<br>• Отбиваться можно в любом порядке: подсветятся все карты, бьющие хотя бы одну неотбитую. Тапни карту руки и, если целей несколько, тапни нужную карту стола; или перетащи карту руки на атакованную.<br>• Подкидывать карты того же ранга: вчетвером по умолчанию только крайние к отбивающемуся, при включённой настройке — все, кроме него; вдвоём/втроём — все, кроме отбивающегося.<br>• Подкинуть можно, пока число неотбитых карт + 1 не превышает руку отбивающегося (и не больше 6 пар).<br>• «Бито» — всё отбито, карты в сброс; отбившийся становится атакующим.<br>• «Взять» — отбивающийся забирает стол и пропускает ход атаки (вдвоём следующий раунд снова «под него»).<br>• Переводной: пока ни одна карта не покрыта и все неотбитые карты одного ранга, отбивающийся кладёт одну свою карту того же ранга (при нескольких — выбирает какую) и переводит всю стопку на следующего игрока.<br>• После раунда все добирают из колоды до 6 (отбивающийся последним).<br>• Проигравший — последний с картами («дурак»). Игрок с пустой рукой при опустевшей колоде становится наблюдателем.<br>• Онлайн: 2–4 игрока; пока хост не нажал «▶ Начать», к комнате могут присоединяться новые игроки.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
+<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила</h2><div class="sub">• Козырь — масть последней карты колоды; первый ход — у младшего козыря.<br>• Атакующий кладёт карту, отбивающийся бьёт её старшей той же масти или козырем.<br>• Отбиваться можно в любом порядке: подсветятся все карты, бьющие хотя бы одну неотбитую. Тапни карту руки и, если целей несколько, тапни нужную карту стола; или перетащи карту руки на атакованную.<br>• Подкидывать карты того же ранга: вчетвером по умолчанию только крайние к отбивающемуся, при включённой настройке — все, кроме него; вдвоём/втроём — все, кроме отбивающегося.<br>• Подкинуть можно, пока число неотбитых карт + 1 не превышает руку отбивающегося (и не больше 6 пар).<br>• «Бито» — всё отбито, карты в сброс; отбившийся становится атакующим.<br>• «Взять» — отбивающийся забирает стол и пропускает ход атаки (вдвоём следующий раунд снова «под него»).<br>• Переводной: пока ни одна карта не покрыта и все неотбитые карты одного ранга, отбивающийся кладёт одну свою карту того же ранга (при нескольких — выбирает какую) и переводит всю стопку на следующего игрока.<br>• После раунда все добирают из колоды до 6 (отбивающийся последним).<br>• Проигравший — последний с картами («дурак»). Игрок с пустой рукой при опустевшей колоде становится наблюдателем.<br>• Онлайн: 2–4 игрока; пока хост не нажал «▶ Начать», к комнате могут присоединяться новые игроки.<br>• Онлайн защищён анонимной авторизацией Firebase (Этап 2): каждое место занято уникальным uid, чужой клиент не сможет подменить игрока.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='3.4';
+const VER='3.5';
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
-let fbDb=null;try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();}catch(e){console.error(e);}
+let fbDb=null,fbAuth=null;
+try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();fbAuth=firebase.auth();}catch(e){console.error(e);}
+/* v3.5 STAGE-2: anonymous auth, uid из Firebase вместо локального случайного id */
+async function ensureAuth(){
+ if(!fbAuth)return;
+ if(fbAuth.currentUser)return;
+ try{await fbAuth.signInAnonymously();}catch(e){console.warn('signInAnonymously failed',e);}
+}
 const tg=window.Telegram?window.Telegram.WebApp:null;if(tg){try{tg.ready();tg.expand();tg.disableVerticalSwipes&&tg.disableVerticalSwipes();}catch(e){}}
 function tgHaptic(t){try{const h=tg&&tg.HapticFeedback;if(!h)return;t==='success'?h.notificationOccurred('success'):t==='error'?h.notificationOccurred('error'):t==='warning'?h.notificationOccurred('warning'):t==='medium'?h.impactOccurred('medium'):h.impactOccurred('light');}catch(e){}}
 function goToHub(){location.href='../';}
@@ -279,7 +287,6 @@ function actBito(s,uid){
  const ns=clone(s);ns.discard+=ns.table.length*2;ns.table=[];
  return resolveRound(ns,false);
 }
-/* ИСПРАВЛЕНО v3.4: для перевода достаточно ОДНОЙ карты ранга атаки; возвращается список вариантов для выбора */
 function transferInfo(s,uid){
  prep(s);
  if(!s.transferEnabled||s.phase!=='attack'||uid!==s.defender)return null;
@@ -297,7 +304,6 @@ function transferInfo(s,uid){
  if(s.table.length+1>6)return null;
  return{rank:R,next:next,options:options};
 }
-/* ИСПРАВЛЕНО v3.4: перевод снимает ровно одну выбранную карту */
 function actTransfer(s,uid,card){
  prep(s);
  const info=transferInfo(s,uid);if(!info)return null;
@@ -359,7 +365,8 @@ let onlineMode=false,roomCode=null,myUid=null,mySeat=null,myName=null,roomRef=nu
 let G=null,botCount=2,botTimer=null,prevTurnMe=null,prevLastAt=0,repairTick=null;
 let closeHoldUntil=0,holdKey='',selCard=null,selTransfer=false;
 let dragCard=null,dragGhost=null,dragMoved=false,downX=0,downY=0;
-function getUid(){let u=lsGet('durak_uid','');if(!u){u='u'+Math.random().toString(36).slice(2,10);lsSet('durak_uid',u);}return u;}
+/* v3.5 STAGE-2: getUid возвращает firebase anonymous uid */
+function getUid(){return (fbAuth&&fbAuth.currentUser)?fbAuth.currentUser.uid:(lsGet('durak_uid_fallback','')||'');}
 function getUserName(){try{const u=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user;if(u)return u.first_name||('id'+u.id);}catch(e){}let n=lsGet('durak_name','');if(!n){n='Игрок'+Math.floor(Math.random()*900+100);lsSet('durak_name',n);}return n;}
 function genRoomCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
 function inviteLink(c){const u=new URL(location.href);u.searchParams.set('room',c);return u.toString();}
@@ -380,7 +387,9 @@ function playersList(){
 function isHost(){return !!roomData&&roomData.host===mySeat;}
 function setPresence(){if(!roomRef||!mySeat)return;const p=roomRef.child('presence/'+mySeat);p.set({uid:myUid,name:myName,at:Date.now()});p.onDisconnect().remove();}
 function recoverSeat(){const m=seatsMap();for(const k of SEAT_KEYS){if(m[k]&&m[k].uid===myUid)return k;}return null;}
-async function createRoom(){if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
+async function createRoom(){
+ if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
+ await ensureAuth();
  myUid=getUid();myName=getUserName();roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);mySeat='p0';
  try{
   await roomRef.set({game:'durak',host:'p0',createdAt:Date.now(),status:'waiting',
@@ -400,7 +409,9 @@ function claimSeat(k){
   },false);
  });
 }
-async function joinRoom(code){if(!fbDb){alert('Firebase не загружен.');return;}
+async function joinRoom(code){
+ if(!fbDb){alert('Firebase не загружен.');return;}
+ await ensureAuth();
  myUid=getUid();myName=getUserName();roomCode=code.toUpperCase();roomRef=fbDb.ref('rooms/'+roomCode);
  try{
   const snap=await roomRef.once('value');
@@ -848,7 +859,6 @@ function onHandClick(c){
  const me=meUid();
  if(onlineMode&&!mySeat){updateMessage('👀 Вы наблюдатель — ход недоступен',true);sDeny();return;}
  if((s.hands[me]||[]).length===0){updateMessage('👀 Нет карт — наблюдаете за партией',true);sDeny();return;}
- /* НОВОЕ v3.4: режим выбора карты для перевода */
  if(selTransfer){
   const info=transferInfo(s,me);
   if(info&&info.options.indexOf(c)>=0){selTransfer=false;applyMove(st=>actTransfer(st,me,c),'перевод',sTrans);return;}
@@ -919,7 +929,6 @@ function attachUI(){
  $('rbToggle').onclick=function(){const bar=$('roomBar'),ex=$('rbExtra');const open=ex.style.display!=='none';ex.style.display=open?'none':'flex';bar.classList.toggle('open',!open);sClickUi();};
  $('bitoBtn').onclick=function(){sClickUi();const me=meUid();applyMove(st=>actBito(st,me),'бито',sBito);};
  $('takeBtn').onclick=function(){sClickUi();const me=meUid();applyMove(st=>actTake(st,me),'беру',sTake);};
- /* НОВОЕ v3.4: кнопка перевода — сразу или через выбор карты */
  $('transferBtn').onclick=function(){sClickUi();const s=S();if(!s||s.result)return;const me=meUid();const info=transferInfo(s,me);if(!info)return;
   if(info.options.length===1){selTransfer=false;applyMove(st=>actTransfer(st,me,info.options[0]),'перевод',sTrans);return;}
   selTransfer=!selTransfer;selCard=null;renderAll();
