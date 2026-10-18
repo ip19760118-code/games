@@ -19,6 +19,7 @@
 </script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <style>
@@ -37,7 +38,6 @@
 .score-item .value{font-weight:700;font-size:20px;color:var(--score);min-width:24px;text-align:center}
 .ver{text-align:center;font-size:10px;opacity:.45;margin-top:10px;font-family:monospace;letter-spacing:1px}
 
-/* ==== ШТОРКА КОМНАТЫ (как в Дураке) ==== */
 .room-bar{background:rgba(0,0,0,0.25);border:1px solid rgba(255,215,80,0.25);border-radius:16px;padding:6px;margin-bottom:10px;font-size:13px;color:var(--text)}
 .rb-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,215,80,.2);border-radius:12px;padding:6px 6px 6px 12px;color:var(--text);font-family:inherit;font-size:12px;cursor:pointer;text-align:left}
 .rb-toggle:active{background:rgba(255,255,255,.09)}
@@ -201,14 +201,13 @@
 <button class="btn btn-primary" id="newGameBtn">🔄 Новая игра</button>
 </div>
 <div class="message" id="message">🎯 Нажмите на кость, чтобы сыграть</div>
-<div class="ver" id="verTag">v2.0</div>
+<div class="ver" id="verTag">v2.1</div>
 </div>
 
-<!-- Выбор режима -->
 <div class="overlay" id="modeOverlay">
   <div class="cardbox">
     <button class="btn-hub card-hub-btn" id="modeHubBtn">← В меню игр</button>
-    <h2>🎲 Домино <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.0</span></h2>
+    <h2>🎲 Домино <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.1</span></h2>
     <div class="sub">Выбери режим</div>
     <div class="mode-choice">
       <button class="mode-btn" id="modeAi"><div class="icon">💻</div><div class="txt"><b>Против компьютера</b><small>3 уровня сложности</small></div></button>
@@ -223,7 +222,6 @@
   </div>
 </div>
 
-<!-- Лобби -->
 <div class="overlay" id="lobbyOverlay">
   <div class="cardbox">
     <h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2>
@@ -237,7 +235,6 @@
   </div>
 </div>
 
-<!-- Настройки -->
 <div class="modal" id="settingsModal">
 <div class="modal-content">
 <h2>⚙️ Настройки</h2>
@@ -259,10 +256,16 @@
 </div>
 
 <script>
-const VER='2.0';
+const VER='2.1';
 /* ========== FIREBASE ========== */
-let fbDb=null;
-try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();}catch(e){console.error(e);}
+let fbDb=null,fbAuth=null;
+try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();fbAuth=firebase.auth();}catch(e){console.error(e);}
+/* v2.1 STAGE-2: anonymous auth */
+async function ensureAuth(){
+ if(!fbAuth)return;
+ if(fbAuth.currentUser)return;
+ try{await fbAuth.signInAnonymously();}catch(e){console.warn('signInAnonymously failed',e);}
+}
 /* ========== TELEGRAM ========== */
 const tg=window.Telegram?.WebApp;
 if(tg){try{tg.ready();tg.expand();if(typeof tg.disableVerticalSwipes==='function')tg.disableVerticalSwipes();}catch(e){}}
@@ -287,7 +290,8 @@ let state={},audioCtx=null;
 let boardEnds=null;
 /* ========== ОНЛАЙН-СОСТОЯНИЕ ========== */
 let onlineMode=false,roomCode=null,myUid=null,myName=null,roomRef=null,roomData=null,shownResultAt=null;
-function getUid(){let u=localStorage.getItem('domino_uid');if(!u){u='u'+Math.random().toString(36).slice(2,10);localStorage.setItem('domino_uid',u);}return u;}
+/* v2.1 STAGE-2: getUid возвращает firebase anonymous uid */
+function getUid(){return (fbAuth&&fbAuth.currentUser)?fbAuth.currentUser.uid:null;}
 function getUserName(){try{const u=window.Telegram?.WebApp?.initDataUnsafe?.user;if(u)return u.first_name||('id'+u.id);}catch(e){}let n=localStorage.getItem('domino_name');if(!n){n='Игрок'+Math.floor(Math.random()*900+100);localStorage.setItem('domino_name',n);}return n;}
 function genRoomCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
 function inviteLink(c){const u=new URL(location.href);u.searchParams.set('room',c);u.hash='';return u.toString();}
@@ -401,11 +405,13 @@ function computerTurn(){if(state.gameOver||state.currentTurn!=='computer'||state
 /* ========== ОНЛАЙН ========== */
 async function createRoom(){
   if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
+  await ensureAuth();
   myUid=getUid();myName=getUserName();roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);
   try{
-    await roomRef.set({game:'domino',host:myUid,createdAt:Date.now(),status:'waiting',maxPlayers:MAX_PLAYERS,order:[],players:{},presence:{},scores:{},hands:{},boneyard:[],board:[],leftEnd:null,rightEnd:null,turnIndex:0,turnAt:Date.now(),passCount:0,result:null,lastMove:null});
-    await roomRef.child('order').transaction(a=>{const arr=Array.isArray(a)?a:[];if(arr.includes(myUid))return arr;arr.push(myUid);return arr;});
-    await roomRef.child('players/'+myUid).set({name:myName});
+    // v2.1 STAGE-2: пишем players[uid] сразу в set, чтобы пройти строгие правила Firebase
+    const initialPlayers = {};
+    initialPlayers[myUid] = {name:myName};
+    await roomRef.set({game:'domino',host:myUid,createdAt:Date.now(),status:'waiting',maxPlayers:MAX_PLAYERS,order:[myUid],players:initialPlayers,presence:{},scores:{},hands:{},boneyard:[],board:[],leftEnd:null,rightEnd:null,turnIndex:0,turnAt:Date.now(),passCount:0,result:null,lastMove:null});
     onlineMode=true;
     $('roomBar').style.display='block';$('roomCode').textContent=roomCode;
     modeOverlay.classList.remove('show');subscribeRoom();trackEvent('room_created',{game_name:'domino',max_players:MAX_PLAYERS});
@@ -413,16 +419,21 @@ async function createRoom(){
 }
 async function joinRoom(code){
   if(!fbDb){alert('Firebase не загружен.');return;}
+  await ensureAuth();
   myUid=getUid();myName=getUserName();roomCode=code.toUpperCase();roomRef=fbDb.ref('rooms/'+roomCode);
   try{
     const snap=await roomRef.once('value');if(!snap.exists()){alert('Комната не найдена: '+roomCode);return;}
     const r=snap.val();if(r.game!=='domino'){alert('Это комната другой игры.');return;}
     if(r.status!=='waiting'){alert('Игра уже идёт. Дождитесь новой партии или создайте свою комнату.');return;}
     if((r.order||[]).length>=MAX_PLAYERS){alert('Комната заполнена ('+MAX_PLAYERS+' игрока).');return;}
+    
+    // v2.1 STAGE-2: сначала занимаем место в players, чтобы правило auth.uid === $uid прошло, и только потом пишем в order
+    await roomRef.child('players/'+myUid).set({name:myName});
+    
     let ok=true;
     await roomRef.child('order').transaction(a=>{const arr=Array.isArray(a)?a:[];if(arr.includes(myUid))return arr;if(arr.length>=MAX_PLAYERS){ok=false;return undefined;}arr.push(myUid);return arr;},(e,c)=>{ok=c;});
     if(!ok){alert('Комната заполнена.');return;}
-    await roomRef.child('players/'+myUid).set({name:myName});
+    
     onlineMode=true;
     $('roomBar').style.display='block';$('roomCode').textContent=roomCode;
     modeOverlay.classList.remove('show');subscribeRoom();trackEvent('room_joined',{game_name:'domino'});
@@ -561,7 +572,6 @@ function updateRoomActions(){
   const cb=document.createElement('button');cb.className='rbtn';cb.textContent='🔢 Код';cb.onclick=()=>{navigator.clipboard?.writeText(roomCode);updateMessage('Код '+roomCode+' скопирован');};box.appendChild(cb);
   const lb=document.createElement('button');lb.className='rbtn danger';lb.textContent='🚪 Выйти';lb.onclick=()=>{if(confirm('Выйти из комнаты?')){leaveRoom();modeOverlay.classList.add('show');}};box.appendChild(lb);
 }
-/* НОВОЕ: живой счётчик на шевроне */
 function updateLiveBadge(){
   if(!onlineMode||!roomData)return;
   const pl=onlinePlayers();
@@ -570,7 +580,6 @@ function updateLiveBadge(){
   $('rbDot').className='live-dot'+(live<pl.length?' some-off':'');
   $('roomPlayersCount').textContent=pl.length+'/'+MAX_PLAYERS;
 }
-/* сторож хоста: автоход за отключившегося */
 let watchdog=null;
 function startWatchdog(){
   if(watchdog)clearInterval(watchdog);
@@ -632,7 +641,6 @@ function renderPlayerHand(){playerHandEl.innerHTML='';const hand=state.playerHan
    d.addEventListener('click',()=>{if(!d.classList.contains('disabled'))playerPlayTile(i);else{playSound('error');updateMessage('❌ Эта кость не подходит.')}});}
   else d.classList.add('disabled');
   playerHandEl.appendChild(d);}}
-/* ОНЛАЙН: кости соперников ВСЕГДА рубашкой */
 function renderComputerHand(){computerHandEl.innerHTML='';
  if(onlineMode){
    computerLabel.textContent='👥 Соперники';
@@ -659,7 +667,6 @@ function renderComputerHand(){computerHandEl.innerHTML='';
    const open=openTilesCheck.checked;
    for(const t of hand){const d=createTile(t[0],t[1],open,false,true);if(!open){d.classList.add('face-down');d._faceUp=false;renderTile(d);}else{d.style.opacity='0.85';d.style.filter='saturate(0.9)';}computerHandEl.appendChild(d);}
  }}
-/* чипы игроков — теперь внутри шторки */
 function renderPlayersBar(){
   playersBar.innerHTML='';
   const list=onlineMode?onlinePlayers():[{uid:'p0',name:'Вы',n:(state.playerHand||[]).length,connected:true,wins:0}].concat((state.computerHand||[]).length||true?[{uid:'b1',name:'Компьютер',n:(state.computerHand||[]).length,connected:true,wins:0}]:[]);
@@ -705,7 +712,6 @@ function updateButtons(){
 }
 function updateMessage(msg){state.message=msg;messageEl.innerHTML=msg}
 function render(){
-  /* НОВОЕ: счёт «Игрок/Компьютер» только в офлайне */
   scoresBlock.style.display=onlineMode?'none':'flex';
   renderBoard();renderPlayerHand();renderComputerHand();renderPlayersBar();updateCounts();updateTurnBadge();updateButtons();
 }
@@ -743,7 +749,6 @@ openTilesCheck.addEventListener('change',()=>{localStorage.setItem('dominoOpen',
 resetStatsBtn.addEventListener('click',()=>{if(confirm('Сбросить статистику?')){saveStats({total:0,playerWins:0,computerWins:0,draws:0});displayStats()}});
 hubBtn.addEventListener('click',()=>{if(onlineMode)leaveRoom();goToHub();});
 $('modeHubBtn').addEventListener('click',goToHub);
-/* НОВОЕ: шторка */
 $('rbToggle').onclick=()=>{const bar=$('roomBar'),ex=$('rbExtra');const open=ex.style.display!=='none';ex.style.display=open?'none':'flex';bar.classList.toggle('open',!open);playSound('draw');};
 $('modeAi').onclick=()=>{onlineMode=false;$('roomBar').style.display='none';modeOverlay.classList.remove('show');initOfflineGame();};
 $('modeHost').onclick=async()=>{await createRoom();};
