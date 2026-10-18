@@ -20,6 +20,7 @@
 </script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <style>
@@ -146,13 +147,13 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
     <button class="btn primary" id="newBtn">🔄 Новая игра</button>
     <button class="btn" id="undoBtn">↩️ Отменить ход</button>
   </div>
-  <div class="ver" id="verTag">v2.1</div>
+  <div class="ver" id="verTag">v2.2</div>
 </div>
 
 <div class="overlay" id="modeOverlay">
   <div class="card">
     <button class="hbtn card-hub-btn" id="modeHubBtn">← В меню игр</button>
-    <h2>♟️ Шахматы <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.1</span></h2>
+    <h2>♟️ Шахматы <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.2</span></h2>
     <div class="sub">Выбери режим игры</div>
     <div class="mode-choice">
       <button class="mode-btn" id="modeAi"><div class="icon">🖥</div><div class="txt"><b>Против компьютера</b><small>3 уровня сложности</small></div></button>
@@ -202,12 +203,20 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div>
 
 <script>
-const VER='2.1';
-let fbDb=null;
+const VER='2.2';
+let fbDb=null,fbAuth=null;
 try{
   firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});
   fbDb=firebase.database();
+  fbAuth=firebase.auth();
 }catch(e){console.error(e);}
+/* v2.2 STAGE-2: anonymous auth */
+async function ensureAuth(){
+  if(!fbAuth)return;
+  if(fbAuth.currentUser)return;
+  try{await fbAuth.signInAnonymously();}catch(e){console.warn('signInAnonymously failed',e);}
+}
+function getUid(){return (fbAuth&&fbAuth.currentUser)?fbAuth.currentUser.uid:null;}
 const tg=window.Telegram?.WebApp;
 if(tg){try{tg.ready();tg.expand();if(typeof tg.disableVerticalSwipes==='function')tg.disableVerticalSwipes();}catch(e){}}
 function tgHaptic(t){try{const h=tg?.HapticFeedback;if(!h)return;if(t==='success')h.notificationOccurred('success');else if(t==='error')h.notificationOccurred('error');else if(t==='warning')h.notificationOccurred('warning');else if(t==='medium')h.impactOccurred('medium');else h.impactOccurred('light');}catch(e){}}
@@ -325,24 +334,30 @@ function updateOnlineStatus(){if(gameOver)return;const waiting=!opponentOnline;
  else showStatus(waiting?'🔗 Поделись ссылкой с другом':'🤔 Ход соперника...');}
 function showDrawOffer(){const box=$('roomActions');if(box.querySelector('[data-prompt="draw"]'))return;const el=document.createElement('div');el.dataset.prompt='draw';el.style.cssText='display:flex;gap:6px;align-items:center;font-size:12px;color:var(--accent);width:100%';el.innerHTML='<span>Ничья?</span><button class="rbtn accept" id="aD">Принять</button><button class="rbtn" id="dD">Нет</button>';box.appendChild(el);el.querySelector('#aD').onclick=()=>roomRef.child('flags/drawAccept').set(true);el.querySelector('#dD').onclick=()=>{roomRef.child('flags/drawOffer').set(null);el.remove();};}
 function showRematchOffer(){const box=$('roomActions');if(box.querySelector('[data-prompt="rematch"]'))return;const el=document.createElement('div');el.dataset.prompt='rematch';el.style.cssText='display:flex;gap:6px;align-items:center;font-size:12px;color:var(--accent);width:100%';el.innerHTML='<span>Реванш?</span><button class="rbtn accept" id="aR">Играть</button><button class="rbtn" id="dR">Нет</button>';box.appendChild(el);el.querySelector('#aR').onclick=()=>roomRef.child('flags/rematchAccept').set(true);el.querySelector('#dR').onclick=()=>{roomRef.update({'flags/rematchOffer':null,'flags/rematchAccept':false});el.remove();};}
-async function createRoom(){if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
- roomCode=genRoomCode();mySideOnline='w';myUid='w';myName=getUserName();roomRef=fbDb.ref('rooms/'+roomCode);
- try{await roomRef.set({game:'chess',createdAt:Date.now(),status:'waiting',players:{w:{name:myName}},flags:{drawOffer:null,drawAccept:false,rematchOffer:null,rematchAccept:false,surrender:null,winner:null},presence:{},moves:{},scores:{}});
-  onlineMode=true;playerSide='w';aiSide='b';resetBoard();
-  $('roomBar').style.display='block';$('roomCode').textContent=roomCode;$('roomCount').textContent='1/2';
-  modeOverlay.classList.remove('show');subscribeRoom();updateRoomActions();renderPlayersBar();updateLiveBadge();
-  showStatus('🔗 Поделись ссылкой или кодом');trackEvent('room_created',{game_name:'chess'});
- }catch(e){console.error(e);alert('Ошибка создания комнаты: '+e.message);}}
-async function joinRoom(code){if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
- roomCode=code.toUpperCase();mySideOnline='b';myUid='b';myName=getUserName();roomRef=fbDb.ref('rooms/'+roomCode);
- try{const snap=await roomRef.once('value');if(!snap.exists()){alert('Комната не найдена: '+roomCode);return;}
-  const room=snap.val();if(room.players&&room.players.b&&room.players.b.name!==myName){if(!confirm('Чёрный игрок уже есть. Всё равно зайти?'))return;}
-  await roomRef.child('players/b').set({name:myName});await roomRef.child('status').set('playing');
-  onlineMode=true;playerSide='b';aiSide='w';resetBoard();
-  $('roomBar').style.display='block';$('roomCode').textContent=roomCode;$('roomCount').textContent='2/2';
-  modeOverlay.classList.remove('show');subscribeRoom();updateRoomActions();renderPlayersBar();updateLiveBadge();
-  trackEvent('room_joined',{game_name:'chess'});
- }catch(e){console.error(e);alert('Ошибка входа: '+e.message);}}
+async function createRoom(){
+  if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
+  await ensureAuth();
+  myUid=getUid();
+  roomCode=genRoomCode();mySideOnline='w';myName=getUserName();roomRef=fbDb.ref('rooms/'+roomCode);
+  try{await roomRef.set({game:'chess',createdAt:Date.now(),status:'waiting',players:{w:{name:myName,uid:myUid}},flags:{drawOffer:null,drawAccept:false,rematchOffer:null,rematchAccept:false,surrender:null,winner:null},presence:{},moves:{},scores:{}});
+   onlineMode=true;playerSide='w';aiSide='b';resetBoard();
+   $('roomBar').style.display='block';$('roomCode').textContent=roomCode;$('roomCount').textContent='1/2';
+   modeOverlay.classList.remove('show');subscribeRoom();updateRoomActions();renderPlayersBar();updateLiveBadge();
+   showStatus('🔗 Поделись ссылкой или кодом');trackEvent('room_created',{game_name:'chess'});
+  }catch(e){console.error(e);alert('Ошибка создания комнаты: '+e.message);}}
+async function joinRoom(code){
+  if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
+  await ensureAuth();
+  myUid=getUid();
+  roomCode=code.toUpperCase();mySideOnline='b';myName=getUserName();roomRef=fbDb.ref('rooms/'+roomCode);
+  try{const snap=await roomRef.once('value');if(!snap.exists()){alert('Комната не найдена: '+roomCode);return;}
+   const room=snap.val();if(room.players&&room.players.b&&room.players.b.name!==myName){if(!confirm('Чёрный игрок уже есть. Всё равно зайти?'))return;}
+   await roomRef.child('players/b').set({name:myName,uid:myUid});await roomRef.child('status').set('playing');
+   onlineMode=true;playerSide='b';aiSide='w';resetBoard();
+   $('roomBar').style.display='block';$('roomCode').textContent=roomCode;$('roomCount').textContent='2/2';
+   modeOverlay.classList.remove('show');subscribeRoom();updateRoomActions();renderPlayersBar();updateLiveBadge();
+   trackEvent('room_joined',{game_name:'chess'});
+  }catch(e){console.error(e);alert('Ошибка входа: '+e.message);}}
 function leaveRoom(){onlineMode=false;if(roomRef){roomRef.off();roomRef=null;}
  $('roomBar').style.display='none';$('roomBar').classList.remove('open');$('rbExtra').style.display='none';
  roomCode=null;mySideOnline=null;roomDataCache=null;document.querySelectorAll('[data-prompt]').forEach(e=>e.remove());}
