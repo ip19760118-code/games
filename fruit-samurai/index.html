@@ -1,6 +1,8 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Фруктовый самурай</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Единый слой платформ (TG / VK / MAX / web) -->
+<script src="../js/platform.js"></script>
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>
@@ -61,7 +63,6 @@ input[type=range]{width:100%;accent-color:#ff5b3a}
 #lives{position:absolute;left:18px;top:calc(max(12px,env(safe-area-inset-top)) + clamp(38px,9vw,56px));display:flex;gap:6px}
 #lives i{width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff9a80,#e8443a 70%);box-shadow:0 0 8px rgba(255,80,50,.55),0 2px 3px #000;transition:.3s}
 #lives i.dead{background:#3a2a22;box-shadow:none;transform:scale(.7)}
-/* НОВОЕ: счётчик промахов под сердечками */
 #missInfo{position:absolute;left:18px;top:calc(max(12px,env(safe-area-inset-top)) + clamp(38px,9vw,56px) + 22px);font:700 clamp(10px,2.6vw,12px) Rubik;color:rgba(255,217,160,.8);letter-spacing:.08em;text-shadow:0 2px 6px #000}
 @keyframes pulse{50%{opacity:.4;transform:scale(.97)}}
 @keyframes bob{50%{transform:rotate(-3deg) translateY(-7px)}}
@@ -105,46 +106,9 @@ input[type=range]{width:100%;accent-color:#ff5b3a}
 </div>
 
 <script>
-const cv = document.getElementById('c');
-const X = cv.getContext('2d');
-const bc = document.createElement('canvas');
-const B = bc.getContext('2d');
-const $ = id => document.getElementById(id);
-const scoreEl = $('score'), bestEl = $('best'), livesEl = $('lives'), missInfoEl = $('missInfo');
-const menuEl = $('menu'), overEl = $('over'), hudEl = $('hud'), setEl = $('set');
-
-const tg = window.Telegram && window.Telegram.WebApp;
-if (tg) {
-  try { tg.ready(); tg.expand(); tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } catch (_) {}
-}
-
-function tgHaptic(type) {
-  try {
-    const h = tg && tg.HapticFeedback;
-    if (!h) return;
-    if (type === 'success') h.notificationOccurred('success');
-    else if (type === 'error') h.notificationOccurred('error');
-    else if (type === 'warning') h.notificationOccurred('warning');
-    else if (type === 'heavy') h.impactOccurred('heavy');
-    else if (type === 'medium') h.impactOccurred('medium');
-    else if (type === 'rigid') h.impactOccurred('rigid');
-    else h.impactOccurred('light');
-  } catch (_) {}
-}
-const hap = s => tgHaptic(s);
-
-function goToHub() {
-  tgHaptic('light');
-  location.href = '../';
-}
-
-function tgHeaderColor(color) {
-  try {
-    if (tg && tg.setHeaderColor) tg.setHeaderColor(color);
-    if (tg && tg.setBackgroundColor) tg.setBackgroundColor(color);
-  } catch (_) {}
-}
-
+/* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
+/* v1.1: BackButton-логика закрытия экранов перенесена в callback back.
+   Platform сам определит платформу и навесит обработчик. */
 function backButtonHandler() {
   try {
     if (!setEl.classList.contains('hide')) { setEl.classList.add('hide'); return; }
@@ -166,12 +130,21 @@ function backButtonHandler() {
   goToHub();
 }
 
-if (tg && tg.BackButton) {
-  tg.BackButton.show();
-  tg.BackButton.onClick(backButtonHandler);
+Platform.init({
+  bg: '#170d06',
+  back: backButtonHandler
+});
+
+/* v1.1: возвращаемся в хаб, сохраняя платформу */
+function goToHub() {
+  Platform.haptic('light');
+  location.href = '../?plat=' + Platform.name;
 }
 
+/* v1.1: трекер с автоматической меткой платформы */
 function trackEvent(name, params) {
+  params = params || {};
+  params.platform = Platform.name;
   try { if (typeof gtag === 'function') gtag('event', name, params); } catch (e) {}
 }
 
@@ -180,13 +153,21 @@ function trackEvent(name, params) {
     const key = 'fruitsamurai_session_tracked';
     if (!sessionStorage.getItem(key)) {
       sessionStorage.setItem(key, '1');
-      let source = 'browser';
-      const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-      if (tgUser) source = 'telegram';
-      trackEvent('game_open', { game_name: 'fruit_samurai', source: source });
+      trackEvent('game_open', { game_name: 'fruit_samurai', source: Platform.name });
     }
   } catch (e) {}
 })();
+
+const cv = document.getElementById('c');
+const X = cv.getContext('2d');
+const bc = document.createElement('canvas');
+const B = bc.getContext('2d');
+const $ = id => document.getElementById(id);
+const scoreEl = $('score'), bestEl = $('best'), livesEl = $('lives'), missInfoEl = $('missInfo');
+const menuEl = $('menu'), overEl = $('over'), hudEl = $('hud'), setEl = $('set');
+
+/* v1.1: hap теперь использует Platform.haptic */
+const hap = s => Platform.haptic(s);
 
 let set = Object.assign({ d: 1, v: .8, bg: 0 }, JSON.parse(localStorage.fs_set || '{}'));
 const save = () => localStorage.fs_set = JSON.stringify(set);
@@ -213,7 +194,6 @@ let spT = 1, shake = 0, flashA = 0, flashC = '255,230,180', overT = 0, tNow = 0,
 let bonusTimer = 20;
 let starsCollected = 0;
 
-/* НОВОЕ: счётчик промахов — 10 промахов = 1 жизнь */
 let missCount = 0;
 const MISS_PER_LIFE = 10;
 
@@ -375,7 +355,6 @@ function spawn(bomb, bonus) {
 
 const syncLives = () => [...livesEl.children].forEach((el, i) => el.classList.toggle('dead', i >= lives));
 
-/* НОВОЕ: обновление счётчика промахов на экране */
 function updateMissInfo() {
   missInfoEl.textContent = 'промахи: ' + missCount + '/' + MISS_PER_LIFE;
 }
@@ -486,9 +465,6 @@ function boom(i, f) {
   }
 }
 
-/* ================================================================ */
-/* ИЗМЕНЕНО: промахи накапливаются, 10 промахов = 1 жизнь          */
-/* ================================================================ */
 function miss(x) {
   missCount++;
   shake = Math.max(shake, 7);
@@ -581,10 +557,9 @@ function goToMainMenu() {
   bestEl.textContent = 'РЕКОРД ' + best;
 }
 
+/* v1.1: шеринг через платформу */
 function share(text) {
-  const u = 'https://t.me/share/url?url=' + encodeURIComponent(location.href) + '&text=' + encodeURIComponent(text);
-  if (tg && tg.openTelegramLink) tg.openTelegramLink(u);
-  else window.open(u, '_blank');
+  Platform.share(location.href, text);
 }
 
 $('advBtn').onclick = () => {
@@ -619,7 +594,8 @@ THEMES.forEach((th, i) => {
   b.style.background = `linear-gradient(135deg,${th.sky[0]},${th.sky[2]})`;
   b.onclick = () => {
     set.bg = i; save(); paintBG(); updSw();
-    tgHeaderColor(th.sky[0]);
+    /* v1.1: смена темы сообщает платформе цвет шапки мессенджера */
+    try { Platform.colors(th.sky[0]); } catch (e) {}
     trackEvent('settings_change', { game_name: 'fruit_samurai', setting: 'theme', value: th.n });
   };
   $('bgSw').appendChild(b);
@@ -650,6 +626,7 @@ $('resetBtn').onclick = () => {
   }
 };
 
+/* v1.1: все кнопки "В меню игр" передают платформу через goToHub() */
 $('hubBtnMenu').addEventListener('click', (e) => { e.stopPropagation(); goToHub(); });
 $('hubBtnGameOver').addEventListener('click', (e) => { e.stopPropagation(); goToHub(); });
 $('hubBtnSettings').addEventListener('click', (e) => { e.stopPropagation(); goToHub(); });
@@ -698,10 +675,6 @@ addEventListener('orientationchange', () => {
   setTimeout(resize, 100);
   setTimeout(resize, 300);
 });
-
-if (tg && tg.onEvent) {
-  tg.onEvent('viewportChanged', resize);
-}
 
 window.addEventListener('load', () => {
   setTimeout(resize, 50);
@@ -1156,7 +1129,8 @@ function loop(ts) {
   render();
 }
 
-tgHeaderColor(THEMES[set.bg].sky[0]);
+/* v1.1: устанавливаем цвет шапки мессенджера при старте */
+try { Platform.colors(THEMES[set.bg].sky[0]); } catch (e) {}
 
 resize();
 setTimeout(resize, 100);
