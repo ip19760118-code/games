@@ -1,5 +1,7 @@
 <!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/><title>Косынка</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Единый слой платформ (TG / VK / MAX / web) -->
+<script src="../js/platform.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
 <style>
@@ -69,7 +71,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
  </div>
 </div>
 <div class="actions"><button class="btn" id="newBtn">🔄 Новая</button><button class="btn" id="hintBtn">💡 Подсказка (5)</button><button class="btn" id="undoBtn">↩️ Отмена</button><button class="btn" id="autoBtn" style="display:none">⚡ Автодоводка</button><button class="btn" id="giveBtn">🏳️ Сдаться</button></div>
-<div class="ver" id="verTag">v2.1</div>
+<div class="ver" id="verTag">v2.2</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Сложность<select id="diffSel"><option value="easy">Новичок · 1 карта, 5 подсказок</option><option value="medium">Среднее · 3 карты, 3 подсказки</option><option value="hard">Сложное · 3 карты, 1 перезаход, 1 подсказка</option></select></div>
@@ -88,27 +90,36 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Цель — собрать 4 дома по мастям от туза до короля.<br>• В колоннах кладём по убыванию, чередуя цвета; на пустую колонну — только король.<br>• Из колоды берём по 1 или 3 карты; пустая колода перезаряжается сбросом (на «Сложном» — 1 раз).<br>• Управление: тяни карту/стопку целиком; неверный бросок вернёт её; ИЛИ тап = выбрать, тап = ход.<br>• 💡 Подсказки лимитированы: Новичок 5, Среднее 3, Сложное 1; не зацикливаются на колоде и не предлагают обратные недавним ходы.<br>• Длинные стопки сжимаются, чтобы поле не выходило за экран.<br>• ⚡ Автодоводка появится, когда колода и сброс пусты и все карты открыты.<br>• В Telegram кнопка «Назад» закрывает окна и возвращает в хаб.</div>
+<div class="note">• Цель — собрать 4 дома по мастям от туза до короля.<br>• В колоннах кладём по убыванию, чередуя цвета; на пустую колонну — только король.<br>• Из колоды берём по 1 или 3 карты; пустая колода перезаряжается сбросом (на «Сложном» — 1 раз).<br>• Управление: тяни карту/стопку целиком; неверный бросок вернёт её; ИЛИ тап = выбрать, тап = ход.<br>• 💡 Подсказки лимитированы: Новичок 5, Среднее 3, Сложное 1; не зацикливаются на колоде и не предлагают обратные недавним ходы.<br>• Длинные стопки сжимаются, чтобы поле не выходило за экран.<br>• ⚡ Автодоводка появится, когда колода и сброс пусты и все карты открыты.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='2.1';
+var VER='2.2';
 var SUITS=['♠','♥','♦','♣'];
 var DIFFS={easy:{draw:1,redeal:9999,hints:5,name:'Новичок'},medium:{draw:3,redeal:9999,hints:3,name:'Среднее'},hard:{draw:3,redeal:1,hints:1,name:'Сложное'}};
-/* TG-интеграция: цвета, Назад, запрет свайпа-закрытия, вибрация */
-var tg=window.Telegram?window.Telegram.WebApp:null;
-if(tg){try{tg.ready();tg.expand();
- if(typeof tg.setHeaderColor==='function')tg.setHeaderColor('#070b16');
- if(typeof tg.setBackgroundColor==='function')tg.setBackgroundColor('#070b16');
- if(typeof tg.disableVerticalSwipes==='function')tg.disableVerticalSwipes();
- if(tg.BackButton){tg.BackButton.show();tg.BackButton.onClick(function(){
-   if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}
-   if($('rulesOverlay').classList.contains('show')){$('rulesOverlay').classList.remove('show');return;}
-   if($('endOverlay').classList.contains('show')){$('endOverlay').classList.remove('show');return;}
-   location.href='../';});}
-}catch(e){}}
-function tgHaptic(t){try{if(tg&&tg.HapticFeedback){if(t==='success')tg.HapticFeedback.notificationOccurred('success');else if(t==='error')tg.HapticFeedback.notificationOccurred('error');else tg.HapticFeedback.impactOccurred('light');}}catch(e){}}
-function trackEvent(n,p){try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
-(function(){try{var k='sol_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'solitaire',source:(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)?'telegram':'browser',ver:VER});}}catch(e){}})();
+
+/* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
+/* v2.2: BackButton-логика закрытия оверлеев перенесена в callback back.
+   Platform сам определит платформу и навесит обработчик. */
+function backHandler(){
+  try {
+    if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}
+    if($('rulesOverlay').classList.contains('show')){$('rulesOverlay').classList.remove('show');return;}
+    if($('endOverlay').classList.contains('show')){$('endOverlay').classList.remove('show');return;}
+  } catch(e){}
+  goToHub();
+}
+
+Platform.init({
+  bg: '#070b16',
+  back: backHandler
+});
+
+/* v2.2: возвращаемся в хаб, сохраняя платформу */
+function goToHub(){Platform.haptic('light');location.href='../?plat='+Platform.name;}
+
+/* v2.2: трекер с автоматической меткой платформы */
+function trackEvent(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
+(function(){try{var k='sol_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'solitaire',source:Platform.name,ver:VER});}}catch(e){}})();
 function lsGet(k,d){try{var v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function $(id){return document.getElementById(id);}
@@ -125,7 +136,7 @@ function noise(d,v,f){if(!AC)return;var n=AC.createBufferSource(),b=AC.createBuf
 function sDraw(){noise(.06,.18,2200);}
 function sPlace(){tone(420,300,.07,'triangle',.14);}
 function sFlip(){tone(700,900,.06,'square',.1);}
-function sInvalid(){tone(150,90,.12,'sawtooth',.12);tgHaptic('error');}
+function sInvalid(){tone(150,90,.12,'sawtooth',.12);Platform.haptic('error');}
 function sRecycle(){noise(.2,.2,900);}
 function sWin(){[523,659,784,1046,1318,1568].forEach(function(f,i){setTimeout(function(){tone(f,f,.16,'triangle',.16);},i*110);});}
 function say(t){if(!set.voice)return;try{if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='ru-RU';u.rate=1.05;window.speechSynthesis.speak(u);}catch(e){}}
@@ -188,7 +199,6 @@ function layout(){var wrapW=Math.min(window.innerWidth-36,720);var gap=6;cw=Math
  var vh=window.innerHeight;
  tabH=Math.max(Math.round(ch*1.6), vh - ch - 210);
  var w=$('wrap');w.style.setProperty('--cw',cw+'px');w.style.setProperty('--ch',ch+'px');w.style.setProperty('--gap',gap+'px');}
-/* базовая раздача (тот же алгоритм, что был inline в newGame) */
 function baseDeal(){
  var deck=[];for(var s=0;s<4;s++)for(var r=1;r<=13;r++)deck.push({id:s+'_'+r,s:s,r:r,up:false});
  for(var i=deck.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=deck[i];deck[i]=deck[j];deck[j]=t;}
@@ -252,7 +262,7 @@ function showDead(){var ov=$('endOverlay');$('endTitle').textContent='😵 Хо�
  $('endBtns').innerHTML='';
  ebtn('🔄 Сыграть ещё',function(){ov.classList.remove('show');newGame();},true);
  ebtn('↩️ Отмена хода',function(){ov.classList.remove('show');G.deadShown=false;doUndo();});
- ebtn('🏠 В меню',function(){ov.classList.remove('show');location.href='../';});
+ ebtn('🏠 В меню',function(){ov.classList.remove('show');goToHub();});
  ov.classList.add('show');say('Ходов не осталось');}
 function clearHint(){if(hintTimer){clearTimeout(hintTimer);hintTimer=null;}
  document.querySelectorAll('.card.hint').forEach(function(e){e.classList.remove('hint');});
@@ -289,7 +299,7 @@ function moveRun(srcPile,srcIndex,dest){
  else if(srcPile[0]==='f'&&dest[0]==='t')G.score=Math.max(0,G.score-15);
  logMove(run[0].id,srcPile,dest);
  G.recycledSinceMove=false;G.drawHintStreak=0;
- G.moves++;G.deadShown=false;startTimer();sPlace();tgHaptic('light');sel=null;clearHint();render();checkWin();return true;}
+ G.moves++;G.deadShown=false;startTimer();sPlace();Platform.haptic('light');sel=null;clearHint();render();checkWin();return true;}
 function draw(){
  if(G.over)return;
  if(G.stock.length){var n=Math.min(G.draw,G.stock.length);for(var k=0;k<n;k++){var c=G.stock.pop();c.up=true;G.waste.push(c);}G.moves++;G.deadShown=false;startTimer();sDraw();sel=null;clearHint();render();}
@@ -302,7 +312,7 @@ function autoFinish(){if(!canAutoFinish())return;say('Автодоводка');v
  for(var c=0;c<7;c++){var a=G.tab[c];if(a.length){var top=a[a.length-1];for(var f=0;f<4;f++){if(canFound(top,f)){moveRun('t'+c,a.length-1,'f'+f);moved=true;break;}}}if(moved)break;}
  if(!moved||G.won){clearInterval(iv);}},180);}
 function checkWin(){var w=G.found.every(function(f){return f.length===13;});if(w)win();}
-function win(){G.over=true;G.won=true;stopTimer();sWin();tgHaptic('success');say('Победа!');
+function win(){G.over=true;G.won=true;stopTimer();sWin();Platform.haptic('success');say('Победа!');
  ST.games++;ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak;
  if(ST.bestTime==null||G.time<ST.bestTime)ST.bestTime=G.time;
  if(G.score>ST.bestScore)ST.bestScore=G.score;saveST();
@@ -312,17 +322,19 @@ function giveUp(){if(!G||G.over)return;G.over=true;G.won=false;stopTimer();sInva
  ST.games++;ST.streak=0;saveST();
  trackEvent('game_end',{game_name:'solitaire',win:0,time:G.time,moves:G.moves,score:G.score,difficulty:set.diff});
  showEnd(false);}
-function shareResult(){var txt='♠️ Косынка: '+(G.won?'ПОБЕДА':'партия окончена')+'! Время '+fmt(G.time)+', ходов '+G.moves+', очков '+G.score+', сложность '+DIFFS[set.diff].name+'. Сможешь лучше?';
- var url=location.href;
- if(navigator.share){navigator.share({title:'Косынка',text:txt,url:url}).catch(function(){});}
- else{try{window.open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(txt),'_blank');}catch(e){try{navigator.clipboard.writeText(txt+' '+url);toast('Скопировано — вставь другу!');}catch(e2){toast(txt);}}}}
+/* v2.2: шеринг через платформу */
+function shareResult(){
+  var txt='♠️ Косынка: '+(G.won?'ПОБЕДА':'партия окончена')+'! Время '+fmt(G.time)+', ходов '+G.moves+', очков '+G.score+', сложность '+DIFFS[set.diff].name+'. Сможешь лучше?';
+  var url=location.href;
+  Platform.share(url,txt);
+}
 function ebtn(txt,fn,primary){var b=document.createElement('button');b.className='btn'+(primary?' primary':'');b.textContent=txt;b.onclick=fn;$('endBtns').appendChild(b);}
 function showEnd(won){var ov=$('endOverlay');$('endTitle').textContent=won?'🏆 Победа!':'🏳️ Партия окончена';
  $('endSub').innerHTML='Время: <b>'+fmt(G.time)+'</b> · Ходы: <b>'+G.moves+'</b> · Очки: <b>'+G.score+'</b><br>Сложность: '+DIFFS[set.diff].name;
  $('endBtns').innerHTML='';
  ebtn('📨 Отправить результат другу',shareResult,true);
  ebtn('🔄 Сыграть ещё',function(){ov.classList.remove('show');newGame();});
- ebtn('🏠 В меню',function(){ov.classList.remove('show');location.href='../';});
+ ebtn('🏠 В меню',function(){ov.classList.remove('show');goToHub();});
  ov.classList.add('show');}
 function cardEl(card,left,top,faceUp,index){var d=document.createElement('div');d.className='card'+(faceUp?'':' back');d.style.left=left+'px';d.style.top=top+'px';d.dataset.id=card.id;if(index!=null)d.dataset.index=index;
  if(faceUp){var col=isRed(card)?'red':'blk';d.innerHTML='<span class="tl '+col+'">'+rankTxt(card.r)+SUITS[card.s]+'</span><span class="cs '+col+'">'+SUITS[card.s]+'</span>';}
@@ -423,7 +435,8 @@ $('volSlider').oninput=function(e){set.vol=e.target.value/100;$('volV').textCont
 $('stReset').onclick=function(){if(confirm('Сбросить статистику?')){ST={games:0,wins:0,streak:0,bestStreak:0,bestTime:null,bestScore:0};saveST();showStats();}};
 $('rulesBtn').onclick=function(){$('rulesOverlay').classList.add('show');};
 $('rulesClose').onclick=function(){$('rulesOverlay').classList.remove('show');};
-$('hubBtn').onclick=function(){location.href='../';};
+/* v2.2: кнопка "В меню" передаёт платформу */
+$('hubBtn').onclick=function(){goToHub();};
 window.addEventListener('resize',function(){if(G)render();});
 applySkin();$('verTag').textContent='v'+VER;newGame();
 </script></body></html>
