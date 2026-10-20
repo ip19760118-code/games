@@ -6,6 +6,8 @@
 <title>Домино</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Единый слой платформ (TG / VK / MAX / web) -->
+<script src="../js/platform.js"></script>
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>
@@ -201,13 +203,13 @@
 <button class="btn btn-primary" id="newGameBtn">🔄 Новая игра</button>
 </div>
 <div class="message" id="message">🎯 Нажмите на кость, чтобы сыграть</div>
-<div class="ver" id="verTag">v2.1</div>
+<div class="ver" id="verTag">v2.2</div>
 </div>
 
 <div class="overlay" id="modeOverlay">
   <div class="cardbox">
     <button class="btn-hub card-hub-btn" id="modeHubBtn">← В меню игр</button>
-    <h2>🎲 Домино <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.1</span></h2>
+    <h2>🎲 Домино <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.2</span></h2>
     <div class="sub">Выбери режим</div>
     <div class="mode-choice">
       <button class="mode-btn" id="modeAi"><div class="icon">💻</div><div class="txt"><b>Против компьютера</b><small>3 уровня сложности</small></div></button>
@@ -256,26 +258,42 @@
 </div>
 
 <script>
-const VER='2.1';
+const VER='2.2';
+
+/* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
+/* v2.2: BackButton-логика закрытия оверлеев перенесена в callback back.
+   Platform сам определит платформу и навесит обработчик. */
+function backHandler(){
+  try {
+    if(settingsModal.classList.contains('show')){settingsModal.classList.remove('show');return;}
+    if(lobbyOverlay.classList.contains('show')){leaveRoom();modeOverlay.classList.add('show');return;}
+    if(modeOverlay.classList.contains('show')){modeOverlay.classList.remove('show');goToHub();return;}
+  } catch(e){}
+  goToHub();
+}
+
+Platform.init({
+  bg: '#1a3a1a',
+  back: backHandler
+});
+
 /* ========== FIREBASE ========== */
 let fbDb=null,fbAuth=null;
 try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();fbAuth=firebase.auth();}catch(e){console.error(e);}
-/* v2.1 STAGE-2: anonymous auth */
 async function ensureAuth(){
  if(!fbAuth)return;
  if(fbAuth.currentUser)return;
  try{await fbAuth.signInAnonymously();}catch(e){console.warn('signInAnonymously failed',e);}
 }
-/* ========== TELEGRAM ========== */
-const tg=window.Telegram?.WebApp;
-if(tg){try{tg.ready();tg.expand();if(typeof tg.disableVerticalSwipes==='function')tg.disableVerticalSwipes();}catch(e){}}
-function tgHaptic(t){try{const h=tg?.HapticFeedback;if(!h)return;if(t==='success')h.notificationOccurred('success');else if(t==='error')h.notificationOccurred('error');else if(t==='warning')h.notificationOccurred('warning');else if(t==='medium')h.impactOccurred('medium');else h.impactOccurred('light');}catch(e){}}
-function goToHub(){tgHaptic('light');location.href='../';}
-function tgHeaderColor(c){try{if(tg&&tg.setHeaderColor)tg.setHeaderColor(c);if(tg&&tg.setBackgroundColor)tg.setBackgroundColor(c);}catch(e){}}
-if(tg?.BackButton){tg.BackButton.show();tg.BackButton.onClick(()=>{try{if(settingsModal.classList.contains('show')){settingsModal.classList.remove('show');return;}if(lobbyOverlay.classList.contains('show')){leaveRoom();modeOverlay.classList.add('show');return;}if(modeOverlay.classList.contains('show')){modeOverlay.classList.remove('show');goToHub();return;}}catch(e){}goToHub();});}
-/* ========== GA ========== */
-function trackEvent(n,p){try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
-(function(){try{const k='domino_session_tracked';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'domino',source:(window.Telegram?.WebApp?.initDataUnsafe?.user)?'telegram':'browser',ver:VER});}}catch(e){}})();
+/* v2.1 STAGE-2: getUid возвращает firebase anonymous uid */
+function getUid(){return (fbAuth&&fbAuth.currentUser)?fbAuth.currentUser.uid:null;}
+
+/* v2.2: возвращаемся в хаб, сохраняя платформу */
+function goToHub(){Platform.haptic('light');location.href='../?plat='+Platform.name;}
+
+/* v2.2: трекер с автоматической меткой платформы */
+function trackEvent(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
+(function(){try{const k='domino_session_tracked';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'domino',source:Platform.name,ver:VER});}}catch(e){}})();
 
 /* ========== БАЗА ========== */
 let W=70,H=35,GAP=2;
@@ -290,11 +308,23 @@ let state={},audioCtx=null;
 let boardEnds=null;
 /* ========== ОНЛАЙН-СОСТОЯНИЕ ========== */
 let onlineMode=false,roomCode=null,myUid=null,myName=null,roomRef=null,roomData=null,shownResultAt=null;
-/* v2.1 STAGE-2: getUid возвращает firebase anonymous uid */
-function getUid(){return (fbAuth&&fbAuth.currentUser)?fbAuth.currentUser.uid:null;}
-function getUserName(){try{const u=window.Telegram?.WebApp?.initDataUnsafe?.user;if(u)return u.first_name||('id'+u.id);}catch(e){}let n=localStorage.getItem('domino_name');if(!n){n='Игрок'+Math.floor(Math.random()*900+100);localStorage.setItem('domino_name',n);}return n;}
+
+/* v2.2: имя пользователя из любой платформы через Platform.user() */
+function getUserName(){
+  try {
+    const u = Platform.user();
+    if (u && u.name) return u.name;
+  } catch (e) {}
+  let n = localStorage.getItem('domino_name');
+  if (!n) {
+    n = 'Игрок' + Math.floor(Math.random() * 900 + 100);
+    localStorage.setItem('domino_name', n);
+  }
+  return n;
+}
 function genRoomCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
-function inviteLink(c){const u=new URL(location.href);u.searchParams.set('room',c);u.hash='';return u.toString();}
+/* v2.2: ссылка-приглашение несёт метку платформы */
+function inviteLink(c){const u=new URL(location.href);u.searchParams.set('room',c);u.searchParams.set('plat',Platform.name);u.hash='';return u.toString();}
 function onlinePlayers(){if(!roomData)return[];const order=roomData.order||[];return order.map(uid=>({uid,name:((roomData.players||{})[uid]||{}).name||'?',connected:!!(roomData.presence&&roomData.presence[uid]),hand:((roomData.hands||{})[uid]||[]),wins:((roomData.scores||{})[uid]||0)}));}
 function turnUid(){const o=(roomData&&roomData.order)||[];return o[(roomData&&roomData.turnIndex)||0];}
 function isHost(){return roomData&&roomData.host===myUid;}
@@ -305,11 +335,11 @@ function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&
 function getVolume(){return parseFloat(volumeSlider.value)/100}
 function ensureAudioContext(){if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();}
 function playSound(type){const vol=getVolume();if(vol===0)return;ensureAudioContext();const ctx=audioCtx,now=ctx.currentTime;try{
- if(type==='move'){const bs=ctx.sampleRate*0.08,buf=ctx.createBuffer(1,bs,ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<bs;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*0.02));const n=ctx.createBufferSource();n.buffer=buf;const g=ctx.createGain();g.gain.setValueAtTime(vol*0.3,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.08);n.connect(g);g.connect(ctx.destination);n.start(now);n.stop(now+0.08);const o=ctx.createOscillator();o.type='sine';o.frequency.value=180;const g2=ctx.createGain();g2.gain.setValueAtTime(vol*0.2,now);g2.gain.exponentialRampToValueAtTime(0.001,now+0.06);o.connect(g2);g2.connect(ctx.destination);o.start(now);o.stop(now+0.06);tgHaptic('medium');}
- else if(type==='draw'){const o=ctx.createOscillator();o.type='triangle';o.frequency.value=800;const g=ctx.createGain();g.gain.setValueAtTime(vol*0.15,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.04);o.connect(g);g.connect(ctx.destination);o.start(now);o.stop(now+0.04);tgHaptic('light');}
- else if(type==='win'){[523,587,659,784,880,988,1175].forEach((f,i)=>{const o=ctx.createOscillator();o.type='square';o.frequency.value=f;const g=ctx.createGain();const s=now+i*0.12;g.gain.setValueAtTime(vol*0.08,s);g.gain.exponentialRampToValueAtTime(0.001,s+0.15);o.connect(g);g.connect(ctx.destination);o.start(s);o.stop(s+0.15);});tgHaptic('success');}
- else if(type==='lose'){[523,494,466,440,392,370,349].forEach((f,i)=>{const o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=f;const g=ctx.createGain();const s=now+i*0.15;g.gain.setValueAtTime(vol*0.06,s);g.gain.exponentialRampToValueAtTime(0.001,s+0.2);o.connect(g);g.connect(ctx.destination);o.start(s);o.stop(s+0.2);});tgHaptic('error');}
- else if(type==='error'){const o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=150;const g=ctx.createGain();g.gain.setValueAtTime(vol*0.12,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.15);o.connect(g);g.connect(ctx.destination);o.start(now);o.stop(now+0.15);tgHaptic('error');}
+ if(type==='move'){const bs=ctx.sampleRate*0.08,buf=ctx.createBuffer(1,bs,ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<bs;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*0.02));const n=ctx.createBufferSource();n.buffer=buf;const g=ctx.createGain();g.gain.setValueAtTime(vol*0.3,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.08);n.connect(g);g.connect(ctx.destination);n.start(now);n.stop(now+0.08);const o=ctx.createOscillator();o.type='sine';o.frequency.value=180;const g2=ctx.createGain();g2.gain.setValueAtTime(vol*0.2,now);g2.gain.exponentialRampToValueAtTime(0.001,now+0.06);o.connect(g2);g2.connect(ctx.destination);o.start(now);o.stop(now+0.06);Platform.haptic('medium');}
+ else if(type==='draw'){const o=ctx.createOscillator();o.type='triangle';o.frequency.value=800;const g=ctx.createGain();g.gain.setValueAtTime(vol*0.15,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.04);o.connect(g);g.connect(ctx.destination);o.start(now);o.stop(now+0.04);Platform.haptic('light');}
+ else if(type==='win'){[523,587,659,784,880,988,1175].forEach((f,i)=>{const o=ctx.createOscillator();o.type='square';o.frequency.value=f;const g=ctx.createGain();const s=now+i*0.12;g.gain.setValueAtTime(vol*0.08,s);g.gain.exponentialRampToValueAtTime(0.001,s+0.15);o.connect(g);g.connect(ctx.destination);o.start(s);o.stop(s+0.15);});Platform.haptic('success');}
+ else if(type==='lose'){[523,494,466,440,392,370,349].forEach((f,i)=>{const o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=f;const g=ctx.createGain();const s=now+i*0.15;g.gain.setValueAtTime(vol*0.06,s);g.gain.exponentialRampToValueAtTime(0.001,s+0.2);o.connect(g);g.connect(ctx.destination);o.start(s);o.stop(s+0.2);});Platform.haptic('error');}
+ else if(type==='error'){const o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=150;const g=ctx.createGain();g.gain.setValueAtTime(vol*0.12,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.15);o.connect(g);g.connect(ctx.destination);o.start(now);o.stop(now+0.15);Platform.haptic('error');}
 }catch(e){}}
 /* ========== ОТРИСОВКА КОСТЕЙ ========== */
 function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -333,13 +363,11 @@ function playTile(t,end){return end==='left'?playTileOnLeft(t):end==='right'?pla
 function getLegalMoves(hand){let m=[];for(let i=0;i<hand.length;i++){let e=getPlayableEnds(hand[i]);if(e.length)m.push({index:i,tile:hand[i],ends:e})}return m}
 function drawFromBoneyard(hand){if(!state.boneyard.length)return null;let t=state.boneyard.pop();hand.push(t);return t}
 function pips(hand){let s=0;for(const t of hand)s+=t[0]+t[1];return s;}
-/* ---------- точки выбора конца ---------- */
 function showChoiceDots(){if(!boardEnds){cancelChoice();return}const dL=$('dotLeft'),dR=$('dotRight');dL.style.left=(boardCanvas.offsetLeft+boardEnds.left.x)+'px';dL.style.top=(boardCanvas.offsetTop+boardEnds.left.y)+'px';dR.style.left=(boardCanvas.offsetLeft+boardEnds.right.x)+'px';dR.style.top=(boardCanvas.offsetTop+boardEnds.right.y)+'px';dL.classList.add('show');dR.classList.add('show');}
 function cancelChoice(){if(state)state.pending=null;$('dotLeft').classList.remove('show');$('dotRight').classList.remove('show');}
 $('dotLeft').addEventListener('click',e=>{e.stopPropagation();if(!state.pending)return;const p=state.pending;if(onlineMode)playOnline(p.idx,'left');else finishPlayTile(p.idx,p.tile,'left');});
 $('dotRight').addEventListener('click',e=>{e.stopPropagation();if(!state.pending)return;const p=state.pending;if(onlineMode)playOnline(p.idx,'right');else finishPlayTile(p.idx,p.tile,'right');});
 document.addEventListener('click',e=>{if(!state.pending)return;if(e.target.closest('.end-dot')||e.target.closest('.tile'))return;cancelChoice();render();updateMessage('🎯 Ваш ход. Выберите кость.');});
-/* ---------- офлайн-ход ---------- */
 function finishPlayTile(idx,tile,end){const hand=state.playerHand;if(idx<0||idx>=hand.length)return;hand.splice(idx,1);playTile(tile,end);state.passCount=0;playSound('move');cancelChoice();render();if(checkOfflineEnd()){render();return}updateMessage('✅ Вы сыграли ['+tile[0]+'|'+tile[1]+'] '+(end==='left'?'слева':'справа'));switchTurn();}
 function playerPlayTile(idx){
   if(onlineMode){onlinePlayTile(idx);return;}
@@ -408,7 +436,6 @@ async function createRoom(){
   await ensureAuth();
   myUid=getUid();myName=getUserName();roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);
   try{
-    // v2.1 STAGE-2: пишем players[uid] сразу в set, чтобы пройти строгие правила Firebase
     const initialPlayers = {};
     initialPlayers[myUid] = {name:myName};
     await roomRef.set({game:'domino',host:myUid,createdAt:Date.now(),status:'waiting',maxPlayers:MAX_PLAYERS,order:[myUid],players:initialPlayers,presence:{},scores:{},hands:{},boneyard:[],board:[],leftEnd:null,rightEnd:null,turnIndex:0,turnAt:Date.now(),passCount:0,result:null,lastMove:null});
@@ -426,14 +453,10 @@ async function joinRoom(code){
     const r=snap.val();if(r.game!=='domino'){alert('Это комната другой игры.');return;}
     if(r.status!=='waiting'){alert('Игра уже идёт. Дождитесь новой партии или создайте свою комнату.');return;}
     if((r.order||[]).length>=MAX_PLAYERS){alert('Комната заполнена ('+MAX_PLAYERS+' игрока).');return;}
-    
-    // v2.1 STAGE-2: сначала занимаем место в players, чтобы правило auth.uid === $uid прошло, и только потом пишем в order
     await roomRef.child('players/'+myUid).set({name:myName});
-    
     let ok=true;
     await roomRef.child('order').transaction(a=>{const arr=Array.isArray(a)?a:[];if(arr.includes(myUid))return arr;if(arr.length>=MAX_PLAYERS){ok=false;return undefined;}arr.push(myUid);return arr;},(e,c)=>{ok=c;});
     if(!ok){alert('Комната заполнена.');return;}
-    
     onlineMode=true;
     $('roomBar').style.display='block';$('roomCode').textContent=roomCode;
     modeOverlay.classList.remove('show');subscribeRoom();trackEvent('room_joined',{game_name:'domino'});
@@ -552,9 +575,9 @@ async function passOnline(){
 function showOnlineEnd(){
   const res=roomData.result;cancelChoice();
   let title,sub;
-  if(res.winner===myUid){title='🏆 Вы победили!';sub=res.reason==='domino'?'Вы выложили все кости!':'У вас меньше всех очков';playSound('win');tgHaptic('success');}
+  if(res.winner===myUid){title='🏆 Вы победили!';sub=res.reason==='domino'?'Вы выложили все кости!':'У вас меньше всех очков';playSound('win');Platform.haptic('success');}
   else if(res.winner===null){title='🤝 Ничья';sub='Партия заблокирована, очки равны';playSound('draw');}
-  else{title='🏁 Победил '+escapeHtml(playerName(res.winner));sub=res.reason==='domino'?'Выложил все кости':'Меньше всех очков';playSound('lose');tgHaptic('error');}
+  else{title='🏁 Победил '+escapeHtml(playerName(res.winner));sub=res.reason==='domino'?'Выложил все кости':'Меньше всех очков';playSound('lose');Platform.haptic('error');}
   endTitle.textContent=title;endSub.textContent=sub;
   endBtns.innerHTML='';
   if(isHost()){const b=document.createElement('button');b.className='btn btn-primary';b.textContent='🔄 Новая партия';b.onclick=()=>{dealNewRound();endOverlay.classList.remove('show');shownResultAt=null;};endBtns.appendChild(b);}
@@ -564,7 +587,13 @@ function showOnlineEnd(){
   endOverlay.classList.add('show');
   trackEvent('game_end',{game_name:'domino',mode:'online',winner:res.winner===myUid?'player':(res.winner===null?'draw':'other'),reason:res.reason});
 }
-function shareOnline(){const url=inviteLink(roomCode);const text='🎲 Домино онлайн! Комната '+roomCode+'. Присоединяйся: '+url;if(tg&&tg.openTelegramLink)tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text));else window.open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text),'_blank');trackEvent('game_share',{game_name:'domino'});}
+/* v2.2: шеринг через платформу */
+function shareOnline(){
+  const url=inviteLink(roomCode);
+  const text='🎲 Домино онлайн! Комната '+roomCode+'. Присоединяйся: '+url;
+  Platform.share(url,text);
+  trackEvent('game_share',{game_name:'domino'});
+}
 function updateRoomActions(){
   const box=$('roomActions');box.innerHTML='';
   if(!onlineMode)return;
@@ -738,7 +767,13 @@ function loadStats(){try{let s=JSON.parse(localStorage.getItem('dominoStats'));i
 function saveStats(s){localStorage.setItem('dominoStats',JSON.stringify(s))}
 function updateStats(winner){let s=loadStats();s.total++;if(winner==='player')s.playerWins++;else if(winner==='computer')s.computerWins++;else if(winner==='draw')s.draws++;saveStats(s);displayStats()}
 function displayStats(){let s=loadStats();totalGames.textContent=s.total;playerWins.textContent=s.playerWins;computerWins.textContent=s.computerWins;draws.textContent=s.draws}
-function applyTheme(theme){document.documentElement.setAttribute('data-theme',theme);localStorage.setItem('dominoTheme',theme);const hc={green:'#1a3a1a',light:'#e8e0d0',dark:'#0e0e1a'};tgHeaderColor(hc[theme]||'#1a3a1a');}
+/* v2.2: смена темы сообщает платформе цвет для шапки мессенджера */
+function applyTheme(theme){
+  const colors={green:'#1a3a1a',light:'#e8e0d0',dark:'#0e0e1a'};
+  document.documentElement.setAttribute('data-theme',theme);
+  localStorage.setItem('dominoTheme',theme);
+  try{Platform.colors(colors[theme]||'#1a3a1a');}catch(e){}
+}
 settingsBtn.addEventListener('click',()=>{settingsModal.classList.add('show');displayStats()});
 closeSettingsBtn.addEventListener('click',()=>settingsModal.classList.remove('show'));
 settingsModal.addEventListener('click',e=>{if(e.target===settingsModal)settingsModal.classList.remove('show')});
@@ -761,7 +796,12 @@ newGameBtn.addEventListener('click',()=>{if(onlineMode){if(isHost()&&roomData&&r
 (function loadSettings(){let d=localStorage.getItem('dominoDiff');if(d)difficultySelect.value=d;let v=localStorage.getItem('dominoVol');if(v)volumeSlider.value=v;let t=localStorage.getItem('dominoTheme');if(t){themeSelect.value=t;applyTheme(t)}else applyTheme('green');let o=localStorage.getItem('dominoOpen');openTilesCheck.checked=(o==='true');displayStats();$('verTag').textContent='v'+VER;$('verTag2').textContent='v'+VER;})();
 state={playerScore:0,computerScore:0,pending:null,board:[],boneyard:[],playerHand:[],computerHand:[]};
 render();
-(function initStart(){const urlRoom=new URL(location.href).searchParams.get('room');if(urlRoom&&urlRoom.length===6){joinRoom(urlRoom);}else{modeOverlay.classList.add('show');}})();
+(function initStart(){
+  const u=new URL(location.href);
+  const urlRoom=u.searchParams.get('room');
+  if(urlRoom&&urlRoom.length===6){joinRoom(urlRoom);}
+  else{modeOverlay.classList.add('show');}
+})();
 let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{updateTileSize();if(!state.gameOver||onlineMode)render()},300)});
 </script>
 </body>
