@@ -6,12 +6,13 @@
 <meta name="theme-color" content="#0f172a">
 <title>💡 Выключи Свет</title>
 
-<!-- Telegram Mini App SDK -->
+<!-- Telegram Mini App SDK (оставляем для обратной совместимости) -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Единый слой платформ (TG / VK / MAX / web) -->
+<script src="../js/platform.js"></script>
 
 <!-- ============================================================ -->
 <!-- GOOGLE ANALYTICS 4                                           -->
-<!-- ЗАМЕНИ G-XXXXXXXXXX НА СВОЙ ID В ДВУХ МЕСТАХ НИЖЕ            -->
 <!-- ============================================================ -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>
@@ -56,7 +57,6 @@
   button.secondary { background: transparent; border: 2px solid var(--text); color: var(--text); }
   button.secondary:hover:not(:disabled) { background: rgba(128,128,128,0.1); }
 
-  /* Кнопка возврата в хаб */
   #btn-hub { margin-bottom: 0.9rem; font-size: 0.9rem; padding: 0.6rem 1rem; }
 
   #game-header { display: flex; justify-content: space-between; width: 100%; margin-bottom: 0.6rem; font-size: 0.9rem; align-items: center; }
@@ -79,7 +79,6 @@
   .cell.on-anim { animation: pulseGlow 0.4s ease; }
   @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 var(--cell-glow); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
 
-  /* Подсказка */
   .cell.hint { 
     box-shadow: 0 0 0 3px var(--accent); 
     animation: hintPulse 0.6s infinite alternate; 
@@ -115,6 +114,9 @@
   .stats-box ul { padding-left: 1.2rem; margin-top: 0.3rem; }
   .close-btn { position: absolute; top: 0.8rem; right: 0.8rem; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text); padding: 0.3rem; width: auto; margin: 0; line-height: 1; transition: color 0.2s; }
   .close-btn:hover { color: var(--accent); }
+
+  .ver { text-align:center; font-size:10px; opacity:.45; margin-top:12px; font-family:monospace; letter-spacing:1px; }
+
   @media (max-width: 380px) { #app { padding: 0.8rem 0.5rem; } }
 </style>
 </head>
@@ -127,6 +129,7 @@
     <button id="btn-start" class="ui-sound">▶ Начать игру</button>
     <button id="btn-rules" class="secondary ui-sound">📖 Правила</button>
     <button id="btn-settings" class="secondary ui-sound">⚙️ Настройки</button>
+    <div class="ver" id="verTag">v2.1</div>
   </section>
 
   <section id="game-screen" class="screen">
@@ -187,333 +190,313 @@
         <li><b>Цель:</b> сделать всё поле выключенным (серым/тёмным).</li>
         <li>Каждый уровень гарантированно решаем.</li>
         <li>Используй «Отмену» для экспериментов и «Подсказку», если застрял.</li>
+        <li>В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</li>
       </ul>
     </div>
   </div>
 </div>
 
 <script>
-  /* ================== TELEGRAM MINI APP ================== */
-  const tg = window.Telegram?.WebApp;
+const VER = '2.1';
 
-  if (tg) {
-    try {
-      tg.ready();
-      tg.expand();
-      if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes();
-    } catch (e) {}
-  }
-
-  function tgHaptic(type) {
-    try {
-      const h = tg?.HapticFeedback;
-      if (!h) return;
-      if (type === 'win') h.notificationOccurred('success');
-      else if (type === 'error') h.notificationOccurred('error');
-      else h.impactOccurred('light');
-    } catch (e) {}
-  }
-
-  function tgHeaderColor() {
-    const map = { dark: '#0f172a', light: '#f8fafc', neon: '#050505' };
-    const color = map[state.theme] || '#0f172a';
-    try {
-      if (tg && typeof tg.setHeaderColor === 'function') tg.setHeaderColor(color);
-      if (tg && typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor(color);
-    } catch (e) {}
-  }
-
-  /* ---------- ПОМОЩНИК ДЛЯ СОБЫТИЙ GOOGLE ANALYTICS ---------- */
-  function trackEvent(name, params) {
-    try {
-      if (typeof gtag === 'function') {
-        gtag('event', name, params);
-      }
-    } catch (e) {}
-  }
-
-  /* ---------- СОБЫТИЕ: ОТКРЫТИЕ ИГРЫ (1 раз за сессию) ---------- */
-  (function trackGameOpen() {
-    try {
-      const key = 'lightsout_session_tracked';
-      if (!sessionStorage.getItem(key)) {
-        sessionStorage.setItem(key, '1');
-
-        let source = 'browser';
-        const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-        if (tgUser) source = 'telegram';
-
-        trackEvent('game_open', {
-          game_name: 'lights_out',
-          source: source
-        });
-      }
-    } catch (e) {}
-  })();
-
-  /* --- АУДИО ДВИЖОК --- */
-  const AudioEngine = {
-    ctx: null,
-    init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); if (this.ctx.state === 'suspended') this.ctx.resume(); },
-    play(type) {
-      if (!this.ctx) return;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.connect(gain); gain.connect(this.ctx.destination);
-      const now = this.ctx.currentTime;
-      
-      if (type === 'ui') { osc.type='sine'; osc.frequency.setValueAtTime(800,now); osc.frequency.exponentialRampToValueAtTime(300,now+0.05); gain.gain.setValueAtTime(0.08,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.05); osc.start(now); osc.stop(now+0.05); }
-      else if (type === 'on') { osc.type='triangle'; osc.frequency.setValueAtTime(440,now); osc.frequency.exponentialRampToValueAtTime(880,now+0.1); gain.gain.setValueAtTime(0.08,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.15); osc.start(now); osc.stop(now+0.15); }
-      else if (type === 'off') { osc.type='triangle'; osc.frequency.setValueAtTime(880,now); osc.frequency.exponentialRampToValueAtTime(330,now+0.1); gain.gain.setValueAtTime(0.08,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.15); osc.start(now); osc.stop(now+0.15); }
-      else if (type === 'win') { [523.25,659.25,783.99,1046.50].forEach((f,i)=>{const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type='sine';o.connect(g);g.connect(this.ctx.destination);o.frequency.value=f;const t=now+i*0.1;g.gain.setValueAtTime(0.06,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.4);o.start(t);o.stop(t+0.4);}); }
-      else if (type === 'hint') { osc.type='sine'; osc.frequency.setValueAtTime(1200,now); osc.frequency.linearRampToValueAtTime(600,now+0.15); gain.gain.setValueAtTime(0.05,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.2); osc.start(now); osc.stop(now+0.2); }
+/* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
+/* v2.1: BackButton-логика закрытия модалок/экранов перенесена в callback back.
+   Platform сам определит платформу и навесит обработчик. */
+function backHandler() {
+  try {
+    const activeModal = document.querySelector('.modal.active');
+    if (activeModal) { closeModal(activeModal.id); return; }
+    if (document.getElementById('game-screen').classList.contains('active')) {
+      showScreen('menu'); return;
     }
-  };
+  } catch (e) {}
+  goToHub();
+}
 
-  const $ = id => document.getElementById(id);
-  const state = {
-    difficulty: 5, theme: 'dark', moves: 0, board: [],
-    history: [], initialBoard: null,
-    stats: { played: 0, won: 0, best: {3:null, 4:null, 5:null, 6:null} }
-  };
+Platform.init({
+  bg: '#0f172a',
+  back: backHandler
+});
 
-  function loadState() {
-    try {
-      const d = JSON.parse(localStorage.getItem('lightsout_data') || '{}');
-      if (d.theme) state.theme = d.theme;
-      if (d.difficulty) state.difficulty = d.difficulty;
-      if (d.stats) state.stats = { ...state.stats, ...d.stats };
-    } catch(e) {}
-    $('set-theme').value = state.theme;
-    $('set-diff').value = state.difficulty;
-    applyTheme(); updateStatsUI();
-  }
+/* v2.1: возвращаемся в хаб, сохраняя платформу */
+function goToHub() {
+  Platform.haptic('light');
+  location.href = '../?plat=' + Platform.name;
+}
 
-  function saveState() {
-    try { localStorage.setItem('lightsout_data', JSON.stringify({ theme: state.theme, difficulty: state.difficulty, stats: state.stats })); } catch(e) {}
-  }
+/* v2.1: трекер с автоматической меткой платформы */
+function trackEvent(name, params) {
+  params = params || {};
+  params.platform = Platform.name;
+  try {
+    if (typeof gtag === 'function') {
+      gtag('event', name, params);
+    }
+  } catch (e) {}
+}
 
-  function applyTheme() {
-    document.documentElement.setAttribute('data-theme', state.theme);
-    try { $('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(); } catch(e) {}
-    tgHeaderColor();
-  }
+/* v2.1: событие открытия игры с source=платформа */
+(function trackGameOpen() {
+  try {
+    const key = 'lightsout_session_tracked';
+    if (!sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, '1');
+      trackEvent('game_open', {
+        game_name: 'lights_out',
+        source: Platform.name,
+        ver: VER
+      });
+    }
+  } catch (e) {}
+})();
 
-  function showScreen(name) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const target = $(name + '-screen'); if (target) target.classList.add('active');
-  }
-
-  function openModal(id) { $(id).classList.add('active'); }
-  function closeModal(id) { $(id).classList.remove('active'); }
-
-  function updateStatsUI() {
-    $('stat-played').textContent = state.stats.played;
-    $('stat-won').textContent = state.stats.won;
-    $('stat-best').innerHTML = Object.entries(state.stats.best).map(([k,v]) => `<li>${k}×${k}: <b>${v !== null ? v : '—'}</b></li>`).join('');
-  }
-
-  function initGame() {
-    /* ---------- GA: СТАРТ ИГРЫ ---------- */
-    trackEvent('game_start', {
-      game_name: 'lights_out',
-      difficulty: state.difficulty
-    });
-
-    AudioEngine.init(); AudioEngine.play('ui');
-    const N = state.difficulty;
-    state.board = Array.from({ length: N }, () => Array(N).fill(0));
-    state.history = [];
-    state.moves = 0;
-    $('moves').textContent = 0;
-    $('diff-label').textContent = `${N}×${N}`;
-    $('win-msg').classList.remove('show');
-    document.documentElement.style.setProperty('--grid-size', N);
-    updateButtons();
-
-    const steps = Math.floor(N * 2.5) + Math.floor(Math.random() * 3);
-    for (let i = 0; i < steps; i++) toggleCell(Math.floor(Math.random()*N), Math.floor(Math.random()*N), true);
+/* --- АУДИО ДВИЖОК --- */
+const AudioEngine = {
+  ctx: null,
+  init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); if (this.ctx.state === 'suspended') this.ctx.resume(); },
+  play(type) {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    const now = this.ctx.currentTime;
     
-    state.initialBoard = JSON.parse(JSON.stringify(state.board));
-    renderGrid(); showScreen('game');
+    if (type === 'ui') { osc.type='sine'; osc.frequency.setValueAtTime(800,now); osc.frequency.exponentialRampToValueAtTime(300,now+0.05); gain.gain.setValueAtTime(0.08,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.05); osc.start(now); osc.stop(now+0.05); }
+    else if (type === 'on') { osc.type='triangle'; osc.frequency.setValueAtTime(440,now); osc.frequency.exponentialRampToValueAtTime(880,now+0.1); gain.gain.setValueAtTime(0.08,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.15); osc.start(now); osc.stop(now+0.15); }
+    else if (type === 'off') { osc.type='triangle'; osc.frequency.setValueAtTime(880,now); osc.frequency.exponentialRampToValueAtTime(330,now+0.1); gain.gain.setValueAtTime(0.08,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.15); osc.start(now); osc.stop(now+0.15); }
+    else if (type === 'win') { [523.25,659.25,783.99,1046.50].forEach((f,i)=>{const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type='sine';o.connect(g);g.connect(this.ctx.destination);o.frequency.value=f;const t=now+i*0.1;g.gain.setValueAtTime(0.06,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.4);o.start(t);o.stop(t+0.4);}); }
+    else if (type === 'hint') { osc.type='sine'; osc.frequency.setValueAtTime(1200,now); osc.frequency.linearRampToValueAtTime(600,now+0.15); gain.gain.setValueAtTime(0.05,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.2); osc.start(now); osc.stop(now+0.2); }
   }
+};
 
-  function toggleCell(r, c, silent = false) {
-    const N = state.board.length;
-    if (!silent) {
-      state.history.push(JSON.parse(JSON.stringify(state.board)));
-      state.moves++;
-      $('moves').textContent = state.moves;
-      updateButtons();
-    }
+const $ = id => document.getElementById(id);
+const state = {
+  difficulty: 5, theme: 'dark', moves: 0, board: [],
+  history: [], initialBoard: null,
+  stats: { played: 0, won: 0, best: {3:null, 4:null, 5:null, 6:null} }
+};
 
-    [[0,0],[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr, dc]) => {
-      const nr = r+dr, nc = c+dc;
-      if (nr>=0 && nr<N && nc>=0 && nc<N) state.board[nr][nc] ^= 1;
-    });
+function loadState() {
+  try {
+    const d = JSON.parse(localStorage.getItem('lightsout_data') || '{}');
+    if (d.theme) state.theme = d.theme;
+    if (d.difficulty) state.difficulty = d.difficulty;
+    if (d.stats) state.stats = { ...state.stats, ...d.stats };
+  } catch(e) {}
+  $('set-theme').value = state.theme;
+  $('set-diff').value = state.difficulty;
+  applyTheme(); updateStatsUI();
+}
 
-    if (!silent) {
-      const isNowOn = state.board[r][c] === 1;
-      AudioEngine.play(isNowOn ? 'on' : 'off');
-      tgHaptic('light');
-      renderGrid();
-      
-      const clickedCell = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
-      if(clickedCell) {
-        clickedCell.classList.remove('pop', 'on-anim', 'hint');
-        void clickedCell.offsetWidth;
-        clickedCell.classList.add('pop');
-        if(isNowOn) clickedCell.classList.add('on-anim');
-      }
-      checkWin();
-    }
-  }
+function saveState() {
+  try { localStorage.setItem('lightsout_data', JSON.stringify({ theme: state.theme, difficulty: state.difficulty, stats: state.stats })); } catch(e) {}
+}
 
-  function renderGrid() {
-    const grid = $('grid'); grid.innerHTML = '';
-    for (let r = 0; r < state.board.length; r++) {
-      for (let c = 0; c < state.board[r].length; c++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell' + (state.board[r][c] ? '' : ' off');
-        cell.dataset.r = r; cell.dataset.c = c;
-        grid.appendChild(cell);
-      }
-    }
-  }
+/* v2.1: смена темы сообщает платформе цвет шапки мессенджера */
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', state.theme);
+  try { $('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(); } catch(e) {}
+  const map = { dark: '#0f172a', light: '#f8fafc', neon: '#050505' };
+  const color = map[state.theme] || '#0f172a';
+  try { Platform.colors(color); } catch(e) {}
+}
 
-  function checkWin() {
-    let allOff = true;
-    for (const row of state.board) for (const v of row) if (v === 1) { allOff = false; break; }
-    if (allOff) {
-      /* ---------- GA: ПОБЕДА ---------- */
-      trackEvent('game_win', {
-        game_name: 'lights_out',
-        difficulty: state.board.length,
-        moves: state.moves
-      });
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = $(name + '-screen'); if (target) target.classList.add('active');
+}
 
-      AudioEngine.play('win');
-      tgHaptic('win');
-      $('win-msg').classList.add('show');
-      $('win-moves').textContent = state.moves;
-      state.stats.played++; state.stats.won++;
-      const N = state.board.length;
-      if (state.stats.best[N] === null || state.moves < state.stats.best[N]) state.stats.best[N] = state.moves;
-      saveState(); updateStatsUI();
-      updateButtons();
-    }
-  }
+function openModal(id) { $(id).classList.add('active'); }
+function closeModal(id) { $(id).classList.remove('active'); }
 
-  /* --- НОВЫЕ ФУНКЦИИ --- */
-  function undoMove() {
-    if (state.history.length === 0 || $('win-msg').classList.contains('show')) return;
-    AudioEngine.play('ui');
-    state.board = state.history.pop();
-    state.moves = Math.max(0, state.moves - 1);
-    $('moves').textContent = state.moves;
-    renderGrid(); updateButtons();
-  }
+function updateStatsUI() {
+  $('stat-played').textContent = state.stats.played;
+  $('stat-won').textContent = state.stats.won;
+  $('stat-best').innerHTML = Object.entries(state.stats.best).map(([k,v]) => `<li>${k}×${k}: <b>${v !== null ? v : '—'}</b></li>`).join('');
+}
 
-  function resetGame() {
-    if ($('win-msg').classList.contains('show')) return;
-    AudioEngine.play('ui');
-    state.board = JSON.parse(JSON.stringify(state.initialBoard));
-    state.history = [];
-    state.moves = 0;
-    $('moves').textContent = 0;
-    renderGrid(); updateButtons();
-  }
-
-  function showHint() {
-    if ($('win-msg').classList.contains('show')) return;
-    AudioEngine.play('hint');
-    let hintCell = null;
-    for(let r=0; r<state.board.length; r++) {
-      for(let c=0; c<state.board[r].length; c++) {
-        if(state.board[r][c] === 1) { hintCell = {r, c}; break; }
-      }
-      if(hintCell) break;
-    }
-    if(hintCell) {
-      const cell = document.querySelector(`.cell[data-r="${hintCell.r}"][data-c="${hintCell.c}"]`);
-      if(cell) {
-        cell.classList.remove('hint'); void cell.offsetWidth;
-        cell.classList.add('hint');
-        setTimeout(() => cell.classList.remove('hint'), 2000);
-      }
-    }
-  }
-
-  function updateButtons() {
-    $('btn-undo').disabled = state.history.length === 0;
-    $('btn-hint').disabled = $('win-msg').classList.contains('show');
-  }
-
-  /* --- TELEGRAM BACKBUTTON --- */
-  function setupBackButton() {
-    if (!tg?.BackButton) return;
-    try {
-      tg.BackButton.show();
-      tg.BackButton.onClick(() => {
-        const activeModal = document.querySelector('.modal.active');
-        if (activeModal) { closeModal(activeModal.id); return; }
-        if (document.getElementById('game-screen').classList.contains('active')) {
-          showScreen('menu'); return;
-        }
-        location.href = '../';
-      });
-    } catch (e) {}
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    loadState();
-    setupBackButton();
-
-    $('btn-hub').onclick = () => { location.href = '../'; };
-    $('btn-start').onclick = () => { AudioEngine.init(); initGame(); };
-    $('btn-retry').onclick = initGame;
-    $('btn-menu').onclick = () => showScreen('menu');
-    $('btn-back').onclick = () => showScreen('menu');
-    $('btn-undo').onclick = undoMove;
-    $('btn-reset').onclick = resetGame;
-    $('btn-hint').onclick = showHint;
-    
-    $('btn-settings').onclick = () => { AudioEngine.play('ui'); openModal('settings-modal'); };
-    $('btn-rules').onclick = () => { AudioEngine.play('ui'); openModal('rules-modal'); };
-
-    document.querySelectorAll('.ui-sound').forEach(b => b.addEventListener('click', () => AudioEngine.play('ui')));
-
-    $('set-diff').onchange = e => {
-      state.difficulty = +e.target.value;
-      saveState();
-      /* ---------- GA: СМЕНА СЛОЖНОСТИ ---------- */
-      trackEvent('settings_change', {
-        game_name: 'lights_out',
-        setting: 'difficulty',
-        value: state.difficulty
-      });
-    };
-
-    $('set-theme').onchange = e => {
-      state.theme = e.target.value;
-      applyTheme();
-      saveState();
-      /* ---------- GA: СМЕНА ТЕМЫ ---------- */
-      trackEvent('settings_change', {
-        game_name: 'lights_out',
-        setting: 'theme',
-        value: state.theme
-      });
-    };
-
-    $('grid').addEventListener('click', e => {
-      const cell = e.target.closest('.cell');
-      if (cell) toggleCell(+cell.dataset.r, +cell.dataset.c);
-    });
-
-    document.querySelectorAll('.close-btn').forEach(btn => btn.onclick = () => closeModal(btn.dataset.modal));
-    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if(e.target===m) closeModal(m.id); }));
+function initGame() {
+  trackEvent('game_start', {
+    game_name: 'lights_out',
+    difficulty: state.difficulty
   });
+
+  AudioEngine.init(); AudioEngine.play('ui');
+  const N = state.difficulty;
+  state.board = Array.from({ length: N }, () => Array(N).fill(0));
+  state.history = [];
+  state.moves = 0;
+  $('moves').textContent = 0;
+  $('diff-label').textContent = `${N}×${N}`;
+  $('win-msg').classList.remove('show');
+  document.documentElement.style.setProperty('--grid-size', N);
+  updateButtons();
+
+  const steps = Math.floor(N * 2.5) + Math.floor(Math.random() * 3);
+  for (let i = 0; i < steps; i++) toggleCell(Math.floor(Math.random()*N), Math.floor(Math.random()*N), true);
+  
+  state.initialBoard = JSON.parse(JSON.stringify(state.board));
+  renderGrid(); showScreen('game');
+}
+
+function toggleCell(r, c, silent = false) {
+  const N = state.board.length;
+  if (!silent) {
+    state.history.push(JSON.parse(JSON.stringify(state.board)));
+    state.moves++;
+    $('moves').textContent = state.moves;
+    updateButtons();
+  }
+
+  [[0,0],[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr, dc]) => {
+    const nr = r+dr, nc = c+dc;
+    if (nr>=0 && nr<N && nc>=0 && nc<N) state.board[nr][nc] ^= 1;
+  });
+
+  if (!silent) {
+    const isNowOn = state.board[r][c] === 1;
+    AudioEngine.play(isNowOn ? 'on' : 'off');
+    Platform.haptic('light');
+    renderGrid();
+    
+    const clickedCell = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+    if(clickedCell) {
+      clickedCell.classList.remove('pop', 'on-anim', 'hint');
+      void clickedCell.offsetWidth;
+      clickedCell.classList.add('pop');
+      if(isNowOn) clickedCell.classList.add('on-anim');
+    }
+    checkWin();
+  }
+}
+
+function renderGrid() {
+  const grid = $('grid'); grid.innerHTML = '';
+  for (let r = 0; r < state.board.length; r++) {
+    for (let c = 0; c < state.board[r].length; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell' + (state.board[r][c] ? '' : ' off');
+      cell.dataset.r = r; cell.dataset.c = c;
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function checkWin() {
+  let allOff = true;
+  for (const row of state.board) for (const v of row) if (v === 1) { allOff = false; break; }
+  if (allOff) {
+    trackEvent('game_win', {
+      game_name: 'lights_out',
+      difficulty: state.board.length,
+      moves: state.moves
+    });
+
+    AudioEngine.play('win');
+    Platform.haptic('success');
+    $('win-msg').classList.add('show');
+    $('win-moves').textContent = state.moves;
+    state.stats.played++; state.stats.won++;
+    const N = state.board.length;
+    if (state.stats.best[N] === null || state.moves < state.stats.best[N]) state.stats.best[N] = state.moves;
+    saveState(); updateStatsUI();
+    updateButtons();
+  }
+}
+
+function undoMove() {
+  if (state.history.length === 0 || $('win-msg').classList.contains('show')) return;
+  AudioEngine.play('ui');
+  state.board = state.history.pop();
+  state.moves = Math.max(0, state.moves - 1);
+  $('moves').textContent = state.moves;
+  renderGrid(); updateButtons();
+}
+
+function resetGame() {
+  if ($('win-msg').classList.contains('show')) return;
+  AudioEngine.play('ui');
+  state.board = JSON.parse(JSON.stringify(state.initialBoard));
+  state.history = [];
+  state.moves = 0;
+  $('moves').textContent = 0;
+  renderGrid(); updateButtons();
+}
+
+function showHint() {
+  if ($('win-msg').classList.contains('show')) return;
+  AudioEngine.play('hint');
+  let hintCell = null;
+  for(let r=0; r<state.board.length; r++) {
+    for(let c=0; c<state.board[r].length; c++) {
+      if(state.board[r][c] === 1) { hintCell = {r, c}; break; }
+    }
+    if(hintCell) break;
+  }
+  if(hintCell) {
+    const cell = document.querySelector(`.cell[data-r="${hintCell.r}"][data-c="${hintCell.c}"]`);
+    if(cell) {
+      cell.classList.remove('hint'); void cell.offsetWidth;
+      cell.classList.add('hint');
+      setTimeout(() => cell.classList.remove('hint'), 2000);
+    }
+  }
+}
+
+function updateButtons() {
+  $('btn-undo').disabled = state.history.length === 0;
+  $('btn-hint').disabled = $('win-msg').classList.contains('show');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+
+  /* v2.1: все переходы в хаб через goToHub() */
+  $('btn-hub').onclick = () => { goToHub(); };
+  $('btn-start').onclick = () => { AudioEngine.init(); initGame(); };
+  $('btn-retry').onclick = initGame;
+  $('btn-menu').onclick = () => showScreen('menu');
+  $('btn-back').onclick = () => showScreen('menu');
+  $('btn-undo').onclick = undoMove;
+  $('btn-reset').onclick = resetGame;
+  $('btn-hint').onclick = showHint;
+  
+  $('btn-settings').onclick = () => { AudioEngine.play('ui'); openModal('settings-modal'); };
+  $('btn-rules').onclick = () => { AudioEngine.play('ui'); openModal('rules-modal'); };
+
+  document.querySelectorAll('.ui-sound').forEach(b => b.addEventListener('click', () => AudioEngine.play('ui')));
+
+  $('set-diff').onchange = e => {
+    state.difficulty = +e.target.value;
+    saveState();
+    trackEvent('settings_change', {
+      game_name: 'lights_out',
+      setting: 'difficulty',
+      value: state.difficulty
+    });
+  };
+
+  $('set-theme').onchange = e => {
+    state.theme = e.target.value;
+    applyTheme();
+    saveState();
+    trackEvent('settings_change', {
+      game_name: 'lights_out',
+      setting: 'theme',
+      value: state.theme
+    });
+  };
+
+  $('grid').addEventListener('click', e => {
+    const cell = e.target.closest('.cell');
+    if (cell) toggleCell(+cell.dataset.r, +cell.dataset.c);
+  });
+
+  document.querySelectorAll('.close-btn').forEach(btn => btn.onclick = () => closeModal(btn.dataset.modal));
+  document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if(e.target===m) closeModal(m.id); }));
+
+  try { $('verTag').textContent = 'v' + VER; } catch(e) {}
+});
 </script>
 </body>
 </html>
