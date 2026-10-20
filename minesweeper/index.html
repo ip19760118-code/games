@@ -1,5 +1,7 @@
 <!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/><title>Сапёр</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Единый слой платформ (TG / VK / MAX / web) -->
+<script src="../js/platform.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
 <style>
@@ -56,7 +58,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="boardwrap" id="boardwrap"><div class="board" id="board"></div></div>
 <div class="status" id="statusEl">Выбери сложность в ⚙️ и нажми 🙂</div>
 <div class="modes"><button class="modebtn active" id="btnDig">🔨</button><button class="modebtn" id="btnFlag">🚩</button></div>
-<div class="ver" id="verTag">v1.4</div>
+<div class="ver" id="verTag">v1.5</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Сложность<select id="diffSel"><option value="novice">Новичок · 9×9 · 10 мин</option><option value="inter">Любитель · 16×16 · 40 мин</option><option value="expert">Эксперт · 30×16 · 99 мин</option></select></div>
@@ -74,16 +76,40 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="note">Очки за победу: 30 (без потерь) / 20 (−1 жизнь) / 10 (−2). Поражение: −5 очков и +3 потраченные жизни. Смена сложности и скина — к новой игре (кнопка 🙂).</div>
 </div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Как играть</h2>
-<div class="note" style="text-align:left">• Открывай клетки 🔨 (ПК — левый клик). Цифра — сколько мин вокруг.<br>• 🚩 — флажок (ПК — правый клик; на телефоне режим 🚩, повторный тап снимает).<br>• Тап/двойной клик по открытой цифре открывает соседей, если флажков вокруг столько же, сколько цифра.<br>• Первый клик всегда безопасен.<br>• ❤️❤️❤️ — 3 жизни: мина снимает жизнь и помечается 💥; третья мина — поражение.<br>• Чем меньше жизней потратил — тем больше очков в статистику.<br>• Победа — открыты все клетки без мин.</div>
+<div class="note" style="text-align:left">• Открывай клетки 🔨 (ПК — левый клик). Цифра — сколько мин вокруг.<br>• 🚩 — флажок (ПК — правый клик; на телефоне режим 🚩, повторный тап снимает).<br>• Тап/двойной клик по открытой цифре открывает соседей, если флажков вокруг столько же, сколько цифра.<br>• Первый клик всегда безопасен.<br>• ❤️❤️❤️ — 3 жизни: мина снимает жизнь и помечается 💥; третья мина — поражение.<br>• Чем меньше жизней потратил — тем больше очков в статистику.<br>• Победа — открыты все клетки без мин.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='1.4';
-/* Telegram-интеграция */
-const tg=window.Telegram?window.Telegram.WebApp:null;
-if(tg){try{tg.ready();tg.expand();if(tg.setHeaderColor)tg.setHeaderColor('#101418');if(tg.setBackgroundColor)tg.setBackgroundColor('#101418');}catch(e){}}
-if(tg&&tg.BackButton){try{tg.BackButton.show();tg.BackButton.onClick(function(){if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}if($('rulesOverlay').classList.contains('show')){$('rulesOverlay').classList.remove('show');return;}location.href='../';});}catch(e){}}
-function trackEvent(n,p){try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
-(function(){try{const k='mines_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'minesweeper',source:(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initDataUnsafe&&window.Telegram.WebApp.initDataUnsafe.user)?'telegram':'browser',ver:VER});}}catch(e){}})();
+const VER='1.5';
+
+/* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
+/* v1.5: BackButton-логика закрытия оверлеев перенесена в callback back.
+   Platform сам определит платформу и навесит обработчик. */
+function backHandler(){
+  try {
+    if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}
+    if($('rulesOverlay').classList.contains('show')){$('rulesOverlay').classList.remove('show');return;}
+  } catch(e){}
+  goToHub();
+}
+
+Platform.init({
+  bg: '#101418',
+  back: backHandler
+});
+
+/* v1.5: возвращаемся в хаб, сохраняя платформу */
+function goToHub(){
+  Platform.haptic('light');
+  location.href='../?plat='+Platform.name;
+}
+
+/* v1.5: трекер с автоматической меткой платформы */
+function trackEvent(n,p){
+  p=p||{};
+  p.platform=Platform.name;
+  try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}
+}
+(function(){try{const k='mines_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'minesweeper',source:Platform.name,ver:VER});}}catch(e){}})();
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 let AC=null,MASTER=null;function ensureAudio(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=set.vol;MASTER.connect(AC.destination);}catch(e){}}if(AC&&AC.resume)AC.resume();if(MASTER)MASTER.gain.value=set.vol;}
@@ -103,7 +129,6 @@ const $=id=>document.getElementById(id);
 let G=null,mode='dig',cellEls=[];
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function adj(i){const r=Math.floor(i/G.cols),c=i%G.cols,out=[];for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const nr=r+dr,nc=c+dc;if(nr>=0&&nr<G.rows&&nc>=0&&nc<G.cols)out.push(nr*G.cols+nc);}return out;}
-function tgHapticSafe(t){try{if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred(t);}catch(e){}}
 function newGame(){
  const d=DIFFS[set.diff];
  G={cols:d.c,rows:d.r,mines:d.m,cells:Array.from({length:d.c*d.r},()=>({m:0,r:0,f:0,n:0,boom:0})),firstDone:false,over:false,won:false,flags:0,time:0,timer:null,lives:3};
@@ -126,15 +151,14 @@ function flood(i){const st=[i];while(st.length){const j=st.pop();const c=G.cells
 function doReveal(i){const c=G.cells[i];if(G.over||c.f||c.r)return;ensureAudio();if(!G.firstDone){placeMines(i);G.firstDone=true;startTimer();smiley('😮');}
  if(c.m){hitMine(i);return;}flood(i);sDig();drawAll();checkWin();updateHud();}
 function chord(i){const c=G.cells[i];if(G.over||!c.r||!c.n)return;ensureAudio();let f=0;const targets=[];adj(i).forEach(j=>{const a=G.cells[j];if(a.f)f++;else if(!a.r)targets.push(j);});if(f!==c.n||!targets.length)return;const mine=targets.find(j=>G.cells[j].m);if(mine!=null){hitMine(mine);return;}targets.forEach(j=>flood(j));sDig();drawAll();checkWin();updateHud();}
-function hitMine(i){G.lives--;G.cells[i].r=true;G.cells[i].boom=1;sBoom();tgHapticSafe('error');drawAll();
+function hitMine(i){G.lives--;G.cells[i].r=true;G.cells[i].boom=1;sBoom();Platform.haptic('error');drawAll();
  if(G.lives<=0){G.over=true;G.won=false;stopTimer();G.cells.forEach(c=>{if(c.m&&!c.f)c.r=true;});drawAll();cellEls.forEach((el,idx)=>{const c=G.cells[idx];if(c.f&&!c.m)el.classList.add('wrong');});smiley('😵');setStatus('💥 Жизни кончились! Время: '+G.time+' с');endStats(false);}
  else{smiley('😮');setStatus('💥 Мина! Осталось жизней: '+'❤️'.repeat(G.lives)+'🖤'.repeat(3-G.lives),true);}
  updateHud();}
 function toggleFlag(i){const c=G.cells[i];if(G.over||c.r)return;if(!G.firstDone){setStatus('Сначала открой первую клетку 🔨',true);return;}c.f=c.f?0:1;G.flags+=c.f?1:-1;c.f?sFlagOn():sFlagOff();drawCell(i);updateHud();}
 function onCell(i){if(!G||G.over)return;if(mode==='flag'){toggleFlag(i);return;}const c=G.cells[i];if(c.r){chord(i);return;}doReveal(i);}
-function win(){G.over=true;G.won=true;stopTimer();G.cells.forEach(c=>{if(c.m)c.f=1;});G.flags=G.mines;drawAll();smiley('😎');const gain=G.lives*10;sWin();tgHapticSafe('success');setStatus('🏆 Победа! +'+gain+' очков (жизней осталось: '+G.lives+')');endStats(true);}
+function win(){G.over=true;G.won=true;stopTimer();G.cells.forEach(c=>{if(c.m)c.f=1;});G.flags=G.mines;drawAll();smiley('😎');const gain=G.lives*10;sWin();Platform.haptic('success');setStatus('🏆 Победа! +'+gain+' очков (жизней осталось: '+G.lives+')');endStats(true);}
 function checkWin(){let left=0;for(const c of G.cells)if(!c.m&&!c.r)left++;if(left===0)win();}
-/* НОВОЕ v1.4: жизни влияют на очки статистики */
 function endStats(w){ST.played++;const bd=ST.byDiff[set.diff];bd.p++;
  if(w){ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak;bd.w++;if(ST.best[set.diff]==null||G.time<ST.best[set.diff])ST.best[set.diff]=G.time;
   const gain=G.lives*10;ST.points=(ST.points||0)+gain;ST.livesUsed=(ST.livesUsed||0)+(3-G.lives);}
@@ -158,7 +182,8 @@ $('volSlider').oninput=e=>{set.vol=e.target.value/100;$('volV').textContent=e.ta
 $('stReset').onclick=()=>{if(confirm('Сбросить статистику?')){ST={played:0,wins:0,losses:0,streak:0,bestStreak:0,points:0,livesUsed:0,best:{novice:null,inter:null,expert:null},byDiff:{novice:{p:0,w:0},inter:{p:0,w:0},expert:{p:0,w:0}}};saveST();showStats();}};
 $('rulesBtn').onclick=()=>$('rulesOverlay').classList.add('show');
 $('rulesClose').onclick=()=>$('rulesOverlay').classList.remove('show');
-$('hubBtn').onclick=()=>{location.href='../';};
+/* v1.5: кнопка "В меню игр" передаёт платформу */
+$('hubBtn').onclick=()=>{goToHub();};
 window.addEventListener('resize',()=>{if(G)newGame();});
 applySkin();$('verTag').textContent='v'+VER;newGame();
 </script></body></html>
