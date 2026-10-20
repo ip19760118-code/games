@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Neon Arkanoid 3D</title>
 
-<!-- Telegram Mini App SDK -->
+<!-- Telegram Mini App SDK (нужен только на TG, Platform.init определит платформу и использует нужный) -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Единый слой платформ (TG / VK / MAX / web) -->
+<script src="../js/platform.js"></script>
 
 <!-- ============================================================ -->
 <!-- GOOGLE ANALYTICS 4                                           -->
-<!-- ЗАМЕНИ G-XXXXXXXXXX НА СВОЙ ID В ДВУХ МЕСТАХ НИЖЕ            -->
 <!-- ============================================================ -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>
@@ -29,7 +30,6 @@
 html, body { height: 100%; }
 body { background: #02020a; color: #fff; font-family: 'Courier New', monospace; overflow: hidden; width: 100vw; height: 100vh; }
 
-/* Канвас на весь экран, без рамок и полос */
 canvas {
   position: fixed; inset: 0;
   width: 100%; height: 100%;
@@ -95,12 +95,14 @@ h1 { font-size: clamp(1.6em, 7vw, 3.5em); color: #0ff; text-shadow: 0 0 20px #0f
 @keyframes pulse { from { opacity: 0.7; } to { opacity: 1; text-shadow: 0 0 25px #f00; } }
 .level-banner { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); color: #0ff; font-size: clamp(2em, 8vw, 3.5em); text-shadow: 0 0 30px #0ff; pointer-events: none; opacity: 0; z-index: 7; transition: opacity 0.5s, transform 0.5s; letter-spacing: 4px; font-weight: 900; text-align: center; white-space: nowrap; }
 .level-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+.ver-tag { position: fixed; bottom: calc(6px + env(safe-area-inset-bottom)); right: 10px; font-size: 10px; opacity: 0.4; color: #0ff; font-family: monospace; letter-spacing: 1px; z-index: 5; pointer-events: none; }
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
 <div class="trap-warning" id="trapWarning">⚠️ ЛОВУШКА: <span id="trapTimerVal">10</span>с</div>
 <div class="level-banner" id="levelBanner">УРОВЕНЬ 1</div>
+<div class="ver-tag" id="verTag">v2.1</div>
 <div class="hud" id="hud" style="display:none;">
   <div class="hud-left">
     <span>Ур:<span id="levelVal">1</span></span>
@@ -164,37 +166,10 @@ h1 { font-size: clamp(1.6em, 7vw, 3.5em); color: #0ff; text-shadow: 0 0 20px #0f
 </div>
 
 <script>
-/* ================== TELEGRAM MINI APP ================== */
-const tg = window.Telegram?.WebApp;
-
-if (tg) {
-  try {
-    tg.ready();
-    tg.expand();
-    if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes();
-    if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#02020a');
-    if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#02020a');
-  } catch (e) {}
-}
-
-function tgHaptic(type) {
-  try {
-    const h = tg?.HapticFeedback;
-    if (!h) return;
-    if (type === 'success') h.notificationOccurred('success');
-    else if (type === 'error') h.notificationOccurred('error');
-    else if (type === 'warning') h.notificationOccurred('warning');
-    else if (type === 'heavy') h.impactOccurred('heavy');
-    else if (type === 'medium') h.impactOccurred('medium');
-    else h.impactOccurred('light');
-  } catch (e) {}
-}
-
-function goToHub() {
-  tgHaptic('light');
-  location.href = '../';
-}
-
+/* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
+/* Инициализация: передаём цвет шапки и обработчик системной кнопки «Назад».
+   Platform сам определит платформу (TG/VK/MAX/web), подгрузит нужный SDK,
+   навесит BackButton и выставит цвета. Никаких прямых обращений к tg.* больше нет. */
 function backButtonHandler() {
   try {
     if (!document.getElementById('gameOverMenu').classList.contains('hidden')) { quitToMenu(); return; }
@@ -204,13 +179,16 @@ function backButtonHandler() {
   } catch (e) { goToHub(); }
 }
 
-if (tg?.BackButton) {
-  tg.BackButton.show();
-  tg.BackButton.onClick(backButtonHandler);
-}
+Platform.init({
+  bg: '#02020a',
+  back: backButtonHandler
+});
 
 /* ---------- ПОМОЩНИК ДЛЯ СОБЫТИЙ GOOGLE ANALYTICS ---------- */
+/* v2.1: автоматически добавляем метку платформы (tg/vk/max/web) в каждое событие */
 function trackEvent(name, params) {
+  params = params || {};
+  params.platform = Platform.name;
   try {
     if (typeof gtag === 'function') {
       gtag('event', name, params);
@@ -224,30 +202,30 @@ function trackEvent(name, params) {
     const key = 'arkanoid_session_tracked';
     if (!sessionStorage.getItem(key)) {
       sessionStorage.setItem(key, '1');
-
-      let source = 'browser';
-      const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-      if (tgUser) source = 'telegram';
-
       trackEvent('game_open', {
         game_name: 'arkanoid',
-        source: source
+        source: Platform.name   /* 'tg' | 'vk' | 'max' | 'web' */
       });
     }
   } catch (e) {}
 })();
 /* =========================================================== */
 
+/* ---------- ВОЗВРАТ В ХАБ ---------- */
+/* v2.1: передаём платформу, чтобы хаб знал, в каком мессенджере открыт */
+function goToHub() {
+  Platform.haptic('light');
+  location.href = '../?plat=' + Platform.name;
+}
+
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
-/* Логические размеры экрана (в CSS-пикселях) */
 let W = 0, H = 0;
-let M = null; // метрики, пересчитанные под экран
+let M = null;
 
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
-/* Пересчёт всех размеров под текущий экран */
 function computeMetrics() {
   const m = {};
   m.paddleW = clamp(W * 0.30, 100, 260);
@@ -283,7 +261,6 @@ function initStars() {
   }
 }
 
-/* Пропорциональный перенос мира при ресайзе / повороте экрана */
 function rescaleWorld(ow, oh, nw, nh) {
   if (!ow || !oh) return;
   const rw = nw / ow, rh = nh / oh;
@@ -367,7 +344,6 @@ function setDifficulty(diff) {
   document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('diff' + diff.charAt(0).toUpperCase() + diff.slice(1)).classList.add('active');
 
-  /* ---------- GA: СМЕНА СЛОЖНОСТИ ---------- */
   trackEvent('settings_change', {
     game_name: 'arkanoid',
     setting: 'difficulty',
@@ -543,13 +519,13 @@ class Block {
       this.active = false; gameState.blocksDestroyed++; gameState.combo++; gameState.score += 10 * gameState.combo;
       if (gameState.combo > gameState.maxCombo) gameState.maxCombo = gameState.combo;
       playSound('break', 200 + Math.random()*200, 0.15); spawnParticles(this.x + this.w/2, this.y + this.h/2, this.colors[this.type], 12);
-      tgHaptic('light');
+      Platform.haptic('light');
       if (this.type === 'explosive') {
         blocks.forEach(b => { if (b.active && Math.abs(b.x - this.x) < this.w * 1.5 && Math.abs(b.y - this.y) < this.h * 1.5) { b.active = false; spawnParticles(b.x+b.w/2, b.y+b.h/2, b.colors[b.type], 8); gameState.blocksDestroyed++; gameState.score += 10; } });
         spawnParticles(this.x + this.w/2, this.y + this.h/2, '#ff0', 20);
-        tgHaptic('medium');
+        Platform.haptic('medium');
       } else if (this.type === 'trap') {
-        playSound('trap'); tgHaptic('warning');
+        playSound('trap'); Platform.haptic('warning');
         startTimer('trap_width', 10.0, () => { paddle.trapWidthMod = 1.0; }); paddle.trapWidthMod = 0.7;
         balls.forEach(b => { if (!b.stuck) { b.dx *= 1.25; b.dy *= 1.25; } });
         startTimer('trap_speed', 10.0, () => { balls.forEach(b => { if(!b.stuck){b.dx /= 1.25; b.dy /= 1.25;} }); });
@@ -577,7 +553,7 @@ class PowerUp {
     ctx.fillStyle = '#000'; ctx.font = `${Math.round(this.r * 1.1)}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(this.icons[this.type], 0, 1); ctx.restore();
   }
   collect() {
-    this.active = false; playSound('powerup'); tgHaptic('success');
+    this.active = false; playSound('powerup'); Platform.haptic('success');
     gameState.powerupsCollected[this.type] = (gameState.powerupsCollected[this.type] || 0) + 1;
     const spd = difficultySettings[difficulty].ballSpeed * M.speedScale;
     if (this.type === 'life') { gameState.lives++; updateHUD(); return; }
@@ -661,7 +637,7 @@ function generateLevel() {
 
 function showLevelBanner() {
   const banner = document.getElementById('levelBanner'); banner.innerText = 'УРОВЕНЬ ' + gameState.level;
-  banner.classList.add('show'); playSound('levelup'); tgHaptic('success'); setTimeout(() => banner.classList.remove('show'), 1500);
+  banner.classList.add('show'); playSound('levelup'); Platform.haptic('success'); setTimeout(() => banner.classList.remove('show'), 1500);
 }
 
 function nextLevel() {
@@ -672,14 +648,13 @@ function nextLevel() {
 }
 
 function startGame(mode) {
-  /* ---------- GA: СТАРТ ИГРЫ ---------- */
   trackEvent('game_start', {
     game_name: 'arkanoid',
     mode: mode,
     difficulty: difficulty
   });
 
-  initAudio(); tgHaptic('medium');
+  initAudio(); Platform.haptic('medium');
   resizeCanvas();
   gameState.mode = mode; gameState.score = 0; gameState.lives = difficultySettings[difficulty].lives;
   gameState.combo = 0; gameState.time = 60; gameState.blocksDestroyed = 0; gameState.level = 1;
@@ -711,7 +686,7 @@ function loop(timestamp) {
     balls.forEach(b => { b.update(dt); b.draw(); });
     if (balls.length === 0) {
       gameState.lives--; gameState.combo = 0; updateHUD();
-      tgHaptic('error');
+      Platform.haptic('error');
       if (gameState.lives <= 0) gameOver();
       else { balls.push(new Ball(W/2, paddle.y - 40, 0, 0)); paddle.sticky = true; }
     }
@@ -729,7 +704,6 @@ function loop(timestamp) {
 function gameOver() {
   if (!gameActive) return;
 
-  /* ---------- GA: КОНЕЦ ИГРЫ ---------- */
   trackEvent('game_end', {
     game_name: 'arkanoid',
     mode: gameState.mode,
@@ -740,7 +714,7 @@ function gameOver() {
     max_combo: gameState.maxCombo
   });
 
-  gameActive = false; stopMusic(); tgHaptic('error');
+  gameActive = false; stopMusic(); Platform.haptic('error');
   document.getElementById('gameOverMenu').classList.remove('hidden');
   document.getElementById('finalScore').innerText = gameState.score; document.getElementById('hud').style.display = 'none';
   let stats = JSON.parse(localStorage.getItem('ark_stats') || '{"time":0,"blocks":0,"maxCombo":0,"powerups":{}}');
@@ -766,7 +740,6 @@ function setTheme(p, s) {
   document.querySelector('h1').style.color = p;
   document.querySelector('h1').style.textShadow = `0 0 20px ${p}`;
 
-  /* ---------- GA: СМЕНА ТЕМЫ ---------- */
   trackEvent('settings_change', {
     game_name: 'arkanoid',
     setting: 'theme',
