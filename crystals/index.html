@@ -1,6 +1,8 @@
 <!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/><title>Кристаллы</title>
 <script>window.addEventListener('error',function(e){var s=document.getElementById('statusEl');if(s){s.textContent='⚠️ Ошибка скрипта: '+e.message;s.style.color='#ff8f8f';}});</script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Единый слой платформ (TG / VK / MAX / web) -->
+<script src="../js/platform.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
 <style>
@@ -137,7 +139,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="catled" id="catLed"></div>
 <div class="status" id="statusEl">Выбери режим в ⚙️ и нажми 🔄</div>
 <div class="actions"><span class="bankchip" id="bankChip">⭐ Банк: 0</span><button class="btn" id="undoBtn">↩️ Отмена</button><button class="btn" id="pauseBtn" style="display:none">⏸ Пауза</button><button class="btn skipglow" id="nextLevelBtn" style="display:none">⏭️ След. уровень (−1000)</button><button class="btn" id="hintBtn">💡 Подсказка</button></div>
-<div class="ver" id="verTag">v4.15</div>
+<div class="ver" id="verTag">v4.16</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Режим<select id="modeSel"><option value="qtime">Задания на время</option><option value="qmoves">Задания на ходы</option><option value="cats">Проведи котиков (∞)</option><option value="endless">Бесконечно</option></select></div>
@@ -159,16 +161,32 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="note" style="text-align:left">• Управление: тап по кристаллу → тап по соседу, ИЛИ свайп от кристалла к соседу (направление берётся из движения пальца).<br>• ОЧКИ УРОВНЯ (слева); БАНК ⭐ (чип под полем).<br>• Режимы: «На время», «На ходы», «Проведи котиков» (∞), «Бесконечно».<br>• Уровни: каждый 3‑й плитки, каждый 4‑й котики, каждый 6‑й корзины.<br>• 🐱 Кот в пустой клетке; засчитывается сразу у низа; свап бонуса с котом активирует бонус; без разрушения — откат.<br>• 🧺 Корзины: цифра = осталось; собрал — исчезает; 3+ цвета сгорают, проваливаются 1–2.<br>• Звёзды: ≥70% ★★★, 40–69% ★★, 10–39% ★; бонус 3000/2000/1000. Овертайм −50/ход, −10/сек; пропуск −1000.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='4.15';
+var VER='4.16';
 var IMG='img/';
 var SWAP_MS=240,FALL_MS=240;
 (function(){var t=new Image();t.onerror=function(){document.body.classList.add('noarrow');};t.src=IMG+'arrow_h.png';})();
-var tg=window.Telegram?window.Telegram.WebApp:null;
-if(tg){try{tg.ready();tg.expand();if(tg.setHeaderColor)tg.setHeaderColor('#0d1026');if(tg.setBackgroundColor)tg.setBackgroundColor('#0d1026');}catch(e){}}
-if(tg&&tg.BackButton){try{tg.BackButton.show();tg.BackButton.onClick(function(){if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}if($('rulesOverlay').classList.contains('show')){$('rulesOverlay').classList.remove('show');return;}if($('endOverlay').classList.contains('show')){$('endOverlay').classList.remove('show');return;}location.href='../';});}catch(e){}}
-function tgHaptic(t){try{if(tg&&tg.HapticFeedback){if(t==='success')tg.HapticFeedback.notificationOccurred('success');else if(t==='error')tg.HapticFeedback.notificationOccurred('error');else tg.HapticFeedback.impactOccurred('light');}}catch(e){}}
-function trackEvent(n,p){try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
-(function(){try{var k='crystals_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'crystals',source:(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initDataUnsafe&&window.Telegram.WebApp.initDataUnsafe.user)?'telegram':'browser',ver:VER});}}catch(e){}})();
+
+/* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
+/* v4.16: BackButton-логика закрытия оверлеев перенесена в callback back.
+   Platform сам определит платформу и навесит обработчик. */
+function backHandler(){
+  try {
+    if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}
+    if($('rulesOverlay').classList.contains('show')){$('rulesOverlay').classList.remove('show');return;}
+    if($('endOverlay').classList.contains('show')){$('endOverlay').classList.remove('show');return;}
+  } catch(e){}
+  /* Все оверлеи закрыты — возвращаемся в хаб */
+  location.href='../?plat='+Platform.name;
+}
+
+Platform.init({
+  bg: '#0d1026',
+  back: backHandler
+});
+
+/* v4.16: трекер с автоматической меткой платформы */
+function trackEvent(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
+(function(){try{var k='crystals_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'crystals',source:Platform.name,ver:VER});}}catch(e){}})();
 function lsGet(k,d){try{var v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 var AC=null,MASTER=null;
@@ -203,7 +221,6 @@ function $(id){return document.getElementById(id);}
 var G=null,cellEls=[],crEls=[],catEls2={},uid=0,undoStack=[];
 var questScore=0,levelStart=0;
 var CATCOLS=['o','b','w'];
-/* ИСПРАВЛЕНО v4.15: детерминированный ввод — тап по исходной клетке, свайп по вектору пальца */
 var dragI=-1,dragX=0,dragY=0,dragCell=-1;
 function dragThreshold(){var cs=(cellEls&&cellEls[0])?cellEls[0].offsetWidth:44;return Math.max(10,cs*0.30);}
 function cleanupDrag(){window.removeEventListener('pointermove',onPtrMove);window.removeEventListener('pointerup',onPtrUp);window.removeEventListener('pointercancel',onPtrCancel);}
@@ -406,9 +423,9 @@ function updateCatLed(){var el=$('catLed');if(!G||G.mode!=='cats'){el.style.disp
  var s=document.createElement('span');s.textContent='Проведено котиков: '+G.delivered;el.appendChild(s);}
 function isAdj(a,b){var ra=Math.floor(a/8),ca=a%8,rb=Math.floor(b/8),cb=b%8;return Math.abs(ra-rb)+Math.abs(ca-cb)===1;}
 function onCell(i){ensureAudio();if(!G||G.over||G.busy||G.paused)return;
- if(G.sel===-1){G.sel=i;sSwap();tgHaptic('light');renderBoard();return;}
+ if(G.sel===-1){G.sel=i;sSwap();Platform.haptic('light');renderBoard();return;}
  if(G.sel===i){G.sel=-1;renderBoard();return;}
- if(isAdj(G.sel,i))trySwap(G.sel,i);else{G.sel=i;sSwap();tgHaptic('light');renderBoard();}}
+ if(isAdj(G.sel,i))trySwap(G.sel,i);else{G.sel=i;sSwap();Platform.haptic('light');renderBoard();}}
 function drawBolt(setCells){var idx=[];setCells.forEach(function(i){idx.push(i);});if(idx.length<3)return;
  var minR=8,maxR=-1,minC=8,maxC=-1;idx.forEach(function(i){var r=i>>3,c=i&7;if(r<minR)minR=r;if(r>maxR)maxR=r;if(c<minC)minC=c;if(c>maxC)maxC=c;});
  var horizontal=(maxC-minC)>=(maxR-minR);
@@ -468,7 +485,7 @@ function trySwap(a,b){
    if(movedCrystal&&movedCrystal.s>0){undoStack.push(snapC);if(undoStack.length>20)undoStack.shift();G.lastSwap=[catIdx,cryIdx];useMove();sBonus();startResolve(new Set([catIdx]),[]);return;}
    var groupsExist=findGroups().length>0;
    if(groupsExist){undoStack.push(snapC);if(undoStack.length>20)undoStack.shift();G.lastSwap=[catIdx,cryIdx];useMove();startResolve(null,null);}
-   else{G.grid[cryIdx]=G.grid[catIdx];G.grid[catIdx]=null;ct.r=orR;ct.c=orC;sDeny();tgHaptic('error');renderBoard();G.busy=false;}
+   else{G.grid[cryIdx]=G.grid[catIdx];G.grid[catIdx]=null;ct.r=orR;ct.c=orC;sDeny();Platform.haptic('error');renderBoard();G.busy=false;}
   },FALL_MS);
   return;}
  var A=G.grid[a],B=G.grid[b];
@@ -502,7 +519,7 @@ function trySwap(a,b){
  setTimeout(function(){
   var groupsExist=findGroups().length>0;
   if(groupsExist){undoStack.push(snap);if(undoStack.length>20)undoStack.shift();G.lastSwap=[a,b];useMove();sSwap();startResolve(null,null);}
-  else{var t=G.grid[a];G.grid[a]=G.grid[b];G.grid[b]=t;sDeny();tgHaptic('error');renderBoard();G.busy=false;}
+  else{var t=G.grid[a];G.grid[a]=G.grid[b];G.grid[b]=t;sDeny();Platform.haptic('error');renderBoard();G.busy=false;}
  },FALL_MS);}
 function useMove(){G.started=true;
  if(G.mode==='qmoves'){
@@ -597,12 +614,12 @@ function objDone(){var o=G.obj;if(!o)return false;
 function timeUp(){if(!G||G.over)return;if(isQuest()&&G.obj&&objDone()){levelWin();}else{questFail();}}
 function checkEnd(){if(!G||G.over||!G.started)return;
  if(isQuest()&&G.obj&&objDone()){levelWin();}}
-function levelWin(){G.over=true;stopTimer();sWin();tgHaptic('success');say('Уровень пройден');
+function levelWin(){G.over=true;stopTimer();sWin();Platform.haptic('success');say('Уровень пройден');
  var stars=starsFor(resourceFrac());var bonus=starBonus(stars);var earned=levelScore()+bonus;questScore=G.score;
  ST.games++;ST.cleared+=G.cleared;ST.bank=(ST.bank||0)+earned;ST.quest=(ST.quest||1)+1;saveST();
  trackEvent('game_end',{game_name:'crystals',mode:G.mode,level:G.level,win:1,stars:stars});
  showEndOverlay('win',stars,bonus);}
-function questFail(){G.over=true;stopTimer();sEnd();tgHaptic('error');say('Не успел');
+function questFail(){G.over=true;stopTimer();sEnd();Platform.haptic('error');say('Не успел');
  ST.games++;ST.cleared+=G.cleared;saveST();
  trackEvent('game_end',{game_name:'crystals',mode:G.mode,level:G.level,win:0});
  showEndOverlay('fail');}
@@ -613,17 +630,18 @@ function skipLevel(){questScore=levelStart;
  toast('⏭️ Пропуск уровня: −1000 баллов. Банк: '+ST.bank,3000);}
 function ebtn(txt,fn,primary){var b=document.createElement('button');b.className='btn'+(primary?' primary':'');b.textContent=txt;b.onclick=fn;$('endBtns').appendChild(b);}
 function starStr(n){var s='';for(var i=0;i<3;i++)s+=i<n?'★':'☆';return s;}
+/* v4.16: все кнопки «В меню» передают платформу в хаб */
 function showEndOverlay(kind,stars,bonus){var ov=$('endOverlay');var t=$('endTitle'),sub=$('endSub');$('endBtns').innerHTML='';
  if(kind==='win'){t.textContent='🎉 Уровень '+G.level+' пройден!';sub.textContent=starStr(stars||0)+' · Очки уровня: +'+levelScore()+(bonus?' · Бонус за звёзды: +'+bonus:'')+' · В банк: +'+(levelScore()+(bonus||0))+'.';
   ebtn('➡️ Следующий уровень',function(){ov.classList.remove('show');newGame();},true);
-  ebtn('🏠 В меню',function(){ov.classList.remove('show');location.href='../';});}
+  ebtn('🏠 В меню',function(){ov.classList.remove('show');location.href='../?plat='+Platform.name;});}
  else if(kind==='bankrupt'){t.textContent='💸 Баллы закончились';sub.textContent='Овертайм съел все баллы. Очки уровня: '+levelScore()+'.';
   ebtn('🔁 Переиграть уровень',function(){ov.classList.remove('show');newGame();},true);
-  ebtn('🏠 В меню',function(){ov.classList.remove('show');location.href='../';});}
+  ebtn('🏠 В меню',function(){ov.classList.remove('show');location.href='../?plat='+Platform.name;});}
  else{t.textContent=G.mode==='qtime'?'⏰ Время вышло!':'😔 Ходы закончились';sub.textContent='Цель не выполнена. Очки уровня: '+levelScore()+'. Банк: '+ST.bank+'.';
   ebtn('🔁 Переиграть уровень',function(){ov.classList.remove('show');newGame();},true);
   ebtn('⏭️ Дальше (−1000)',function(){skipLevel();});
-  ebtn('🏠 В меню',function(){ov.classList.remove('show');location.href='../';});}
+  ebtn('🏠 В меню',function(){ov.classList.remove('show');location.href='../?plat='+Platform.name;});}
  ov.classList.add('show');}
 function tilesByColor(){var m={};G.tiles.forEach(function(t){if(t>=0)m[t]=(m[t]||0)+1;});return m;}
 function updateHud(){$('scoreLcd').textContent=levelScore();
@@ -660,7 +678,8 @@ $('volSlider').oninput=function(e){set.vol=e.target.value/100;$('volV').textCont
 $('stReset').onclick=function(){if(confirm('Сбросить статистику?')){ST={games:0,cleared:0,quest:1,bank:0,bestCats:0,basketsTotal:0};saveST();showStats();updateHud();}};
 $('rulesBtn').onclick=function(){$('rulesOverlay').classList.add('show');};
 $('rulesClose').onclick=function(){$('rulesOverlay').classList.remove('show');};
-$('hubBtn').onclick=function(){location.href='../';};
+/* v4.16: кнопка «В меню» передаёт платформу */
+$('hubBtn').onclick=function(){location.href='../?plat='+Platform.name;};
 window.addEventListener('resize',function(){if(G){buildBoard();renderBaskets();}});
 applySkin();$('voiceChk').checked=!!set.voice;$('verTag').textContent='v'+VER;newGame();
 </script></body></html>
