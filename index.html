@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Игровой центр</title>
   <meta property="og:title" content="Игровой центр">
-  <meta property="og:description" content="Мини-игры прямо в Telegram: выбирай, играй и делись рекордами с друзьями.">
+  <meta property="og:description" content="Мини-игры в Telegram, VK и MAX: выбирай, играй и делись рекордами с друзьями.">
   <meta name="color-scheme" content="light dark">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Единый слой платформ (TG / VK / MAX / web) -->
+  <script src="./js/platform.js"></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -32,6 +34,7 @@
     .game-text small { font-size: clamp(11px, 3.2vw, 13px); color: #a8b4d8; line-height: 1.25; }
     .hub-foot { margin: 12px 0 0; color: #6b7699; font-size: 12px; }
     .hub-ver { margin: 6px 0 0; color: #4d5670; font-size: 10px; font-family: monospace; letter-spacing: 1px; }
+    .hub-ver .plat { color: #7cffc4; font-weight: 700; }
     .tag-online { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 10px; background: rgba(124, 255, 196, 0.15); border: 1px solid rgba(124, 255, 196, 0.4); color: #7cffc4; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; vertical-align: middle; }
   </style>
 </head>
@@ -39,8 +42,8 @@
   <div class="wrap">
     <div class="panel">
       <h1>🎮 Игровой центр</h1>
-      <p class="hub-subtitle">Мини-игры прямо в Telegram</p>
-      <p class="hub-desc">15 игр в одном боте: аркады, головоломки, классика, онлайн‑партии, match‑3, пасьянс, морской бой и маджонг. Без установки — нажми и играй.</p>
+      <p class="hub-subtitle">Мини-игры в Telegram, VK и MAX</p>
+      <p class="hub-desc">15 игр в одном центре: аркады, головоломки, классика, онлайн‑партии, match‑3, пасьянс, морской бой и маджонг. Работает в трёх мессенджерах и в браузере — без установки, нажми и играй.</p>
 
       <button class="game-btn" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
       <button class="game-btn" id="lightsOutBtn"><span class="game-emoji">💡</span><span class="game-text"><b>Выключи Свет</b><small>Логическая головоломка: выключи всё поле</small></span></button>
@@ -60,16 +63,77 @@
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.7</p>
+      <p class="hub-ver" id="hubVer">hub v3.8 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
   <script>
-    const HUB_VER = '3.7';
-    const tg = window.Telegram?.WebApp;
-    if (tg) { try { tg.ready(); tg.expand(); if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#070b16'); if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#070b16'); if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes(); } catch (e) {} }
-    function trackEvent(name, params){ try { if (typeof gtag === 'function') gtag('event', name, params); } catch (e) {} }
-    (function(){ try { const k = 'hub_session_tracked'; if (!sessionStorage.getItem(k)) { sessionStorage.setItem(k, '1'); trackEvent('hub_open', { source: (window.Telegram?.WebApp?.initDataUnsafe?.user) ? 'telegram' : 'browser', ver: HUB_VER }); } } catch (e) {} })();
-    function openGame(url, gameName) { trackEvent('hub_game_click', { game_name: gameName }); try { if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); } catch (e) {} location.href = url; }
+    const HUB_VER = '3.8';
+
+    /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
+    /* Platform.init сам определит платформу (TG/VK/MAX/web), подгрузит нужный SDK,
+       выставит цвета шапки/фона мессенджера и навесит системную кнопку «Назад».
+       В хабе BackButton закрывает мини-апп. */
+    Platform.init({
+      bg: '#070b16',
+      back: function() { Platform.close(); }
+    });
+
+    /* Показываем текущую платформу в футере (для отладки) */
+    try { document.getElementById('platTag').textContent = Platform.name; } catch(e) {}
+
+    /* v3.8: трекер с автоматической меткой платформы */
+    function trackEvent(name, params){
+      params = params || {};
+      params.platform = Platform.name;
+      try { if (typeof gtag === 'function') gtag('event', name, params); } catch (e) {}
+    }
+
+    (function(){
+      try {
+        const k = 'hub_session_tracked';
+        if (!sessionStorage.getItem(k)) {
+          sessionStorage.setItem(k, '1');
+          trackEvent('hub_open', {
+            source: Platform.name,   /* 'tg' | 'vk' | 'max' | 'web' */
+            ver: HUB_VER
+          });
+        }
+      } catch (e) {}
+    })();
+
+    /* v3.8: openGame проставляет ?plat= в URL игры, чтобы та знала, в каком мессенджере открыта */
+    function openGame(url, gameName) {
+      trackEvent('hub_game_click', { game_name: gameName });
+      try { Platform.haptic('light'); } catch (e) {}
+      const sep = url.indexOf('?') >= 0 ? '&' : '?';
+      location.href = url + sep + 'plat=' + Platform.name;
+    }
+
+    /* Карта deep-link'ов от ботов: ?game=chess → сразу в шахматы.
+       Бот (TG/VK/MAX) может прислать ссылку вида https://.../?plat=vk&game=chess
+       и пользователь сразу откроет игру внутри своего мессенджера. */
+    const GAME_MAP = {
+      'trend_catch': './trend-catch/',
+      'trend': './trend-catch/',
+      'lights_out': './lights-out/',
+      'lights': './lights-out/',
+      'arkanoid': './arkanoid/',
+      'domino': './domino/',
+      'shooter': './shooter/',
+      'fruit_samurai': './fruit-samurai/',
+      'samurai': './fruit-samurai/',
+      'chess': './chess/',
+      'durak': './durak/',
+      'nardy': './nardy/',
+      'shashki': './shashki/',
+      'minesweeper': './minesweeper/',
+      'mines': './minesweeper/',
+      'crystals': './crystals/',
+      'solitaire': './solitaire/',
+      'seabattle': './seabattle/',
+      'mahjong': './mahjong/'
+    };
+
     document.getElementById('trendCatchBtn').addEventListener('click', () => openGame('./trend-catch/', 'trend_catch'));
     document.getElementById('lightsOutBtn').addEventListener('click', () => openGame('./lights-out/', 'lights_out'));
     document.getElementById('arkanoidBtn').addEventListener('click', () => openGame('./arkanoid/', 'arkanoid'));
@@ -85,7 +149,24 @@
     document.getElementById('solitaireBtn').addEventListener('click', () => openGame('./solitaire/', 'solitaire'));
     document.getElementById('seabattleBtn').addEventListener('click', () => openGame('./seabattle/', 'seabattle'));
     document.getElementById('mahjongBtn').addEventListener('click', () => openGame('./mahjong/', 'mahjong'));
-    document.getElementById('hubVer').textContent = 'hub v' + HUB_VER;
+
+    document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
+
+    /* Deep-link от ботов: авто-вход в игру при наличии ?game=... в URL */
+    (function handleDeepLink() {
+      try {
+        const u = new URL(location.href);
+        const g = (u.searchParams.get('game') || '').toLowerCase();
+        if (g && GAME_MAP[g]) {
+          /* Небольшая задержка, чтобы Platform.init успел отрисоваться
+             и GA успел зафиксировать hub_open перед переходом */
+          setTimeout(function() {
+            trackEvent('hub_deeplink', { game: g });
+            openGame(GAME_MAP[g], g);
+          }, 150);
+        }
+      } catch (e) {}
+    })();
   </script>
 </body>
 </html>
