@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>✨ 3D SHOOTER | Мобильная версия ✨</title>
 
-    <!-- Telegram Mini App SDK -->
+    <!-- Telegram Mini App SDK (оставляем для обратной совместимости) -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Единый слой платформ (TG / VK / MAX / web) -->
+    <script src="../js/platform.js"></script>
 
     <!-- ============================================================ -->
     <!-- GOOGLE ANALYTICS 4                                           -->
-    <!-- ЗАМЕНИ G-XXXXXXXXXX НА СВОЙ ID В ДВУХ МЕСТАХ НИЖЕ            -->
     <!-- ============================================================ -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
     <script>
@@ -74,7 +75,6 @@
             white-space: normal;
         }
 
-        /* === ПАНЕЛЬ СМЕНЫ ОРУЖИЯ === */
         .weapon-switcher {
             position: absolute;
             bottom: 90px;
@@ -121,7 +121,6 @@
         .weapon-switch-btn:active { transform: scale(0.95); }
 
         .weapon-switch-btn.empty { opacity: 0.45; }
-        /* === КОНЕЦ ПАНЕЛИ СМЕНЫ === */
 
         #record-panel { bottom: 10px; left: 10px; font-size: clamp(10px, 3vw, 14px); }
 
@@ -143,7 +142,6 @@
             font-size: clamp(12px, 4vw, 16px);
         }
 
-        /* === ЕДИНСТВЕННЫЙ ЭЛЕМЕНТ ДЛЯ ВСПЛЫВАЮЩИХ СООБЩЕНИЙ === */
         #floating-text {
             position: absolute;
             left: 50%;
@@ -206,6 +204,14 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+        }
+
+        .menu-ver {
+            font-size: 10px;
+            opacity: 0.45;
+            font-family: monospace;
+            letter-spacing: 1px;
+            margin-top: 12px;
         }
 
         .mode-selector { margin: 15px 0; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
@@ -444,7 +450,6 @@
         </div>
     </div>
 
-    <!-- КНОПКИ СМЕНЫ ОРУЖИЯ -->
     <div class="weapon-switcher">
         <div class="weapon-switch-btn active" data-weapon="0">
             <span class="w-icon">🔫</span>
@@ -471,7 +476,6 @@
     </div>
     <div id="countdown">3</div>
 
-    <!-- ЕДИНСТВЕННЫЙ элемент для всплывающих сообщений -->
     <div id="floating-text"></div>
 
     <div id="menu-screen">
@@ -491,6 +495,7 @@
                 <input type="range" id="sfxVolume" min="0" max="100" value="70">
             </div>
             <button id="startGameBtn">▶ НАЧАТЬ ИГРУ</button>
+            <div class="menu-ver" id="verTag">v1.1</div>
         </div>
     </div>
 
@@ -526,37 +531,11 @@
     <script type="module">
         import * as THREE from 'three';
 
-        /* ================== TELEGRAM MINI APP ================== */
-        const tg = window.Telegram?.WebApp;
+        const VER = '1.1';
 
-        if (tg) {
-            try {
-                tg.ready();
-                tg.expand();
-                if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes();
-                if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#050b1a');
-                if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#050b1a');
-            } catch (e) {}
-        }
-
-        function tgHaptic(type) {
-            try {
-                const h = tg?.HapticFeedback;
-                if (!h) return;
-                if (type === 'success') h.notificationOccurred('success');
-                else if (type === 'error') h.notificationOccurred('error');
-                else if (type === 'warning') h.notificationOccurred('warning');
-                else if (type === 'heavy') h.impactOccurred('heavy');
-                else if (type === 'medium') h.impactOccurred('medium');
-                else h.impactOccurred('light');
-            } catch (e) {}
-        }
-
-        function goToHub() {
-            tgHaptic('light');
-            location.href = '../';
-        }
-
+        /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
+        /* v1.1: BackButton-логика перенесена в callback back.
+           Platform сам определит платформу и навесит обработчик. */
         function backButtonHandler() {
             try {
                 const menuScreen = document.getElementById('menu-screen');
@@ -571,13 +550,21 @@
             } catch (e) { goToHub(); }
         }
 
-        if (tg?.BackButton) {
-            tg.BackButton.show();
-            tg.BackButton.onClick(backButtonHandler);
+        Platform.init({
+            bg: '#050b1a',
+            back: backButtonHandler
+        });
+
+        /* v1.1: возвращаемся в хаб, сохраняя платформу */
+        function goToHub() {
+            Platform.haptic('light');
+            location.href = '../?plat=' + Platform.name;
         }
 
-        /* ---------- ПОМОЩНИК ДЛЯ СОБЫТИЙ GOOGLE ANALYTICS ---------- */
+        /* v1.1: трекер с автоматической меткой платформы */
         function trackEvent(name, params) {
+            params = params || {};
+            params.platform = Platform.name;
             try {
                 if (typeof gtag === 'function') {
                     gtag('event', name, params);
@@ -585,25 +572,20 @@
             } catch (e) {}
         }
 
-        /* ---------- СОБЫТИЕ: ОТКРЫТИЕ ИГРЫ (1 раз за сессию) ---------- */
+        /* v1.1: событие открытия игры с source=платформа */
         (function trackGameOpen() {
             try {
                 const key = 'shooter_session_tracked';
                 if (!sessionStorage.getItem(key)) {
                     sessionStorage.setItem(key, '1');
-
-                    let source = 'browser';
-                    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-                    if (tgUser) source = 'telegram';
-
                     trackEvent('game_open', {
                         game_name: 'shooter',
-                        source: source
+                        source: Platform.name,
+                        ver: VER
                     });
                 }
             } catch (e) {}
         })();
-        /* =========================================================== */
 
         // ------------------- АУДИО -------------------
         let audioCtx = null;
@@ -625,6 +607,7 @@
             sfxGain.gain.value = sfxVolume;
         }
 
+        /* v1.1: все tgHaptic заменены на Platform.haptic */
         function playSound(type) {
             if (!audioCtx || !sfxGain) return;
             const now = audioCtx.currentTime;
@@ -637,13 +620,13 @@
                 gain.gain.value = 0.2;
                 gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
                 osc.start(); osc.stop(now + 0.2);
-                tgHaptic('light');
+                Platform.haptic('light');
             } else if (type === 'hit') {
                 osc.frequency.value = 1200;
                 gain.gain.value = 0.25;
                 gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.1);
                 osc.start(); osc.stop(now + 0.1);
-                tgHaptic('success');
+                Platform.haptic('success');
             } else if (type === 'miss') {
                 osc.frequency.value = 400;
                 gain.gain.value = 0.1;
@@ -654,25 +637,25 @@
                 gain.gain.value = 0.2;
                 gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
                 osc.start(); osc.stop(now + 0.2);
-                tgHaptic('success');
+                Platform.haptic('success');
             } else if (type === 'reload') {
                 osc.frequency.value = 600;
                 gain.gain.value = 0.15;
                 gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
                 osc.start(); osc.stop(now + 0.2);
-                tgHaptic('light');
+                Platform.haptic('light');
             } else if (type === 'switch') {
                 osc.frequency.value = 1000;
                 gain.gain.value = 0.15;
                 gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
                 osc.start(); osc.stop(now + 0.08);
-                tgHaptic('light');
+                Platform.haptic('light');
             } else if (type === 'empty') {
                 osc.frequency.value = 200;
                 gain.gain.value = 0.15;
                 gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
                 osc.start(); osc.stop(now + 0.15);
-                tgHaptic('warning');
+                Platform.haptic('warning');
             }
         }
 
@@ -722,7 +705,6 @@
             { name: 'дробовик', delay: 400, shots: 5, spread: 0.12, maxAmmo: 20, currentAmmo: 20, reloadAmount: 5 }
         ];
 
-        // === ЕДИНСТВЕННЫЙ ЭЛЕМЕНТ ДЛЯ ВСПЛЫВАЮЩИХ СООБЩЕНИЙ ===
         let floatingTextTimeout = null;
         const floatingTextEl = document.getElementById('floating-text');
 
@@ -770,7 +752,6 @@
             playSound('switch');
             showFloatingText('🔫 ' + weapons[idx].name.toUpperCase());
 
-            /* ---------- GA: СМЕНА ОРУЖИЯ ---------- */
             trackEvent('weapon_switch', {
                 game_name: 'shooter',
                 weapon: weapons[idx].name
@@ -798,7 +779,6 @@
         function endGame(reason) {
             if (!gameActive) return;
 
-            /* ---------- GA: КОНЕЦ ИГРЫ ---------- */
             trackEvent('game_end', {
                 game_name: 'shooter',
                 mode: gameMode,
@@ -814,7 +794,7 @@
             document.getElementById('finalScore').innerText = score;
             document.getElementById('game-over-screen').classList.remove('hidden');
             stopMusic();
-            tgHaptic('error');
+            Platform.haptic('error');
         }
 
         function dropAmmo(position) {
@@ -1145,7 +1125,6 @@
             if (e.key === '3') switchWeapon(2);
         });
 
-        // Обработчики кнопок смены оружия
         document.querySelectorAll('.weapon-switch-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -1181,6 +1160,7 @@
             cross.style.color = e.target.value;
         });
 
+        /* v1.1: все кнопки "В меню игр" через goToHub() */
         document.getElementById('hubBtnMenu').addEventListener('click', (e) => { e.stopPropagation(); goToHub(); });
         document.getElementById('hubBtnGameOver').addEventListener('click', (e) => { e.stopPropagation(); goToHub(); });
         document.getElementById('hubBtnPause').addEventListener('click', (e) => { e.stopPropagation(); goToHub(); });
@@ -1238,7 +1218,6 @@
                     clearInterval(interval);
                     countdownDiv.style.display = 'none';
 
-                    /* ---------- GA: СТАРТ ИГРЫ ---------- */
                     trackEvent('game_start', {
                         game_name: 'shooter',
                         mode: gameMode
@@ -1387,6 +1366,7 @@
         updateCrosshairPos(window.innerWidth / 2, window.innerHeight / 2);
         updateWeaponSwitcherUI();
         showMenu();
+        try { document.getElementById('verTag').textContent = 'v' + VER; } catch(e) {}
         animate();
     </script>
 </body>
