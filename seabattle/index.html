@@ -1,7 +1,6 @@
 <!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/><meta name="color-scheme" content="light"/><meta http-equiv="Cache-Control" content="no-cache"/><meta http-equiv="Pragma" content="no-cache"/><title>Морской бой</title>
 <script>window.addEventListener('error',function(e){var m=(e&&e.message)||'';if(/Script error/i.test(m))return;var s=document.getElementById('statusEl');if(s){s.textContent='⚠️ '+m;s.style.color='#ff8f8f';setTimeout(function(){var q=document.getElementById('statusEl');if(q)q.style.color=''},4000)}});window.addEventListener('unhandledrejection',function(e){try{e.preventDefault()}catch(err){}});</script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<!-- Единый слой платформ (TG / VK / MAX / web) -->
 <script src="../js/platform.js"></script>
 <script src="../js/snd.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
@@ -129,7 +128,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div></div>
 </div></div>
 <div class="status" id="statusEl">Выбери режим игры</div>
-<div class="ver" id="verTag">v4.19</div>
+<div class="ver" id="verTag">v4.20</div>
 </div>
 <div class="overlay" id="modeOverlay"><div class="cardbox"><h2>🚢 Морской бой</h2><div class="sub">Выбери режим игры</div>
 <div class="mgrid">
@@ -157,9 +156,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
 var FB={apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"};
-var VER='4.19',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=false;
-
-/* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
+var VER='4.20',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=false;
 function backHandler(){
   var a=['setOverlay','rulesOverlay','endOverlay','modeOverlay'];
   for(var i=0;i<a.length;i++){
@@ -169,25 +166,21 @@ function backHandler(){
   if(NET.conn){netLeave();return;}
   goToHub();
 }
-
 Platform.init({
   bg: '#101418',
   back: backHandler
 });
-
 function goToHub(){
   Platform.haptic('light');
   clearPreview();
   if(G&&G.online)NET.reset();
   location.href='../?plat='+Platform.name;
 }
-
 function trk(n,p){
   p=p||{};
   p.platform=Platform.name;
   try{if(typeof gtag=='function')gtag('event',n,p)}catch(e){}
 }
-
 (function(){
   try{
     const k='seabattle_session_tracked';
@@ -197,7 +190,6 @@ function trk(n,p){
     }
   }catch(e){}
 })();
-
 var G=null,AC=null,MASTER=null,toastT=null,set=null,ST=null,preview=null;
 var renderedShots={my:new Array(100).fill(0),en:new Array(100).fill(0)};
 var FNS={},NET={code:null,role:null,room:null,conn:false,lastPend:0,lastRes:0,L:[]};
@@ -301,7 +293,6 @@ NET.reset=function(){NET.detach();NET.conn=false;NET.room=null;NET.lastPend=0;NE
 function genCode(){var s='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',o='';for(var i=0;i<6;i++)o+=s[Math.random()*s.length|0];return o}
 function ourTurn(){return NET.room&&NET.room.turn===NET.role}
 function otherRole(){return NET.role==='host'?'guest':'host'}
-
 function meInfo(){
   var id='anon';
   try{if(FNS.auth&&FNS.auth.currentUser)id=FNS.auth.currentUser.uid}catch(e){}
@@ -313,7 +304,6 @@ function meInfo(){
   }catch(e){}
   return{id:id,name:name};
 }
-
 async function netCreate(){try{await NET.ensure()}catch(e){return}NET.reset();NET.code=genCode();NET.role='host';var me=meInfo();await FNS.set(NET.roomRef(),{createdAt:Date.now(),host:me,guest:null,hostOnline:true,guestOnline:false,state:'placing',hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null});try{FNS.od(FNS.ref(FNS.db,'rooms/'+NET.code+'/hostOnline')).set(false)}catch(e){}NET.conn=true;NET.attach('rooms/'+NET.code,function(s){onRoom(s.val())});resetOnlinePlace();hideMode();refreshBar();setStatus('Комната '+NET.code+' создана · нажми 📨 Пригласить');trk('net_create',{role:'host'})}
 async function netJoin(code){code=(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length<4){toast('Введи код комнаты');return}try{await NET.ensure()}catch(e){return}NET.reset();var s=await FNS.get(FNS.ref(FNS.db,'rooms/'+code));if(!s.exists()){toast('Комната не найдена: '+code);return}var d=s.val();if(d.guest){toast('Комната уже занята');return}NET.code=code;NET.role='guest';var me=meInfo();await FNS.set(FNS.ref(FNS.db,'rooms/'+code+'/guest'),me);await FNS.set(FNS.ref(FNS.db,'rooms/'+code+'/guestOnline'),true);try{FNS.od(FNS.ref(FNS.db,'rooms/'+code+'/guestOnline')).set(false)}catch(e){}NET.conn=true;NET.attach('rooms/'+code,function(sn){onRoom(sn.val())});resetOnlinePlace();hideMode();refreshBar();setStatus('Подключено к комнате '+code+' · расставь флот и жми «⚔️ В бой!»');trk('net_join',{role:'guest'})}
 function netReady(){if(!NET.room)return;var o={};o[NET.role+'Ready']=true;NET.patch(o);setStatus('Ты готов · ожидание соперника…')}
@@ -351,58 +341,28 @@ function onRoom(d){if(!d){if(NET.conn){toast('Комната закрыта');ne
  if(d.resolve&&d.resolve.by===NET.role)applyResolve(d);
  renderAll()}
 function end(w){if(G.over)return;G.over=true;G.won=w;stopT();if(w){sWin();Platform.haptic('success');V('v_win','Победа!')}else{sLose();Platform.haptic('error');V('v_lose','Поражение')}ST.games++;if(w){ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak}else ST.streak=0;saveST();trk('game_end',{game_name:'seabattle',win:w?1:0,time:G.time,shots:G.shotsFired,acc:G.shotsFired?Math.round(G.hits/G.shotsFired*100):0,online:G.online?1:0,difficulty:set.diff});showEnd(w)}
-
-/* ============================================================ */
-/* v4.19: УНИВЕРСАЛЬНЫЙ ШЕРИНГ                                     */
-/* На мобильном → системное окно со всеми приложениями            */
-/* (Telegram, WhatsApp, VK, SMS, Email, "Скопировать" и т.д.)     */
-/* На ПК (где нет Web Share API) → копируем в буфер + тост         */
-/* Если clipboard недоступен → показываем ссылку в тосте          */
-/* ============================================================ */
-async function smartShare(url, text, fallbackToast) {
-  // 1. Web Share API — нативное системное окно со всеми приложениями
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: 'Морской бой',
-        text: text,
-        url: url
-      });
-      return;
-    } catch (e) {
-      if (e.name === 'AbortError') return; // пользователь отменил — не показываем тост
-      // иначе падаем в fallback
-    }
-  }
-
-  // 2. Fallback для ПК: копируем в буфер + тост
-  var fullText = text + '\n' + url;
-  try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(fullText);
-      toast(fallbackToast || 'Ссылка скопирована, отправьте её другу');
-      return;
-    }
-  } catch (e) { /* ignore */ }
-
-  // 3. Последний fallback: показываем ссылку в тосте
-  toast((fallbackToast || 'Ссылка') + '. ' + url);
+/* v4.20: шеринг делегируется в Platform.share:
+   браузер-телефон -> системный лист со всеми приложениями;
+   внутри TG -> нативный выбор чата Telegram; VK/MAX -> их нативный шеринг;
+   ПК -> буфер обмена + тост */
+function smartShare(url,text,fallbackToast){
+  Platform.share(url,text,{
+    title:'Морской бой',
+    onCopied:function(){toast(fallbackToast||'Ссылка скопирована, отправьте её другу')}
+  });
 }
-
-function invite() {
-  if (!NET.code) { toast('Сначала создай комнату'); return; }
-  var url = location.origin + location.pathname + '?room=' + NET.code + '&plat=' + Platform.name + '&v=' + VER;
-  var text = '🚢 Морской бой! Комната ' + NET.code + '. Сыграем?';
-  smartShare(url, text, 'Ссылка для приглашения скопирована, отправьте её другу');
+function invite(){
+  if(!NET.code){toast('Сначала создай комнату');return}
+  var url=location.origin+location.pathname+'?room='+NET.code+'&plat='+Platform.name+'&v='+VER;
+  var text='🚢 Морской бой! Комната '+NET.code+'. Сыграем?';
+  smartShare(url,text,'Ссылка для приглашения скопирована, отправьте её другу');
 }
-
-function share() {
-  var acc = G.shotsFired ? Math.round(G.hits / G.shotsFired * 100) : 0;
-  var text = '🚢 Морской бой: ' + (G.won ? 'ПОБЕДА!' : 'поражение') + '! Время ' + fmt(G.time) + ', точность ' + acc + '%. Сможешь лучше?';
-  var url = location.origin + location.pathname + '?plat=' + Platform.name;
-  smartShare(url, text, 'Результат скопирован, поделитесь с другом');
+function share(){
+  var acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;
+  var text='🚢 Морской бой: '+(G.won?'ПОБЕДА!':'поражение')+'! Время '+fmt(G.time)+', точность '+acc+'%. Сможешь лучше?';
+  var url=location.origin+location.pathname+'?plat='+Platform.name;
+  smartShare(url,text,'Результат скопирован, поделитесь с другом');
 }
-
 function copyCode(){if(!NET.code)return;try{navigator.clipboard.writeText(NET.code).catch(function(){});toast('Код '+NET.code+' скопирован')}catch(e){toast('Код: '+NET.code)}}
 function ebtn(t,f,p){var b=document.createElement('button');b.className='btn'+(p?' primary':'');b.textContent=t;b.onclick=f;$('endBtns').appendChild(b)}
 function showEnd(w){var ov=$('endOverlay'),acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;$('endTitle').textContent=w?'🏆 Победа!':'💥 Флот потоплен';$('endSub').innerHTML='Время: <b>'+fmt(G.time)+'</b> · Выстрелы: <b>'+G.shotsFired+'</b> · Точность: <b>'+acc+'%</b><br>Режим: '+(G.online?'онлайн‑дуэль':'ИИ ('+dName()+')');$('endBtns').innerHTML='';ebtn('📨 Отправить результат другу',share,true);ebtn('🔄 Сыграть ещё',function(){ov.classList.remove('show');if(G.online)netLeave();else{newGame();showMode('menu')}});ebtn('🏠 В меню',function(){ov.classList.remove('show');if(G.online)NET.reset();goToHub();});ov.classList.add('show')}
