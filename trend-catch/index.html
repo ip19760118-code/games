@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Trend Catch</title>
 
-  <!-- Telegram Mini App SDK -->
+  <!-- Telegram Mini App SDK (оставляем для обратной совместимости) -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Единый слой платформ (TG / VK / MAX / web) -->
+  <script src="../js/platform.js"></script>
 
   <!-- ============================================================ -->
   <!-- GOOGLE ANALYTICS 4                                           -->
-  <!-- ЗАМЕНИ G-XXXXXXXXXX НА СВОЙ ID В ДВУХ МЕСТАХ НИЖЕ            -->
   <!-- ============================================================ -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
   <script>
@@ -253,6 +254,14 @@
     .stats-separator {
       height: 10px;
     }
+
+    .menu-ver {
+      font-size: 10px;
+      opacity: 0.4;
+      margin-top: 14px;
+      font-family: monospace;
+      letter-spacing: 1px;
+    }
   </style>
 </head>
 <body>
@@ -284,6 +293,8 @@
           <button class="btn-secondary" id="soundBtn">🔊 Звук: классика</button>
           <button class="btn-secondary" id="statsBtn">📊 Статистика</button>
         </div>
+
+        <div class="menu-ver" id="verTag">v1.1</div>
       </div>
 
       <div id="gameOverScreen" class="panel hidden">
@@ -306,32 +317,53 @@
   </div>
 
   <script>
-    // Инициализация Telegram Mini App
-    const tg = window.Telegram?.WebApp;
+    const VER = '1.1';
 
-    if (tg) {
+    /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
+    /* v1.1: BackButton-логика перенесена в callback back.
+       Platform сам определит платформу и навесит обработчик. */
+    function backHandler() {
       try {
-        tg.ready();
-        tg.expand();
-
-        if (typeof tg.setHeaderColor === 'function') {
-          tg.setHeaderColor('#070b16');
+        // Если открыт экран статистики — вернуться на предыдущий
+        if (!statsScreen.classList.contains('hidden')) {
+          playSound('click');
+          if (statsReturn === 'gameover') {
+            showGameOverScreen();
+          } else {
+            showStartScreen();
+          }
+          return;
         }
-
-        if (typeof tg.setBackgroundColor === 'function') {
-          tg.setBackgroundColor('#070b16');
+        // Если открыт экран окончания игры — возврат к меню
+        if (!gameOverScreen.classList.contains('hidden')) {
+          showStartScreen();
+          return;
         }
-
-        if (typeof tg.disableVerticalSwipes === 'function') {
-          tg.disableVerticalSwipes();
+        // Если открыт стартовый экран — в хаб
+        if (!startScreen.classList.contains('hidden')) {
+          goToHub();
+          return;
         }
-      } catch (e) {
-        // Telegram может быть недоступен в обычном браузере — это нормально
-      }
+      } catch (e) {}
+      goToHub();
     }
 
-    /* ---------- ПОМОЩНИК ДЛЯ СОБЫТИЙ GOOGLE ANALYTICS ---------- */
+    Platform.init({
+      bg: '#070b16',
+      back: backHandler
+    });
+
+    /* v1.1: возвращаемся в хаб, сохраняя платформу */
+    function goToHub() {
+      Platform.haptic('light');
+      playSound('click');
+      location.href = '../?plat=' + Platform.name;
+    }
+
+    /* v1.1: трекер с автоматической меткой платформы */
     function trackEvent(name, params) {
+      params = params || {};
+      params.platform = Platform.name;
       try {
         if (typeof gtag === 'function') {
           gtag('event', name, params);
@@ -339,27 +371,21 @@
       } catch (e) {}
     }
 
-    /* ---------- СОБЫТИЕ: ОТКРЫТИЕ ИГРЫ (1 раз за сессию) ---------- */
+    /* v1.1: событие открытия игры с source=платформа */
     (function trackGameOpen() {
       try {
         const key = 'trendcatch_session_tracked';
         if (!sessionStorage.getItem(key)) {
           sessionStorage.setItem(key, '1');
-
-          let source = 'browser';
-          const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-          if (tgUser) source = 'telegram';
-
           trackEvent('game_open', {
             game_name: 'trend_catch',
-            source: source
+            source: Platform.name,
+            ver: VER
           });
         }
       } catch (e) {}
     })();
 
-    // Сюда потом можно вставить прямую ссылку вида:
-    // 'https://t.me/YOUR_BOT_USERNAME/trendcatch'
     const APP_URL_FOR_SHARE = '';
 
     const canvas = document.getElementById('game');
@@ -382,7 +408,6 @@
     const gameOverStatsBtn = document.getElementById('gameOverStatsBtn');
     const statsBackBtn = document.getElementById('statsBackBtn');
 
-    // Кнопки возврата в меню
     const backBtnStart = document.getElementById('backBtnStart');
     const backBtnGameOver = document.getElementById('backBtnGameOver');
     const backBtnStats = document.getElementById('backBtnStats');
@@ -430,17 +455,12 @@
 
     function loadSettings() {
       let sound = 'classic';
-
       try {
         const savedSound = localStorage.getItem('trendCatchSound_v1');
-
         if (['off', 'classic', 'retro', 'soft'].includes(savedSound)) {
           sound = savedSound;
         }
-      } catch (e) {
-        // ignore
-      }
-
+      } catch (e) {}
       return { sound };
     }
 
@@ -449,9 +469,7 @@
     function saveSettings() {
       try {
         localStorage.setItem('trendCatchSound_v1', settings.sound);
-      } catch (e) {
-        // ignore
-      }
+      } catch (e) {}
     }
 
     function loadStats() {
@@ -462,49 +480,28 @@
         totalBad: 0,
         totalBonuses: 0,
         totalTimePlayed: 0,
-        bestScores: {
-          easy: 0,
-          normal: 0,
-          hard: 0,
-          endless: 0
-        }
+        bestScores: { easy: 0, normal: 0, hard: 0, endless: 0 }
       };
 
-      let result = {
-        ...defaults,
-        bestScores: { ...defaults.bestScores }
-      };
+      let result = { ...defaults, bestScores: { ...defaults.bestScores } };
 
       try {
         const raw = localStorage.getItem('trendCatchStats_v1');
-
         if (raw) {
           const parsed = JSON.parse(raw);
-
           result = {
             ...defaults,
             ...parsed,
-            bestScores: {
-              ...defaults.bestScores,
-              ...(parsed.bestScores || {})
-            }
+            bestScores: { ...defaults.bestScores, ...(parsed.bestScores || {}) }
           };
         }
-      } catch (e) {
-        // ignore
-      }
+      } catch (e) {}
 
-      // На всякий случай подтягиваем старые рекорды, если они были
       ['easy', 'normal', 'hard', 'endless'].forEach((key) => {
         try {
           const old = Number(localStorage.getItem(`trendBest_${key}`) || 0);
-
-          if (old > result.bestScores[key]) {
-            result.bestScores[key] = old;
-          }
-        } catch (e) {
-          // ignore
-        }
+          if (old > result.bestScores[key]) result.bestScores[key] = old;
+        } catch (e) {}
       });
 
       return result;
@@ -515,14 +512,11 @@
     function saveStats() {
       try {
         localStorage.setItem('trendCatchStats_v1', JSON.stringify(stats));
-      } catch (e) {
-        // ignore
-      }
+      } catch (e) {}
     }
 
     let W = 360;
     let H = 640;
-
     let bgGradient = null;
     let particles = [];
 
@@ -539,75 +533,27 @@
 
     const DIFFICULTIES = {
       easy: {
-        label: 'easy',
-        time: 60,
-        lives: 5,
-        baseSpeed: 85,
-        speedMult: 2.0,
-        maxSpeed: 320,
-        spawnRate: 0.85,
-        minSpawn: 0.45,
-        badChance: 0.15,
-        badChanceMax: 0.30,
-        bonusChance: 0.06
+        label: 'easy', time: 60, lives: 5, baseSpeed: 85, speedMult: 2.0, maxSpeed: 320,
+        spawnRate: 0.85, minSpawn: 0.45, badChance: 0.15, badChanceMax: 0.30, bonusChance: 0.06
       },
       normal: {
-        label: 'normal',
-        time: 45,
-        lives: 3,
-        baseSpeed: 110,
-        speedMult: 3.0,
-        maxSpeed: 420,
-        spawnRate: 0.72,
-        minSpawn: 0.38,
-        badChance: 0.24,
-        badChanceMax: 0.38,
-        bonusChance: 0.05
+        label: 'normal', time: 45, lives: 3, baseSpeed: 110, speedMult: 3.0, maxSpeed: 420,
+        spawnRate: 0.72, minSpawn: 0.38, badChance: 0.24, badChanceMax: 0.38, bonusChance: 0.05
       },
       hard: {
-        label: 'hard',
-        time: 30,
-        lives: 2,
-        baseSpeed: 150,
-        speedMult: 4.5,
-        maxSpeed: 520,
-        spawnRate: 0.55,
-        minSpawn: 0.32,
-        badChance: 0.34,
-        badChanceMax: 0.48,
-        bonusChance: 0.04
+        label: 'hard', time: 30, lives: 2, baseSpeed: 150, speedMult: 4.5, maxSpeed: 520,
+        spawnRate: 0.55, minSpawn: 0.32, badChance: 0.34, badChanceMax: 0.48, bonusChance: 0.04
       },
       endless: {
-        label: 'endless',
-        time: null,
-        lives: 3,
-        baseSpeed: 100,
-        speedMult: 2.2,
-        maxSpeed: 430,
-        spawnRate: 0.78,
-        minSpawn: 0.36,
-        badChance: 0.22,
-        badChanceMax: 0.42,
-        bonusChance: 0.06
+        label: 'endless', time: null, lives: 3, baseSpeed: 100, speedMult: 2.2, maxSpeed: 430,
+        spawnRate: 0.78, minSpawn: 0.36, badChance: 0.22, badChanceMax: 0.42, bonusChance: 0.06
       }
     };
 
     const ITEM_STYLES = {
-      good: {
-        ring: '#22ff8e',
-        glow: 'rgba(34, 255, 142, 0.55)',
-        disc: 'rgba(4, 16, 12, 0.90)'
-      },
-      bad: {
-        ring: '#ff4d63',
-        glow: 'rgba(255, 77, 99, 0.55)',
-        disc: 'rgba(24, 5, 10, 0.90)'
-      },
-      bonus: {
-        ring: '#ffd84d',
-        glow: 'rgba(255, 216, 77, 0.70)',
-        disc: 'rgba(24, 17, 3, 0.92)'
-      }
+      good: { ring: '#22ff8e', glow: 'rgba(34, 255, 142, 0.55)', disc: 'rgba(4, 16, 12, 0.90)' },
+      bad: { ring: '#ff4d63', glow: 'rgba(255, 77, 99, 0.55)', disc: 'rgba(24, 5, 10, 0.90)' },
+      bonus: { ring: '#ffd84d', glow: 'rgba(255, 216, 77, 0.70)', disc: 'rgba(24, 17, 3, 0.92)' }
     };
 
     const state = {
@@ -647,113 +593,48 @@
       { emoji: '🛡', type: 'life' }
     ];
 
-    function rand(min, max) {
-      return Math.random() * (max - min) + min;
-    }
-
-    function clamp(v, min, max) {
-      return Math.max(min, Math.min(max, v));
-    }
-
-    function getBest(key) {
-      try {
-        return Number(localStorage.getItem(key) || 0);
-      } catch (e) {
-        return 0;
-      }
-    }
-
-    function setBest(key, value) {
-      try {
-        localStorage.setItem(key, String(value));
-      } catch (e) {
-        // ignore
-      }
-    }
+    function rand(min, max) { return Math.random() * (max - min) + min; }
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
     function ensureAudio() {
       try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-
         if (!AudioContextClass) return;
-
-        if (!audioCtx) {
-          audioCtx = new AudioContextClass();
-        }
-
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume().catch(() => {});
-        }
-      } catch (e) {
-        // ignore
-      }
+        if (!audioCtx) audioCtx = new AudioContextClass();
+        if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+      } catch (e) {}
     }
 
-    function playTone({
-      freq = 440,
-      endFreq = null,
-      duration = 0.12,
-      type = 'sine',
-      gain = 0.05,
-      delay = 0
-    } = {}) {
+    function playTone({ freq = 440, endFreq = null, duration = 0.12, type = 'sine', gain = 0.05, delay = 0 } = {}) {
       if (settings.sound === 'off') return;
-
       try {
         ensureAudio();
-
         if (!audioCtx) return;
-
         const now = audioCtx.currentTime + delay;
-
         const osc = audioCtx.createOscillator();
         const g = audioCtx.createGain();
-
         osc.type = type;
         osc.frequency.setValueAtTime(Math.max(20, freq), now);
-
-        if (endFreq) {
-          osc.frequency.exponentialRampToValueAtTime(Math.max(20, endFreq), now + duration);
-        }
-
+        if (endFreq) osc.frequency.exponentialRampToValueAtTime(Math.max(20, endFreq), now + duration);
         g.gain.setValueAtTime(0.0001, now);
         g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), now + 0.01);
         g.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-
         osc.connect(g);
         g.connect(audioCtx.destination);
-
         osc.start(now);
         osc.stop(now + duration + 0.03);
-      } catch (e) {
-        // ignore
-      }
+      } catch (e) {}
     }
 
     function playSound(name) {
       const theme = SOUND_THEMES[settings.sound];
-
       if (!theme) return;
-
       try {
         ensureAudio();
-
-        if (name === 'good') {
-          playTone(theme.good);
-        }
-
-        if (name === 'bad') {
-          playTone(theme.bad);
-        }
-
-        if (name === 'click') {
-          playTone(theme.click);
-        }
-
-        if (name === 'gameover') {
-          playTone(theme.gameover);
-        }
-
+        if (name === 'good') playTone(theme.good);
+        if (name === 'bad') playTone(theme.bad);
+        if (name === 'click') playTone(theme.click);
+        if (name === 'gameover') playTone(theme.gameover);
         if (name === 'bonus') {
           theme.bonus.notes.forEach((noteFreq, index) => {
             playTone({
@@ -766,60 +647,31 @@
             });
           });
         }
-      } catch (e) {
-        // ignore
-      }
+      } catch (e) {}
     }
 
+    /* v1.1: haptic теперь через Platform, с маппингом нестандартных типов */
     function haptic(type) {
       try {
-        const h = window.Telegram?.WebApp?.HapticFeedback;
-
-        if (h) {
-          if (type === 'error') {
-            h.notificationOccurred('error');
-          } else if (type === 'success') {
-            h.notificationOccurred('success');
-          } else if (type === 'heavy') {
-            h.impactOccurred('heavy');
-          } else {
-            h.impactOccurred('light');
-          }
-        } else if (navigator.vibrate) {
-          if (type === 'error') {
-            navigator.vibrate([60, 35, 60]);
-          } else if (type === 'success') {
-            navigator.vibrate(30);
-          } else {
-            navigator.vibrate(15);
-          }
-        }
-      } catch (e) {
-        // ignore
-      }
+        let t = type;
+        if (t === 'warning') t = 'error';
+        if (t === 'heavy') t = 'medium';
+        Platform.haptic(t);
+      } catch (e) {}
     }
 
     function formatTime(value) {
       const total = Math.max(0, Math.floor(value));
-
       const h = Math.floor(total / 3600);
       const m = Math.floor((total % 3600) / 60);
       const s = total % 60;
-
-      if (h > 0) {
-        return `${h} ч ${m} мин`;
-      }
-
-      if (m > 0) {
-        return `${m} мин ${s} сек`;
-      }
-
+      if (h > 0) return `${h} ч ${m} мин`;
+      if (m > 0) return `${m} мин ${s} сек`;
       return `${s} сек`;
     }
 
     function updateLayout() {
       const basketCenterY = Math.max(150, H - 140);
-
       layout = {
         basketCenterY,
         catchTop: basketCenterY - 40,
@@ -832,14 +684,11 @@
     function resize() {
       const rect = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
-
       canvas.width = Math.floor(rect.width * dpr);
       canvas.height = Math.floor(rect.height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
       W = rect.width;
       H = rect.height;
-
       initBackground();
       updateLayout();
     }
@@ -849,83 +698,49 @@
       bgGradient.addColorStop(0, '#070b16');
       bgGradient.addColorStop(0.42, '#0b1230');
       bgGradient.addColorStop(1, '#0d1733');
-
       const count = Math.max(10, Math.min(26, Math.floor((W * H) / 24000)));
       particles = [];
-
       for (let i = 0; i < count; i++) {
         particles.push({
-          x: rand(0, W),
-          y: rand(0, H),
-          vx: rand(-7, 7),
-          vy: rand(-5, 5),
-          r: rand(1, 2.3),
-          a: rand(0.06, 0.16)
+          x: rand(0, W), y: rand(0, H),
+          vx: rand(-7, 7), vy: rand(-5, 5),
+          r: rand(1, 2.3), a: rand(0.06, 0.16)
         });
       }
     }
 
     function drawGlow(x, y, r, color) {
       if (r <= 0) return;
-
       const g = ctx.createRadialGradient(x, y, 0, x, y, r);
       g.addColorStop(0, color);
       g.addColorStop(1, 'rgba(0,0,0,0)');
-
       ctx.fillStyle = g;
       ctx.fillRect(x - r, y - r, r * 2, r * 2);
     }
 
     function drawBackground(dt) {
       if (!bgGradient) initBackground();
-
       ctx.fillStyle = bgGradient;
       ctx.fillRect(0, 0, W, H);
-
       const t = performance.now() / 1000;
-
-      drawGlow(
-        W * 0.22 + Math.sin(t * 0.35) * W * 0.04,
-        H * 0.20 + Math.cos(t * 0.28) * H * 0.03,
-        Math.max(W, H) * 0.34,
-        'rgba(124, 255, 196, 0.035)'
-      );
-
-      drawGlow(
-        W * 0.80 + Math.cos(t * 0.22) * W * 0.05,
-        H * 0.28 + Math.sin(t * 0.31) * H * 0.04,
-        Math.max(W, H) * 0.30,
-        'rgba(99, 102, 241, 0.045)'
-      );
-
-      drawGlow(
-        W * 0.50 + Math.sin(t * 0.18) * W * 0.06,
-        H * 0.78 + Math.cos(t * 0.26) * H * 0.04,
-        Math.max(W, H) * 0.36,
-        'rgba(255, 183, 3, 0.025)'
-      );
-
+      drawGlow(W * 0.22 + Math.sin(t * 0.35) * W * 0.04, H * 0.20 + Math.cos(t * 0.28) * H * 0.03, Math.max(W, H) * 0.34, 'rgba(124, 255, 196, 0.035)');
+      drawGlow(W * 0.80 + Math.cos(t * 0.22) * W * 0.05, H * 0.28 + Math.sin(t * 0.31) * H * 0.04, Math.max(W, H) * 0.30, 'rgba(99, 102, 241, 0.045)');
+      drawGlow(W * 0.50 + Math.sin(t * 0.18) * W * 0.06, H * 0.78 + Math.cos(t * 0.26) * H * 0.04, Math.max(W, H) * 0.36, 'rgba(255, 183, 3, 0.025)');
       for (const p of particles) {
         p.x += p.vx * dt;
         p.y += p.vy * dt;
-
         if (p.x < -20) p.x = W + 20;
         if (p.x > W + 20) p.x = -20;
         if (p.y < -20) p.y = H + 20;
         if (p.y > H + 20) p.y = -20;
       }
-
       ctx.lineWidth = 1;
-
       for (let i = 0; i < particles.length; i++) {
         const a = particles[i];
-
         for (let j = i + 1; j < particles.length; j++) {
           const b = particles[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
+          const dx = a.x - b.x, dy = a.y - b.y;
           const dist = Math.hypot(dx, dy);
-
           if (dist < 120) {
             const alpha = (1 - dist / 120) * 0.065;
             ctx.strokeStyle = `rgba(148, 163, 255, ${alpha})`;
@@ -936,7 +751,6 @@
           }
         }
       }
-
       for (const p of particles) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -948,48 +762,26 @@
     function pickWeighted(arr) {
       const total = arr.reduce((sum, item) => sum + (item.weight || 1), 0);
       let r = Math.random() * total;
-
       for (const item of arr) {
         r -= (item.weight || 1);
-
-        if (r <= 0) {
-          return item;
-        }
+        if (r <= 0) return item;
       }
-
       return arr[0];
     }
 
     function spawnItem() {
       let category = 'good';
-
-      const dynamicBadChance = Math.min(
-        state.diff.badChance + state.elapsed * 0.0015,
-        state.diff.badChanceMax
-      );
-
+      const dynamicBadChance = Math.min(state.diff.badChance + state.elapsed * 0.0015, state.diff.badChanceMax);
       const roll = Math.random();
-
-      if (roll < state.diff.bonusChance) {
-        category = 'bonus';
-      } else if (roll < state.diff.bonusChance + dynamicBadChance) {
-        category = 'bad';
-      }
+      if (roll < state.diff.bonusChance) category = 'bonus';
+      else if (roll < state.diff.bonusChance + dynamicBadChance) category = 'bad';
 
       let type;
+      if (category === 'good') type = pickWeighted(goodTypes);
+      else if (category === 'bad') type = pickWeighted(badTypes);
+      else type = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
 
-      if (category === 'good') {
-        type = pickWeighted(goodTypes);
-      } else if (category === 'bad') {
-        type = pickWeighted(badTypes);
-      } else {
-        type = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
-      }
-
-      const speed = Math.min(
-        rand(state.diff.baseSpeed, state.diff.baseSpeed + 45) + state.elapsed * state.diff.speedMult,
-        state.diff.maxSpeed
-      );
+      const speed = Math.min(rand(state.diff.baseSpeed, state.diff.baseSpeed + 45) + state.elapsed * state.diff.speedMult, state.diff.maxSpeed);
 
       state.items.push({
         x: rand(34, W - 34),
@@ -1004,51 +796,32 @@
 
     function applyBonus(item) {
       stats.totalBonuses += 1;
-
       state.flash = 0.18;
       state.flashColor = 'rgba(255, 215, 0, 0.20)';
-
       haptic('success');
       playSound('bonus');
-
-      if (item.bonusType === 'score') {
-        state.score += 5;
-      }
-
+      if (item.bonusType === 'score') state.score += 5;
       if (item.bonusType === 'time') {
-        if (state.time !== null) {
-          state.time += 5;
-        } else {
-          state.score += 5;
-        }
+        if (state.time !== null) state.time += 5;
+        else state.score += 5;
       }
-
-      if (item.bonusType === 'life') {
-        state.lives = Math.min(state.lives + 1, 5);
-      }
+      if (item.bonusType === 'life') state.lives = Math.min(state.lives + 1, 5);
     }
 
     function catchItem(item) {
       if (item.category === 'bad') {
         stats.totalBad += 1;
-
         state.lives -= 1;
         state.flash = 0.18;
         state.flashColor = 'rgba(255, 70, 70, 0.24)';
-
         haptic('error');
         playSound('bad');
-
-        if (state.lives <= 0) {
-          endGame();
-        }
+        if (state.lives <= 0) endGame();
       } else if (item.category === 'good') {
         stats.totalGood += 1;
-
         state.score += item.points;
         state.flash = 0.10;
         state.flashColor = 'rgba(0, 255, 136, 0.14)';
-
         haptic('light');
         playSound('good');
       } else if (item.category === 'bonus') {
@@ -1056,42 +829,20 @@
       }
     }
 
-    // Управление нативной кнопкой BackButton в Telegram
+    /* v1.1: управление BackButton через Platform.backButton */
     function showBackButton() {
       try {
-        if (tg?.BackButton) {
-          tg.BackButton.show();
-        }
-      } catch (e) {
-        // ignore
-      }
+        if (Platform.backButton && Platform.backButton.show) Platform.backButton.show();
+      } catch (e) {}
     }
 
     function hideBackButton() {
       try {
-        if (tg?.BackButton) {
-          tg.BackButton.hide();
-        }
-      } catch (e) {
-        // ignore
-      }
-    }
-
-    function goBackToHub() {
-      haptic('light');
-      playSound('click');
-
-      // Переход в родительскую директорию (хаб)
-      location.href = '../';
-    }
-
-    // Обработчик нативной кнопки BackButton
-    if (tg?.BackButton) {
-      tg.BackButton.onClick(goBackToHub);
+        if (Platform.backButton && Platform.backButton.hide) Platform.backButton.hide();
+      } catch (e) {}
     }
 
     function startGame(diffKey) {
-      /* ---------- GA: СТАРТ ИГРЫ ---------- */
       trackEvent('game_start', {
         game_name: 'trend_catch',
         difficulty: diffKey
@@ -1111,24 +862,16 @@
       state.playerX = W / 2;
       state.targetX = W / 2;
       state.dragging = false;
-
       state.flash = 0;
       state.flashColor = 'rgba(255,255,255,0)';
 
-      if (settings.sound !== 'off') {
-        ensureAudio();
-      }
-
-      // Во время игры скрываем BackButton, чтобы случайно не выйти
+      if (settings.sound !== 'off') ensureAudio();
       hideBackButton();
-
       overlay.classList.add('hidden');
     }
 
     function endGame() {
       if (!state.running) return;
-
-      /* ---------- GA: КОНЕЦ ИГРЫ ---------- */
       const reason = (state.time !== null && state.time <= 0) ? 'time_out' : 'lives_out';
 
       trackEvent('game_end', {
@@ -1141,7 +884,6 @@
 
       state.running = false;
       state.dragging = false;
-
       haptic('warning');
       playSound('gameover');
 
@@ -1149,24 +891,17 @@
       stats.totalScore += state.score;
       stats.totalTimePlayed += state.elapsed;
 
-      if (!stats.bestScores[state.diffName]) {
-        stats.bestScores[state.diffName] = 0;
-      }
-
-      if (state.score > stats.bestScores[state.diffName]) {
-        stats.bestScores[state.diffName] = state.score;
-      }
+      if (!stats.bestScores[state.diffName]) stats.bestScores[state.diffName] = 0;
+      if (state.score > stats.bestScores[state.diffName]) stats.bestScores[state.diffName] = state.score;
 
       saveStats();
-
-      setBest(`trendBest_${state.diffName}`, stats.bestScores[state.diffName]);
+      try { localStorage.setItem(`trendBest_${state.diffName}`, String(stats.bestScores[state.diffName])); } catch (e) {}
 
       statsDiv.innerHTML = `
         Счёт: <b>${state.score.toLocaleString('ru-RU')}</b><br>
         Лучший результат: <b>${stats.bestScores[state.diffName].toLocaleString('ru-RU')}</b><br>
         Режим: <b>${DIFF_LABELS[state.diffName] || state.diffName}</b>
       `;
-
       showGameOverScreen();
     }
 
@@ -1179,11 +914,9 @@
     function showStartScreen() {
       state.running = false;
       state.dragging = false;
-
       hideAllPanels();
       startScreen.classList.remove('hidden');
       overlay.classList.remove('hidden');
-
       updateSoundLabel();
       showBackButton();
     }
@@ -1192,19 +925,15 @@
       hideAllPanels();
       gameOverScreen.classList.remove('hidden');
       overlay.classList.remove('hidden');
-
       showBackButton();
     }
 
     function showStatsScreen(returnTo) {
       statsReturn = returnTo;
-
       renderStats();
-
       hideAllPanels();
       statsScreen.classList.remove('hidden');
       overlay.classList.remove('hidden');
-
       showBackButton();
     }
 
@@ -1214,23 +943,15 @@
 
     function cycleSound() {
       let index = SOUND_ORDER.indexOf(settings.sound);
-
-      if (index === -1) {
-        index = 0;
-      }
-
+      if (index === -1) index = 0;
       settings.sound = SOUND_ORDER[(index + 1) % SOUND_ORDER.length];
-
       saveSettings();
       updateSoundLabel();
-
-      /* ---------- GA: СМЕНА ЗВУКА ---------- */
       trackEvent('settings_change', {
         game_name: 'trend_catch',
         setting: 'sound',
         value: settings.sound
       });
-
       if (settings.sound !== 'off') {
         ensureAudio();
         playSound('click');
@@ -1239,26 +960,18 @@
 
     function renderStats() {
       const b = stats.bestScores;
-
-      const avg = stats.games > 0
-        ? Math.round(stats.totalScore / stats.games)
-        : 0;
-
+      const avg = stats.games > 0 ? Math.round(stats.totalScore / stats.games) : 0;
       statsInfo.innerHTML = `
         <div>Завершено игр: <b>${stats.games.toLocaleString('ru-RU')}</b></div>
         <div>Всего очков: <b>${stats.totalScore.toLocaleString('ru-RU')}</b></div>
         <div>Средний счёт: <b>${avg.toLocaleString('ru-RU')}</b></div>
         <div>Время в игре: <b>${formatTime(stats.totalTimePlayed)}</b></div>
-
         <div class="stats-separator"></div>
-
         <div>Лучший счёт — Легко: <b>${b.easy.toLocaleString('ru-RU')}</b></div>
         <div>Лучший счёт — Средне: <b>${b.normal.toLocaleString('ru-RU')}</b></div>
         <div>Лучший счёт — Сложно: <b>${b.hard.toLocaleString('ru-RU')}</b></div>
         <div>Лучший счёт — Бесконечно: <b>${b.endless.toLocaleString('ru-RU')}</b></div>
-
         <div class="stats-separator"></div>
-
         <div>Поймано трендов: <b>${stats.totalGood.toLocaleString('ru-RU')}</b></div>
         <div>Поймано бонусов: <b>${stats.totalBonuses.toLocaleString('ru-RU')}</b></div>
         <div>Поймано инфошума: <b>${stats.totalBad.toLocaleString('ru-RU')}</b></div>
@@ -1270,66 +983,42 @@
       state.targetX = clientX - rect.left;
     }
 
-    function getShareUrl() {
-      if (APP_URL_FOR_SHARE) {
-        return APP_URL_FOR_SHARE;
-      }
-
-      try {
-        const u = new URL(location.href);
-        return u.origin + u.pathname;
-      } catch (e) {
-        return location.href;
-      }
-    }
-
+    /* v1.1: шеринг через Platform.share */
     function shareResult() {
-      /* ---------- GA: ПОДЕЛИТЬСЯ РЕЗУЛЬТАТОМ ---------- */
       trackEvent('game_share', {
         game_name: 'trend_catch',
         score: state.score,
         difficulty: state.diffName
       });
-
       const text = `Я набрал ${state.score} очков в Trend Catch! Попробуй побить мой рекорд.`;
-      const url = getShareUrl();
-
-      const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
-
+      let url;
       try {
-        if (window.Telegram?.WebApp?.openTelegramLink) {
-          window.Telegram.WebApp.openTelegramLink(shareUrl);
-        } else {
-          window.open(shareUrl, '_blank');
+        if (APP_URL_FOR_SHARE) url = APP_URL_FOR_SHARE;
+        else {
+          const u = new URL(location.href);
+          url = u.origin + u.pathname + '?plat=' + Platform.name;
         }
       } catch (e) {
-        window.open(shareUrl, '_blank');
+        url = location.href;
       }
-
+      Platform.share(url, text);
       haptic('light');
     }
 
     canvas.addEventListener('pointerdown', (e) => {
       state.dragging = true;
       setTargetX(e.clientX);
-
       if (canvas.setPointerCapture) {
-        try {
-          canvas.setPointerCapture(e.pointerId);
-        } catch (err) {}
+        try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
       }
     });
 
     canvas.addEventListener('pointermove', (e) => {
-      if (state.dragging) {
-        setTargetX(e.clientX);
-      }
+      if (state.dragging) setTargetX(e.clientX);
     });
 
     ['pointerup', 'pointercancel', 'pointerleave'].forEach((eventName) => {
-      canvas.addEventListener(eventName, () => {
-        state.dragging = false;
-      });
+      canvas.addEventListener(eventName, () => { state.dragging = false; });
     });
 
     canvas.addEventListener('touchstart', (e) => {
@@ -1340,16 +1029,11 @@
 
     canvas.addEventListener('touchmove', (e) => {
       e.preventDefault();
-
-      if (state.dragging) {
-        setTargetX(e.touches[0].clientX);
-      }
+      if (state.dragging) setTargetX(e.touches[0].clientX);
     }, { passive: false });
 
     ['touchend', 'touchcancel'].forEach((eventName) => {
-      canvas.addEventListener(eventName, () => {
-        state.dragging = false;
-      });
+      canvas.addEventListener(eventName, () => { state.dragging = false; });
     });
 
     document.querySelectorAll('[data-diff]').forEach((btn) => {
@@ -1374,47 +1058,27 @@
       showStartScreen();
     });
 
-    soundBtn.addEventListener('click', () => {
-      cycleSound();
-    });
-
-    statsBtn.addEventListener('click', () => {
-      playSound('click');
-      showStatsScreen('start');
-    });
-
-    gameOverStatsBtn.addEventListener('click', () => {
-      playSound('click');
-      showStatsScreen('gameover');
-    });
+    soundBtn.addEventListener('click', cycleSound);
+    statsBtn.addEventListener('click', () => { playSound('click'); showStatsScreen('start'); });
+    gameOverStatsBtn.addEventListener('click', () => { playSound('click'); showStatsScreen('gameover'); });
 
     statsBackBtn.addEventListener('click', () => {
       playSound('click');
-
-      if (statsReturn === 'gameover') {
-        showGameOverScreen();
-      } else {
-        showStartScreen();
-      }
+      if (statsReturn === 'gameover') showGameOverScreen();
+      else showStartScreen();
     });
 
-    // Кнопки возврата в меню
-    backBtnStart.addEventListener('click', goBackToHub);
-    backBtnGameOver.addEventListener('click', goBackToHub);
-    backBtnStats.addEventListener('click', goBackToHub);
+    /* v1.1: все кнопки "В меню игр" через goToHub() */
+    backBtnStart.addEventListener('click', goToHub);
+    backBtnGameOver.addEventListener('click', goToHub);
+    backBtnStats.addEventListener('click', goToHub);
 
-    document.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-    });
+    document.addEventListener('contextmenu', (e) => { e.preventDefault(); });
 
     function drawItem(item) {
       const style = ITEM_STYLES[item.category] || ITEM_STYLES.good;
-
       let r = 24;
-
-      if (item.category === 'bonus') {
-        r = 24 + Math.sin(performance.now() / 180 + item.x * 0.02) * 3;
-      }
+      if (item.category === 'bonus') r = 24 + Math.sin(performance.now() / 180 + item.x * 0.02) * 3;
 
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
@@ -1454,52 +1118,24 @@
 
     function update(dt) {
       if (!state.running) return;
-
       state.elapsed += dt;
       state.flash = Math.max(0, state.flash - dt);
-
       if (state.time !== null) {
         state.time -= dt;
-
-        if (state.time <= 0) {
-          state.time = 0;
-          endGame();
-          return;
-        }
+        if (state.time <= 0) { state.time = 0; endGame(); return; }
       }
-
       state.targetX = clamp(state.targetX, 35, W - 35);
-
       const ease = 0.22;
       state.playerX += (state.targetX - state.playerX) * ease;
       state.playerX = clamp(state.playerX, 35, W - 35);
-
       state.spawnTimer -= dt;
-
-      const spawnInterval = Math.max(
-        state.diff.minSpawn,
-        state.diff.spawnRate - state.elapsed * 0.005
-      );
-
-      if (state.spawnTimer <= 0) {
-        spawnItem();
-        state.spawnTimer = spawnInterval;
-      }
-
+      const spawnInterval = Math.max(state.diff.minSpawn, state.diff.spawnRate - state.elapsed * 0.005);
+      if (state.spawnTimer <= 0) { spawnItem(); state.spawnTimer = spawnInterval; }
       for (let i = state.items.length - 1; i >= 0; i--) {
         const item = state.items[i];
         item.y += item.vy * dt;
-
-        if (item.y > H + 60) {
-          state.items.splice(i, 1);
-          continue;
-        }
-
-        if (
-          Math.abs(item.x - state.playerX) < 46 &&
-          item.y > layout.catchTop &&
-          item.y < layout.catchBottom
-        ) {
+        if (item.y > H + 60) { state.items.splice(i, 1); continue; }
+        if (Math.abs(item.x - state.playerX) < 46 && item.y > layout.catchTop && item.y < layout.catchBottom) {
           catchItem(item);
           state.items.splice(i, 1);
         }
@@ -1508,43 +1144,27 @@
 
     function draw(dt) {
       drawBackground(dt);
-
-      if (state.flash > 0) {
-        ctx.fillStyle = state.flashColor;
-        ctx.fillRect(0, 0, W, H);
-      }
-
+      if (state.flash > 0) { ctx.fillStyle = state.flashColor; ctx.fillRect(0, 0, W, H); }
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-
       ctx.save();
       ctx.shadowBlur = 10;
       ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
       ctx.fillStyle = 'rgba(244, 248, 255, 0.98)';
       ctx.font = '800 20px system-ui';
-
-      const timeLabel = state.time === null
-        ? '⏱ ∞'
-        : `⏱ ${Math.ceil(state.time)}`;
-
+      const timeLabel = state.time === null ? '⏱ ∞' : `⏱ ${Math.ceil(state.time)}`;
       ctx.fillText(`Счёт: ${state.score}`, 84, 28);
       ctx.fillText(timeLabel, W - 76, 28);
       ctx.fillText(`❤️ ${state.lives}`, W / 2, 28);
       ctx.restore();
-
-      for (const item of state.items) {
-        drawItem(item);
-      }
-
+      for (const item of state.items) drawItem(item);
       drawGlow(state.playerX, layout.glowY, 95, 'rgba(124, 255, 196, 0.12)');
-
       ctx.save();
       ctx.shadowBlur = 18;
       ctx.shadowColor = 'rgba(124, 255, 196, 0.35)';
       ctx.font = '50px serif';
       ctx.fillText('🧺', state.playerX, layout.basketCenterY);
       ctx.restore();
-
       ctx.beginPath();
       ctx.moveTo(state.playerX - 44, layout.catchLineY);
       ctx.lineTo(state.playerX + 44, layout.catchLineY);
@@ -1554,22 +1174,19 @@
     }
 
     let lastTime = performance.now();
-
     function loop(now) {
       const dt = Math.min((now - lastTime) / 1000, 0.05);
       lastTime = now;
-
       update(dt);
       draw(dt);
-
       requestAnimationFrame(loop);
     }
 
     window.addEventListener('resize', resize);
-
     updateSoundLabel();
     resize();
     showBackButton();
+    try { document.getElementById('verTag').textContent = 'v' + VER; } catch(e) {}
     requestAnimationFrame(loop);
   </script>
 </body>
