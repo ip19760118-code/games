@@ -101,7 +101,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .stat-row{display:flex;justify-content:space-between;padding:4px 2px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
 .btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
 .note{font-size:11px;opacity:.7;line-height:1.4;margin-top:6px;text-align:left}
-.toast{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(30,150,90,.95);color:#fff;font-weight:800;font-size:12px;padding:8px 16px;border-radius:24px;z-index:600;pointer-events:none;opacity:0;transition:opacity .25s}
+.toast{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(30,150,90,.95);color:#fff;font-weight:800;font-size:12px;padding:8px 16px;border-radius:24px;z-index:600;pointer-events:none;opacity:0;transition:opacity .25s;max-width:90vw;text-align:center}
 .toast.show{opacity:1}
 @media (max-width:600px){.boards{flex-direction:column}.title{font-size:14px}.btn{font-size:11px;padding:6px 11px}.lab{font-size:calc(var(--cell)*.34)}}
 </style></head><body>
@@ -129,7 +129,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div></div>
 </div></div>
 <div class="status" id="statusEl">Выбери режим игры</div>
-<div class="ver" id="verTag">v4.18</div>
+<div class="ver" id="verTag">v4.19</div>
 </div>
 <div class="overlay" id="modeOverlay"><div class="cardbox"><h2>🚢 Морской бой</h2><div class="sub">Выбери режим игры</div>
 <div class="mgrid">
@@ -157,12 +157,9 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
 var FB={apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"};
-var VER='4.18',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=false;
+var VER='4.19',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=false;
 
 /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
-/* v4.18: BackButton-логика закрытия оверлеев перенесена в callback back.
-   Порядок: set → rules → end → mode (если не в онлайн-комнате) → hub.
-   Если в активной онлайн-комнате — выходим из неё (netLeave). */
 function backHandler(){
   var a=['setOverlay','rulesOverlay','endOverlay','modeOverlay'];
   for(var i=0;i<a.length;i++){
@@ -178,7 +175,6 @@ Platform.init({
   back: backHandler
 });
 
-/* v4.18: возвращаемся в хаб, сохраняя платформу */
 function goToHub(){
   Platform.haptic('light');
   clearPreview();
@@ -186,7 +182,6 @@ function goToHub(){
   location.href='../?plat='+Platform.name;
 }
 
-/* v4.18: трекер с автоматической меткой платформы */
 function trk(n,p){
   p=p||{};
   p.platform=Platform.name;
@@ -307,7 +302,6 @@ function genCode(){var s='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',o='';for(var i=0;i<6
 function ourTurn(){return NET.room&&NET.room.turn===NET.role}
 function otherRole(){return NET.role==='host'?'guest':'host'}
 
-/* v4.18: имя пользователя из любой платформы через Platform.user() */
 function meInfo(){
   var id='anon';
   try{if(FNS.auth&&FNS.auth.currentUser)id=FNS.auth.currentUser.uid}catch(e){}
@@ -358,19 +352,55 @@ function onRoom(d){if(!d){if(NET.conn){toast('Комната закрыта');ne
  renderAll()}
 function end(w){if(G.over)return;G.over=true;G.won=w;stopT();if(w){sWin();Platform.haptic('success');V('v_win','Победа!')}else{sLose();Platform.haptic('error');V('v_lose','Поражение')}ST.games++;if(w){ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak}else ST.streak=0;saveST();trk('game_end',{game_name:'seabattle',win:w?1:0,time:G.time,shots:G.shotsFired,acc:G.shotsFired?Math.round(G.hits/G.shotsFired*100):0,online:G.online?1:0,difficulty:set.diff});showEnd(w)}
 
-/* v4.18: шеринг результата через платформу */
-function share(){
-  var acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;
-  var txt='🚢 Морской бой: '+(G.won?'ПОБЕДА!':'поражение')+'! Время '+fmt(G.time)+', выстрелов '+G.shotsFired+', точность '+acc+'%, '+(G.online?'онлайн‑дуэль':'ИИ: '+dName())+'. Сможешь лучше?';
-  Platform.share(location.href, txt);
+/* ============================================================ */
+/* v4.19: УНИВЕРСАЛЬНЫЙ ШЕРИНГ                                     */
+/* На мобильном → системное окно со всеми приложениями            */
+/* (Telegram, WhatsApp, VK, SMS, Email, "Скопировать" и т.д.)     */
+/* На ПК (где нет Web Share API) → копируем в буфер + тост         */
+/* Если clipboard недоступен → показываем ссылку в тосте          */
+/* ============================================================ */
+async function smartShare(url, text, fallbackToast) {
+  // 1. Web Share API — нативное системное окно со всеми приложениями
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'Морской бой',
+        text: text,
+        url: url
+      });
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return; // пользователь отменил — не показываем тост
+      // иначе падаем в fallback
+    }
+  }
+
+  // 2. Fallback для ПК: копируем в буфер + тост
+  var fullText = text + '\n' + url;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(fullText);
+      toast(fallbackToast || 'Ссылка скопирована, отправьте её другу');
+      return;
+    }
+  } catch (e) { /* ignore */ }
+
+  // 3. Последний fallback: показываем ссылку в тосте
+  toast((fallbackToast || 'Ссылка') + '. ' + url);
 }
 
-/* v4.18: приглашение через платформу, URL несёт plat */
-function invite(){
-  if(!NET.code){toast('Сначала создай комнату');return}
-  var url=location.origin+location.pathname+'?room='+NET.code+'&plat='+Platform.name+'&v='+VER;
-  var txt='🚢 Морской бой! Комната '+NET.code+'. Открой ссылку и играй: '+url;
-  Platform.share(url, txt);
+function invite() {
+  if (!NET.code) { toast('Сначала создай комнату'); return; }
+  var url = location.origin + location.pathname + '?room=' + NET.code + '&plat=' + Platform.name + '&v=' + VER;
+  var text = '🚢 Морской бой! Комната ' + NET.code + '. Сыграем?';
+  smartShare(url, text, 'Ссылка для приглашения скопирована, отправьте её другу');
+}
+
+function share() {
+  var acc = G.shotsFired ? Math.round(G.hits / G.shotsFired * 100) : 0;
+  var text = '🚢 Морской бой: ' + (G.won ? 'ПОБЕДА!' : 'поражение') + '! Время ' + fmt(G.time) + ', точность ' + acc + '%. Сможешь лучше?';
+  var url = location.origin + location.pathname + '?plat=' + Platform.name;
+  smartShare(url, text, 'Результат скопирован, поделитесь с другом');
 }
 
 function copyCode(){if(!NET.code)return;try{navigator.clipboard.writeText(NET.code).catch(function(){});toast('Код '+NET.code+' скопирован')}catch(e){toast('Код: '+NET.code)}}
@@ -425,7 +455,6 @@ $('voiceChk').onchange=function(e){set.voice=e.target.checked;saveSet();if(windo
 $('volSlider').oninput=function(e){set.vol=e.target.value/100;$('volV').textContent=e.target.value+'%';saveSet();aud();if(window.SND)SND.setVol(set.vol)};
 $('stReset').onclick=function(){if(confirm('Сбросить статистику?')){ST={games:0,wins:0,streak:0,bestStreak:0};saveST();showStats()}};
 $('rulesClose').onclick=function(){$('rulesOverlay').classList.remove('show')};
-/* v4.18: кнопка "В меню" передаёт платформу */
 $('hubBtn').onclick=function(){goToHub();};
 window.addEventListener('resize',function(){rescale()});
 window.addEventListener('orientationchange',function(){setTimeout(function(){rescale()},120)});
