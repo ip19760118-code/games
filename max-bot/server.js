@@ -1,7 +1,8 @@
-/* MAX Bot "Игровой центр" — webhook-сервер v1.4
-   v1.4: исходящие вызовы MAX через node:https с rejectUnauthorized:false
-   (сертификат MAX от УЦ Минцифры отсутствует в CA-бандле Node/Vercel);
-   chatId берётся из message.recipient.chat_id; обработчик с catch; 15 игр. */
+/* MAX Bot "Игровой центр" — webhook-сервер v1.5
+   v1.5: вся обработка ДО отправки ответа 200 — Vercel замораживает функцию
+   сразу после ответа, фоновые вызовы не успевают выполниться.
+   Таймаут 6с на каждый запрос к MAX API. chatId из message.recipient.chat_id.
+   Исходящие вызовы через node:https c rejectUnauthorized:false (УЦ Минцифры). */
 const express = require('express');
 const https = require('https');
 const app = express();
@@ -47,7 +48,7 @@ const START_TEXT =
 
 Выбирай игру и играй! 🚀`;
 
-/* ---------- API MAX через node:https (обходим недоверенный CA Минцифры) ---------- */
+/* ---------- API MAX через node:https + таймаут ---------- */
 function api(method, body) {
   return new Promise((resolve) => {
     const data = body ? JSON.stringify(body) : null;
@@ -56,7 +57,8 @@ function api(method, body) {
     const req = https.request(API + method, {
       method: body ? 'POST' : 'GET',
       headers: headers,
-      rejectUnauthorized: false          // только для домена MAX
+      rejectUnauthorized: false,
+      timeout: 6000
     }, (res) => {
       let txt = '';
       res.on('data', (c) => { txt += c; });
@@ -67,6 +69,7 @@ function api(method, body) {
         resolve({ status: res.statusCode, json: json });
       });
     });
+    req.on('timeout', () => { req.destroy(new Error('timeout 6s')); });
     req.on('error', (e) => {
       console.log('[MAX API]', method, '-> ERROR', e.message);
       resolve({ status: 0, json: { error: e.message } });
@@ -77,7 +80,6 @@ function api(method, body) {
 }
 function apiOk(r) { return r.status >= 200 && r.status < 300 && !(r.json && r.json.code); }
 
-/* ---------- v1.4: правильный chatId из message.recipient ---------- */
 function chatOf(u) {
   const m = u.message || (u.callback && u.callback.message) || {};
   const rec = m.recipient || {};
@@ -120,38 +122,42 @@ async function sendGame(chatId, id) {
   await send(chatId, (g ? g[1] : '🎮 Игра') + ' — открывай 👇\n' + url, false);
 }
 
-/* ---------- webhook ---------- */
-app.all('/max', (req, res, next) => {
+/* ---------- webhook: сначала работа, ПОТОМ ответ 200 ---------- */
+app.all('/max', async (req, res) => {
   console.log('[MAX] incoming:', req.method, '| update_type:', (req.body && req.body.update_type) || '-');
-  if (req.method !== 'POST') return res.status(200).send('ok');
-  if (MAX_SECRET && req.headers['x-max-bot-api-secret'] !== MAX_SECRET) return res.sendStatus(403);
-  res.sendStatus(200);                              // MAX ждёт 200 в течение 30 секунд
+  if (req.method !== 'POST') { res.status(200).send('ok'); return; }
+  if (MAX_SECRET && req.headers['x-max-bot-api-secret'] !== MAX_SECRET) { res.sendStatus(403); return; }
   const u = req.body || {};
   console.log('[MAX] update body:', JSON.stringify(u).slice(0, 600));
   const chatId = chatOf(u);
   console.log('[MAX] resolved chatId:', chatId);
-  if (!chatId) return;
-  (async () => {
-    if (u.update_type === 'bot_started' || u.update_type === 'message_created' || u.update_type === 'message_new') {
-      const text = (u.message && u.message.body && u.message.body.text || '').trim();
-      if (u.update_type === 'bot_started' || !text || /^(\/start|\/help|привет|меню|игры)/i.test(text)) {
-        await send(chatId, START_TEXT, true); return;
+  if (chatId) {
+    try {
+      if (u.update_type === 'bot_started' || u.update_type === 'message_created' || u.update_type === 'message_new') {
+        const text = (u.message && u.message.body && u.message.body.text || '').trim();
+        if (u.update_type === 'bot_started' || !text || /^(\/start|\/help|привет|меню|игры)/i.test(text)) {
+          await send(chatId, START_TEXT, true);
+        } else {
+          const byNum = /^(\d{1,2})$/.exec(text);
+          if (byNum && GAMES[+byNum[1] - 1]) { await sendGame(chatId, GAMES[+byNum[1] - 1][0]); }
+          else {
+            const low = text.toLowerCase();
+            const hit = GAMES.find(([id, l]) => l.toLowerCase().includes(low) || id === low);
+            if (hit) { await sendGame(chatId, hit[0]); }
+            else { await send(chatId, 'Не понял 🙂 Нажми кнопку ниже или отправь /start', true); }
+          }
+        }
       }
-      const byNum = /^(\d{1,2})$/.exec(text);
-      if (byNum && GAMES[+byNum[1] - 1]) { await sendGame(chatId, GAMES[+byNum[1] - 1][0]); return; }
-      const low = text.toLowerCase();
-      const hit = GAMES.find(([id, l]) => l.toLowerCase().includes(low) || id === low);
-      if (hit) { await sendGame(chatId, hit[0]); return; }
-      await send(chatId, 'Не понял 🙂 Нажми кнопку ниже или отправь /start', true);
-    }
-    else if (u.update_type === 'message_callback') {
-      let payload = u.callback && u.callback.payload;
-      if (typeof payload === 'string') { try { payload = JSON.parse(payload); } catch (e) { payload = null; } }
-      const g = payload && payload.g;
-      if (g === 'hub') await send(chatId, '🎮 Все игры здесь 👇\n' + HUB + '?plat=max', false);
-      else if (g) await sendGame(chatId, g);
-    }
-  })().catch((e) => { console.error('[MAX] handler error:', e && e.message); });
+      else if (u.update_type === 'message_callback') {
+        let payload = u.callback && u.callback.payload;
+        if (typeof payload === 'string') { try { payload = JSON.parse(payload); } catch (e) { payload = null; } }
+        const g = payload && payload.g;
+        if (g === 'hub') await send(chatId, '🎮 Все игры здесь 👇\n' + HUB + '?plat=max', false);
+        else if (g) await sendGame(chatId, g);
+      }
+    } catch (e) { console.error('[MAX] handler error:', e && e.message); }
+  }
+  res.sendStatus(200);   // только после всех вызовов MAX API (лимит MAX — 30 секунд)
 });
 
 app.get('/', (req, res) => res.send('MAX bot "Игровой центр" alive'));
