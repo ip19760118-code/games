@@ -1,6 +1,8 @@
-/* MAX Bot "Игровой центр" — webhook-сервер v1.1
-   Актуальный домен: platform-api2.max.ru, токен только в заголовке Authorization,
-   типы событий: message_created / message_callback / bot_started */
+/* MAX Bot "Игровой центр" — webhook-сервер v1.2
+   Домен: platform-api2.max.ru
+   Токен: только через заголовок Authorization
+   Типы событий: message_created / message_callback / bot_started
+   Отвечает 200 на все probe-запросы (GET/HEAD/OPTIONS) для надёжной регистрации webhook */
 const express = require('express');
 const app = express();
 app.use(express.json());
@@ -56,9 +58,11 @@ async function api(method, body) {
 
 function chatOf(u) {
   const m = u.message || (u.callback && u.callback.message) || u.callback || {};
-  return (m.chat_id != null ? m.chat_id : null)
-      ?? (m.sender && m.sender.user_id != null ? m.sender.user_id : null)
-      ?? (u.callback && u.callback.user && u.callback.user.user_id != null ? u.callback.user.user_id : null);
+  const chat =
+    (m.chat_id != null ? m.chat_id : null) ??
+    (m.sender && m.sender.user_id != null ? m.sender.user_id : null) ??
+    (u.callback && u.callback.user && u.callback.user.user_id != null ? u.callback.user.user_id : null);
+  return chat;
 }
 
 function menuKeyboard() {
@@ -92,7 +96,10 @@ async function sendGame(chatId, id) {
   await send(chatId, (g ? g[1] : '🎮 Игра') + ' — открывай 👇\n' + url, false);
 }
 
-app.post('/max', async (req, res) => {
+/* ---------- v1.2: обработка ВСЕХ методов, включая probe-запросы ---------- */
+app.all('/max', (req, res, next) => {
+  console.log('[MAX] incoming:', req.method, '| update_type:', (req.body && req.body.update_type) || '-');
+  if (req.method !== 'POST') return res.status(200).send('ok');
   if (MAX_SECRET && req.headers['x-max-bot-api-secret'] !== MAX_SECRET) return res.sendStatus(403);
   res.sendStatus(200);                            // MAX ждёт 200 в течение 30 секунд
   const u = req.body || {};
@@ -102,25 +109,26 @@ app.post('/max', async (req, res) => {
     if (u.update_type === 'bot_started' || u.update_type === 'message_created' || u.update_type === 'message_new') {
       const text = (u.message && u.message.body && u.message.body.text || '').trim();
       if (u.update_type === 'bot_started' || !text || /^(\/start|\/help|привет|меню|игры)/i.test(text)) {
-        await send(chatId, START_TEXT, true); return;
+        send(chatId, START_TEXT, true); return;
       }
       const byNum = /^(\d{1,2})$/.exec(text);
-      if (byNum && GAMES[+byNum[1] - 1]) { await sendGame(chatId, GAMES[+byNum[1] - 1][0]); return; }
+      if (byNum && GAMES[+byNum[1] - 1]) { sendGame(chatId, GAMES[+byNum[1] - 1][0]); return; }
       const low = text.toLowerCase();
       const hit = GAMES.find(([id, l]) => l.toLowerCase().includes(low) || id === low);
-      if (hit) { await sendGame(chatId, hit[0]); return; }
-      await send(chatId, 'Не понял 🙂 Нажми кнопку ниже или отправь /start', true);
+      if (hit) { sendGame(chatId, hit[0]); return; }
+      send(chatId, 'Не понял 🙂 Нажми кнопку ниже или отправь /start', true);
     }
     else if (u.update_type === 'message_callback') {
       let payload = u.callback && u.callback.payload;
       if (typeof payload === 'string') { try { payload = JSON.parse(payload); } catch (e) { payload = null; } }
       const g = payload && payload.g;
-      if (g === 'hub') await send(chatId, '🎮 Все игры здесь 👇\n' + HUB + '?plat=max', false);
-      else if (g) await sendGame(chatId, g);
+      if (g === 'hub') send(chatId, '🎮 Все игры здесь 👇\n' + HUB + '?plat=max', false);
+      else if (g) sendGame(chatId, g);
     }
   } catch (e) { console.error('max webhook error', e); }
 });
 
 app.get('/', (req, res) => res.send('MAX bot "Игровой центр" alive'));
+
 module.exports = app;
 if (require.main === module) app.listen(3000);

@@ -1,0 +1,4 @@
+{
+  "url": "https://tg-games-mu.vercel.app/max",
+  "update_types": ["message_created", "message_callback", "bot_started"]
+}
