@@ -105,7 +105,7 @@ function menuKeyboard() {
       type: 'callback', text: label, payload: JSON.stringify({ g: id })
     })));
   }
-  rows.push([{ type: 'callback', text: '🎮 Открыть все игры', payload: JSON.stringify({ g: 'hub' }) }]);
+  // v1.8: убрали кнопку "Открыть все игры"
   return { type: 'inline_keyboard', payload: { buttons: rows } };
 }
 
