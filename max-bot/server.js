@@ -12,7 +12,7 @@ app.use(express.json());
 const MAX_TOKEN = process.env.MAX_TOKEN || '';
 const MAX_SECRET = process.env.MAX_SECRET || '';
 const API = 'https://platform-api2.max.ru';
-const HUB = 'https://ip19760118-code.github.io/tg-games/';
+const HUB = 'https://ip19760118-code.github.io/games/';
 
 const GAMES = [
   ['chess',     '♟️ Шахматы'],
