@@ -1,7 +1,9 @@
-/* MAX Bot "Игровой центр" — webhook-сервер v1.7
-   v1.7: ГЛАВНОЕ ИСПРАВЛЕНИЕ — user_id/chat_id передаются в QUERY-строке
-   (POST /messages?user_id=...), а не в JSON-теле (официальный пример docs MAX).
-   Тело содержит только text/attachments. Лимит MAX: 2 сообщения/сек в диалог. */
+/* MAX Bot "Игровой центр" — webhook-сервер v1.8
+   v1.8: убрана кнопка "Открыть все игры" из клавиатуры.
+   v1.7: user_id/chat_id передаются в QUERY-строке POST /messages (официальный пример docs MAX).
+   Адресат личного диалога — user_id отправителя (sender.user_id / callback.user.user_id).
+   Исходящие вызовы через node:https c rejectUnauthorized:false (УЦ Минцифры).
+   Лимит MAX: 2 сообщения/сек в диалог. */
 const express = require('express');
 const https = require('https');
 const app = express();
@@ -51,7 +53,7 @@ const START_TEXT =
 
 Выбирай игру и играй! 🚀`;
 
-/* ---------- API MAX: id адресата — в QUERY, тело — только text/attachments ---------- */
+/* ---------- API MAX: адресат в QUERY, тело — только text/attachments ---------- */
 function api(method, body, query) {
   return new Promise((resolve) => {
     let url = API + method;
@@ -98,6 +100,7 @@ function idsOf(u) {
   return { human: human, chat: chat };
 }
 
+/* ---------- v1.8: клавиатура БЕЗ кнопки "Открыть все игры" ---------- */
 function menuKeyboard() {
   const rows = [];
   for (let i = 0; i < GAMES.length; i += 2) {
@@ -105,11 +108,9 @@ function menuKeyboard() {
       type: 'callback', text: label, payload: JSON.stringify({ g: id })
     })));
   }
-  // v1.8: убрали кнопку "Открыть все игры"
   return { type: 'inline_keyboard', payload: { buttons: rows } };
 }
 
-/* ---------- отправка: сначала user_id (диалог), потом chat_id (группа) ---------- */
 async function send(ids, text, withKeyboard) {
   const kb = withKeyboard ? [menuKeyboard()] : null;
   const tries = [];
@@ -161,8 +162,7 @@ app.all('/max', async (req, res) => {
         let payload = u.callback && u.callback.payload;
         if (typeof payload === 'string') { try { payload = JSON.parse(payload); } catch (e) { payload = null; } }
         const g = payload && payload.g;
-        if (g === 'hub') await send(ids, '🎮 Все игры здесь 👇\n' + HUB + '?plat=max', false);
-        else if (g) await sendGame(ids, g);
+        if (g) await sendGame(ids, g);
       }
     } catch (e) { console.error('[MAX] handler error:', e && e.message); }
   }
