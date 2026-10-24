@@ -1,8 +1,7 @@
-/* VK Bot "Игровой центр" — Callback API сервер v1.4
-   v1.4: кнопка "🎮 Мини-апп" (action open_link на vk.com/app54850501)
-   на второй странице меню + ссылка на мини-апп в стартовом тексте.
-   open_link не порождает message_event — открывается клиентом VK напрямую, без спиннера.
-   Клавиатуры: <= 4 рядов и <= 10 кнопок (лимиты VK). Обработка ДО res.send('ok'). */
+/* VK Bot "Игровой центр" — Callback API сервер v1.5
+   v1.5: цепочка вариантов клавиатуры: с кнопкой мини-аппа (open_link) ->
+   без неё -> текстовый список. Тег победившего варианта в логах ([VK SEND]).
+   Клавиатуры <= 4 рядов и <= 10 кнопок. Обработка ДО res.send('ok'). */
 const express = require('express');
 const app = express();
 app.use(express.json());
@@ -71,8 +70,8 @@ async function api(method, params) {
 }
 function apiOk(j) { return j && !j.error && j.response !== undefined; }
 
-/* ---------- клавиатура страницы: 3 ряда игр + ряд навигации ---------- */
-function pageKeyboard(page) {
+/* ---------- клавиатура страницы; withApp — добавлять ли кнопку мини-аппа ---------- */
+function pageKeyboard(page, withApp) {
   const startIdx = (page - 1) * PER_PAGE;
   const slice = GAMES.slice(startIdx, startIdx + PER_PAGE);
   const rows = [];
@@ -85,8 +84,7 @@ function pageKeyboard(page) {
   const nav = [];
   if (page > 1) nav.push({ action: { type: 'callback', label: '⬅️ Назад', payload: JSON.stringify({ p: page - 1 }) }, color: 'secondary' });
   if (page < TOTAL_PAGES) nav.push({ action: { type: 'callback', label: 'Ещё ➡️', payload: JSON.stringify({ p: page + 1 }) }, color: 'secondary' });
-  /* v1.4: на последней странице — кнопка запуска мини-аппа (8 кнопок, 3 ряда — в лимитах) */
-  if (page === TOTAL_PAGES) nav.push({ action: { type: 'open_link', label: '🎮 Мини-апп', link: VK_APP_URL }, color: 'positive' });
+  if (withApp && page === TOTAL_PAGES) nav.push({ action: { type: 'open_link', label: '🎮 Мини-апп', link: VK_APP_URL }, color: 'positive' });
   if (nav.length) rows.push(nav);
   return { one_time: false, inline: true, buttons: rows };
 }
@@ -94,19 +92,25 @@ function pageKeyboard(page) {
 let rnd = 0;
 function nextRandomId() { rnd += 1; return Date.now() * 10 + (rnd % 10); }
 
+/* ---------- v1.5: цепочка вариантов отправки меню ---------- */
 async function sendMenu(peerId, page) {
   const text = page === 1 ? START_TEXT : '🎮 Игры — страница ' + page + ' из ' + TOTAL_PAGES + ':';
-  const r = await api('messages.send', {
-    peer_id: peerId, message: text, random_id: nextRandomId(),
-    keyboard: JSON.stringify(pageKeyboard(page))
-  });
-  if (!apiOk(r)) {
-    await api('messages.send', {
-      peer_id: peerId, random_id: nextRandomId(),
-      message: text + '\n\n' + numList() + '\n\nОтветь номером игры.'
+  const variants = [
+    { tag: 'kb-with-app', kb: pageKeyboard(page, true) },
+    { tag: 'kb-no-app',   kb: pageKeyboard(page, false) }
+  ];
+  for (const v of variants) {
+    const r = await api('messages.send', {
+      peer_id: peerId, message: text, random_id: nextRandomId(),
+      keyboard: JSON.stringify(v.kb)
     });
+    if (apiOk(r)) { console.log('[VK SEND] ok via', v.tag); return r; }
   }
-  return r;
+  console.log('[VK SEND] fallback list');
+  return await api('messages.send', {
+    peer_id: peerId, random_id: nextRandomId(),
+    message: text + '\n\n' + numList() + '\n\nОтветь номером игры.\n🎮 Мини-апп: ' + VK_APP_URL
+  });
 }
 
 async function sendGame(peerId, id) {
