@@ -1,41 +1,77 @@
-/* tg-games: единый слой платформ v1.1 — Telegram / VK / MAX / web.
-   v1.1: умный шеринг: системный лист (Web Share API) -> нативный лист мессенджера
-   (TG switchInlineQuery / t.me/share, VK Share, MAX share) -> буфер обмена + тост. */
+/* tg-games: единый слой платформ v2 — Telegram / VK / MAX / web.
+   v2: VK — свайп-назад, полные тактильные нотификации, шеринг с текстом;
+       MAX — активация реального SDK (st.max.ru/js/max-web-app.js);
+       умный шеринг: Web Share API -> нативный лист мессенджера -> буфер + тост. */
 var Platform=(function(){
- var MAX_SDK_URL=''; /* ← впиши URL SDK MAX из docs dev.max.ru после регистрации */
+ var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
+ var TG_SDK_URL='https://telegram.org/js/telegram-web-app.js';
  var name='web',user=null,backFn=null,inited=false;
+
  function qs(k){try{return new URLSearchParams(location.search).get(k)||''}catch(e){return ''}}
  function load(src){return new Promise(function(res){var s=document.createElement('script');s.src=src;s.onload=function(){res(true)};s.onerror=function(){res(false)};document.head.appendChild(s)})}
  function detect(){var p=(qs('plat')||'').toLowerCase();
   if(p==='tg'||p==='vk'||p==='max')return p;
   if(window.Telegram&&window.Telegram.WebApp)return 'tg';
   if(window.vkBridge)return 'vk';
-  if(window.maxApi||window.maxBridge)return 'max';
+  if(window.WebApp&&window.WebApp.version)return 'max';   /* MAX создаёт window.WebApp */
   return 'web'}
  name=detect();
+
  function ensureSdk(cb){
-  if(name==='tg'&&!window.Telegram)load('https://telegram.org/js/telegram-web-app.js').then(cb);
+  if(name==='tg'&&!window.Telegram)load(TG_SDK_URL).then(cb);
   else if(name==='vk'&&!window.vkBridge)load(VK_SDK_URL).then(cb);
-  else if(name==='max'&&MAX_SDK_URL&&!window.maxApi)load(MAX_SDK_URL).then(cb);
+  else if(name==='max'&&!window.WebApp)load(MAX_SDK_URL).then(cb);
   else cb(true)}
+
  function pickUser(){
-  try{if(name==='tg'&&window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initDataUnsafe&&Telegram.WebApp.initDataUnsafe.user){var u=Telegram.WebApp.initDataUnsafe.user;user={id:'tg'+u.id,name:u.first_name||'Игрок'};return}}catch(e){}
+  try{
+   if(name==='tg'&&window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initDataUnsafe&&Telegram.WebApp.initDataUnsafe.user){
+    var u=Telegram.WebApp.initDataUnsafe.user;user={id:'tg'+u.id,name:u.first_name||'Игрок'};return}}catch(e){}
   if(name==='vk'&&window.vkBridge){try{vkBridge.send('VKWebAppGetUserInfo').then(function(d){user={id:'vk'+d.id,name:d.first_name||'Игрок'}}).catch(function(){})}catch(e){}}
-  if(name==='max'&&window.maxApi&&maxApi.getUserInfo){try{maxApi.getUserInfo().then(function(d){user={id:'mx'+(d.userId||d.id),name:d.name||d.first_name||'Игрок'}}).catch(function(){})}catch(e){}}
+  if(name==='max'&&window.WebApp){try{
+    var m=window.WebApp.initDataUnsafe&&window.WebApp.initDataUnsafe.user;
+    if(m)user={id:'mx'+m.id,name:m.first_name||'Игрок'}
+    else vkBridge=null} catch(e){}}
   if(!user)user={id:'g'+Math.floor(Math.random()*1e9),name:'Гость'}}
+
  function init(o){o=o||{};if(inited)return;inited=true;
   ensureSdk(function(){pickUser();
    try{
-    if(name==='tg'){var t=Telegram.WebApp;t.ready();t.expand();if(t.setHeaderColor&&o.bg)t.setHeaderColor(o.bg);if(t.setBackgroundColor&&o.bg)t.setBackgroundColor(o.bg);if(t.disableVerticalSwipes)t.disableVerticalSwipes();
+    /* ---------- Telegram ---------- */
+    if(name==='tg'){var t=Telegram.WebApp;t.ready();t.expand();
+     if(t.setHeaderColor&&o.bg)t.setHeaderColor(o.bg);
+     if(t.setBackgroundColor&&o.bg)t.setBackgroundColor(o.bg);
+     if(t.disableVerticalSwipes)t.disableVerticalSwipes();
      if(o.back&&t.BackButton){backFn=o.back;t.BackButton.show();t.BackButton.onClick(o.back)}}
-    else if(name==='vk'&&window.vkBridge){vkBridge.send('VKWebAppInit').catch(function(){});
+
+    /* ---------- VK: свайп-назад + подписка на событие ---------- */
+    else if(name==='vk'&&window.vkBridge){
+     vkBridge.send('VKWebAppInit').catch(function(){});
      if(o.bg)vkBridge.send('VKWebAppSetViewSettings',{status_bar_style:'light',action_bar_color:o.bg,navigation_bar_color:o.bg}).catch(function(){});
      vkBridge.send('VKWebAppShowCloseButton').catch(function(){});
-     if(o.back)backFn=o.back}
-    else if(name==='max'&&window.maxApi){try{if(maxApi.init)maxApi.init()}catch(e){}if(o.back)backFn=o.back}
+     vkBridge.send('VKWebAppEnableSwipeBack').catch(function(){});
+     if(o.back){
+      backFn=o.back;
+      try{vkBridge.subscribe(function(e){
+       if(e&&e.detail&&e.detail.type==='VKWebAppSwipeBack'){o.back()}
+      })}catch(e){}}}
+
+    /* ---------- MAX: инициализация через window.WebApp ---------- */
+    else if(name==='max'&&window.WebApp){
+     try{if(window.WebApp.ready)window.WebApp.ready()}catch(e){}
+     if(o.bg)try{window.WebApp.setHeaderColor&&window.WebApp.setHeaderColor(o.bg)}catch(e){}
+     if(o.back){
+      backFn=o.back;
+      try{
+       if(window.WebApp.BackButton){
+        window.WebApp.BackButton.show();
+        window.WebApp.BackButton.onClick(o.back)}
+      }catch(e){}}}
+
     else if(o.back)backFn=o.back;
    }catch(e){}})}
+
  /* ---------- встроенный тост для фолбэка шаринга ---------- */
  var toastEl=null,toastT=null;
  function platToast(msg){
@@ -46,6 +82,7 @@ var Platform=(function(){
   if(toastT)clearTimeout(toastT);
   toastT=setTimeout(function(){toastEl.style.opacity='0'},2600)}
  function copyText(t){try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t);return true}}catch(e){}return false}
+
  /* ---------- УМНЫЙ ШЕРИНГ ---------- */
  function share(url,text,opts){
   opts=opts||{};
@@ -54,8 +91,12 @@ var Platform=(function(){
    if(name==='tg'&&window.Telegram&&Telegram.WebApp){var tw=Telegram.WebApp;
     if(tw.switchInlineQuery){try{tw.switchInlineQuery(text+' '+url,['users','groups','channels']);return true}catch(e){}}
     if(tw.openTelegramLink){try{tw.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text));return true}catch(e){}}}
-   if(name==='vk'&&window.vkBridge){try{vkBridge.send('VKWebAppShare',{link:url});return true}catch(e){}}
-   if(name==='max'&&window.maxApi&&window.maxApi.share){try{maxApi.share({url:url,text:text});return true}catch(e){}}
+   if(name==='vk'&&window.vkBridge){try{vkBridge.send('VKWebAppShare',{link:url,text:text});return true}catch(e){}}
+   if(name==='max'&&window.WebApp){
+    try{
+     if(window.WebApp.shareMaxContent){window.WebApp.shareMaxContent({text:text+' '+url});return true}
+     if(window.WebApp.shareContent){window.WebApp.shareContent({text:text,link:url});return true}
+    }catch(e){}}
    return false}
   if(navigator.share){
    try{navigator.share({title:opts.title||document.title,text:text,url:url})
@@ -63,27 +104,43 @@ var Platform=(function(){
     .catch(function(err){if(err&&err.name==='AbortError')return;if(!messengerShare())onCopied()});
     return}catch(e){}}
   if(!messengerShare())onCopied()}
+
  return{
   get name(){return name},
   init:init,
   user:function(){return user||{id:'g0',name:'Гость'}},
+
+  /* ---------- HAPTIC: полные тактильные нотификации ---------- */
   haptic:function(t){try{
    if(name==='tg'&&window.Telegram&&Telegram.WebApp.HapticFeedback){var h=Telegram.WebApp.HapticFeedback;
     if(t==='success')h.notificationOccurred('success');else if(t==='error')h.notificationOccurred('error');else if(t==='warning')h.notificationOccurred('warning');else h.impactOccurred(t==='heavy'?'heavy':(t==='medium'?'medium':'light'));return}
-   if(name==='vk'&&window.vkBridge){vkBridge.send('VKWebAppTapticImpactOccurred',{style:(t==='error'||t==='heavy')?'heavy':((t==='warning'||t==='medium')?'medium':'light')}).catch(function(){});return}
-   if(name==='max'&&window.maxApi&&maxApi.haptic){maxApi.haptic((t==='error'||t==='heavy')?'heavy':'light');return}
+   if(name==='vk'&&window.vkBridge){
+    if(t==='success'||t==='error'||t==='warning'){vkBridge.send('VKWebAppTapticNotificationOccurred',{type:t}).catch(function(){})}
+    else{vkBridge.send('VKWebAppTapticImpactOccurred',{style:t==='heavy'?'heavy':(t==='medium'?'medium':'light')}).catch(function(){})}
+    return}
+   if(name==='max'&&window.WebApp&&window.WebApp.HapticFeedback){var hm=window.WebApp.HapticFeedback;
+    if(t==='success')hm.notificationOccurred('success');else if(t==='error')hm.notificationOccurred('error');else if(t==='warning')hm.notificationOccurred('warning');else hm.impactOccurred(t==='heavy'?'heavy':(t==='medium'?'medium':'light'));return}
    if(navigator.vibrate)navigator.vibrate((t==='error'||t==='heavy')?60:20);}catch(e){}},
+
   share:share,
   toast:platToast,
-  onBack:function(fn){backFn=fn;if(name==='tg')try{Telegram.WebApp.BackButton.show();Telegram.WebApp.BackButton.onClick(fn)}catch(e){}},
+
+  onBack:function(fn){backFn=fn;
+   if(name==='tg')try{Telegram.WebApp.BackButton.show();Telegram.WebApp.BackButton.onClick(fn)}catch(e){}
+   if(name==='vk'&&window.vkBridge)try{vkBridge.subscribe(function(e){if(e&&e.detail&&e.detail.type==='VKWebAppSwipeBack')fn()})}catch(e){}
+   if(name==='max'&&window.WebApp&&window.WebApp.BackButton)try{window.WebApp.BackButton.show();window.WebApp.BackButton.onClick(fn)}catch(e){}},
+
   fireBack:function(){if(backFn)backFn()},
+
   close:function(){try{
    if(name==='tg')Telegram.WebApp.close();
-   else if(name==='vk'&&window.vkBridge)vkBridge.send('VKWebAppClose').catch(function(){});
-   else if(name==='max'&&window.maxApi&&maxApi.close)maxApi.close();
+   else if(name==='vk'&&window.vkBridge)vkBridge.send('VKWebAppClose',{payload:'igrovoj-centr'}).catch(function(){});
+   else if(name==='max'&&window.WebApp&&window.WebApp.close)window.WebApp.close();
    else history.back()}catch(e){history.back()}},
+
   colors:function(bg){try{
    if(name==='tg'){Telegram.WebApp.setHeaderColor(bg);Telegram.WebApp.setBackgroundColor(bg)}
-   else if(name==='vk'&&window.vkBridge)vkBridge.send('VKWebAppSetViewSettings',{status_bar_style:'light',action_bar_color:bg,navigation_bar_color:bg}).catch(function(){});}catch(e){}}
+   else if(name==='vk'&&window.vkBridge)vkBridge.send('VKWebAppSetViewSettings',{status_bar_style:'light',action_bar_color:bg,navigation_bar_color:bg}).catch(function(){});
+   else if(name==='max'&&window.WebApp&&window.WebApp.setHeaderColor)window.WebApp.setHeaderColor(bg);}catch(e){}}
  };
 })();

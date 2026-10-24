@@ -6,8 +6,11 @@
   <title>Игровой центр</title>
   <meta property="og:title" content="Игровой центр">
   <meta property="og:description" content="Мини-игры в Telegram, VK и MAX: выбирай, играй и делись рекордами с друзьями.">
+  <meta property="og:image" content="https://ip19760118-code.github.io/games/icon-512.png">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#070b16">
   <meta name="color-scheme" content="light dark">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Telegram SDK удалён: platform.js сам подгрузит нужный SDK при необходимости -->
   <!-- Единый слой платформ (TG / VK / MAX / web) -->
   <script src="./js/platform.js"></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
@@ -63,25 +66,20 @@
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.8 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.9 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
   <script>
-    const HUB_VER = '3.8';
+    const HUB_VER = '3.9';
 
     /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
-    /* Platform.init сам определит платформу (TG/VK/MAX/web), подгрузит нужный SDK,
-       выставит цвета шапки/фона мессенджера и навесит системную кнопку «Назад».
-       В хабе BackButton закрывает мини-апп. */
     Platform.init({
       bg: '#070b16',
       back: function() { Platform.close(); }
     });
 
-    /* Показываем текущую платформу в футере (для отладки) */
     try { document.getElementById('platTag').textContent = Platform.name; } catch(e) {}
 
-    /* v3.8: трекер с автоматической меткой платформы */
     function trackEvent(name, params){
       params = params || {};
       params.platform = Platform.name;
@@ -93,15 +91,11 @@
         const k = 'hub_session_tracked';
         if (!sessionStorage.getItem(k)) {
           sessionStorage.setItem(k, '1');
-          trackEvent('hub_open', {
-            source: Platform.name,   /* 'tg' | 'vk' | 'max' | 'web' */
-            ver: HUB_VER
-          });
+          trackEvent('hub_open', { source: Platform.name, ver: HUB_VER });
         }
       } catch (e) {}
     })();
 
-    /* v3.8: openGame проставляет ?plat= в URL игры, чтобы та знала, в каком мессенджере открыта */
     function openGame(url, gameName) {
       trackEvent('hub_game_click', { game_name: gameName });
       try { Platform.haptic('light'); } catch (e) {}
@@ -109,9 +103,6 @@
       location.href = url + sep + 'plat=' + Platform.name;
     }
 
-    /* Карта deep-link'ов от ботов: ?game=chess → сразу в шахматы.
-       Бот (TG/VK/MAX) может прислать ссылку вида https://.../?plat=vk&game=chess
-       и пользователь сразу откроет игру внутри своего мессенджера. */
     const GAME_MAP = {
       'trend_catch': './trend-catch/',
       'trend': './trend-catch/',
@@ -152,14 +143,11 @@
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
-    /* Deep-link от ботов: авто-вход в игру при наличии ?game=... в URL */
     (function handleDeepLink() {
       try {
         const u = new URL(location.href);
         const g = (u.searchParams.get('game') || '').toLowerCase();
         if (g && GAME_MAP[g]) {
-          /* Небольшая задержка, чтобы Platform.init успел отрисоваться
-             и GA успел зафиксировать hub_open перед переходом */
           setTimeout(function() {
             trackEvent('hub_deeplink', { game: g });
             openGame(GAME_MAP[g], g);
