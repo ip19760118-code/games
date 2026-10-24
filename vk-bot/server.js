@@ -1,6 +1,7 @@
-/* VK Bot "Игровой центр" — Callback API сервер v1.1
-   v1.1: клавиатура 4 ряда x 4 кнопки (VK error 911: слишком много рядов).
-   События: message_new, message_event. Ответ VK <3 сек: обработка ДО res.send('ok'). */
+/* VK Bot "Игровой центр" — Callback API сервер v1.2
+   v1.2: пагинация клавиатуры — каждая страница <= 4 рядов и <= 10 кнопок
+   (VK error 911: лимиты на ряды и на общее число кнопок).
+   События: message_new, message_event. Обработка ДО res.send('ok'). */
 const express = require('express');
 const app = express();
 app.use(express.json());
@@ -29,6 +30,9 @@ const GAMES = [
   ['lights',    '💡 Выключи свет'],
   ['trend',     '📈 Trend Catch'],
 ];
+
+const PER_PAGE = 9;
+const TOTAL_PAGES = Math.ceil(GAMES.length / PER_PAGE);
 
 function numList() {
   return GAMES.map(([id, l], i) => (i + 1) + '. ' + l).join('\n');
@@ -64,32 +68,47 @@ async function api(method, params) {
 }
 function apiOk(j) { return j && !j.error && j.response !== undefined; }
 
-/* ---------- v1.1: inline-клавиатура 4 ряда x 4 кнопки (лимиты VK) ---------- */
-function menuKeyboard() {
+/* ---------- v1.2: клавиатура одной страницы: 3 ряда игр + ряд навигации ---------- */
+function pageKeyboard(page) {
+  const startIdx = (page - 1) * PER_PAGE;
+  const slice = GAMES.slice(startIdx, startIdx + PER_PAGE);
   const rows = [];
-  for (let i = 0; i < GAMES.length; i += 4) {
-    rows.push(GAMES.slice(i, i + 4).map(([id, label]) => ({
+  for (let i = 0; i < slice.length; i += 3) {
+    rows.push(slice.slice(i, i + 3).map(([id, label]) => ({
       action: { type: 'callback', label: label, payload: JSON.stringify({ g: id }) },
       color: 'primary'
     })));
   }
-  return { one_time: false, inline: true, buttons: rows };
+  const nav = [];
+  if (page > 1) nav.push({ action: { type: 'callback', label: '⬅️ Назад', payload: JSON.stringify({ p: page - 1 }) }, color: 'secondary' });
+  if (page < TOTAL_PAGES) nav.push({ action: { type: 'callback', label: 'Ещё ➡️', payload: JSON.stringify({ p: page + 1 }) }, color: 'secondary' });
+  if (nav.length) rows.push(nav);
+  return { one_time: false, inline: true, buttons: rows };   // стр.1: 4 ряда/10 кнопок, стр.2: 3 ряда/7 кнопок
 }
 
 let rnd = 0;
 function nextRandomId() { rnd += 1; return Date.now() * 10 + (rnd % 10); }
 
-async function send(peerId, text, withKeyboard) {
-  const params = { peer_id: peerId, message: text, random_id: nextRandomId() };
-  if (withKeyboard) params.keyboard = JSON.stringify(menuKeyboard());
-  const r = await api('messages.send', params);
-  if (!apiOk(r) && withKeyboard) {           // фолбэк: текст со списком, если клавиатура не прошла
+/* ---------- отправка меню со страницей клавиатуры + фолбэк списком ---------- */
+async function sendMenu(peerId, page) {
+  const text = page === 1 ? START_TEXT : '🎮 Игры — страница ' + page + ' из ' + TOTAL_PAGES + ':';
+  const r = await api('messages.send', {
+    peer_id: peerId, message: text, random_id: nextRandomId(),
+    keyboard: JSON.stringify(pageKeyboard(page))
+  });
+  if (!apiOk(r)) {
     await api('messages.send', {
       peer_id: peerId, random_id: nextRandomId(),
       message: text + '\n\n' + numList() + '\n\nОтветь номером игры.'
     });
   }
   return r;
+}
+
+async function send(peerId, text, withKeyboard) {
+  const params = { peer_id: peerId, message: text, random_id: nextRandomId() };
+  if (withKeyboard) return sendMenu(peerId, 1);
+  return api('messages.send', params);
 }
 
 async function sendGame(peerId, id) {
@@ -117,7 +136,7 @@ app.post('/vk', async (req, res) => {
       const text = (m.text || '').trim();
       if (peer) {
         if (!text || /^(\/start|\/help|привет|меню|игры)/i.test(text)) {
-          await send(peer, START_TEXT, true);
+          await sendMenu(peer, 1);
         } else {
           const byNum = /^(\d{1,2})$/.exec(text);
           if (byNum && GAMES[+byNum[1] - 1]) { await sendGame(peer, GAMES[+byNum[1] - 1][0]); }
@@ -125,7 +144,7 @@ app.post('/vk', async (req, res) => {
             const low = text.toLowerCase();
             const hit = GAMES.find(([id, l]) => l.toLowerCase().includes(low) || id === low);
             if (hit) { await sendGame(peer, hit[0]); }
-            else { await send(peer, 'Не понял 🙂 Напиши «меню» или номер игры из списка.', true); }
+            else { await sendMenu(peer, 1); }
           }
         }
       }
@@ -134,8 +153,9 @@ app.post('/vk', async (req, res) => {
       const e = u.object || {};
       let payload = e.payload;
       if (typeof payload === 'string') { try { payload = JSON.parse(payload); } catch (err) { payload = null; } }
-      const g = payload && payload.g;
-      if (g && e.peer_id) await sendGame(e.peer_id, g);
+      if (!payload) { res.send('ok'); return; }
+      if (payload.p) { await sendMenu(e.peer_id, payload.p); }
+      else if (payload.g) { await sendGame(e.peer_id, payload.g); }
     }
   } catch (e) { console.error('[VK] handler error:', e && e.message); }
   res.send('ok');
