@@ -1,6 +1,6 @@
-/* VK Bot "Игровой центр" — Callback API сервер v1.2
-   v1.2: пагинация клавиатуры — каждая страница <= 4 рядов и <= 10 кнопок
-   (VK error 911: лимиты на ряды и на общее число кнопок).
+/* VK Bot "Игровой центр" — Callback API сервер v1.3
+   v1.3: на каждое нажатие callback-кнопки отвечаем messages.sendMessageEventAnswer
+   (иначе кнопка крутит спиннер); страницы клавиатуры <= 4 рядов и <= 10 кнопок.
    События: message_new, message_event. Обработка ДО res.send('ok'). */
 const express = require('express');
 const app = express();
@@ -68,7 +68,7 @@ async function api(method, params) {
 }
 function apiOk(j) { return j && !j.error && j.response !== undefined; }
 
-/* ---------- v1.2: клавиатура одной страницы: 3 ряда игр + ряд навигации ---------- */
+/* ---------- клавиатура страницы: 3 ряда игр + ряд навигации ---------- */
 function pageKeyboard(page) {
   const startIdx = (page - 1) * PER_PAGE;
   const slice = GAMES.slice(startIdx, startIdx + PER_PAGE);
@@ -83,13 +83,12 @@ function pageKeyboard(page) {
   if (page > 1) nav.push({ action: { type: 'callback', label: '⬅️ Назад', payload: JSON.stringify({ p: page - 1 }) }, color: 'secondary' });
   if (page < TOTAL_PAGES) nav.push({ action: { type: 'callback', label: 'Ещё ➡️', payload: JSON.stringify({ p: page + 1 }) }, color: 'secondary' });
   if (nav.length) rows.push(nav);
-  return { one_time: false, inline: true, buttons: rows };   // стр.1: 4 ряда/10 кнопок, стр.2: 3 ряда/7 кнопок
+  return { one_time: false, inline: true, buttons: rows };
 }
 
 let rnd = 0;
 function nextRandomId() { rnd += 1; return Date.now() * 10 + (rnd % 10); }
 
-/* ---------- отправка меню со страницей клавиатуры + фолбэк списком ---------- */
 async function sendMenu(peerId, page) {
   const text = page === 1 ? START_TEXT : '🎮 Игры — страница ' + page + ' из ' + TOTAL_PAGES + ':';
   const r = await api('messages.send', {
@@ -105,16 +104,21 @@ async function sendMenu(peerId, page) {
   return r;
 }
 
-async function send(peerId, text, withKeyboard) {
-  const params = { peer_id: peerId, message: text, random_id: nextRandomId() };
-  if (withKeyboard) return sendMenu(peerId, 1);
-  return api('messages.send', params);
-}
-
 async function sendGame(peerId, id) {
   const g = GAMES.find(x => x[0] === id);
   const url = HUB + '?plat=vk&game=' + id;
-  return send(peerId, (g ? g[1] : '🎮 Игра') + ' — открывай 👇\n' + url, false);
+  return api('messages.send', {
+    peer_id: peerId, random_id: nextRandomId(),
+    message: (g ? g[1] : '🎮 Игра') + ' — открывай 👇\n' + url
+  });
+}
+
+/* ---------- v1.3: закрыть callback-событие снакбаром ---------- */
+function answerEvent(e, txt) {
+  return api('messages.sendMessageEventAnswer', {
+    event_id: e.event_id, user_id: e.user_id, peer_id: e.peer_id,
+    event_data: JSON.stringify({ type: 'show_snackbar', text: txt })
+  });
 }
 
 /* ---------- Callback API ---------- */
@@ -149,13 +153,19 @@ app.post('/vk', async (req, res) => {
         }
       }
     }
-    else if (u.type === 'message_event') {   // нажатие inline-кнопки
+    else if (u.type === 'message_event') {
       const e = u.object || {};
       let payload = e.payload;
       if (typeof payload === 'string') { try { payload = JSON.parse(payload); } catch (err) { payload = null; } }
-      if (!payload) { res.send('ok'); return; }
-      if (payload.p) { await sendMenu(e.peer_id, payload.p); }
-      else if (payload.g) { await sendGame(e.peer_id, payload.g); }
+      if (!payload) { await answerEvent(e, '…'); }
+      else if (payload.p) {
+        await answerEvent(e, '📄 Страница ' + payload.p);
+        await sendMenu(e.peer_id, payload.p);
+      }
+      else if (payload.g) {
+        await answerEvent(e, '🎮 Ссылка ниже');
+        await sendGame(e.peer_id, payload.g);
+      }
     }
   } catch (e) { console.error('[VK] handler error:', e && e.message); }
   res.send('ok');
