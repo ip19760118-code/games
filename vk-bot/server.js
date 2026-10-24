@@ -1,7 +1,8 @@
-/* VK Bot "Игровой центр" — Callback API сервер v1.3
-   v1.3: на каждое нажатие callback-кнопки отвечаем messages.sendMessageEventAnswer
-   (иначе кнопка крутит спиннер); страницы клавиатуры <= 4 рядов и <= 10 кнопок.
-   События: message_new, message_event. Обработка ДО res.send('ok'). */
+/* VK Bot "Игровой центр" — Callback API сервер v1.4
+   v1.4: кнопка "🎮 Мини-апп" (action open_link на vk.com/app54850501)
+   на второй странице меню + ссылка на мини-апп в стартовом тексте.
+   open_link не порождает message_event — открывается клиентом VK напрямую, без спиннера.
+   Клавиатуры: <= 4 рядов и <= 10 кнопок (лимиты VK). Обработка ДО res.send('ok'). */
 const express = require('express');
 const app = express();
 app.use(express.json());
@@ -12,6 +13,7 @@ const VK_CONFIRM = process.env.VK_CONFIRM || '';
 const API = 'https://api.vk.com/method/';
 const V = '5.199';
 const HUB = 'https://ip19760118-code.github.io/games/';
+const VK_APP_URL = 'https://vk.com/app54850501';   /* VK Mini App "Игровой центр" */
 
 const GAMES = [
   ['chess',     '♟️ Шахматы'],
@@ -52,6 +54,7 @@ const START_TEXT =
 • Сложности, рекорды, статистика.
 • Звук, вибрация, адаптация под телефон.
 
+🎮 Мини-апп внутри VK: vk.com/app54850501
 Выбирай игру и играй! 🚀`;
 
 /* ---------- VK API ---------- */
@@ -82,6 +85,8 @@ function pageKeyboard(page) {
   const nav = [];
   if (page > 1) nav.push({ action: { type: 'callback', label: '⬅️ Назад', payload: JSON.stringify({ p: page - 1 }) }, color: 'secondary' });
   if (page < TOTAL_PAGES) nav.push({ action: { type: 'callback', label: 'Ещё ➡️', payload: JSON.stringify({ p: page + 1 }) }, color: 'secondary' });
+  /* v1.4: на последней странице — кнопка запуска мини-аппа (8 кнопок, 3 ряда — в лимитах) */
+  if (page === TOTAL_PAGES) nav.push({ action: { type: 'open_link', label: '🎮 Мини-апп', link: VK_APP_URL }, color: 'positive' });
   if (nav.length) rows.push(nav);
   return { one_time: false, inline: true, buttons: rows };
 }
@@ -113,7 +118,7 @@ async function sendGame(peerId, id) {
   });
 }
 
-/* ---------- v1.3: закрыть callback-событие снакбаром ---------- */
+/* ---------- закрыть callback-событие снакбаром (иначе спиннер) ---------- */
 function answerEvent(e, txt) {
   return api('messages.sendMessageEventAnswer', {
     event_id: e.event_id, user_id: e.user_id, peer_id: e.peer_id,
