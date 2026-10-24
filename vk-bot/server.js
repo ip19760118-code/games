@@ -1,8 +1,6 @@
-/* VK Bot "Игровой центр" — Callback API сервер v1.0
-   События: message_new (текст), message_event (нажатие inline-кнопки).
-   Ответ VK должен прийти за <3 сек — вся обработка ДО res.send('ok')
-   (иначе Vercel заморозит функцию, как было в MAX).
-   Клавиатура: inline, callback-кнопки, payload — JSON-строка. */
+/* VK Bot "Игровой центр" — Callback API сервер v1.1
+   v1.1: клавиатура 4 ряда x 4 кнопки (VK error 911: слишком много рядов).
+   События: message_new, message_event. Ответ VK <3 сек: обработка ДО res.send('ok'). */
 const express = require('express');
 const app = express();
 app.use(express.json());
@@ -66,11 +64,11 @@ async function api(method, params) {
 }
 function apiOk(j) { return j && !j.error && j.response !== undefined; }
 
-/* ---------- inline-клавиатура 15 игр ---------- */
+/* ---------- v1.1: inline-клавиатура 4 ряда x 4 кнопки (лимиты VK) ---------- */
 function menuKeyboard() {
   const rows = [];
-  for (let i = 0; i < GAMES.length; i += 2) {
-    rows.push(GAMES.slice(i, i + 2).map(([id, label]) => ({
+  for (let i = 0; i < GAMES.length; i += 4) {
+    rows.push(GAMES.slice(i, i + 4).map(([id, label]) => ({
       action: { type: 'callback', label: label, payload: JSON.stringify({ g: id }) },
       color: 'primary'
     })));
@@ -104,7 +102,7 @@ async function sendGame(peerId, id) {
 app.post('/vk', async (req, res) => {
   const u = req.body || {};
   console.log('[VK] incoming:', u.type);
-  if (u.type === 'confirmation') {           // VK проверяет сервер при привязке
+  if (u.type === 'confirmation') {
     console.log('[VK] confirmation requested');
     return res.status(200).send(VK_CONFIRM);
   }
@@ -140,7 +138,7 @@ app.post('/vk', async (req, res) => {
       if (g && e.peer_id) await sendGame(e.peer_id, g);
     }
   } catch (e) { console.error('[VK] handler error:', e && e.message); }
-  res.send('ok');                             // VK ждёт "ok" быстро
+  res.send('ok');
 });
 
 app.get('/', (req, res) => res.send('VK bot "Игровой центр" alive'));
