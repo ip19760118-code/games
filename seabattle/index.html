@@ -102,6 +102,10 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .note{font-size:11px;opacity:.7;line-height:1.4;margin-top:6px;text-align:left}
 .toast{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(30,150,90,.95);color:#fff;font-weight:800;font-size:12px;padding:8px 16px;border-radius:24px;z-index:600;pointer-events:none;opacity:0;transition:opacity .25s;max-width:90vw;text-align:center}
 .toast.show{opacity:1}
+/* v4.21: просмотр поля противника */
+.fieldViewBar{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:200;background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:8px 16px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;align-items:center;gap:12px}
+.fieldViewBar.show{display:flex}
+.fieldViewBar .title{font-size:13px;font-weight:700;color:var(--accent)}
 @media (max-width:600px){.boards{flex-direction:column}.title{font-size:14px}.btn{font-size:11px;padding:6px 11px}.lab{font-size:calc(var(--cell)*.34)}}
 </style></head><body>
 <div class="wrap" id="wrap">
@@ -128,8 +132,9 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div></div>
 </div></div>
 <div class="status" id="statusEl">Выбери режим игры</div>
-<div class="ver" id="verTag">v4.20</div>
+<div class="ver" id="verTag">v4.21</div>
 </div>
+<div class="fieldViewBar" id="fieldViewBar"><span class="title">👁 Просмотр поля противника</span><button class="btn" id="closeFieldView">Закрыть</button></div>
 <div class="overlay" id="modeOverlay"><div class="cardbox"><h2>🚢 Морской бой</h2><div class="sub">Выбери режим игры</div>
 <div class="mgrid">
 <button class="mcard" id="modeAI"><span class="ic">🖥</span><span><b>Против компьютера</b><small>3 уровня сложности, офлайн</small></span></button>
@@ -152,12 +157,14 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="note">Тумблер «🔊 Голос» отключает только речевые подсказки — звуковые эффекты остаются. Звуки берутся из assets/snd (модуль js/snd.js), пока файлов нет — работает синтез. Клетка листа совпадает с клеткой полей. Онлайн защищён анонимной авторизацией Firebase (Этап 2). В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Поле 10×10, цифры 1–10 сверху, буквы А–К слева.<br>• Флот 1×4,2×3,3×2,4×1; не касаются углами.<br>• Расстановка: 1‑е нажатие = мигающее превью, 2‑е = подтвердить; либо 🎲 Авто.<br>• Онлайн: создай комнату → 📨 Пригласить → друг открывает ссылку (пилюля станет зелёной с 2) → оба расставляют флот и жмут «⚔️ В бой!».<br>• Над полем противника — легенда остатка флота; потопленный тип прозрачный.<br>• Попадание = доп. ход; промах = всплеск; убитый = метки по всем клеткам + раскрытый контур.<br>• Размер поля: по умолчанию во всю ширину; 🔲 — вписать в экран, ⛶ — обратно.<br>• Шторка инструментов/комнаты сворачивается кнопкой «▴ Свернуть / ▾ Развернуть» справа в её шапке.</div>
+<div class="note">• Поле 10×10, цифры 1–10 сверху, буквы А–К слева.<br>• Флот 1×4,2×3,3×2,4×1; не касаются углами.<br>• Расстановка: 1‑е нажатие = мигающее превью, 2‑е = подтвердить; либо 🎲 Авто.<br>• Онлайн: создай комнату → 📨 Пригласить → друг открывает ссылку (пилюля станет зелёной с 2) → оба расставляют флот и жмут «⚔️ В бой!».<br>• Над полем противника — легенда остатка флота; потопленный тип прозрачный.<br>• Попадание = доп. ход; промах = всплеск; убитый = метки по всем клеткам + раскрытый контур.<br>• Размер поля: по умолчанию во всю ширину; 🔲 — вписать в экран, ⛶ — обратно.<br>• Шторка инструментов/комнаты сворачивается кнопкой «▴ Свернуть / ▾ Развернуть» справа в её шапке.<br>• После игры: 🔄 Реванш — новая партия с тем же соперником; 👁 Посмотреть поле — раскрыть позиции кораблей противника.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
 var FB={apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"};
-var VER='4.20',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=false;
+var VER='4.21',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=false;
+var fieldViewMode=false;
 function backHandler(){
+  if(fieldViewMode){closeFieldView();return;}
   var a=['setOverlay','rulesOverlay','endOverlay','modeOverlay'];
   for(var i=0;i<a.length;i++){
     var e=$(a[i]);
@@ -234,7 +241,7 @@ function stopT(){if(G&&G.timer){clearInterval(G.timer);G.timer=null}}
 function startT(){if(!G||G.timer)return;G.timer=setInterval(function(){G.time++;updateStats()},1000)}
 function buildLabels(){var sides=['my','en'];for(var s=0;s<2;s++){var p=sides[s];var t=$(p+'Top'),l=$(p+'Left');if(!t||!l)continue;t.innerHTML='';l.innerHTML='';for(var i=0;i<10;i++){var a=document.createElement('span');a.className='lab';a.textContent=i+1;t.appendChild(a);var cc=document.createElement('span');cc.className='lab';cc.textContent=LETTERS[i];l.appendChild(cc)}}}
 function updateStats(){if(!G)return;var acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;$('statsLine').textContent='⏱ '+fmt(G.time)+' · Выстрелы: '+G.shotsFired+' · Точность: '+acc+'% · '+(G.online?'онлайн':dName())}
-function updateRoomBar(){var d=NET.room;if(!d)return 1;var onl=(d.hostOnline?1:0)+(d.guestOnline?1:0);var h='';if(d.host)h+='👤 '+((d.host&&d.host.name)||'Игрок 1')+' · хост '+(d.hostOnline?'🟢 онлайн':'⚪ офлайн')+'<br>';if(d.guest)h+='👤 '+((d.guest&&d.guest.name)||'Игрок 2')+' · гость '+(d.guestOnline?'🟢 онлайн':' офлайн')+'<br>';if(!d.guest)h+='<i>Ожидание второго игрока… нажми «📨 Пригласить».</i>';$('rbPlayers').innerHTML=h;return onl}
+function updateRoomBar(){var d=NET.room;if(!d)return 1;var onl=(d.hostOnline?1:0)+(d.guestOnline?1:0);var h='';if(d.host)h+='👤 '+((d.host&&d.host.name)||'Игрок 1')+' · хост '+(d.hostOnline?'🟢 онлайн':'⚪ офлайн')+'<br>';if(d.guest)h+='👤 '+((d.guest&&d.guest.name)||'Игрок 2')+' · гость '+(d.guestOnline?'🟢 онлайн':'⚪ офлайн')+'<br>';if(!d.guest)h+='<i>Ожидание второго игрока… нажми «📨 Пригласить».</i>';$('rbPlayers').innerHTML=h;return onl}
 function updateFold(){var f=$('barFold');if(!f)return;f.textContent=$('mainBar').classList.contains('expanded')?'▴ Свернуть':'▾ Развернуть'}
 function refreshBar(){var on=G&&G.online;var ht=$('barHeadTxt');
  if(on){var onl=updateRoomBar();ht.innerHTML='👥 Комната <b>'+(NET.code||'------')+'</b><span class="pill'+(onl>=2?' g2':'')+'"><i></i><b>'+onl+'</b></span>';
@@ -304,7 +311,7 @@ function meInfo(){
   }catch(e){}
   return{id:id,name:name};
 }
-async function netCreate(){try{await NET.ensure()}catch(e){return}NET.reset();NET.code=genCode();NET.role='host';var me=meInfo();await FNS.set(NET.roomRef(),{createdAt:Date.now(),host:me,guest:null,hostOnline:true,guestOnline:false,state:'placing',hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null});try{FNS.od(FNS.ref(FNS.db,'rooms/'+NET.code+'/hostOnline')).set(false)}catch(e){}NET.conn=true;NET.attach('rooms/'+NET.code,function(s){onRoom(s.val())});resetOnlinePlace();hideMode();refreshBar();setStatus('Комната '+NET.code+' создана · нажми 📨 Пригласить');trk('net_create',{role:'host'})}
+async function netCreate(){try{await NET.ensure()}catch(e){return}NET.reset();NET.code=genCode();NET.role='host';var me=meInfo();await FNS.set(NET.roomRef(),{createdAt:Date.now(),host:me,guest:null,hostOnline:true,guestOnline:false,state:'placing',hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null,rematchHost:false,rematchGuest:false});try{FNS.od(FNS.ref(FNS.db,'rooms/'+NET.code+'/hostOnline')).set(false)}catch(e){}NET.conn=true;NET.attach('rooms/'+NET.code,function(s){onRoom(s.val())});resetOnlinePlace();hideMode();refreshBar();setStatus('Комната '+NET.code+' создана · нажми 📨 Пригласить');trk('net_create',{role:'host'})}
 async function netJoin(code){code=(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length<4){toast('Введи код комнаты');return}try{await NET.ensure()}catch(e){return}NET.reset();var s=await FNS.get(FNS.ref(FNS.db,'rooms/'+code));if(!s.exists()){toast('Комната не найдена: '+code);return}var d=s.val();if(d.guest){toast('Комната уже занята');return}NET.code=code;NET.role='guest';var me=meInfo();await FNS.set(FNS.ref(FNS.db,'rooms/'+code+'/guest'),me);await FNS.set(FNS.ref(FNS.db,'rooms/'+code+'/guestOnline'),true);try{FNS.od(FNS.ref(FNS.db,'rooms/'+code+'/guestOnline')).set(false)}catch(e){}NET.conn=true;NET.attach('rooms/'+code,function(sn){onRoom(sn.val())});resetOnlinePlace();hideMode();refreshBar();setStatus('Подключено к комнате '+code+' · расставь флот и жми «⚔️ В бой!»');trk('net_join',{role:'guest'})}
 function netReady(){if(!NET.room)return;var o={};o[NET.role+'Ready']=true;NET.patch(o);setStatus('Ты готов · ожидание соперника…')}
 function netFire(r,c){if(!ourTurn())return;if(NET.room.pending)return;NET.patch({pending:{by:NET.role,r:r,c:c,at:Date.now()}});setStatus('Выстрел отправлен…')}
@@ -336,15 +343,16 @@ function onRoom(d){if(!d){if(NET.conn){toast('Комната закрыта');ne
   setStatus(NET.role=='host'&&!d.guest?('Ждём соперника · код '+NET.code):((d.hostReady&&d.guestReady)?'Оба готовы — старт!':'Расставь флот и жми «⚔️ В бой!»'))}
  else if(d.state=='battle'){if(G.phase!='battle'){G.phase='battle';startT();V('v_battle','В бой!')}
   setStatus(ourTurn()?'ТВОЙ ХОД — стреляй по полю соперника':'Ход соперника…'+(oppOn?'':' · ⚠️ соперник офлайн'))}
- else if(d.state=='over'){stopT();if(!G.over)end(d.winner===NET.role)}
+ else if(d.state=='over'){stopT();if(!G.over)end(d.winner===NET.role);
+  /* v4.21: автоматический реванш когда оба готовы */
+  if(d.rematchHost&&d.rematchGuest){
+   NET.patch({state:'placing',hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null,rematchHost:false,rematchGuest:false});
+   G.my.ships=[];G.myShipsVer++;rndFleet(G.my);G.qi=0;G.oppView=eBoard();G.en=eBoard();G.over=false;G.won=false;G.shotsFired=0;G.hits=0;G.time=0;
+   resetRendered();buildLabels();renderAll();$('endOverlay').classList.remove('show');setStatus('Реванш! Расставь флот и жми «⚔️ В бой!»');trk('net_rematch',{role:NET.role})}}
  if(d.pending&&d.pending.by!==NET.role)applyPending(d);
  if(d.resolve&&d.resolve.by===NET.role)applyResolve(d);
  renderAll()}
 function end(w){if(G.over)return;G.over=true;G.won=w;stopT();if(w){sWin();Platform.haptic('success');V('v_win','Победа!')}else{sLose();Platform.haptic('error');V('v_lose','Поражение')}ST.games++;if(w){ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak}else ST.streak=0;saveST();trk('game_end',{game_name:'seabattle',win:w?1:0,time:G.time,shots:G.shotsFired,acc:G.shotsFired?Math.round(G.hits/G.shotsFired*100):0,online:G.online?1:0,difficulty:set.diff});showEnd(w)}
-/* v4.20: шеринг делегируется в Platform.share:
-   браузер-телефон -> системный лист со всеми приложениями;
-   внутри TG -> нативный выбор чата Telegram; VK/MAX -> их нативный шеринг;
-   ПК -> буфер обмена + тост */
 function smartShare(url,text,fallbackToast){
   Platform.share(url,text,{
     title:'Морской бой',
@@ -365,7 +373,42 @@ function share(){
 }
 function copyCode(){if(!NET.code)return;try{navigator.clipboard.writeText(NET.code).catch(function(){});toast('Код '+NET.code+' скопирован')}catch(e){toast('Код: '+NET.code)}}
 function ebtn(t,f,p){var b=document.createElement('button');b.className='btn'+(p?' primary':'');b.textContent=t;b.onclick=f;$('endBtns').appendChild(b)}
-function showEnd(w){var ov=$('endOverlay'),acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;$('endTitle').textContent=w?'🏆 Победа!':'💥 Флот потоплен';$('endSub').innerHTML='Время: <b>'+fmt(G.time)+'</b> · Выстрелы: <b>'+G.shotsFired+'</b> · Точность: <b>'+acc+'%</b><br>Режим: '+(G.online?'онлайн‑дуэль':'ИИ ('+dName()+')');$('endBtns').innerHTML='';ebtn('📨 Отправить результат другу',share,true);ebtn('🔄 Сыграть ещё',function(){ov.classList.remove('show');if(G.online)netLeave();else{newGame();showMode('menu')}});ebtn('🏠 В меню',function(){ov.classList.remove('show');if(G.online)NET.reset();goToHub();});ov.classList.add('show')}
+function showEnd(w){var ov=$('endOverlay'),acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;$('endTitle').textContent=w?'🏆 Победа!':'💥 Флот потоплен';$('endSub').innerHTML='Время: <b>'+fmt(G.time)+'</b> · Выстрелы: <b>'+G.shotsFired+'</b> · Точность: <b>'+acc+'%</b><br>Режим: '+(G.online?'онлайн‑дуэль':'ИИ ('+dName()+')');$('endBtns').innerHTML='';ebtn('📨 Отправить результат другу',share,true);
+ if(G.online){ebtn('🔄 Реванш',function(){requestRematch();},false);}
+ else{ebtn('🔄 Сыграть ещё',function(){ov.classList.remove('show');newGame();showMode('menu')},false);}
+ ebtn('👁 Посмотреть поле',function(){showFieldView()},false);
+ ebtn('🏠 В меню',function(){ov.classList.remove('show');if(G.online)NET.reset();goToHub();},false);ov.classList.add('show')}
+function requestRematch(){
+ if(!NET.room)return;
+ var o={};o[NET.role+'Rematch']=true;NET.patch(o);
+ setStatus('Ожидание соперника для реванша…');
+ $('endOverlay').classList.remove('show');
+}
+function showFieldView(){
+ $('endOverlay').classList.remove('show');
+ fieldViewMode=true;
+ $('fieldViewBar').classList.add('show');
+ /* Раскрываем все корабли противника */
+ if(G.online){
+  G.en.ships.forEach(function(sh){
+   var dup=false;
+   G.oppView.ships.forEach(function(s){if(s.r===sh.r&&s.c===sh.c&&s.len===sh.len)dup=true});
+   if(!dup){G.oppView.ships.push({r:sh.r,c:sh.c,len:sh.len,hor:sh.hor,hits:sh.len,dead:true});cells(sh).forEach(function(x){G.oppView.shots[x]=2})}
+  });
+ }else{
+  G.en.ships.forEach(function(sh){
+   var dup=false;
+   G.en.ships.forEach(function(s){if(s.r===sh.r&&s.c===sh.c&&s.len===sh.len&&s.dead)dup=true});
+   if(!dup){sh.dead=true;cells(sh).forEach(function(x){G.en.shots[x]=2})}
+  });
+ }
+ renderAll();
+}
+function closeFieldView(){
+ fieldViewMode=false;
+ $('fieldViewBar').classList.remove('show');
+ if(G.over){showEnd(G.won);}
+}
 function tryPlace(r,c){if(!G||G.phase!='place')return;if(G.online&&NET.room&&(!NET.room.guest||NET.room.state!='placing'||NET.room[NET.role+'Ready']))return;if(G.qi>=G.queue.length)return;var l=G.queue[G.qi];
  if(preview&&preview.r===r&&preview.c===c){if(place(G.my,r,c,l,preview.hor)){preview=null;$('myPreview').innerHTML='';G.qi++;G.myShipsVer++;sPlace();renderAll();if(!G.online&&G.qi>=G.queue.length)setStatus('Флот готов — жми «В бой!»')}else{tn(150,90,.1,'sawtooth',.1);Platform.haptic('error');clearPreview();setStatus('Здесь нельзя — выбери другое место')}return}
  clearPreview();preview={r:r,c:c,len:l,hor:G.hor};addShip($('myPreview'),preview,true);sPlace();setStatus(canPlace(G.my,r,c,l,G.hor)?'Нажми ещё раз, чтобы подтвердить':'Место занято — нажми ещё раз, чтобы убрать')}
@@ -416,6 +459,7 @@ $('volSlider').oninput=function(e){set.vol=e.target.value/100;$('volV').textCont
 $('stReset').onclick=function(){if(confirm('Сбросить статистику?')){ST={games:0,wins:0,streak:0,bestStreak:0};saveST();showStats()}};
 $('rulesClose').onclick=function(){$('rulesOverlay').classList.remove('show')};
 $('hubBtn').onclick=function(){goToHub();};
+$('closeFieldView').onclick=function(){closeFieldView()};
 window.addEventListener('resize',function(){rescale()});
 window.addEventListener('orientationchange',function(){setTimeout(function(){rescale()},120)});
 window.addEventListener('beforeunload',function(){if(NET.conn&&NET.code){try{FNS.set(FNS.ref(FNS.db,'rooms/'+NET.code+'/'+(NET.role+'Online')),false)}catch(e){}}});}
