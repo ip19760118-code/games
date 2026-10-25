@@ -47,7 +47,7 @@
     <div class="panel">
       <h1>🎮 Игровой центр</h1>
       <p class="hub-subtitle">Мини-игры в Telegram, VK и MAX</p>
-      <p class="hub-desc">16 игр в одном центре: аркады, головоломки, классика, онлайн‑партии, match‑3, пасьянс, морской бой, маджонг и тетрис. Работает в трёх мессенджерах и в браузере — без установки, нажми и играй.</p>
+      <p class="hub-desc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. Работает в трёх мессенджерах и в браузере: без установки, нажми и играй. Новые игры добавляются регулярно.</p>
 
       <button class="game-btn" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
       <button class="game-btn" id="lightsOutBtn"><span class="game-emoji">💡</span><span class="game-text"><b>Выключи Свет</b><small>Логическая головоломка: выключи всё поле</small></span></button>
@@ -68,11 +68,11 @@
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.17 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.18 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
   <script>
-    const HUB_VER = '3.17';
+    const HUB_VER = '3.18';
 
     /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
     Platform.init({
@@ -82,7 +82,6 @@
 
     try { document.getElementById('platTag').textContent = Platform.name; } catch(e) {}
 
-    /* v3.8+: трекер с автоматической меткой платформы */
     function trackEvent(name, params){
       params = params || {};
       params.platform = Platform.name;
@@ -99,8 +98,7 @@
       } catch (e) {}
     })();
 
-    /* v3.16: без iframe. В MAX игры открываем через WebApp.openLink (внешнее окно,
-       first-party контекст — Firebase и онлайн-комнаты работают).
+    /* В MAX игры открываем через WebApp.openLink (внешнее окно, first-party).
        TG / VK / браузер — обычная навигация верхнего уровня. */
     function openGame(url, gameName) {
       trackEvent('hub_game_click', { game_name: gameName });
@@ -122,7 +120,7 @@
       location.href = target;
     }
 
-    /* v3.14: prefetch популярных игр в простое — первый вход быстрее */
+    /* prefetch популярных игр в простое — первый вход быстрее */
     (function prefetchTop(){
       try {
         if (navigator.connection && navigator.connection.saveData) return;
