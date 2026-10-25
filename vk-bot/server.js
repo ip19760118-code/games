@@ -1,8 +1,8 @@
-/* VK Bot "Игровой центр" — Callback API сервер v1.11
-   v1.11: цель — кнопка "🎮 Играть" открывает хаб БЕЗ сообщений в чате.
-   Цепочка клавиатур: open_app(owner-) -> open_app(owner+) -> open_link(hub) -> callback.
-   Теги в логах: [VK SEND] ok via ... ; ошибки первого варианта видны целиком.
-   Привет/Начать -> только описание + клавиатура. Дедупликация событий сохранена. */
+/* VK Bot "Игровой центр" — Callback API сервер v1.12
+   v1.12: УБРАН color у кнопок open_app/open_link (VK: action несовместим с color) —
+   теперь клавиатура open_app проходит с первой попытки, кнопка открывает хаб
+   клиентом VK без событий и сообщений; ошибки 911 исчезают.
+   Color остаётся только у callback-кнопки (запасной вариант и старые чаты). */
 const express = require('express');
 const app = express();
 app.use(express.json());
@@ -62,12 +62,16 @@ function eventSeen(id) {
   return false;
 }
 
-/* ---------- варианты постоянной нижней клавиатуры ---------- */
-function oneBtn(action) { return { one_time: false, inline: false, buttons: [[{ action: action, color: 'positive' }]] }; }
+/* ---------- v1.12: color только для callback; open_app/open_link без color ---------- */
+function oneBtn(action, color) {
+  const b = { action: action };
+  if (color) b.color = color;
+  return { one_time: false, inline: false, buttons: [[b]] };
+}
 function kbAppNeg()  { return oneBtn({ type: 'open_app', app_id: VK_APP_ID, owner_id: -GROUP_POS, label: '🎮 Играть' }); }
 function kbAppPos()  { return oneBtn({ type: 'open_app', app_id: VK_APP_ID, owner_id: GROUP_POS,  label: '🎮 Играть' }); }
 function kbLinkHub() { return oneBtn({ type: 'open_link', label: '🎮 Играть', link: HUB_URL }); }
-function kbCb()      { return oneBtn({ type: 'callback', label: '🎮 Играть', payload: JSON.stringify({ a: 1 }) }); }
+function kbCb()      { return oneBtn({ type: 'callback', label: '🎮 Играть', payload: JSON.stringify({ a: 1 }) }, 'positive'); }
 
 let rnd = 0;
 function nextRandomId() { rnd += 1; return Date.now() * 10 + (rnd % 10); }
@@ -132,7 +136,7 @@ app.post('/vk', async (req, res) => {
           console.log('[VK EVENT] duplicate ignored', e.event_id);
           return res.send('ok');
         }
-        /* пробуем открыть напрямую без сообщений; снакбар гасит спиннер */
+        /* запасной путь для старых чатов с callback-клавиатурой */
         const tries = [
           { type: 'open_app', app_id: VK_APP_ID, owner_id: -GROUP_POS },
           { type: 'open_app', app_id: VK_APP_ID, owner_id: GROUP_POS },
