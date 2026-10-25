@@ -1,8 +1,7 @@
-/* VK Bot "Игровой центр" — Callback API сервер v1.7
-   v1.7: ПОСТОЯННАЯ кнопка "🎮 Играть" — нижняя клавиатура (inline:false, one_time:false).
-   Цепочка вариантов: open_app -> open_link -> callback(присылает ссылку) -> текст.
-   Тег победившего варианта в логах: [VK SEND] ok via ...
-   open_app: app_id 54850501, owner_id = -group_id (242534673). */
+/* VK Bot "Игровой центр" — Callback API сервер v1.8
+   v1.8: нажатие постоянной кнопки "🎮 Играть" отвечает event_data open_link —
+   клиент VK открывает мини-апп мгновенно, без лишних сообщений в чате.
+   Клавиатура: нижняя постоянная (inline:false, one_time:false), цепочка вариантов. */
 const express = require('express');
 const app = express();
 app.use(express.json());
@@ -14,7 +13,7 @@ const API = 'https://api.vk.com/method/';
 const V = '5.199';
 const VK_APP_URL = 'https://vk.com/app54850501';
 const VK_APP_ID = 54850501;
-const VK_GROUP_ID = -242534673;   /* owner_id = минус group_id из confirmation */
+const VK_GROUP_ID = -242534673;
 
 const START_TEXT =
 `Что умеет этот бот?
@@ -46,9 +45,8 @@ async function api(method, params) {
 }
 function apiOk(j) { return j && !j.error && j.response !== undefined; }
 
-/* ---------- варианты постоянной клавиатуры ---------- */
-function kbApp()    { return { one_time: false, inline: false, buttons: [[{ action: { type: 'open_app', app_id: VK_APP_ID, owner_id: VK_GROUP_ID, label: '🎮 Играть' }, color: 'positive' }]] }; }
-function kbLink()   { return { one_time: false, inline: false, buttons: [[{ action: { type: 'open_link', label: '🎮 Играть', link: VK_APP_URL }, color: 'positive' }]] }; }
+/* ---------- постоянная нижняя клавиатура: цепочка вариантов ---------- */
+function kbApp()     { return { one_time: false, inline: false, buttons: [[{ action: { type: 'open_app', app_id: VK_APP_ID, owner_id: VK_GROUP_ID, label: '🎮 Играть' }, color: 'positive' }]] }; }
 function kbCallback(){ return { one_time: false, inline: false, buttons: [[{ action: { type: 'callback', label: '🎮 Играть', payload: JSON.stringify({ a: 1 }) }, color: 'positive' }]] }; }
 
 let rnd = 0;
@@ -57,8 +55,7 @@ function nextRandomId() { rnd += 1; return Date.now() * 10 + (rnd % 10); }
 async function sendWelcome(peerId) {
   const variants = [
     { tag: 'app-bottom', kb: kbApp() },
-    { tag: 'link-bottom', kb: kbLink() },
-    { tag: 'cb-bottom', kb: kbCallback() }
+    { tag: 'cb-bottom',  kb: kbCallback() }
   ];
   for (const v of variants) {
     const r = await api('messages.send', {
@@ -71,14 +68,6 @@ async function sendWelcome(peerId) {
   return await api('messages.send', {
     peer_id: peerId, random_id: nextRandomId(),
     message: START_TEXT + '\n\n🎮 Мини-апп: ' + VK_APP_URL
-  });
-}
-
-/* ---------- закрыть callback-событие снакбаром ---------- */
-function answerEvent(e, txt) {
-  return api('messages.sendMessageEventAnswer', {
-    event_id: e.event_id, user_id: e.user_id, peer_id: e.peer_id,
-    event_data: JSON.stringify({ type: 'show_snackbar', text: txt })
   });
 }
 
@@ -105,11 +94,22 @@ app.post('/vk', async (req, res) => {
       let payload = e.payload;
       if (typeof payload === 'string') { try { payload = JSON.parse(payload); } catch (err) { payload = null; } }
       if (payload && payload.a) {
-        await answerEvent(e, '🎮 Открываю мини-апп…');
-        await api('messages.send', {
-          peer_id: e.peer_id, random_id: nextRandomId(),
-          message: '🎮 Игровой центр внутри VK 👇\n' + VK_APP_URL
+        /* v1.8: главный путь — клиент сам открывает мини-апп по ответу события */
+        const r = await api('messages.sendMessageEventAnswer', {
+          event_id: e.event_id, user_id: e.user_id, peer_id: e.peer_id,
+          event_data: JSON.stringify({ type: 'open_link', link: VK_APP_URL })
         });
+        if (!apiOk(r)) {
+          /* если open_link в ответе события не прошёл — снакбар + ссылка сообщением */
+          await api('messages.sendMessageEventAnswer', {
+            event_id: e.event_id, user_id: e.user_id, peer_id: e.peer_id,
+            event_data: JSON.stringify({ type: 'show_snackbar', text: '🎮 Ссылка ниже' })
+          });
+          await api('messages.send', {
+            peer_id: e.peer_id, random_id: nextRandomId(),
+            message: '🎮 Игровой центр внутри VK 👇\n' + VK_APP_URL
+          });
+        }
       }
     }
   } catch (e) { console.error('[VK] handler error:', e && e.message); }
