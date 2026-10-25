@@ -65,11 +65,11 @@
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.10 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.11 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
   <script>
-    const HUB_VER = '3.10';
+    const HUB_VER = '3.11';
 
     Platform.init({
       bg: '#070b16',
@@ -94,11 +94,10 @@
       } catch (e) {}
     })();
 
-    /* v3.10: умная навигация в игру.
-       1) Пробуем обычный внутренний переход location.href.
-       2) Если контейнер мессенджера (MAX) его молча блокирует — за 1.5 сек
-          не сработает pagehide, тогда открываем игру через WebApp.openLink
-          (MAX) или новое окно, чтобы нажатие никогда не "зависало". */
+    /* v3.11: умная навигация без двойных загрузок.
+       Страховка срабатывает ТОЛЬКО если навигация реально не стартовала
+       (контейнер мессенджера заблокировал location.href). Если навигация
+       идёт, но медленно (мобильная сеть) — не мешаем ей. */
     function openGame(url, gameName) {
       trackEvent('hub_game_click', { game_name: gameName });
       try { Platform.haptic('light'); } catch (e) {}
@@ -107,11 +106,23 @@
       let abs = target;
       try { abs = new URL(target, location.href).href; } catch (e) {}
       try { Platform.toast('Открываю игру…'); } catch (e) {}
+
+      const t0 = (window.performance && performance.now) ? performance.now() : 0;
       let gone = false;
       window.addEventListener('pagehide', function(){ gone = true; });
       location.href = target;
+
       setTimeout(function(){
         if (gone) return;
+        /* проверяем, стартовала ли навигация: появилась ли новая navigation-запись */
+        let started = false;
+        try {
+          const ents = performance.getEntriesByType('navigation');
+          for (let i = 0; i < ents.length; i++) {
+            if (ents[i].startTime >= t0 - 50) { started = true; break; }
+          }
+        } catch (e) { started = true; }   /* не уверены — не мешаем */
+        if (started) return;              /* идёт медленная загрузка — не трогаем */
         try {
           if (Platform.name === 'max' && window.WebApp && window.WebApp.openLink) { window.WebApp.openLink(abs); return; }
         } catch (e) {}
