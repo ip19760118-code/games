@@ -1,7 +1,7 @@
-/* tg-games: единый слой платформ v2 — Telegram / VK / MAX / web.
-   v2: VK — свайп-назад, полные тактильные нотификации, шеринг с текстом;
-       MAX — активация реального SDK (st.max.ru/js/max-web-app.js);
-       умный шеринг: Web Share API -> нативный лист мессенджера -> буфер + тост. */
+/* tg-games: единый слой платформ v2.1 — Telegram / VK / MAX / web.
+   v2.1: регистрация service worker (кэш игр на github.io) из одного места.
+   VK: свайп-назад, тактильные нотификации, шеринг с текстом;
+   MAX: SDK st.max.ru, BackButton, HapticFeedback, shareMaxContent. */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
@@ -14,9 +14,21 @@ var Platform=(function(){
   if(p==='tg'||p==='vk'||p==='max')return p;
   if(window.Telegram&&window.Telegram.WebApp)return 'tg';
   if(window.vkBridge)return 'vk';
-  if(window.WebApp&&window.WebApp.version)return 'max';   /* MAX создаёт window.WebApp */
+  if(window.WebApp&&window.WebApp.version)return 'max';
   return 'web'}
  name=detect();
+
+ /* ---------- v2.1: service worker для кэша игр (только github.io) ---------- */
+ (function(){
+  try{
+   if(!('serviceWorker' in navigator))return;
+   if(location.protocol!=='https:')return;
+   if(location.host.indexOf('github.io')<0)return;
+   var m=location.pathname.match(/^(.*\/games\/)/);
+   if(!m)return;
+   navigator.serviceWorker.register(m[1]+'sw.js',{scope:m[1]}).catch(function(){});
+  }catch(e){}
+ })();
 
  function ensureSdk(cb){
   if(name==='tg'&&!window.Telegram)load(TG_SDK_URL).then(cb);
@@ -32,20 +44,17 @@ var Platform=(function(){
   if(name==='max'&&window.WebApp){try{
     var m=window.WebApp.initDataUnsafe&&window.WebApp.initDataUnsafe.user;
     if(m)user={id:'mx'+m.id,name:m.first_name||'Игрок'}
-    else vkBridge=null} catch(e){}}
+    }catch(e){}}
   if(!user)user={id:'g'+Math.floor(Math.random()*1e9),name:'Гость'}}
 
  function init(o){o=o||{};if(inited)return;inited=true;
   ensureSdk(function(){pickUser();
    try{
-    /* ---------- Telegram ---------- */
     if(name==='tg'){var t=Telegram.WebApp;t.ready();t.expand();
      if(t.setHeaderColor&&o.bg)t.setHeaderColor(o.bg);
      if(t.setBackgroundColor&&o.bg)t.setBackgroundColor(o.bg);
      if(t.disableVerticalSwipes)t.disableVerticalSwipes();
      if(o.back&&t.BackButton){backFn=o.back;t.BackButton.show();t.BackButton.onClick(o.back)}}
-
-    /* ---------- VK: свайп-назад + подписка на событие ---------- */
     else if(name==='vk'&&window.vkBridge){
      vkBridge.send('VKWebAppInit').catch(function(){});
      if(o.bg)vkBridge.send('VKWebAppSetViewSettings',{status_bar_style:'light',action_bar_color:o.bg,navigation_bar_color:o.bg}).catch(function(){});
@@ -56,8 +65,6 @@ var Platform=(function(){
       try{vkBridge.subscribe(function(e){
        if(e&&e.detail&&e.detail.type==='VKWebAppSwipeBack'){o.back()}
       })}catch(e){}}}
-
-    /* ---------- MAX: инициализация через window.WebApp ---------- */
     else if(name==='max'&&window.WebApp){
      try{if(window.WebApp.ready)window.WebApp.ready()}catch(e){}
      if(o.bg)try{window.WebApp.setHeaderColor&&window.WebApp.setHeaderColor(o.bg)}catch(e){}
@@ -68,11 +75,9 @@ var Platform=(function(){
         window.WebApp.BackButton.show();
         window.WebApp.BackButton.onClick(o.back)}
       }catch(e){}}}
-
     else if(o.back)backFn=o.back;
    }catch(e){}})}
 
- /* ---------- встроенный тост для фолбэка шаринга ---------- */
  var toastEl=null,toastT=null;
  function platToast(msg){
   if(!toastEl){toastEl=document.createElement('div');toastEl.id='platToast';
@@ -83,7 +88,6 @@ var Platform=(function(){
   toastT=setTimeout(function(){toastEl.style.opacity='0'},2600)}
  function copyText(t){try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t);return true}}catch(e){}return false}
 
- /* ---------- УМНЫЙ ШЕРИНГ ---------- */
  function share(url,text,opts){
   opts=opts||{};
   function onCopied(){copyText(text+'\n'+url);if(opts.onCopied)opts.onCopied();else platToast(opts.copiedToast||'Ссылка скопирована — отправьте её другу')}
@@ -109,8 +113,6 @@ var Platform=(function(){
   get name(){return name},
   init:init,
   user:function(){return user||{id:'g0',name:'Гость'}},
-
-  /* ---------- HAPTIC: полные тактильные нотификации ---------- */
   haptic:function(t){try{
    if(name==='tg'&&window.Telegram&&Telegram.WebApp.HapticFeedback){var h=Telegram.WebApp.HapticFeedback;
     if(t==='success')h.notificationOccurred('success');else if(t==='error')h.notificationOccurred('error');else if(t==='warning')h.notificationOccurred('warning');else h.impactOccurred(t==='heavy'?'heavy':(t==='medium'?'medium':'light'));return}
@@ -121,23 +123,18 @@ var Platform=(function(){
    if(name==='max'&&window.WebApp&&window.WebApp.HapticFeedback){var hm=window.WebApp.HapticFeedback;
     if(t==='success')hm.notificationOccurred('success');else if(t==='error')hm.notificationOccurred('error');else if(t==='warning')hm.notificationOccurred('warning');else hm.impactOccurred(t==='heavy'?'heavy':(t==='medium'?'medium':'light'));return}
    if(navigator.vibrate)navigator.vibrate((t==='error'||t==='heavy')?60:20);}catch(e){}},
-
   share:share,
   toast:platToast,
-
   onBack:function(fn){backFn=fn;
    if(name==='tg')try{Telegram.WebApp.BackButton.show();Telegram.WebApp.BackButton.onClick(fn)}catch(e){}
    if(name==='vk'&&window.vkBridge)try{vkBridge.subscribe(function(e){if(e&&e.detail&&e.detail.type==='VKWebAppSwipeBack')fn()})}catch(e){}
    if(name==='max'&&window.WebApp&&window.WebApp.BackButton)try{window.WebApp.BackButton.show();window.WebApp.BackButton.onClick(fn)}catch(e){}},
-
   fireBack:function(){if(backFn)backFn()},
-
   close:function(){try{
    if(name==='tg')Telegram.WebApp.close();
    else if(name==='vk'&&window.vkBridge)vkBridge.send('VKWebAppClose',{payload:'igrovoj-centr'}).catch(function(){});
    else if(name==='max'&&window.WebApp&&window.WebApp.close)window.WebApp.close();
    else history.back()}catch(e){history.back()}},
-
   colors:function(bg){try{
    if(name==='tg'){Telegram.WebApp.setHeaderColor(bg);Telegram.WebApp.setBackgroundColor(bg)}
    else if(name==='vk'&&window.vkBridge)vkBridge.send('VKWebAppSetViewSettings',{status_bar_style:'light',action_bar_color:bg,navigation_bar_color:bg}).catch(function(){});

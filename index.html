@@ -65,12 +65,13 @@
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.13 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.14 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
   <script>
-    const HUB_VER = '3.13';
+    const HUB_VER = '3.14';
 
+    /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
     Platform.init({
       bg: '#070b16',
       back: function() { Platform.close(); }
@@ -78,6 +79,7 @@
 
     try { document.getElementById('platTag').textContent = Platform.name; } catch(e) {}
 
+    /* v3.8+: трекер с автоматической меткой платформы */
     function trackEvent(name, params){
       params = params || {};
       params.platform = Platform.name;
@@ -117,6 +119,22 @@
       location.href = target;
     }
 
+    /* v3.14: prefetch популярных игр в простое — первый вход быстрее */
+    (function prefetchTop(){
+      try {
+        if (navigator.connection && navigator.connection.saveData) return;
+        setTimeout(function(){
+          ['chess','seabattle','durak'].forEach(function(g){
+            var l = document.createElement('link');
+            l.rel = 'prefetch';
+            l.href = './' + g + '/';
+            document.head.appendChild(l);
+          });
+        }, 1500);
+      } catch (e) {}
+    })();
+
+    /* Карта deep-link'ов от ботов: ?game=chess → сразу в шахматы */
     const GAME_MAP = {
       'trend_catch': './trend-catch/',
       'trend': './trend-catch/',
@@ -157,6 +175,7 @@
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
+    /* Deep-link от ботов: авто-вход в игру при наличии ?game=... в URL */
     (function handleDeepLink() {
       try {
         const u = new URL(location.href);
