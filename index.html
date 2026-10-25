@@ -10,8 +10,7 @@
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#070b16">
   <meta name="color-scheme" content="light dark">
-  <!-- Telegram SDK удалён: platform.js сам подгрузит нужный SDK при необходимости -->
-  <!-- Единый слой платформ (TG / VK / MAX / web) -->
+  <!-- Telegram SDK не хардкодим: platform.js сам подгрузит нужный SDK -->
   <script src="./js/platform.js"></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
   <script>
@@ -66,13 +65,12 @@
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.9 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.10 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
   <script>
-    const HUB_VER = '3.9';
+    const HUB_VER = '3.10';
 
-    /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
     Platform.init({
       bg: '#070b16',
       back: function() { Platform.close(); }
@@ -96,11 +94,29 @@
       } catch (e) {}
     })();
 
+    /* v3.10: умная навигация в игру.
+       1) Пробуем обычный внутренний переход location.href.
+       2) Если контейнер мессенджера (MAX) его молча блокирует — за 1.5 сек
+          не сработает pagehide, тогда открываем игру через WebApp.openLink
+          (MAX) или новое окно, чтобы нажатие никогда не "зависало". */
     function openGame(url, gameName) {
       trackEvent('hub_game_click', { game_name: gameName });
       try { Platform.haptic('light'); } catch (e) {}
       const sep = url.indexOf('?') >= 0 ? '&' : '?';
-      location.href = url + sep + 'plat=' + Platform.name;
+      const target = url + sep + 'plat=' + Platform.name;
+      let abs = target;
+      try { abs = new URL(target, location.href).href; } catch (e) {}
+      try { Platform.toast('Открываю игру…'); } catch (e) {}
+      let gone = false;
+      window.addEventListener('pagehide', function(){ gone = true; });
+      location.href = target;
+      setTimeout(function(){
+        if (gone) return;
+        try {
+          if (Platform.name === 'max' && window.WebApp && window.WebApp.openLink) { window.WebApp.openLink(abs); return; }
+        } catch (e) {}
+        try { window.open(abs, '_blank'); } catch (e) {}
+      }, 1500);
     }
 
     const GAME_MAP = {
