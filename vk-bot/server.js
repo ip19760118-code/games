@@ -1,8 +1,7 @@
-/* VK Bot "Игровой центр" — Callback API сервер v1.12
-   v1.12: УБРАН color у кнопок open_app/open_link (VK: action несовместим с color) —
-   теперь клавиатура open_app проходит с первой попытки, кнопка открывает хаб
-   клиентом VK без событий и сообщений; ошибки 911 исчезают.
-   Color остаётся только у callback-кнопки (запасной вариант и старые чаты). */
+/* VK Bot "Игровой центр" — Callback API сервер v1.13
+   v1.13: START_TEXT без числа игр (универсальный под любое кол-во).
+   v1.12: open_app без color — клавиатура проходит с первой попытки.
+   Кнопка "🎮 Играть" открывает хаб клиентом VK без сообщений; дедупликация событий. */
 const express = require('express');
 const app = express();
 app.use(express.json());
@@ -23,8 +22,8 @@ const START_TEXT =
 Играй один против ИИ или создавай комнаты и зови друзей онлайн.
 
 🔥 Что внутри:
-• Аркады, логика, классика.
-• Онлайн: Шахматы, Шашки, Нарды, Домино, Дурак, Морской бой 🚢.
+• Аркады, логика и классика: от арканоида и шутера до пасьянса и маджонга.
+• Онлайн-дуэли: шахматы, шашки, нарды, домино, дурак, морской бой и другие.
 
 ⚡ Удобно:
 • Запуск в один клик, без скачиваний.
@@ -62,7 +61,7 @@ function eventSeen(id) {
   return false;
 }
 
-/* ---------- v1.12: color только для callback; open_app/open_link без color ---------- */
+/* ---------- color только для callback; open_app/open_link без color ---------- */
 function oneBtn(action, color) {
   const b = { action: action };
   if (color) b.color = color;
@@ -136,7 +135,6 @@ app.post('/vk', async (req, res) => {
           console.log('[VK EVENT] duplicate ignored', e.event_id);
           return res.send('ok');
         }
-        /* запасной путь для старых чатов с callback-клавиатурой */
         const tries = [
           { type: 'open_app', app_id: VK_APP_ID, owner_id: -GROUP_POS },
           { type: 'open_app', app_id: VK_APP_ID, owner_id: GROUP_POS },

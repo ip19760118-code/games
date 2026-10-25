@@ -1,9 +1,12 @@
-/* MAX Bot "Игровой центр" — webhook-сервер v1.8
-   v1.8: убрана кнопка "Открыть все игры" из клавиатуры.
-   v1.7: user_id/chat_id передаются в QUERY-строке POST /messages (официальный пример docs MAX).
-   Адресат личного диалога — user_id отправителя (sender.user_id / callback.user.user_id).
-   Исходящие вызовы через node:https c rejectUnauthorized:false (УЦ Минцифры).
-   Лимит MAX: 2 сообщения/сек в диалог. */
+/* MAX Bot "Игровой центр" v2.0 — webhook-сервер Callback API MAX.
+   v2.0: START_TEXT без числа игр (универсальный).
+   Особенности MAX (см. docs/PLATFORM-SPEC.md):
+   - base https://platform-api2.max.ru, заголовок Authorization: <token> сырой строкой;
+   - TLS: rejectUnauthorized:false (цепочка УЦ Минцифры);
+   - получатель личного диалога в QUERY: POST /messages?user_id=...;
+   - ВСЕ вызовы API строго ДО ответа вебхуку (Vercel freeze);
+   - клавиатура: attachments [{type:'inline_keyboard', payload:{buttons}}];
+   - фолбэк-цепочка: user_id+kb -> user_id -> chat_id+kb -> chat_id. */
 const express = require('express');
 const https = require('https');
 const app = express();
@@ -11,7 +14,6 @@ app.use(express.json());
 
 const MAX_TOKEN = process.env.MAX_TOKEN || '';
 const MAX_SECRET = process.env.MAX_SECRET || '';
-const API = 'https://platform-api2.max.ru';
 const HUB = 'https://ip19760118-code.github.io/games/';
 
 const GAMES = [
@@ -30,142 +32,165 @@ const GAMES = [
   ['samurai',   '🍉 Самурай'],
   ['lights',    '💡 Выключи свет'],
   ['trend',     '📈 Trend Catch'],
+  ['tetris',    '🧱 Тетрис'],
 ];
-
-function numList() {
-  return GAMES.map(([id, l], i) => (i + 1) + '. ' + l).join('\n');
-}
 
 const START_TEXT =
 `Что умеет этот бот?
-🎮 Игровой Центр — 15 мини-игр в MAX!
+🎮 Игровой Центр — мини-игры в MAX!
 Играй один против ИИ или создавай комнаты и зови друзей онлайн.
 
 🔥 Что внутри:
-• Аркады, логика, классика: Арканоид, Шутер, Самурай, Сапёр, Косынка, Маджонг, Кристаллы.
-• Онлайн: Шахматы, Шашки, Нарды, Домино, Дурак, Морской бой 🚢.
+• Аркады, логика и классика: от арканоида и шутера до пасьянса и маджонга.
+• Онлайн-дуэли: шахматы, шашки, нарды, домино, дурак, морской бой и другие.
 
 ⚡ Удобно:
 • Запуск в один клик, без скачиваний.
 • Сложности, рекорды, статистика.
 • Звук, вибрация, адаптация под телефон.
-• Новые игры регулярно.
 
-Выбирай игру и играй! 🚀`;
+Выбирай игру кнопкой ниже — ссылка откроется в один тап! 🚀`;
 
-/* ---------- API MAX: адресат в QUERY, тело — только text/attachments ---------- */
-function api(method, body, query) {
-  return new Promise((resolve) => {
-    let url = API + method;
-    if (query) {
-      const qs = Object.keys(query).map(k => k + '=' + encodeURIComponent(query[k])).join('&');
-      if (qs) url += '?' + qs;
-    }
-    const data = body ? JSON.stringify(body) : null;
-    const headers = { 'Authorization': MAX_TOKEN, 'Content-Type': 'application/json' };
-    if (data) headers['Content-Length'] = Buffer.byteLength(data);
-    const req = https.request(url, {
-      method: body ? 'POST' : 'GET',
-      headers: headers,
-      rejectUnauthorized: false,
-      timeout: 6000
-    }, (res) => {
-      let txt = '';
-      res.on('data', (c) => { txt += c; });
-      res.on('end', () => {
-        console.log('[MAX API]', url.replace(API, ''), '->', res.statusCode, txt.slice(0, 300));
-        let json = {};
-        try { json = JSON.parse(txt); } catch (e) { json = { raw: txt }; }
-        resolve({ status: res.statusCode, json: json });
+/* ---------- HTTP-клиент MAX с отключённой проверкой сертификата ---------- */
+function maxPost(path, body) {
+  return new Promise(function (resolve) {
+    try {
+      const data = JSON.stringify(body || {});
+      const u = new URL('https://platform-api2.max.ru' + path);
+      const req = https.request({
+        hostname: u.hostname,
+        path: u.pathname + u.search,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': MAX_TOKEN,
+          'Content-Length': Buffer.byteLength(data)
+        },
+        rejectUnauthorized: false
+      }, function (res) {
+        let s = '';
+        res.on('data', function (c) { s += c; });
+        res.on('end', function () {
+          let j = {};
+          try { j = JSON.parse(s); } catch (e) {}
+          console.log('[MAX API]', path, res.statusCode, s.slice(0, 250));
+          resolve({ ok: res.statusCode === 200 && !j.errorCode, j: j });
+        });
       });
-    });
-    req.on('timeout', () => { req.destroy(new Error('timeout 6s')); });
-    req.on('error', (e) => {
-      console.log('[MAX API]', url.replace(API, ''), '-> ERROR', e.message);
-      resolve({ status: 0, json: { error: e.message } });
-    });
-    if (data) req.write(data);
-    req.end();
+      req.on('error', function (e) { console.log('[MAX API err]', path, e.message); resolve({ ok: false }); });
+      req.setTimeout(6000, function () { try { req.destroy(); } catch (e) {} resolve({ ok: false }); });
+      req.end(data);
+    } catch (e) { resolve({ ok: false }); }
   });
 }
-function apiOk(r) { return r.status >= 200 && r.status < 300 && !(r.json && r.json.code); }
 
-function idsOf(u) {
-  const m = u.message || (u.callback && u.callback.message) || {};
-  const cb = u.callback || {};
-  const human = (m.sender && m.sender.user_id != null ? m.sender.user_id : null)
-      ?? (cb.user && cb.user.user_id != null ? cb.user.user_id : null);
-  const chat = (m.recipient && m.recipient.chat_id != null ? m.recipient.chat_id : null)
-      ?? (m.chat_id != null ? m.chat_id : null);
-  return { human: human, chat: chat };
-}
-
-/* ---------- v1.8: клавиатура БЕЗ кнопки "Открыть все игры" ---------- */
+/* ---------- клавиатура: callback-кнопки направлений ---------- */
 function menuKeyboard() {
   const rows = [];
   for (let i = 0; i < GAMES.length; i += 2) {
-    rows.push(GAMES.slice(i, i + 2).map(([id, label]) => ({
-      type: 'callback', text: label, payload: JSON.stringify({ g: id })
-    })));
+    rows.push(GAMES.slice(i, i + 2).map(function (g) {
+      return { type: 'callback', text: g[1], payload: JSON.stringify({ g: g[0] }) };
+    }));
   }
-  return { type: 'inline_keyboard', payload: { buttons: rows } };
+  rows.push([{ type: 'callback', text: '🎮 Открыть весь центр', payload: JSON.stringify({ hub: 1 }) }]);
+  return [{ type: 'inline_keyboard', payload: { buttons: rows } }];
 }
 
-async function send(ids, text, withKeyboard) {
-  const kb = withKeyboard ? [menuKeyboard()] : null;
+/* ---------- извлечение адресата из апдейта ---------- */
+function peerOf(u) {
+  try {
+    if (u.message_callback && u.message_callback.callback) {
+      const c = u.message_callback.callback;
+      return {
+        user: (c.user && c.user.user_id) || (c.message && c.message.sender && c.message.sender.user_id) || null,
+        chat: (c.message && c.message.chat && c.message.chat.chat_id) || null
+      };
+    }
+  } catch (e) {}
+  try {
+    const m = (u.message_created && u.message_created.message) ||
+              (u.bot_started && u.bot_started.message) || u.message;
+    if (m) {
+      return {
+        user: (m.sender && m.sender.user_id) || null,
+        chat: (m.chat && m.chat.chat_id) || null
+      };
+    }
+  } catch (e) {}
+  return { user: null, chat: null };
+}
+
+/* ---------- отправка с фолбэк-цепочкой ---------- */
+async function send(peer, text, withKb) {
+  const kb = withKb ? menuKeyboard() : undefined;
   const tries = [];
-  if (ids.human != null && kb) tries.push({ tag: 'user_id+kb', q: { user_id: ids.human }, b: { text: text, attachments: kb } });
-  if (ids.human != null)       tries.push({ tag: 'user_id',    q: { user_id: ids.human }, b: { text: withKeyboard ? text + '\n\n' + numList() + '\n\nОтветь номером игры.' : text } });
-  if (ids.chat != null && kb)  tries.push({ tag: 'chat_id+kb', q: { chat_id: ids.chat },  b: { text: text, attachments: kb } });
-  if (ids.chat != null)        tries.push({ tag: 'chat_id',    q: { chat_id: ids.chat },  b: { text: withKeyboard ? text + '\n\n' + numList() + '\n\nОтветь номером игры.' : text } });
+  if (peer.user) tries.push({ path: '/messages?user_id=' + peer.user, body: { text: text, attachments: kb } });
+  if (peer.user) tries.push({ path: '/messages?user_id=' + peer.user, body: { text: text } });
+  if (peer.chat) tries.push({ path: '/messages?chat_id=' + peer.chat, body: { text: text, attachments: kb } });
+  if (peer.chat) tries.push({ path: '/messages?chat_id=' + peer.chat, body: { text: text } });
   for (const t of tries) {
-    const r = await api('/messages', t.b, t.q);
-    if (apiOk(r)) { console.log('[MAX SEND] ok via', t.tag); return r; }
+    const r = await maxPost(t.path, t.body);
+    if (r.ok) return r;
   }
-  console.log('[MAX SEND] all variants failed');
-  return { status: 0, json: { error: 'all variants failed' } };
+  return { ok: false };
 }
 
-async function sendGame(ids, id) {
-  const g = GAMES.find(x => x[0] === id);
-  const url = HUB + '?plat=max&game=' + id;
-  await send(ids, (g ? g[1] : '🎮 Игра') + ' — открывай 👇\n' + url, false);
+function numList() {
+  return GAMES.map(function (g, i) { return (i + 1) + '. ' + g[1]; }).join('\n');
+}
+
+async function sendMenu(peer) {
+  const r = await send(peer, START_TEXT, true);
+  if (!r.ok) await send(peer, START_TEXT + '\n\n' + numList() + '\n\nОтветь номером игры.', false);
+  return r;
+}
+
+async function sendGame(peer, id) {
+  const g = GAMES.find(function (x) { return x[0] === id; });
+  if (!g) return sendMenu(peer);
+  const url = HUB + id + '/?plat=max';
+  return send(peer, g[1] + ' — открывай 👇\n' + url, false);
 }
 
 /* ---------- webhook ---------- */
-app.all('/max', async (req, res) => {
-  console.log('[MAX] incoming:', req.method, '| update_type:', (req.body && req.body.update_type) || '-');
-  if (req.method !== 'POST') { res.status(200).send('ok'); return; }
-  if (MAX_SECRET && req.headers['x-max-bot-api-secret'] !== MAX_SECRET) { res.sendStatus(403); return; }
+app.post('/max', async (req, res) => {
   const u = req.body || {};
-  console.log('[MAX] update body:', JSON.stringify(u).slice(0, 600));
-  const ids = idsOf(u);
-  console.log('[MAX] ids: human =', ids.human, '| chat =', ids.chat);
-  if (ids.human != null || ids.chat != null) {
-    try {
-      if (u.update_type === 'bot_started' || u.update_type === 'message_created' || u.update_type === 'message_new') {
-        const text = (u.message && u.message.body && u.message.body.text || '').trim();
-        if (u.update_type === 'bot_started' || !text || /^(\/start|\/help|привет|меню|игры)/i.test(text)) {
-          await send(ids, START_TEXT, true);
-        } else {
-          const byNum = /^(\d{1,2})$/.exec(text);
-          if (byNum && GAMES[+byNum[1] - 1]) { await sendGame(ids, GAMES[+byNum[1] - 1][0]); }
-          else {
-            const low = text.toLowerCase();
-            const hit = GAMES.find(([id, l]) => l.toLowerCase().includes(low) || id === low);
-            if (hit) { await sendGame(ids, hit[0]); }
-            else { await send(ids, 'Не понял 🙂 Отправь /start или номер игры из списка.', true); }
-          }
+  console.log('[MAX] incoming:', u.update_type || u.type || Object.keys(u).join(','));
+
+  if (MAX_SECRET) {
+    const hs = req.headers || {};
+    const got = hs['x-max-bot-api-secret'] || '';
+    if (got !== MAX_SECRET) { console.log('[MAX] bad secret'); return res.status(403).send('bad secret'); }
+  }
+
+  /* ВСЯ работа ДО ответа: Vercel замораживает функцию после res.send */
+  try {
+    const peer = peerOf(u);
+
+    if (u.message_callback) {
+      let payload = u.message_callback.callback && u.message_callback.callback.payload;
+      if (typeof payload === 'string') { try { payload = JSON.parse(payload); } catch (e) { payload = null; } }
+      if (payload && payload.g) await sendGame(peer, payload.g);
+      else if (payload && payload.hub) await send(peer, '🎮 Игровой центр 👇\n' + HUB + '?plat=max', false);
+      else await sendMenu(peer);
+    }
+    else if (u.bot_started || u.message_created) {
+      const text = ((u.message_created && u.message_created.message && u.message_created.message.text) || '').trim();
+      const low = text.toLowerCase();
+      if (!text || low === '/start' || low === 'привет' || low === 'меню' || low === 'игры') {
+        await sendMenu(peer);
+      } else {
+        const byNum = /^(\d{1,2})$/.exec(text);
+        if (byNum && GAMES[+byNum[1] - 1]) await sendGame(peer, GAMES[+byNum[1] - 1][0]);
+        else {
+          const hit = GAMES.find(function (g) { return g[1].toLowerCase().indexOf(low) >= 0 || g[0] === low; });
+          if (hit) await sendGame(peer, hit[0]);
+          else await sendMenu(peer);
         }
       }
-      else if (u.update_type === 'message_callback') {
-        let payload = u.callback && u.callback.payload;
-        if (typeof payload === 'string') { try { payload = JSON.parse(payload); } catch (e) { payload = null; } }
-        const g = payload && payload.g;
-        if (g) await sendGame(ids, g);
-      }
-    } catch (e) { console.error('[MAX] handler error:', e && e.message); }
-  }
+    }
+  } catch (e) { console.error('[MAX] handler error:', e && e.message); }
+
   res.sendStatus(200);
 });
 
