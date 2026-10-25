@@ -1,7 +1,7 @@
-/* VK Bot "Игровой центр" — Callback API сервер v1.9
-   v1.9: клавиатура прикладывается к КАЖДОМУ исходящему сообщению
-   (иначе веб-клиент VK сбрасывает нижнюю клавиатуру);
-   нажатие "🎮 Играть": event open_link -> fallback снакбар+ссылка (тоже с клавиатурой). */
+/* VK Bot "Игровой центр" — Callback API сервер v1.10
+   v1.10: дедупликация message_event по event_id (VK ретраит события — были
+   периодические письма); нажатие "🎮 Играть" = снакбар (гасит спиннер) + одно
+   сообщение со ссылкой на мини-апп; клавиатура в каждом сообщении. */
 const express = require('express');
 const app = express();
 app.use(express.json());
@@ -45,6 +45,21 @@ async function api(method, params) {
 }
 function apiOk(j) { return j && !j.error && j.response !== undefined; }
 
+/* ---------- v1.10: дедупликация событий ---------- */
+const seenEvents = new Map();
+function eventSeen(id) {
+  if (!id) return false;
+  const now = Date.now();
+  const TTL = 6 * 3600 * 1000;
+  if (seenEvents.has(id) && now - seenEvents.get(id) < TTL) return true;
+  seenEvents.set(id, now);
+  if (seenEvents.size > 500) {
+    const cut = now - TTL;
+    for (const [k, v] of seenEvents) if (v < cut) seenEvents.delete(k);
+  }
+  return false;
+}
+
 /* ---------- постоянная нижняя клавиатура ---------- */
 function kbApp()     { return { one_time: false, inline: false, buttons: [[{ action: { type: 'open_app', app_id: VK_APP_ID, owner_id: VK_GROUP_ID, label: '🎮 Играть' }, color: 'positive' }]] }; }
 function kbCallback(){ return { one_time: false, inline: false, buttons: [[{ action: { type: 'callback', label: '🎮 Играть', payload: JSON.stringify({ a: 1 }) }, color: 'positive' }]] }; }
@@ -52,7 +67,6 @@ function kbCallback(){ return { one_time: false, inline: false, buttons: [[{ act
 let rnd = 0;
 function nextRandomId() { rnd += 1; return Date.now() * 10 + (rnd % 10); }
 
-/* v1.9: ЛЮБОЕ сообщение шлём с клавиатурой */
 async function send(peerId, text, kb) {
   return await api('messages.send', {
     peer_id: peerId, message: text, random_id: nextRandomId(),
@@ -72,7 +86,6 @@ async function sendWelcome(peerId) {
   return await send(peerId, START_TEXT + '\n\n🎮 Мини-апп: ' + VK_APP_URL, kbCallback());
 }
 
-/* ---------- закрыть callback-событие ---------- */
 function answerEvent(e, eventData) {
   return api('messages.sendMessageEventAnswer', {
     event_id: e.event_id, user_id: e.user_id, peer_id: e.peer_id,
@@ -103,14 +116,12 @@ app.post('/vk', async (req, res) => {
       let payload = e.payload;
       if (typeof payload === 'string') { try { payload = JSON.parse(payload); } catch (err) { payload = null; } }
       if (payload && payload.a) {
-        const r = await answerEvent(e, { type: 'open_link', link: VK_APP_URL });
-        if (apiOk(r)) {
-          console.log('[VK EVENT] open_link ok');
-        } else {
-          console.log('[VK EVENT] open_link rejected, fallback');
-          await answerEvent(e, { type: 'show_snackbar', text: '🎮 Ссылка ниже' });
-          await send(e.peer_id, '🎮 Игровой центр внутри VK 👇\n' + VK_APP_URL, kbCallback());
+        if (eventSeen(e.event_id)) {          /* повторная доставка — игнор */
+          console.log('[VK EVENT] duplicate ignored', e.event_id);
+          return res.send('ok');
         }
+        await answerEvent(e, { type: 'show_snackbar', text: '🎮 Открываю игровой центр…' });
+        await send(e.peer_id, '🎮 Игровой центр внутри VK 👇\n' + VK_APP_URL, kbCallback());
       }
     }
   } catch (e) { console.error('[VK] handler error:', e && e.message); }
