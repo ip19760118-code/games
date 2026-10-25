@@ -30,6 +30,7 @@
     .game-btn { width: 100%; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; background: rgba(255, 255, 255, 0.06); color: #eaf0ff; padding: 12px; margin-bottom: 10px; cursor: pointer; text-align: left; transition: transform 0.08s ease, background 0.15s ease; font-family: inherit; font-size: inherit; touch-action: manipulation; min-width: 0; }
     .game-btn:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.10); }
     .game-btn.disabled { opacity: 0.45; cursor: default; }
+    .game-btn.new { background: linear-gradient(135deg, rgba(124,255,196,.12), rgba(51,214,255,.08)); border-color: rgba(124,255,196,.35); }
     .game-emoji { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; background: rgba(124, 255, 196, 0.12); border: 1px solid rgba(124, 255, 196, 0.18); flex-shrink: 0; }
     .game-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
     .game-text b { font-size: clamp(15px, 4.2vw, 17px); color: #ffffff; }
@@ -38,6 +39,7 @@
     .hub-ver { margin: 6px 0 0; color: #4d5670; font-size: 10px; font-family: monospace; letter-spacing: 1px; }
     .hub-ver .plat { color: #7cffc4; font-weight: 700; }
     .tag-online { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 10px; background: rgba(124, 255, 196, 0.15); border: 1px solid rgba(124, 255, 196, 0.4); color: #7cffc4; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; vertical-align: middle; }
+    .tag-new { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 10px; background: rgba(255, 193, 7, 0.18); border: 1px solid rgba(255, 193, 7, 0.5); color: #ffd54f; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; vertical-align: middle; }
   </style>
 </head>
 <body>
@@ -45,7 +47,7 @@
     <div class="panel">
       <h1>🎮 Игровой центр</h1>
       <p class="hub-subtitle">Мини-игры в Telegram, VK и MAX</p>
-      <p class="hub-desc">15 игр в одном центре: аркады, головоломки, классика, онлайн‑партии, match‑3, пасьянс, морской бой и маджонг. Работает в трёх мессенджерах и в браузере — без установки, нажми и играй.</p>
+      <p class="hub-desc">16 игр в одном центре: аркады, головоломки, классика, онлайн‑партии, match‑3, пасьянс, морской бой, маджонг и тетрис. Работает в трёх мессенджерах и в браузере — без установки, нажми и играй.</p>
 
       <button class="game-btn" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
       <button class="game-btn" id="lightsOutBtn"><span class="game-emoji">💡</span><span class="game-text"><b>Выключи Свет</b><small>Логическая головоломка: выключи всё поле</small></span></button>
@@ -62,15 +64,17 @@
       <button class="game-btn" id="solitaireBtn"><span class="game-emoji">♠️</span><span class="game-text"><b>Косынка</b><small>Классический пасьянс: перетаскивание, подсказки, скины</small></span></button>
       <button class="game-btn" id="seabattleBtn"><span class="game-emoji">🚢</span><span class="game-text"><b>Морской бой <span class="tag-online">ONLINE</span></b><small>1 игрок vs ИИ или онлайн‑дуэль по коду комнаты</small></span></button>
       <button class="game-btn" id="mahjongBtn"><span class="game-emoji">🀄</span><span class="game-text"><b>Маджонг</b><small>Пасьянс: 72/120/180 плиток, наборы, подсказки, отмена</small></span></button>
+      <button class="game-btn new" id="tetrisBtn"><span class="game-emoji">🧱</span><span class="game-text"><b>Тетрис <span class="tag-new">NEW</span></b><small>Классика: 6 уровней, ghost, hold, wall kicks, рекорды</small></span></button>
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.16 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.17 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
   <script>
-    const HUB_VER = '3.16';
+    const HUB_VER = '3.17';
 
+    /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
     Platform.init({
       bg: '#070b16',
       back: function() { Platform.close(); }
@@ -78,6 +82,7 @@
 
     try { document.getElementById('platTag').textContent = Platform.name; } catch(e) {}
 
+    /* v3.8+: трекер с автоматической меткой платформы */
     function trackEvent(name, params){
       params = params || {};
       params.platform = Platform.name;
@@ -94,8 +99,9 @@
       } catch (e) {}
     })();
 
-    /* v3.16: openLink только в настоящем клиенте MAX; иначе новое окно,
-       а если браузер его заблокировал — текущая вкладка (ничего не "зависает"). */
+    /* v3.16: без iframe. В MAX игры открываем через WebApp.openLink (внешнее окно,
+       first-party контекст — Firebase и онлайн-комнаты работают).
+       TG / VK / браузер — обычная навигация верхнего уровня. */
     function openGame(url, gameName) {
       trackEvent('hub_game_click', { game_name: gameName });
       try { Platform.haptic('light'); } catch (e) {}
@@ -106,26 +112,22 @@
 
       if (Platform.name === 'max') {
         try { Platform.toast('Открываю игру…'); } catch (e) {}
-        if (Platform.maxClientReal && Platform.maxClientReal()) {
-          try {
-            if (window.WebApp && window.WebApp.openLink) { window.WebApp.openLink(abs); return; }
-          } catch (e) {}
-        }
-        let w = null;
-        try { w = window.open(abs, '_blank'); } catch (e) {}
-        if (w) return;
+        try {
+          if (window.WebApp && window.WebApp.openLink) { window.WebApp.openLink(abs); return; }
+        } catch (e) {}
+        try { window.open(abs, '_blank'); return; } catch (e) {}
         location.href = target;
         return;
       }
       location.href = target;
     }
 
-    /* v3.14: prefetch популярных игр в простое */
+    /* v3.14: prefetch популярных игр в простое — первый вход быстрее */
     (function prefetchTop(){
       try {
         if (navigator.connection && navigator.connection.saveData) return;
         setTimeout(function(){
-          ['chess','seabattle','durak'].forEach(function(g){
+          ['chess','seabattle','durak','tetris'].forEach(function(g){
             var l = document.createElement('link');
             l.rel = 'prefetch';
             l.href = './' + g + '/';
@@ -135,6 +137,7 @@
       } catch (e) {}
     })();
 
+    /* Карта deep-link'ов от ботов: ?game=chess → сразу в шахматы */
     const GAME_MAP = {
       'trend_catch': './trend-catch/',
       'trend': './trend-catch/',
@@ -154,7 +157,9 @@
       'crystals': './crystals/',
       'solitaire': './solitaire/',
       'seabattle': './seabattle/',
-      'mahjong': './mahjong/'
+      'mahjong': './mahjong/',
+      'tetris': './tetris/',
+      'tetris_classic': './tetris/'
     };
 
     document.getElementById('trendCatchBtn').addEventListener('click', () => openGame('./trend-catch/', 'trend_catch'));
@@ -172,9 +177,11 @@
     document.getElementById('solitaireBtn').addEventListener('click', () => openGame('./solitaire/', 'solitaire'));
     document.getElementById('seabattleBtn').addEventListener('click', () => openGame('./seabattle/', 'seabattle'));
     document.getElementById('mahjongBtn').addEventListener('click', () => openGame('./mahjong/', 'mahjong'));
+    document.getElementById('tetrisBtn').addEventListener('click', () => openGame('./tetris/', 'tetris'));
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
+    /* Deep-link от ботов: авто-вход в игру при наличии ?game=... в URL */
     (function handleDeepLink() {
       try {
         const u = new URL(location.href);
