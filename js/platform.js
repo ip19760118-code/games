@@ -1,11 +1,12 @@
-/* tg-games: единый слой платформ v2.1 — Telegram / VK / MAX / web.
-   v2.1: регистрация service worker (кэш игр на github.io) из одного места.
-   VK: свайп-назад, тактильные нотификации, шеринг с текстом;
-   MAX: SDK st.max.ru, BackButton, HapticFeedback, shareMaxContent. */
+/* tg-games: единый слой платформ v2.2 — Telegram / VK / MAX / web.
+   v2.2: кнопка "В меню" во внешнем браузере (игры, открытые из MAX через openLink)
+   закрывает браузер и возвращает в MAX; перехват кликов по кнопкам со словом "меню".
+   v2.1: service worker; VK: свайп-назад/тактилка/шеринг; MAX: SDK st.max.ru. */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
  var TG_SDK_URL='https://telegram.org/js/telegram-web-app.js';
+ var MAX_DEEPLINK='https://max.ru/se14729332_bot';
  var name='web',user=null,backFn=null,inited=false;
 
  function qs(k){try{return new URLSearchParams(location.search).get(k)||''}catch(e){return ''}}
@@ -18,7 +19,7 @@ var Platform=(function(){
   return 'web'}
  name=detect();
 
- /* ---------- v2.1: service worker для кэша игр (только github.io) ---------- */
+ /* ---------- service worker (кэш игр на github.io) ---------- */
  (function(){
   try{
    if(!('serviceWorker' in navigator))return;
@@ -46,6 +47,32 @@ var Platform=(function(){
     if(m)user={id:'mx'+m.id,name:m.first_name||'Игрок'}
     }catch(e){}}
   if(!user)user={id:'g'+Math.floor(Math.random()*1e9),name:'Гость'}}
+
+ /* ---------- v2.2: возврат в мессенджер из внешнего браузера ---------- */
+ function isMaxExternal(){ return name==='max' && !window.WebApp; }
+ function backToMessenger(){
+  try{ platToast('Возвращаем в MAX…'); }catch(e){}
+  try{ window.close(); }catch(e){}
+  setTimeout(function(){
+   try{
+    if(document.hidden)return;          /* вкладка закрылась — всё ок */
+    location.href=MAX_DEEPLINK;         /* не закрылась — диплинк в приложение MAX */
+   }catch(e){}
+  },400);
+ }
+ /* перехват кликов по кнопкам/ссылкам со словом "меню" во внешнем MAX-браузере */
+ document.addEventListener('click', function(ev){
+  try{
+   if(!isMaxExternal())return;
+   var el=(ev.target&&ev.target.closest)?ev.target.closest('button,a'):null;
+   if(!el)return;
+   var txt=(el.textContent||'');
+   if(txt.indexOf('меню')<0&&txt.indexOf('Меню')<0)return;
+   ev.preventDefault();
+   ev.stopPropagation();
+   backToMessenger();
+  }catch(e){}
+ }, true);
 
  function init(o){o=o||{};if(inited)return;inited=true;
   ensureSdk(function(){pickUser();
@@ -113,6 +140,8 @@ var Platform=(function(){
   get name(){return name},
   init:init,
   user:function(){return user||{id:'g0',name:'Гость'}},
+  backToMessenger:backToMessenger,
+  isMaxExternal:isMaxExternal,
   haptic:function(t){try{
    if(name==='tg'&&window.Telegram&&Telegram.WebApp.HapticFeedback){var h=Telegram.WebApp.HapticFeedback;
     if(t==='success')h.notificationOccurred('success');else if(t==='error')h.notificationOccurred('error');else if(t==='warning')h.notificationOccurred('warning');else h.impactOccurred(t==='heavy'?'heavy':(t==='medium'?'medium':'light'));return}
@@ -134,6 +163,7 @@ var Platform=(function(){
    if(name==='tg')Telegram.WebApp.close();
    else if(name==='vk'&&window.vkBridge)vkBridge.send('VKWebAppClose',{payload:'igrovoj-centr'}).catch(function(){});
    else if(name==='max'&&window.WebApp&&window.WebApp.close)window.WebApp.close();
+   else if(isMaxExternal()){backToMessenger();return}
    else history.back()}catch(e){history.back()}},
   colors:function(bg){try{
    if(name==='tg'){Telegram.WebApp.setHeaderColor(bg);Telegram.WebApp.setBackgroundColor(bg)}

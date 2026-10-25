@@ -65,13 +65,12 @@
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.14 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.15 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
   <script>
-    const HUB_VER = '3.14';
+    const HUB_VER = '3.15';
 
-    /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
     Platform.init({
       bg: '#070b16',
       back: function() { Platform.close(); }
@@ -79,7 +78,6 @@
 
     try { document.getElementById('platTag').textContent = Platform.name; } catch(e) {}
 
-    /* v3.8+: трекер с автоматической меткой платформы */
     function trackEvent(name, params){
       params = params || {};
       params.platform = Platform.name;
@@ -96,9 +94,8 @@
       } catch (e) {}
     })();
 
-    /* v3.13: без iframe. В MAX игры открываем через WebApp.openLink (внешнее окно,
-       first-party контекст — Firebase и онлайн-комнаты работают).
-       TG / VK / браузер — обычная навигация верхнего уровня. */
+    /* v3.15: MAX — openLink; если новое окно заблокировано — текущая вкладка.
+       TG / VK / браузер — обычная навигация. */
     function openGame(url, gameName) {
       trackEvent('hub_game_click', { game_name: gameName });
       try { Platform.haptic('light'); } catch (e) {}
@@ -112,14 +109,16 @@
         try {
           if (window.WebApp && window.WebApp.openLink) { window.WebApp.openLink(abs); return; }
         } catch (e) {}
-        try { window.open(abs, '_blank'); return; } catch (e) {}
+        let w = null;
+        try { w = window.open(abs, '_blank'); } catch (e) {}
+        if (w) return;
         location.href = target;
         return;
       }
       location.href = target;
     }
 
-    /* v3.14: prefetch популярных игр в простое — первый вход быстрее */
+    /* v3.14: prefetch популярных игр в простое */
     (function prefetchTop(){
       try {
         if (navigator.connection && navigator.connection.saveData) return;
@@ -134,7 +133,6 @@
       } catch (e) {}
     })();
 
-    /* Карта deep-link'ов от ботов: ?game=chess → сразу в шахматы */
     const GAME_MAP = {
       'trend_catch': './trend-catch/',
       'trend': './trend-catch/',
@@ -175,7 +173,6 @@
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
-    /* Deep-link от ботов: авто-вход в игру при наличии ?game=... в URL */
     (function handleDeepLink() {
       try {
         const u = new URL(location.href);
