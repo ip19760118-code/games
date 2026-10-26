@@ -135,9 +135,9 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <button class="btn primary" id="finishBtn" style="display:none">🏁 Завершить</button>
 <button class="btn" id="menuBtn" style="display:none">🏠 В меню игр</button>
 </div>
-<div class="ver" id="verTag">v3.7</div>
+<div class="ver" id="verTag">v3.8</div>
 </div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v3.7</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>2–4 игрока, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока, старт вручную</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v3.8</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>2–4 игрока, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока, старт вручную</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="lobbyOverlay"><div class="cardbox"><h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2><div class="sub">Ожидание игроков (2–4). Хост запускает партию кнопкой «▶ Начать».</div><div class="lobby-list" id="lobbyList"></div><div class="btns"><button class="btn" id="lobbyInvite">📤 Пригласить</button><button class="btn primary" id="lobbyStart">▶ Начать</button><button class="btn" id="lobbyLeave">🚪 Выйти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="setOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">⚙️ Настройки</h2>
@@ -156,7 +156,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="btns"><button class="btn primary" id="setClose">Готово</button></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила</h2><div class="sub">• Козырь — масть последней карты колоды; первый ход — у младшего козыря.<br>• Атакующий кладёт карту, отбивающийся бьёт её старшей той же масти или козырем.<br>• Отбиваться можно в любом порядке: подсветятся все карты, бьющие хотя бы одну неотбитую. Тапни карту руки и, если целей несколько, тапни нужную карту стола; или перетащи карту руки на атакованную.<br>• Подкидывать карты того же ранга: вчетвером по умолчанию только крайние к отбивающемуся, при включённой настройке — все, кроме него; вдвоём/втроём — все, кроме отбивающегося.<br>• Подкинуть можно, пока число неотбитых карт + 1 не превышает руку отбивающегося (и не больше 6 пар).<br>• «Бито» — всё отбито, карты в сброс; отбившийся становится атакующим.<br>• «Взять» — отбивающийся забирает стол и пропускает ход атаки (вдвоём следующий раунд снова «под него»).<br>• Переводной: пока ни одна карта не покрыта и все неотбитые карты одного ранга, отбивающийся кладёт одну свою карту того же ранга (при нескольких — выбирает какую) и переводит всю стопку на следующего игрока.<br>• После раунда все добирают из колоды до 6 (отбивающийся последним).<br>• Проигравший — последний с картами («дурак»). Игрок с пустой рукой при опустевшей колоде становится наблюдателем.<br>• Онлайн: 2–4 игрока; после партии все жмут «🔄 Реванш» — можно догнать новых игроков или отпустить ушедших, и хост снова запускает партию.<br>• Онлайн защищён анонимной авторизацией Firebase: каждое место занято уникальным uid, чужой клиент не сможет подменить игрока.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='3.7';
+const VER='3.8';
 const HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000;
 let heartbeatTimer=null, myRound=0;
 
@@ -415,20 +415,23 @@ function playersList(){
  return G.order.map(uid=>({seat:uid,uid:uid,name:nameOf(uid),n:(G.hands[uid]||[]).length,connected:true,loses:(G.loses||{})[uid]||0,host:uid==='p0'}));
 }
 function isHost(){return !!roomData&&roomData.host===mySeat;}
+/* v3.8: heartbeat с логированием ошибок */
 function startHeartbeat(){
   stopHeartbeat();
   if(!roomRef||!mySeat)return;
+  console.log('[DU] startHeartbeat, seat=',mySeat,'uid=',myUid);
   const beat=()=>{
     try{
-      roomRef.child('presence/'+mySeat).set({uid:myUid,name:myName,at:Date.now()});
-    }catch(e){console.warn('[DU] heartbeat failed:',e);}
+      roomRef.child('presence/'+mySeat).set({uid:myUid,name:myName,at:Date.now()})
+        .catch(e=>console.warn('[DU] presence write failed:',e.message||e));
+    }catch(e){console.warn('[DU] heartbeat error:',e);}
   };
   beat();
   heartbeatTimer=setInterval(beat,HEARTBEAT_INTERVAL);
 }
 function stopHeartbeat(){if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}}
 function removePresence(){if(!roomRef||!mySeat)return;try{roomRef.child('presence/'+mySeat).remove();}catch(e){}}
-function setPresence(){if(!roomRef||!mySeat)return;const p=roomRef.child('presence/'+mySeat);p.set({uid:myUid,name:myName,at:Date.now()});p.onDisconnect().remove();startHeartbeat();}
+function setPresence(){if(!roomRef||!mySeat)return;const p=roomRef.child('presence/'+mySeat);p.set({uid:myUid,name:myName,at:Date.now()}).catch(e=>console.warn('[DU] setPresence failed:',e.message||e));p.onDisconnect().remove();startHeartbeat();}
 function recoverSeat(){const m=seatsMap();for(const k of SEAT_KEYS){if(m[k]&&m[k].uid===myUid)return k;}return null;}
 async function createRoom(){
  if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
@@ -440,7 +443,10 @@ async function createRoom(){
    presence:{},rematch:{},flags:{drawOffer:null,drawAccept:false,surrender:null},state:null});
   onlineMode=true;
   $('roomBar').style.display='block';$('roomCode').textContent=roomCode;
-  hideMode();setPresence();subscribeRoom();trackEvent('room_created',{game_name:'durak'});
+  hideMode();
+  /* v3.8: даём Firebase время принять seats/p0 перед стартом heartbeat */
+  setTimeout(()=>setPresence(),500);
+  subscribeRoom();trackEvent('room_created',{game_name:'durak'});
  }catch(e){console.error(e);alert('Ошибка создания: '+e.message);}}
 function claimSeat(k){
  return new Promise(function(res){
@@ -475,7 +481,10 @@ async function joinRoom(code){
   myRound=r.round||1;
   onlineMode=true;
   $('roomBar').style.display='block';$('roomCode').textContent=roomCode;
-  hideMode();setPresence();subscribeRoom();trackEvent('room_joined',{game_name:'durak',seat:side});
+  hideMode();
+  /* v3.8: даём Firebase время принять seats/k перед стартом heartbeat */
+  setTimeout(()=>setPresence(),500);
+  subscribeRoom();trackEvent('room_joined',{game_name:'durak',seat:side});
  }catch(e){console.error(e);alert('Ошибка входа: '+e.message);}}
 function subscribeRoom(){
  roomRef.on('value',snap=>{
@@ -487,7 +496,7 @@ function subscribeRoom(){
   else lobbyOverlay.classList.remove('show');
   if(roomData.status==='playing'&&isHost()&&(!roomData.state||!roomData.state.hands||(roomData.state.order||[]).length<2)){
    const keys=seatKeys();
-   if(keys.length>=2){const st=dealState(keys,{},set.transfer,set.allAdd);st.lastMove={name:myName,action:'deal',at:Date.now()};roomRef.update({state:st});}
+   if(keys.length>=2){const st=dealState(keys,{},set.transfer,set.allAdd);st.lastMove={name:myName,action:'deal',at:Date.now()};roomRef.update({state:st}).catch(e=>console.warn('[DU] deal write failed:',e.message));}
   }
   if(roomData.state)roomData.state=normState(roomData.state);
   const s=roomData.state;
@@ -496,8 +505,8 @@ function subscribeRoom(){
    if(fl.drawAccept){s.result={loser:null,at:Date.now()};roomRef.child('state').set(s);}
    else if(fl.surrender&&seatKeys().indexOf(fl.surrender)>=0){s.result={loser:fl.surrender,at:Date.now()};s.loses[fl.surrender]=(s.loses[fl.surrender]||0)+1;roomRef.child('state').set(s);}
   }
-  /* v3.7: реванш — когда все активные игроки (с presence) согласились, хост переводит в waiting и очищает seats ушедших */
-  if(s&&s.result){
+  /* v3.8: триггер реванша ТОЛЬКО при status='playing' (иначе не должен срабатывать в лобби) */
+  if(s&&s.result && roomData.status==='playing'){
     const rm=roomData.rematch||{};
     const activeSeats=seatKeys().filter(k=>isPresenceFresh(roomData.presence&&roomData.presence[k]));
     const allAgreed=activeSeats.length>=2 && activeSeats.every(k=>rm[k]);
@@ -512,7 +521,7 @@ function subscribeRoom(){
         rematch:{},
         seats:newSeats,
         flags:{drawOffer:null,drawAccept:false,surrender:null}
-      });
+      }).catch(e=>console.warn('[DU] rematch update failed:',e.message));
     }
   }
   const rr=roomData.round||1;
@@ -536,7 +545,8 @@ function subscribeRoom(){
   renderAll();updateRoomActions();updateLiveBadge();
   if(s&&s.result&&s.result.at!==shownEndAt){shownEndAt=s.result.at;showEnd();}
  });
- setPresence();startWatchdog();
+ /* v3.8: НЕ вызываем setPresence здесь — он уже вызван в createRoom/joinRoom после задержки */
+ startWatchdog();
 }
 function leaveRoom(){stopHeartbeat();removePresence();onlineMode=false;if(roomRef){roomRef.off();roomRef=null;}roomData=null;roomCode=null;shownEndAt=null;prevTurnMe=null;mySeat=null;myRound=0;closeHoldUntil=0;holdKey='';selCard=null;selTransfer=false;
  $('roomBar').style.display='none';$('roomBar').classList.remove('open');$('rbExtra').style.display='none';
@@ -566,11 +576,10 @@ function updateRoomActions(){const box=$('roomActions');[...box.children].forEac
  }
  const lb=document.createElement('button');lb.className='rbtn danger';lb.textContent='🚪 Выйти';lb.onclick=function(){if(confirm('Выйти из комнаты? Партия прервётся.')){leaveRoom();showMode();}};box.appendChild(lb);}
 function updateLiveBadge(){if(!onlineMode||!roomData)return;const pl=playersList();const live=pl.filter(p=>p.connected).length;$('rbLive').textContent=live;$('rbDot').className='live-dot'+(pl.length>0&&live<pl.length?' some-off':'');}
-/* v3.7: реванш — флаг rematch/{seat}; если соперники уже согласились, сразу идём в лобби */
 function requestRematch(){
   if(!roomRef||!mySeat)return;
   console.log('[DU] propose rematch · seat=',mySeat,'· current=',JSON.stringify((roomData&&roomData.rematch)||{}));
-  roomRef.child('rematch/'+mySeat).set(true);
+  roomRef.child('rematch/'+mySeat).set(true).catch(e=>console.warn('[DU] rematch write failed:',e.message));
   endOverlay.classList.remove('show');
   updateMessage('🔄 Ожидание игроков для реванша…');
   const rm=(roomData&&roomData.rematch)||{};
@@ -587,7 +596,7 @@ function requestRematch(){
       rematch:{},
       seats:newSeats,
       flags:{drawOffer:null,drawAccept:false,surrender:null}
-    });
+    }).catch(e=>console.warn('[DU] rematch update failed:',e.message));
   }
 }
 let watchdog=null;
@@ -996,7 +1005,6 @@ function showEnd(){
  $('endTitle').textContent=title;$('endSub').innerHTML=sub;
  const b=$('endBtns');b.innerHTML='';
  if(onlineMode){
-  /* v3.7: кнопка Реванш для ВСЕХ игроков (а не только хоста) */
   const rb=document.createElement('button');rb.className='btn primary';rb.textContent='🔄 Реванш';rb.onclick=requestRematch;b.appendChild(rb);
   const sh=document.createElement('button');sh.className='btn';sh.textContent='📤 Поделиться';sh.onclick=shareInvite;b.appendChild(sh);
   const lv=document.createElement('button');lv.className='btn';lv.textContent='🚪 Выйти';lv.onclick=function(){leaveRoom();endOverlay.classList.remove('show');showMode();};b.appendChild(lv);
@@ -1009,7 +1017,7 @@ function showEnd(){
  trackEvent('game_end',{game_name:'durak',mode:onlineMode?'online':'ai',difficulty:DIFF(),loser:iLose?'player':(draw?'draw':'other')});
 }
 function attachUI(){
- $('lobbyStart').onclick=function(){if(!isHost())return;const keys=seatKeys();if(keys.length<2)return;const st=dealState(keys,{},set.transfer,set.allAdd);st.lastMove={name:myName,action:'deal',at:Date.now()};roomRef.update({state:st,status:'playing',flags:{drawOffer:null,drawAccept:false,surrender:null},rematch:{}});sDeal();trackEvent('game_start',{game_name:'durak',mode:'online',players:keys.length});};
+ $('lobbyStart').onclick=function(){if(!isHost())return;const keys=seatKeys();if(keys.length<2)return;const st=dealState(keys,{},set.transfer,set.allAdd);st.lastMove={name:myName,action:'deal',at:Date.now()};roomRef.update({state:st,status:'playing',flags:{drawOffer:null,drawAccept:false,surrender:null},rematch:{}}).catch(e=>console.warn('[DU] lobby start failed:',e.message));sDeal();trackEvent('game_start',{game_name:'durak',mode:'online',players:keys.length});};
  $('lobbyInvite').onclick=shareInvite;
  $('lobbyLeave').onclick=function(){leaveRoom();showMode();};
  $('hubBtn').onclick=function(){if(onlineMode)leaveRoom();goToHub();};
