@@ -5,35 +5,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>Шахматы</title>
-
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="../js/platform.js"></script>
-
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-ZD8QE6XKTR', {
-    'page_title': document.title,
-    'page_path': location.pathname
-  });
+  gtag('config', 'G-ZD8QE6XKTR', {'page_title': document.title,'page_path': location.pathname});
 </script>
-
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-
 <style>
-:root{
-  --bg1:#101418; --bg2:#1c2430; --bg3:#080a0d;
-  --panel:rgba(24,32,44,0.85); --text:#e8ecf2; --accent:#7cffc4;
-  --sq-light:#f0d9b5; --sq-dark:#b58863;
-  --shadow:rgba(0,0,0,0.6);
-  --bs:min(calc(100vw - 64px), 460px);
-}
-[data-theme="green"]{ --sq-light:#eeeed2; --sq-dark:#769656; }
-[data-theme="neon"]{ --sq-light:#3b3f63; --sq-dark:#23263c; }
+:root{--bg1:#101418;--bg2:#1c2430;--bg3:#080a0d;--panel:rgba(24,32,44,0.85);--text:#e8ecf2;--accent:#7cffc4;--sq-light:#f0d9b5;--sq-dark:#b58863;--shadow:rgba(0,0,0,0.6);--bs:min(calc(100vw - 64px), 460px);}
+[data-theme="green"]{--sq-light:#eeeed2;--sq-dark:#769656;}
+[data-theme="neon"]{--sq-light:#3b3f63;--sq-dark:#23263c;}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;overscroll-behavior-y:none}
 html,body{overscroll-behavior:none;overscroll-behavior-y:none}
 body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:12px;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:calc(12px + env(safe-area-inset-bottom))}
@@ -47,7 +34,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .ver{text-align:center;font-size:10px;opacity:.45;margin-top:8px;font-family:monospace;letter-spacing:1px}
 .status{text-align:center;font-size:15px;font-weight:600;min-height:24px;margin-bottom:6px;color:var(--accent);text-shadow:0 1px 4px rgba(0,0,0,0.5)}
 .status.warn{color:#ff6b6b}
-
 .room-bar{background:rgba(0,0,0,.25);border:1px solid rgba(124,255,196,.25);border-radius:14px;padding:6px;margin-bottom:8px;font-size:12px}
 .rb-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(124,255,196,.2);border-radius:10px;padding:6px 6px 6px 12px;color:var(--text);font-family:inherit;font-size:12px;cursor:pointer;text-align:left}
 .rb-toggle:active{background:rgba(255,255,255,.09)}
@@ -72,7 +58,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .chip.turn{border-color:var(--accent);color:var(--accent);font-weight:700}
 .chip .dot{width:7px;height:7px;border-radius:50%;background:#57c85b;box-shadow:0 0 5px #57c85b}
 .chip .dot.off{background:#777;box-shadow:none}
-
 .caprow{display:flex;justify-content:space-between;min-height:22px;font-size:16px;letter-spacing:1px;margin:2px 4px;opacity:0.9}
 #board{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:var(--bs);height:var(--bs);margin:6px auto;border-radius:8px;overflow:hidden;box-shadow:0 10px 30px var(--shadow),0 0 0 3px rgba(255,255,255,0.08)}
 .sq{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;overflow:hidden}
@@ -121,7 +106,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .srow select,.srow input[type=range]{width:100%;padding:7px;border-radius:10px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);color:var(--text);font-size:14px}
 .stat-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:14px}
 .modal-close{text-align:center;margin-top:16px}
-/* v2.4: плавающая панель просмотра доски после окончания игры */
 .fieldViewBar{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:200;background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:8px 16px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;align-items:center;gap:12px}
 .fieldViewBar.show{display:flex}
 .fieldViewBar .title{font-size:13px;font-weight:700;color:var(--accent)}
@@ -134,7 +118,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
     <div class="title">♟️ ШАХМАТЫ</div>
     <div class="hbtns"><button class="hbtn" id="settingsBtn">⚙️</button></div>
   </div>
-
   <div class="room-bar" id="roomBar" style="display:none">
     <button class="rb-toggle" id="rbToggle">
       <span>👥 Комната <span class="code" id="roomCode">------</span> · <span id="roomCount">0/2</span></span>
@@ -145,7 +128,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
       <div class="players-bar" id="playersBar"></div>
     </div>
   </div>
-
   <div class="status" id="status">Ваш ход</div>
   <div class="caprow"><span id="capByPlayer"></span><span id="capByAI"></span></div>
   <div id="board"></div>
@@ -153,15 +135,13 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
     <button class="btn primary" id="newBtn">🔄 Новая игра</button>
     <button class="btn" id="undoBtn">↩️ Отменить ход</button>
   </div>
-  <div class="ver" id="verTag">v2.4</div>
+  <div class="ver" id="verTag">v2.5</div>
 </div>
-
 <div class="fieldViewBar" id="fieldViewBar"><span class="title">👁 Просмотр партии</span><button class="btn" id="closeFieldView">Закрыть</button></div>
-
 <div class="overlay" id="modeOverlay">
   <div class="card">
     <button class="hbtn card-hub-btn" id="modeHubBtn">← В меню игр</button>
-    <h2>♟️ Шахматы <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.4</span></h2>
+    <h2>♟️ Шахматы <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.5</span></h2>
     <div class="sub">Выбери режим игры</div>
     <div class="mode-choice">
       <button class="mode-btn" id="modeAi"><div class="icon">🖥</div><div class="txt"><b>Против компьютера</b><small>3 уровня сложности</small></div></button>
@@ -175,7 +155,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
     </div>
   </div>
 </div>
-
 <div class="overlay" id="promoOverlay">
   <div class="card">
     <h2>Превращение пешки</h2>
@@ -184,7 +163,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
     <div class="btns"><button class="btn" id="promoCancel">Отмена</button></div>
   </div>
 </div>
-
 <div class="overlay" id="endOverlay">
   <div class="card">
     <h2 id="endTitle">🏆 Победа!</h2>
@@ -192,7 +170,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
     <div class="btns" id="endBtns"></div>
   </div>
 </div>
-
 <div class="modal" id="settingsModal">
   <div class="modal-content">
     <h2>⚙️ Настройки</h2>
@@ -209,13 +186,13 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
     <div class="modal-close"><button class="btn" id="closeSettingsBtn">Закрыть</button></div>
   </div>
 </div>
-
 <script>
-const VER='2.4';
+const VER='2.5';
+const HEARTBEAT_INTERVAL=5000;
+const HEARTBEAT_TTL=15000;
+let heartbeatTimer=null;
 
-/* ========== v2.4: возврат в хаб через единый слой платформ ========== */
 function goToHub(){Platform.haptic('light');Platform.goToHub();}
-
 function backHandler() {
   try {
     if (fieldViewMode) { closeFieldView(); return; }
@@ -226,13 +203,8 @@ function backHandler() {
   } catch (e) {}
   Platform.close();
 }
+Platform.init({ bg: '#101418', back: backHandler });
 
-Platform.init({
-  bg: '#101418',
-  back: backHandler
-});
-
-/* ========== FIREBASE ========== */
 let fbDb=null,fbAuth=null;
 try{
   firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});
@@ -331,7 +303,6 @@ function insufficient(){const pcs=[];for(const p of board)if(p)pcs.push(p);if(pc
 let onlineMode=false,roomCode=null,mySideOnline=null,myName=null,myUid=null,roomRef=null,opponentOnline=false;
 let matchScore={w:0,b:0};
 let roomDataCache=null;
-let heartbeatTimer=null;
 let fieldViewMode=false;
 function getUserName(){
   try {
@@ -347,23 +318,36 @@ function getUserName(){
 function genRoomCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
 function inviteLink(code){const u=new URL(location.href);u.searchParams.set('room',code);u.searchParams.set('plat',Platform.name);u.hash='';return u.toString();}
 
-/* ========== v2.4: heartbeat вместо onDisconnect ========== */
-const HEARTBEAT_INTERVAL=5000;
-const HEARTBEAT_TTL=15000;
+/* ========== v2.5: heartbeat через update на уровне комнаты ========== */
+function isPresenceFresh(pres){
+  if(!pres||!pres.at)return false;
+  return (Date.now()-pres.at)<HEARTBEAT_TTL;
+}
 function startHeartbeat(){
   stopHeartbeat();
   if(!roomRef||!mySideOnline)return;
-  const presRef=roomRef.child('presence/'+mySideOnline);
-  const beat=()=>{try{presRef.update({name:myName,uid:myUid,at:Date.now()});}catch(e){}};
+  const beat=()=>{
+    try{
+      const upd={};
+      upd['presence/'+mySideOnline]={name:myName,uid:myUid,at:Date.now()};
+      roomRef.update(upd);
+    }catch(e){
+      console.warn('[HB] beat failed:', e);
+    }
+  };
   beat();
   heartbeatTimer=setInterval(beat,HEARTBEAT_INTERVAL);
 }
 function stopHeartbeat(){
   if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}
 }
-function isPresenceFresh(pres){
-  if(!pres||!pres.at)return false;
-  return (Date.now()-pres.at)<HEARTBEAT_TTL;
+function removePresence(){
+  if(!roomRef||!mySideOnline)return;
+  try{
+    const upd={};
+    upd['presence/'+mySideOnline]=null;
+    roomRef.update(upd);
+  }catch(e){}
 }
 
 function subscribeRoom(){
@@ -393,7 +377,6 @@ function subscribeRoom(){
   roomRef.on('value',snap=>{
     roomDataCache=snap.val();
     if(!roomDataCache){showStatus('❌ Комната закрыта');leaveRoom();return;}
-    /* v2.4: presence через heartbeat */
     const oppSide=mySideOnline==='w'?'b':'w';
     const oppPres=roomDataCache.presence&&roomDataCache.presence[oppSide];
     opponentOnline=isPresenceFresh(oppPres);
@@ -451,11 +434,15 @@ async function createRoom(){
       moves:{},
       scores:{}
     });
-    onlineMode=true;playerSide='w';aiSide='b';resetBoard();
-    $('roomBar').style.display='block';$('roomCode').textContent=roomCode;$('roomCount').textContent='1/2';
-    modeOverlay.classList.remove('show');subscribeRoom();updateRoomActions();renderPlayersBar();updateLiveBadge();
-    showStatus('🔗 Поделись ссылкой или кодом');trackEvent('room_created',{game_name:'chess'});
-  }catch(e){console.error(e);alert('Ошибка создания: '+e.message);}
+  }catch(e){
+    console.error('[createRoom] set failed:', e);
+    alert('Ошибка создания: '+e.message);
+    return;
+  }
+  onlineMode=true;playerSide='w';aiSide='b';resetBoard();
+  $('roomBar').style.display='block';$('roomCode').textContent=roomCode;$('roomCount').textContent='1/2';
+  modeOverlay.classList.remove('show');subscribeRoom();updateRoomActions();renderPlayersBar();updateLiveBadge();
+  showStatus('🔗 Поделись ссылкой или кодом');trackEvent('room_created',{game_name:'chess'});
 }
 async function joinRoom(code){
   if(!fbDb){alert('Firebase не настроен.');return;}
@@ -471,19 +458,20 @@ async function joinRoom(code){
     }
     await roomRef.child('players/b').set({name:myName,uid:myUid});
     await roomRef.child('status').set('playing');
-    onlineMode=true;playerSide='b';aiSide='w';resetBoard();
-    $('roomBar').style.display='block';$('roomCode').textContent=roomCode;$('roomCount').textContent='2/2';
-    modeOverlay.classList.remove('show');subscribeRoom();updateRoomActions();renderPlayersBar();updateLiveBadge();
-    trackEvent('room_joined',{game_name:'chess'});
-  }catch(e){console.error(e);alert('Ошибка входа: '+e.message);}
+  }catch(e){
+    console.error('[joinRoom] set failed:', e);
+    alert('Ошибка входа: '+e.message);
+    return;
+  }
+  onlineMode=true;playerSide='b';aiSide='w';resetBoard();
+  $('roomBar').style.display='block';$('roomCode').textContent=roomCode;$('roomCount').textContent='2/2';
+  modeOverlay.classList.remove('show');subscribeRoom();updateRoomActions();renderPlayersBar();updateLiveBadge();
+  trackEvent('room_joined',{game_name:'chess'});
 }
 function leaveRoom(){
   stopHeartbeat();
-  if(roomRef&&mySideOnline){
-    try{roomRef.child('presence/'+mySideOnline).remove();}catch(e){}
-    roomRef.off();
-  }
-  roomRef=null;
+  removePresence();
+  if(roomRef){roomRef.off();roomRef=null;}
   onlineMode=false;
   $('roomBar').style.display='none';$('roomBar').classList.remove('open');$('rbExtra').style.display='none';
   roomCode=null;mySideOnline=null;roomDataCache=null;
@@ -585,7 +573,6 @@ async function startRematch(){
     flags:{drawOffer:null,drawAccept:false,rematchOffer:null,rematchAccept:false,surrender:null,winner:null},
     status:'playing'
   });
-  /* v2.4: стороны НЕ меняем — играем теми же цветами, как просил пользователь */
   resetBoard();
   render();
   showStatus('🔄 Реванш! Ты за '+(mySideOnline==='w'?'белых':'чёрных'));
@@ -641,7 +628,6 @@ function doPlayerMoveOnline(m){sel=-1;legalCache=[];const wc=!!m.captured;makeMo
 function aiTurn(){thinking=true;showStatus('🤔 Компьютер думает...');setTimeout(()=>{const m=aiBestMove();thinking=false;if(!m){checkEnd();return;}const wc=!!m.captured;makeMove(m);wc?sCap():sMove();render();if(inCheck(turn)){sCheck();showStatus('⚠️ Шах вам!',true);}else showStatus('Ваш ход');checkEnd();},120);}
 function undoMove(){if(onlineMode)return;if(moveLog.length<2||turn!==playerSide||thinking||gameOver)return;unmakeMove();unmakeMove();sel=-1;legalCache=[];sClick();render();showStatus('Ваш ход');}
 
-/* ========== v2.4: просмотр доски после окончания партии ========== */
 function showFieldView(){
   endOverlay.classList.remove('show');
   fieldViewMode=true;
@@ -677,7 +663,6 @@ function endGame(winner,reason){
   $('endTitle').textContent=title;$('endSub').textContent=sub+' · ходов: '+Math.ceil(moveLog.length/2);
   const b=$('endBtns');b.innerHTML='';
   if(onlineMode){
-    /* v2.4: улучшенные кнопки: реванш с тем же игроком + просмотр доски */
     b.innerHTML='<button class="btn primary" id="eR">🔄 Реванш</button><button class="btn" id="eV">👁 Посмотреть партию</button><button class="btn" id="eS">📤 Поделиться</button><button class="btn" id="eL">🚪 Выйти</button><button class="btn" id="eH">🏠 В меню</button>';
     $('eR').onclick=proposeRematch;
     $('eV').onclick=showFieldView;
@@ -752,7 +737,7 @@ $('joinGo').onclick=async()=>{const c=$('joinCodeInput').value.trim().toUpperCas
   else modeOverlay.classList.add('show');
  }catch(e){console.error('init error:',e);modeOverlay.classList.add('show');}
 })();
-window.addEventListener('beforeunload',()=>{stopHeartbeat();if(roomRef&&mySideOnline){try{roomRef.child('presence/'+mySideOnline).remove();}catch(e){}}});
+window.addEventListener('beforeunload',()=>{stopHeartbeat();removePresence();});
 </script>
 </body>
 </html>
