@@ -10,7 +10,6 @@
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#070b16">
   <meta name="color-scheme" content="light dark">
-  <!-- Telegram SDK не хардкодим: platform.js сам подгрузит нужный SDK -->
   <script src="./js/platform.js"></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
   <script>
@@ -20,9 +19,9 @@
     gtag('config', 'G-ZD8QE6XKTR', {'page_title': document.title, 'page_path': location.pathname});
   </script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #070b16; font-family: system-ui, -apple-system, sans-serif; touch-action: pan-y; user-select: none; -webkit-user-select: none; overscroll-behavior: none; }
-    .wrap { width: 100vw; height: 100vh; display: flex; padding: 16px; padding-top: calc(16px + env(safe-area-inset-top)); padding-bottom: calc(16px + env(safe-area-inset-bottom)); overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+    *, *::before, *::after { box-sizing: border-box; overscroll-behavior: none; overscroll-behavior-y: none; }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #070b16; font-family: system-ui, -apple-system, sans-serif; touch-action: pan-y; user-select: none; -webkit-user-select: none; overscroll-behavior: none; overscroll-behavior-y: none; }
+    .wrap { width: 100vw; height: 100vh; display: flex; padding: 16px; padding-top: calc(16px + env(safe-area-inset-top)); padding-bottom: calc(16px + env(safe-area-inset-bottom)); overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
     .panel { margin: auto; width: 100%; max-width: min(420px, 100%); padding: 22px 16px; border-radius: 24px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28); text-align: center; color: #eaf0ff; flex-shrink: 0; }
     h1 { margin: 0 0 6px; font-size: clamp(24px, 7vw, 32px); color: #7cffc4; }
     .hub-subtitle { margin: 0 0 8px; color: #7cffc4; font-size: clamp(13px, 3.6vw, 15px); font-weight: 700; }
@@ -68,13 +67,12 @@
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.18 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.19 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
   <script>
-    const HUB_VER = '3.18';
+    const HUB_VER = '3.19';
 
-    /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
     Platform.init({
       bg: '#070b16',
       back: function() { Platform.close(); }
@@ -98,8 +96,6 @@
       } catch (e) {}
     })();
 
-    /* В MAX игры открываем через WebApp.openLink (внешнее окно, first-party).
-       TG / VK / браузер — обычная навигация верхнего уровня. */
     function openGame(url, gameName) {
       trackEvent('hub_game_click', { game_name: gameName });
       try { Platform.haptic('light'); } catch (e) {}
@@ -120,7 +116,6 @@
       location.href = target;
     }
 
-    /* prefetch популярных игр в простое — первый вход быстрее */
     (function prefetchTop(){
       try {
         if (navigator.connection && navigator.connection.saveData) return;
@@ -135,7 +130,6 @@
       } catch (e) {}
     })();
 
-    /* Карта deep-link'ов от ботов: ?game=chess → сразу в шахматы */
     const GAME_MAP = {
       'trend_catch': './trend-catch/',
       'trend': './trend-catch/',
@@ -179,7 +173,6 @@
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
-    /* Deep-link от ботов: авто-вход в игру при наличии ?game=... в URL */
     (function handleDeepLink() {
       try {
         const u = new URL(location.href);

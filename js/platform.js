@@ -1,8 +1,7 @@
-/* tg-games: единый слой платформ v2.3 — Telegram / VK / MAX / web.
-   v2.3: честное определение "настоящий клиент MAX" через initData/UA/referrer
-   (SDK, загруженный в обычном браузере, создаёт фейковый window.WebApp без initData);
-   кнопка "В меню" во внешнем браузере закрывает вкладку / диплинком возвращает в MAX.
-   v2.2: перехват кликов "меню"; v2.1: service worker. */
+/* tg-games: единый слой платформ v2.4 — Telegram / VK / MAX / web.
+   v2.4: блокировка pull-to-refresh в MAX/VK (свайп вниз не обновляет страницу);
+   улучшенный close() — корректный возврат в хаб из web/браузерной версии MAX.
+   v2.3: честный детект клиента MAX по initData/UA/referrer. */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
@@ -32,7 +31,7 @@ var Platform=(function(){
   }catch(e){}
  })();
 
- /* ---------- v2.3: настоящий ли клиент MAX? ---------- */
+ /* ---------- v2.4: настоящий ли клиент MAX? ---------- */
  function maxClientReal(){
   try{
    if(window.WebApp&&window.WebApp.initData&&String(window.WebApp.initData).length>10)return true;
@@ -64,7 +63,40 @@ var Platform=(function(){
     }catch(e){}}
   if(!user)user={id:'g'+Math.floor(Math.random()*1e9),name:'Гость'}}
 
- /* ---------- возврат в мессенджер из внешнего браузера ---------- */
+ /* ---------- v2.4: возврат в хаб (универсальный) ---------- */
+ function hubBase(){
+  try{
+   /* пытаемся найти корень хаба: ищем в пути сегмент /games/ */
+   var p=location.pathname;
+   var i=p.indexOf('/games/');
+   if(i>=0)return location.origin+p.substring(0,i+7); /* включая /games/ */
+   /* fallback: на одну директорию вверх */
+   var parts=p.split('/').filter(Boolean);
+   if(parts.length>=2)parts.pop();
+   return location.origin+'/'+parts.join('/')+'/';
+  }catch(e){
+   return location.origin+'/games/';
+  }
+ }
+ function goToHub(){
+  try{
+   if(name==='max'&&maxClientReal()&&window.WebApp&&window.WebApp.close){window.WebApp.close();return}
+   if(name==='tg'&&window.Telegram&&Telegram.WebApp){Telegram.WebApp.close();return}
+   if(name==='vk'&&window.vkBridge){vkBridge.send('VKWebAppClose',{payload:'igrovoj-centr'}).catch(function(){});return}
+   if(isMaxExternal()){backToMessenger();return}
+   /* web / браузерная MAX / fallback */
+   var url=hubBase()+'?plat='+name;
+   if(location.href.replace(/\/$/,'')===url.replace(/\/$/,'')){
+    /* уже в хабе — ничего не делаем */
+    return;
+   }
+   location.href=url;
+  }catch(e){
+   try{history.back()}catch(e2){location.href='../?plat='+name}
+  }
+ }
+
+ /* ---------- возврат в MAX из внешнего браузера ---------- */
  function backToMessenger(){
   try{ platToast('Возвращаем в MAX…'); }catch(e){}
   try{ window.close(); }catch(e){}
@@ -90,6 +122,37 @@ var Platform=(function(){
  }, true);
 
  function init(o){o=o||{};if(inited)return;inited=true;
+
+  /* ---------- v2.4: блокируем pull-to-refresh и overscroll в MAX/VK/web ---------- */
+  try{
+   document.documentElement.style.overscrollBehavior='none';
+   document.documentElement.style.overscrollBehaviorY='none';
+   document.body.style.overscrollBehavior='none';
+   document.body.style.overscrollBehaviorY='none';
+   /* предотвращаем pull-to-refresh на самом верху */
+   var lastY=0;
+   document.addEventListener('touchstart',function(e){
+    if(e.touches.length===1)lastY=e.touches[0].clientY;
+   },{passive:true});
+   document.addEventListener('touchmove',function(e){
+    if(window.scrollY===0&&e.touches.length===1){
+     var dy=e.touches[0].clientY-lastY;
+     if(dy>0){
+      /* тянем вниз из самого верха — не даём браузеру обновлять страницу */
+      /* но если внутри есть скроллируемый контейнер, он сам обработает */
+      var el=e.target;
+      var inScroller=false;
+      while(el&&el!==document.body){
+       var os=getComputedStyle(el).overflowY;
+       if((os==='auto'||os==='scroll')&&el.scrollTop>0){inScroller=true;break}
+       el=el.parentNode;
+      }
+      if(!inScroller)e.preventDefault();
+     }
+    }
+   },{passive:false});
+  }catch(e){}
+
   ensureSdk(function(){pickUser();
    try{
     if(name==='tg'){var t=Telegram.WebApp;t.ready();t.expand();
@@ -158,6 +221,8 @@ var Platform=(function(){
   maxClientReal:maxClientReal,
   isMaxExternal:isMaxExternal,
   backToMessenger:backToMessenger,
+  goToHub:goToHub,
+  hubBase:hubBase,
   haptic:function(t){try{
    if(name==='tg'&&window.Telegram&&Telegram.WebApp.HapticFeedback){var h=Telegram.WebApp.HapticFeedback;
     if(t==='success')h.notificationOccurred('success');else if(t==='error')h.notificationOccurred('error');else if(t==='warning')h.notificationOccurred('warning');else h.impactOccurred(t==='heavy'?'heavy':(t==='medium'?'medium':'light'));return}
@@ -179,8 +244,8 @@ var Platform=(function(){
    if(name==='tg')Telegram.WebApp.close();
    else if(name==='vk'&&window.vkBridge)vkBridge.send('VKWebAppClose',{payload:'igrovoj-centr'}).catch(function(){});
    else if(name==='max'&&maxClientReal()&&window.WebApp&&window.WebApp.close)window.WebApp.close();
-   else if(isMaxExternal()){backToMessenger();return}
-   else history.back()}catch(e){history.back()}},
+   else goToHub();
+  }catch(e){try{history.back()}catch(e2){location.href='../?plat='+name}}},
   colors:function(bg){try{
    if(name==='tg'){Telegram.WebApp.setHeaderColor(bg);Telegram.WebApp.setBackgroundColor(bg)}
    else if(name==='vk'&&window.vkBridge)vkBridge.send('VKWebAppSetViewSettings',{status_bar_style:'light',action_bar_color:bg,navigation_bar_color:bg}).catch(function(){});
