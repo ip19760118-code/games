@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>Шахматы</title>
+<link rel="icon" href="data:,">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="../js/platform.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
@@ -135,13 +136,13 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
     <button class="btn primary" id="newBtn">🔄 Новая игра</button>
     <button class="btn" id="undoBtn">↩️ Отменить ход</button>
   </div>
-  <div class="ver" id="verTag">v2.6</div>
+  <div class="ver" id="verTag">v2.7</div>
 </div>
 <div class="fieldViewBar" id="fieldViewBar"><span class="title">👁 Просмотр партии</span><button class="btn" id="closeFieldView">Закрыть</button></div>
 <div class="overlay" id="modeOverlay">
   <div class="card">
     <button class="hbtn card-hub-btn" id="modeHubBtn">← В меню игр</button>
-    <h2>♟️ Шахматы <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.6</span></h2>
+    <h2>♟️ Шахматы <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.7</span></h2>
     <div class="sub">Выбери режим игры</div>
     <div class="mode-choice">
       <button class="mode-btn" id="modeAi"><div class="icon">🖥</div><div class="txt"><b>Против компьютера</b><small>3 уровня сложности</small></div></button>
@@ -187,7 +188,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
   </div>
 </div>
 <script>
-const VER='2.6';
+const VER='2.7';
 const HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000;
 let heartbeatTimer=null, myRound=0, fieldViewMode=false;
 
@@ -304,6 +305,8 @@ function isPresenceFresh(p){return !!(p&&p.at&&(Date.now()-p.at)<HEARTBEAT_TTL);
 function startHeartbeat(){stopHeartbeat();if(!roomRef||!mySideOnline)return;const beat=()=>{try{const u={};u['presence/'+mySideOnline]={name:myName,uid:myUid,at:Date.now()};roomRef.update(u);}catch(e){console.warn('[HB] beat failed:',e);}};beat();heartbeatTimer=setInterval(beat,HEARTBEAT_INTERVAL);}
 function stopHeartbeat(){if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}}
 function removePresence(){if(!roomRef||!mySideOnline)return;try{const u={};u['presence/'+mySideOnline]=null;roomRef.update(u);}catch(e){}}
+function otherSide(){return mySideOnline==='w'?'b':'w';}
+
 function subscribeRoom(){
   if(!fbDb||!roomRef)return;
   let firstLoad=true;
@@ -316,20 +319,24 @@ function subscribeRoom(){
   roomRef.on('value',snap=>{
     roomDataCache=snap.val();
     if(!roomDataCache){showStatus('❌ Комната закрыта');leaveRoom();return;}
-    const oppSide=mySideOnline==='w'?'b':'w';
-    opponentOnline=isPresenceFresh(roomDataCache.presence&&roomDataCache.presence[oppSide]);
+    opponentOnline=isPresenceFresh(roomDataCache.presence&&roomDataCache.presence[otherSide()]);
     const fl=roomDataCache.flags||{};
     if(fl.drawOffer&&fl.drawOffer!==mySideOnline&&!fl.drawAccept)showDrawOffer();
     if(fl.drawAccept)endGame(null,'draw_agreed');
     if(fl.surrender)endGame(fl.surrender==='w'?'b':'w','surrender');
-    if(fl.rematchOffer&&fl.rematchOffer!==mySideOnline&&!fl.rematchAccept)showRematchOffer();
-    /* v2.6: реванш — сброс пишет ТОЛЬКО белый (хост), оба реагируют на round */
-    if(fl.rematchOffer&&fl.rematchAccept&&mySideOnline==='w'){
-      roomRef.child('moves').remove();
-      roomRef.update({round:(roomDataCache.round||1)+1,flags:{drawOffer:null,drawAccept:false,rematchOffer:null,rematchAccept:false,surrender:null,winner:null},status:'playing'});
+    /* v2.7: реванш — оба флага rematch/{w,b}; сброс пишут оба идемпотентно */
+    const rm=roomDataCache.rematch||{};
+    if(rm.w&&rm.b){
+      const newRound=(roomDataCache.round||1)+1;
+      if(myRound!==newRound){
+        console.log('[CH] both agreed -> reset round to',newRound);
+        roomRef.child('moves').remove();
+        roomRef.update({round:newRound,rematch:{w:false,b:false},flags:{drawOffer:null,drawAccept:false,surrender:null,winner:null},status:'playing'});
+      }
     }
     const rr=roomDataCache.round||1;
     if(rr!==myRound){
+      console.log('[CH] round change',myRound,'->',rr);
       myRound=rr;
       resetBoard();
       fieldViewMode=false;$('fieldViewBar').classList.remove('show');
@@ -345,12 +352,11 @@ function updateOnlineStatus(){if(gameOver)return;const waiting=!opponentOnline;
  if(turn===(onlineMode?mySideOnline:set.side))showStatus('🕓 Твой ход');
  else showStatus(waiting?'🔗 Поделись ссылкой с другом':'🤔 Ход соперника...');}
 function showDrawOffer(){const box=$('roomActions');if(box.querySelector('[data-prompt="draw"]'))return;const el=document.createElement('div');el.dataset.prompt='draw';el.style.cssText='display:flex;gap:6px;align-items:center;font-size:12px;color:var(--accent);width:100%';el.innerHTML='<span>Ничья?</span><button class="rbtn accept" id="aD">Принять</button><button class="rbtn" id="dD">Нет</button>';box.appendChild(el);el.querySelector('#aD').onclick=()=>roomRef.child('flags/drawAccept').set(true);el.querySelector('#dD').onclick=()=>{roomRef.child('flags/drawOffer').set(null);el.remove();};}
-function showRematchOffer(){const box=$('roomActions');if(box.querySelector('[data-prompt="rematch"]'))return;const el=document.createElement('div');el.dataset.prompt='rematch';el.style.cssText='display:flex;gap:6px;align-items:center;font-size:12px;color:var(--accent);width:100%';el.innerHTML='<span>🔄 Реванш?</span><button class="rbtn accept" id="aR">Играть</button><button class="rbtn" id="dR">Нет</button>';box.appendChild(el);el.querySelector('#aR').onclick=()=>roomRef.child('flags/rematchAccept').set(true);el.querySelector('#dR').onclick=()=>{roomRef.update({'flags/rematchOffer':null,'flags/rematchAccept':false});el.remove();};}
 async function createRoom(){
   if(!fbDb){alert('Firebase не настроен.');return;}
   await ensureAuth();myUid=getUid();
   roomCode=genRoomCode();mySideOnline='w';myName=getUserName();myRound=1;roomRef=fbDb.ref('rooms/'+roomCode);
-  try{await roomRef.set({game:'chess',createdAt:Date.now(),round:1,status:'waiting',players:{w:{name:myName,uid:myUid}},flags:{drawOffer:null,drawAccept:false,rematchOffer:null,rematchAccept:false,surrender:null,winner:null},presence:{},moves:{},scores:{}});}
+  try{await roomRef.set({game:'chess',createdAt:Date.now(),round:1,status:'waiting',players:{w:{name:myName,uid:myUid}},flags:{drawOffer:null,drawAccept:false,surrender:null,winner:null},rematch:{w:false,b:false},presence:{},moves:{},scores:{}});}
   catch(e){console.error('[createRoom] set failed:',e);alert('Ошибка создания: '+e.message);return;}
   onlineMode=true;playerSide='w';aiSide='b';resetBoard();
   $('roomBar').style.display='block';$('roomCode').textContent=roomCode;$('roomCount').textContent='1/2';
@@ -383,17 +389,36 @@ function updateLiveBadge(){if(!onlineMode||!roomRef||!roomDataCache)return;let l
  $('rbLive').textContent=live;$('rbDot').className='live-dot'+(live<total?' some-off':'');$('roomCount').textContent=total+'/2';}
 function updateRoomActions(){const box=$('roomActions');[...box.children].forEach(c=>{if(!c.dataset.prompt)c.remove();});if(!onlineMode||!roomRef)return;
  const sh=document.createElement('button');sh.className='rbtn';sh.textContent='📤 Пригласить';
- sh.onclick=()=>{Platform.share(inviteLink(roomCode),'♟️ Шахматы онлайн. Комната: '+roomCode+'\n'+inviteLink(roomCode));};box.appendChild(sh);
+ sh.onclick=()=>{const url=inviteLink(roomCode);Platform.share(url,'♟️ Шахматы онлайн. Комната: '+roomCode+'\n'+url);};box.appendChild(sh);
  const cb=document.createElement('button');cb.className='rbtn';cb.textContent='🔢 Код';cb.onclick=()=>{navigator.clipboard?.writeText(roomCode);showStatus('Код '+roomCode+' скопирован');};box.appendChild(cb);
  if(!gameOver){
   const db=document.createElement('button');db.className='rbtn';db.textContent='🤝 Ничья';db.onclick=async()=>{if(confirm('Предложить ничью?'))await roomRef.child('flags/drawOffer').set(mySideOnline);};box.appendChild(db);
-  const sb=document.createElement('button');sb.className='rbtn danger';sb.textContent='🏳 Сдаться';sb.onclick=async()=>{if(confirm('Сдаться?'))await roomRef.child('flags/surrender').set(mySideOnline);};box.appendChild(sb);}
+  const sb=document.createElement('button');sb.className='rbtn danger';sb.textContent='🏳 Сдаться';sb.onclick=async()=>{if(confirm('Сдаться?'))await roomRef.child('flags/surrender').set(mySideOnline);};box.appendChild(sb);
+ }else{
+  const rb=document.createElement('button');rb.className='rbtn accept';rb.textContent='🔄 Реванш';rb.onclick=requestRematch;box.appendChild(rb);
+ }
  const lb=document.createElement('button');lb.className='rbtn danger';lb.textContent='🚪 Выйти';lb.onclick=()=>{if(confirm('Выйти из комнаты? Партия прервётся.')){leaveRoom();resetBoard();modeOverlay.classList.add('show');}};box.appendChild(lb);}
 async function sendMoveOnline(m){if(!roomRef)return;await roomRef.child('moves').push({by:mySideOnline,from:m.from,to:m.to,promo:m.promo||null,at:Date.now()});}
 function applyRemoteMove(m){if(turn!==m.by)return;const legal=genLegal(turn);const cand=legal.find(x=>x.from===m.from&&x.to===m.to&&x.promo===(m.promo||null));if(!cand)return;const wc=!!cand.captured;makeMove(cand);wc?sCap():sMove();Platform.haptic('light');render();if(inCheck(turn)){sCheck();showStatus('⚠️ Шах тебе!',true);}else updateOnlineStatus();checkEndOnline();}
 function checkEndOnline(){const mv=genLegal(turn);if(mv.length===0){if(inCheck(turn))endGame(turn===playerSide?'computer':'player','checkmate');else endGame(null,'stalemate');return true;}if(halfmove>=100){endGame(null,'fifty');return true;}if(insufficient()){endGame(null,'material');return true;}return false;}
 function resetBoard(){board=initialBoard();turn='w';castling={wK:true,wQ:true,bK:true,bQ:true};epTarget=-1;halfmove=0;undoStack=[];moveLog=[];lastMove=null;gameOver=false;thinking=false;sel=-1;promoPending=null;legalCache=[];hidePromo();endOverlay.classList.remove('show');document.querySelectorAll('[data-prompt]').forEach(e=>e.remove());render();}
-async function proposeRematch(){if(!roomRef)return;await roomRef.update({'flags/rematchOffer':mySideOnline,'flags/rematchAccept':false});showStatus('🔄 Ожидание согласия на реванш...');}
+/* v2.7: реванш флагом rematch/{side} + мгновенный сброс, если соперник уже согласен */
+function requestRematch(){
+  if(!roomRef)return;
+  console.log('[CH] propose rematch · side=',mySideOnline,'· current=',JSON.stringify((roomDataCache&&roomDataCache.rematch)||{}));
+  roomRef.child('rematch/'+mySideOnline).set(true);
+  endOverlay.classList.remove('show');
+  showStatus('🔄 Ожидание соперника для реванша…');
+  const rm=(roomDataCache&&roomDataCache.rematch)||{};
+  if(rm[otherSide()]){
+    const newRound=(roomDataCache.round||1)+1;
+    if(myRound!==newRound){
+      console.log('[CH] opponent already agreed -> reset round to',newRound);
+      roomRef.child('moves').remove();
+      roomRef.update({round:newRound,rematch:{w:false,b:false},flags:{drawOffer:null,drawAccept:false,surrender:null,winner:null},status:'playing'});
+    }
+  }
+}
 const $=id=>document.getElementById(id);
 const boardEl=$('board'),statusEl=$('status');
 const settingsModal=$('settingsModal'),endOverlay=$('endOverlay'),promoOverlay=$('promoOverlay'),modeOverlay=$('modeOverlay');
@@ -445,7 +470,7 @@ function endGame(winner,reason){if(gameOver)return;gameOver=true;thinking=false;
  $('endTitle').textContent=title;$('endSub').textContent=sub+' · ходов: '+Math.ceil(moveLog.length/2);
  const b=$('endBtns');b.innerHTML='';
  if(onlineMode){b.innerHTML='<button class="btn primary" id="eR">🔄 Реванш</button><button class="btn" id="eV">👁 Посмотреть партию</button><button class="btn" id="eS">📤 Поделиться</button><button class="btn" id="eL">🚪 Выйти</button><button class="btn" id="eH">🏠 В меню</button>';
-  $('eR').onclick=proposeRematch;$('eV').onclick=showFieldView;$('eS').onclick=shareGame;
+  $('eR').onclick=requestRematch;$('eV').onclick=showFieldView;$('eS').onclick=shareGame;
   $('eL').onclick=()=>{leaveRoom();resetBoard();endOverlay.classList.remove('show');modeOverlay.classList.add('show');};
   $('eH').onclick=()=>{leaveRoom();goToHub();};}
  else{b.innerHTML='<button class="btn primary" id="eN">🔄 Ещё партию</button><button class="btn" id="eV">👁 Посмотреть партию</button><button class="btn" id="eS">📤 Поделиться</button><button class="btn" id="eH">🏠 В меню</button>';
@@ -464,7 +489,7 @@ function resetGameAI(){onlineMode=false;stopHeartbeat();if(roomRef){roomRef.off(
  $('roomBar').style.display='none';$('roomBar').classList.remove('open');$('rbExtra').style.display='none';
  playerSide=set.side;aiSide=playerSide==='w'?'b':'w';resetBoard();render();showStatus('Ваш ход');
  trackEvent('game_start',{game_name:'chess',difficulty:set.diff,side:playerSide});if(turn!==playerSide)aiTurn();}
-$('newBtn').onclick=()=>{ensureAudio();sClick();if(onlineMode){if(gameOver)proposeRematch();else if(confirm('Прервать и предложить реванш?'))proposeRematch();}else resetGameAI();};
+$('newBtn').onclick=()=>{ensureAudio();sClick();if(onlineMode){if(gameOver)requestRematch();else if(confirm('Прервать и предложить реванш?'))requestRematch();}else resetGameAI();};
 $('undoBtn').onclick=()=>{ensureAudio();undoMove();};
 $('hubBtn').onclick=()=>{if(onlineMode)leaveRoom();goToHub();};
 $('modeHubBtn').onclick=goToHub;
