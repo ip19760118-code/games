@@ -1,6 +1,5 @@
-<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="color-scheme" content="light dark"><title>Шашки</title>
+<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="color-scheme" content="light dark"><link rel="icon" href="data:,"><title>Шашки</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<!-- Единый слой платформ (TG / VK / MAX / web) -->
 <script src="../js/platform.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
@@ -93,9 +92,9 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div id="board"></div>
 <div class="status" id="statusEl">Выбери режим</div>
 <div class="actions"><button class="btn" id="menuBtn" style="display:none">🏠 В меню игр</button><button class="btn primary" id="newBtn" style="display:none">🔄 Новая игра</button></div>
-<div class="ver" id="verTag">v1.5</div>
+<div class="ver" id="verTag">v1.6</div>
 </div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🟤 Шашки <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v1.5</span></h2><div class="sub">Русские · обязательное взятие</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🟤 Шашки <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v1.6</span></h2><div class="sub">Русские · обязательное взятие</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="lobbyOverlay"><div class="cardbox"><h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2><div class="sub">Ожидание второго игрока…</div><div class="lobby-list" id="lobbyList"></div><div class="btns"><button class="btn" id="lobbyInvite">📤 Пригласить</button><button class="btn primary" id="lobbyStart">▶ Начать</button><button class="btn" id="lobbyLeave">🚪 Выйти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
@@ -105,13 +104,12 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="srow"><label>Скин шашек</label><select id="pieceSel"><option value="classic" selected>Белые / чёрные</option><option value="red">Белые / красные</option><option value="blue">Белые / синие</option></select></div>
 <div class="btns"><button class="btn primary" id="setClose">Готово</button></div></div></div>
 <div class="overlay" id="statsOverlay"><div class="cardbox"><h2>📊 Статистика</h2><div class="stat-row"><span>Партий сыграно</span><b id="stT">0</b></div><div class="stat-row"><span>Побед</span><b id="stW">0</b></div><div class="stat-row"><span>Поражений</span><b id="stL">0</b></div><div class="stat-row"><span>Процент побед</span><b id="stPct">—</b></div><div class="stat-row"><span>Серия побед сейчас</span><b id="stSt">0</b></div><div class="stat-row"><span>Рекордная серия</span><b id="stBest">0</b></div><div class="stat-row"><span>Съедено шашек</span><b id="stCap">0</b></div><div class="btns"><button class="btn" id="stReset">Сбросить</button><button class="btn primary" id="stClose">Закрыть</button></div></div></div>
-<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (русские)</h2><div class="sub">• Простая шашка ходит на одну клетку по диагонали вперёд; бьёт — перескакивая через шашку соперника вперёд или назад.<br>• Взятие обязательно; за один ход можно съесть несколько шашек цепочкой.<br>• Дойдя до последнего ряда, шашка становится дамкой (♛): ходит и бьёт на любое расстояние по диагонали.<br>• Если шашка стала дамкой во время цепочки — она продолжает бить уже как дамка.<br>• Победа: у соперника не осталось шашек или ходов (пропуск хода невозможен).<br>• Онлайн: ничья и сдача — в шторке комнаты.<br>• Онлайн защищён анонимной авторизацией Firebase (Этап 2).<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
+<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (русские)</h2><div class="sub">• Простая шашка ходит на одну клетку по диагонали вперёд; бьёт — перескакивая через шашку соперника вперёд или назад.<br>• Взятие обязательно; за один ход можно съесть несколько шашек цепочкой.<br>• Дойдя до последнего ряда, шашка становится дамкой (♛): ходит и бьёт на любое расстояние по диагонали.<br>• Если шашка стала дамкой во время цепочки — она продолжает бить уже как дамка.<br>• Победа: у соперника не осталось шашек или ходов (пропуск хода невозможен).<br>• Онлайн: ничья и сдача — в шторке комнаты.<br>• После партии все жмут «🔄 Реванш» — можно заменить ушедшего игрока новым и начать новую партию.<br>• Онлайн защищён анонимной авторизацией Firebase.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='1.5',FLY=230;
+const VER='1.6',FLY=230;
+const HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000;
+let heartbeatTimer=null, myRound=0;
 
-/* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
-/* v1.5: BackButton-логика закрытия оверлеев перенесена в callback back.
-   Порядок: rules → stats → set → lobby (с leaveRoom) → mode → hub */
 function backHandler(){
   try {
     if(rulesOverlay.classList.contains('show')){rulesOverlay.classList.remove('show');return;}
@@ -128,14 +126,12 @@ Platform.init({
   back: backHandler
 });
 
-/* v1.5: возвращаемся в хаб, сохраняя платформу */
 function goToHub(){
   Platform.haptic('light');
   if(onlineMode)leaveRoom();
   location.href='../?plat='+Platform.name;
 }
 
-/* v1.5: трекер с автоматической меткой платформы */
 function trackEvent(n,p){
   p=p||{};
   p.platform=Platform.name;
@@ -208,7 +204,6 @@ function botMove(s,side){const mv=genMoves(s,side);if(!mv.length)return null;
 let onlineMode=false,roomCode=null,myUid=null,mySide=null,myName=null,roomRef=null,roomData=null,shownEndAt=null,G=null,botTimer=null,flight=null,sel=-1,dests=[],playerSide='w',prevTurnMe=null,prevLastAt=0,capsMe=0;
 function getUid(){return (fbAuth&&fbAuth.currentUser)?fbAuth.currentUser.uid:null;}
 
-/* v1.5: имя пользователя из любой платформы через Platform.user() */
 function getUserName(){
   try {
     const u = Platform.user();
@@ -220,14 +215,21 @@ function getUserName(){
 }
 function genRoomCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
 
-/* v1.5: ссылка-приглашение несёт метку платформы */
 function inviteLink(c){const u=new URL(location.href);u.searchParams.set('room',c);u.searchParams.set('plat',Platform.name);return u.toString();}
 
 function S(){if(!onlineMode)return G?normState(G):null;return(roomData&&roomData.state)?normState(roomData.state):null;}
 function meSide(){return onlineMode?mySide:playerSide;}
 function nameOf(side){if(!onlineMode)return side===playerSide?'Вы':'Компьютер';const p=(roomData&&roomData.players||{})[side];return p?p.name:(side==='w'?'Белые':'Чёрные');}
-function playersList(){if(onlineMode){if(!roomData)return[];const sc=(roomData.state&&roomData.state.scores)||{};return['w','b'].filter(x=>(roomData.players||{})[x]).map(sd=>({side:sd,name:nameOf(sd),n:countP(roomData.state||{},sd),connected:!!(roomData.presence&&roomData.presence[sd]),wins:sc[sd]||0}));}
+/* v1.6: определение свежести presence */
+function isPresenceFresh(p){return !!(p&&p.at&&(Date.now()-p.at)<HEARTBEAT_TTL);}
+function playersList(){if(onlineMode){if(!roomData)return[];const sc=(roomData.state&&roomData.state.scores)||{};return['w','b'].filter(x=>(roomData.players||{})[x]).map(sd=>({side:sd,name:nameOf(sd),n:countP(roomData.state||{},sd),connected:isPresenceFresh(roomData.presence&&roomData.presence[sd]),wins:sc[sd]||0}));}
  if(!G)return[];return[{side:'w',name:nameOf('w'),n:countP(G,'w'),connected:true,wins:0},{side:'b',name:nameOf('b'),n:countP(G,'b'),connected:true,wins:0}];}
+/* v1.6: список активных сторон (с presence) */
+function activeSides(){
+  if(!roomData)return[];
+  const pres=roomData.presence||{};
+  return ['w','b'].filter(sd=>(roomData.players||{})[sd]&&isPresenceFresh(pres[sd]));
+}
 let cellEls={};
 function buildBoard(){const bd=$('board');bd.innerHTML='';cellEls={};const me=meSide();
  for(let dr=0;dr<8;dr++)for(let dc=0;dc<8;dc++){
@@ -255,20 +257,56 @@ function startFlight(side,path,k,cb){
   })();
  }catch(e){clearTimeout(hard);finish();}
 }
+/* v1.6: heartbeat с логированием */
+function startHeartbeat(){
+  stopHeartbeat();
+  if(!roomRef||!mySide)return;
+  console.log('[SH] startHeartbeat, side=',mySide,'uid=',myUid);
+  const beat=()=>{
+    try{
+      roomRef.child('presence/'+mySide).set({name:myName,uid:myUid,at:Date.now()})
+        .catch(e=>console.warn('[SH] presence write failed:',e.message||e));
+    }catch(e){console.warn('[SH] heartbeat error:',e);}
+  };
+  beat();
+  heartbeatTimer=setInterval(beat,HEARTBEAT_INTERVAL);
+}
+function stopHeartbeat(){if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}}
+function removePresence(){if(!roomRef||!mySide)return;try{roomRef.child('presence/'+mySide).remove();}catch(e){}}
 async function createRoom(){
  if(!fbDb){alert('Firebase не загружен.');return;}
  await ensureAuth();
- myUid=getUid();myName=getUserName();mySide='w';roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);
- try{await roomRef.set({game:'shashki',host:mySide,createdAt:Date.now(),status:'waiting',players:{w:{name:myName,uid:myUid}},presence:{},flags:{drawOffer:null,drawAccept:false,surrender:null,winner:null},scores:{w:0,b:0},state:newState()});
- onlineMode=true;$('roomBar').style.display='block';$('roomCode').textContent=roomCode;modeOverlay.classList.remove('show');buildBoard();subscribeRoom();trackEvent('room_created',{game_name:'shashki'});}catch(e){alert('Ошибка: '+e.message);}}
+ myUid=getUid();myName=getUserName();mySide='w';roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);myRound=1;
+ try{await roomRef.set({game:'shashki',host:mySide,createdAt:Date.now(),round:1,status:'waiting',players:{w:{name:myName,uid:myUid}},presence:{},flags:{drawOffer:null,drawAccept:false,surrender:null,winner:null},rematch:{},scores:{w:0,b:0},state:newState()});
+ onlineMode=true;$('roomBar').style.display='block';$('roomCode').textContent=roomCode;modeOverlay.classList.remove('show');buildBoard();
+ setTimeout(()=>{startHeartbeat();subscribeRoom();},500);
+ trackEvent('room_created',{game_name:'shashki'});}catch(e){alert('Ошибка: '+e.message);}}
 async function joinRoom(code){
  if(!fbDb){alert('Firebase не загружен.');return;}
  await ensureAuth();
- myUid=getUid();myName=getUserName();mySide='b';roomCode=code.toUpperCase();roomRef=fbDb.ref('rooms/'+roomCode);
- try{const snap=await roomRef.once('value');if(!snap.exists()){alert('Комната не найдена.');return;}const r=snap.val();if(r.game!=='shashki'){alert('Другая игра.');return;}if(r.status!=='waiting'){alert('Игра уже идёт.');return;}if(r.players&&r.players.b){alert('Место занято.');return;}
- await roomRef.child('players/b').set({name:myName,uid:myUid});if(!r.state||!r.state.board)await roomRef.child('state').set(newState());
- await roomRef.child('status').set('playing');
- onlineMode=true;$('roomBar').style.display='block';$('roomCode').textContent=roomCode;modeOverlay.classList.remove('show');buildBoard();subscribeRoom();trackEvent('room_joined',{game_name:'shashki'});}catch(e){alert('Ошибка: '+e.message);}}
+ myUid=getUid();myName=getUserName();roomCode=code.toUpperCase();roomRef=fbDb.ref('rooms/'+roomCode);
+ try{const snap=await roomRef.once('value');if(!snap.exists()){alert('Комната не найдена.');return;}const r=snap.val();if(r.game!=='shashki'){alert('Другая игра.');return;}
+  /* v1.6: разрешаем вход в waiting и в finished (для реванша) */
+  if(r.status!=='waiting'&&r.status!=='finished'){alert('Игра уже идёт. Дождитесь окончания или создайте новую комнату.');return;}
+  /* определяем сторону */
+  let side=null;
+  if(r.players){
+    if(r.players.w&&r.players.w.uid===myUid)side='w';
+    else if(r.players.b&&r.players.b.uid===myUid)side='b';
+  }
+  if(!side){
+    if(!r.players||!r.players.b){side='b';}
+    else if(!r.players.w){side='w';}
+    else{alert('Комната заполнена.');return;}
+  }
+  mySide=side;
+  myRound=r.round||1;
+  await roomRef.child('players/'+mySide).set({name:myName,uid:myUid});
+  if(!r.state||!r.state.board)await roomRef.child('state').set(newState());
+  if(r.status==='waiting')await roomRef.child('status').set('playing');
+ onlineMode=true;$('roomBar').style.display='block';$('roomCode').textContent=roomCode;modeOverlay.classList.remove('show');buildBoard();
+ setTimeout(()=>{startHeartbeat();subscribeRoom();},500);
+ trackEvent('room_joined',{game_name:'shashki'});}catch(e){alert('Ошибка: '+e.message);}}
 function subscribeRoom(){roomRef.on('value',snap=>{roomData=snap.val();if(!roomData){leaveRoom();return;}
  if(!roomData.state||!roomData.state.board){try{roomRef.update({state:newState()});}catch(e){}roomData.state=roomData.state||newState();}
  roomData.state=normState(roomData.state);
@@ -280,17 +318,48 @@ function subscribeRoom(){roomRef.on('value',snap=>{roomData=snap.val();if(!roomD
  if(fl.drawOffer&&fl.drawOffer!==mySide&&!fl.drawAccept)showPrompt('draw','Ничья?','flags/drawAccept',true,'flags/drawOffer',null);
  if(fl.drawAccept&&s&&!s.result){s.result={winner:null,at:Date.now()};try{roomRef.child('state/result').set(s.result);}catch(e){}}
  if(fl.surrender&&s&&!s.result){const w=oth(fl.surrender);const ns=clone(s);ns.result={winner:w,at:Date.now()};ns.scores[w]=(ns.scores[w]||0)+1;try{roomRef.child('state').set(ns);}catch(e){}}
+ 
+ /* v1.6: триггер реванша ТОЛЬКО при status='finished' */
+ if(s&&s.result && roomData.status==='finished'){
+   const rm=roomData.rematch||{};
+   const active=activeSides();
+   const allAgreed=active.length>=2 && active.every(sd=>rm[sd]);
+   if(allAgreed && roomData.host===mySide){
+     console.log('[SH] all agreed -> back to lobby, round+1');
+     /* сохраняем только активных игроков */
+     const newPlayers={};
+     for(const sd of active)newPlayers[sd]=roomData.players[sd];
+     roomRef.update({
+       status:'waiting',
+       round:(roomData.round||1)+1,
+       rematch:{},
+       players:newPlayers,
+       flags:{drawOffer:null,drawAccept:false,surrender:null,winner:null},
+       state:newState()
+     }).catch(e=>console.warn('[SH] rematch update failed:',e.message));
+   }
+ }
+ 
+ /* v1.6: синхронизация round */
+ const rr=roomData.round||1;
+ if(rr!==myRound){
+   console.log('[SH] round change',myRound,'->',rr);
+   myRound=rr;
+   shownEndAt=null;
+   endOverlay.classList.remove('show');
+ }
+ 
  updateLiveBadge();updateRoomActions();renderAll();
  if(s.result&&s.result.at!==shownEndAt){shownEndAt=s.result.at;showEnd();}});
- const p=roomRef.child('presence/'+mySide);p.set({name:myName,at:Date.now()});p.onDisconnect().remove();startWatchdog();}
+ /* v1.6: НЕ вызываем startHeartbeat здесь — он уже запущен в createRoom/joinRoom */
+ startWatchdog();}
 function showPrompt(key,text,onOkPath,okVal,onNoPath,noVal){const box=$('roomActions');if(box.querySelector('[data-prompt="'+key+'"]'))return;const el=document.createElement('div');el.dataset.prompt=key;el.style.cssText='display:flex;gap:6px;align-items:center;font-size:12px;color:var(--accent);width:100%';el.innerHTML='<span>'+text+'</span><button class="rbtn accept" id="pY">Да</button><button class="rbtn" id="pN">Нет</button>';box.appendChild(el);el.querySelector('#pY').onclick=()=>roomRef.child(onOkPath).set(okVal);el.querySelector('#pN').onclick=()=>{roomRef.child(onNoPath).set(noVal);el.remove();};}
-function leaveRoom(){onlineMode=false;flight=null;if(roomRef){roomRef.off();if(mySide)roomRef.child('presence/'+mySide).remove();roomRef=null;}roomData=null;roomCode=null;shownEndAt=null;prevTurnMe=null;$('roomBar').style.display='none';$('roomBar').classList.remove('open');$('rbExtra').style.display='none';lobbyOverlay.classList.remove('show');endOverlay.classList.remove('show');renderPlayersBar();}
-function showLobby(){lobbyOverlay.classList.add('show');$('lobbyCode').textContent=roomCode;const list=$('lobbyList');list.innerHTML='';playersList().forEach((p,i)=>{const r=document.createElement('div');r.className='row';r.innerHTML='<span>'+(i+1)+'. '+esc(p.name)+(p.side===mySide?' (вы)':'')+(i===0?' 👑':'')+'</span><span>'+(p.connected?'🟢':'')+'</span>';list.appendChild(r);});if(playersList().length<2){const r=document.createElement('div');r.className='row';r.innerHTML='<span style="opacity:.5">— свободно —</span><span>⚪</span>';list.appendChild(r);}
+function leaveRoom(){stopHeartbeat();removePresence();onlineMode=false;flight=null;if(roomRef){roomRef.off();roomRef=null;}roomData=null;roomCode=null;shownEndAt=null;prevTurnMe=null;myRound=0;$('roomBar').style.display='none';$('roomBar').classList.remove('open');$('rbExtra').style.display='none';lobbyOverlay.classList.remove('show');endOverlay.classList.remove('show');renderPlayersBar();}
+function showLobby(){lobbyOverlay.classList.add('show');$('lobbyCode').textContent=roomCode;const list=$('lobbyList');list.innerHTML='';playersList().forEach((p,i)=>{const r=document.createElement('div');r.className='row';r.innerHTML='<span>'+(i+1)+'. '+esc(p.name)+(p.side===mySide?' (вы)':'')+(p.side==='w'?' 👑':'')+'</span><span>'+(p.connected?'🟢':'⚪')+'</span>';list.appendChild(r);});if(playersList().length<2){const r=document.createElement('div');r.className='row';r.innerHTML='<span style="opacity:.5">— свободно —</span><span>⚪</span>';list.appendChild(r);}
  $('lobbyStart').style.display=(roomData&&roomData.host===mySide)?'inline-flex':'none';$('lobbyStart').disabled=playersList().length<2;}
-$('lobbyStart').onclick=()=>{if(!roomData||roomData.host!==mySide)return;const st=newState();st.scores=(roomData.state&&roomData.state.scores)||{w:0,b:0};st.lastMove={name:myName,action:'deal',at:Date.now()};roomRef.update({state:st,status:'playing',flags:{drawOffer:null,drawAccept:false,surrender:null,winner:null}});sDeal();trackEvent('game_start',{game_name:'shashki',mode:'online'});};
+$('lobbyStart').onclick=()=>{if(!roomData||roomData.host!==mySide)return;const st=newState();st.scores=(roomData.state&&roomData.state.scores)||{w:0,b:0};st.lastMove={name:myName,action:'deal',at:Date.now()};roomRef.update({state:st,status:'playing',flags:{drawOffer:null,drawAccept:false,surrender:null,winner:null},rematch:{}}).catch(e=>console.warn('[SH] lobby start failed:',e.message));sDeal();trackEvent('game_start',{game_name:'shashki',mode:'online'});};
 $('lobbyInvite').onclick=shareInvite;$('lobbyLeave').onclick=()=>{leaveRoom();modeOverlay.classList.add('show');};
 
-/* v1.5: шеринг через платформу */
 function shareInvite(){
   const url=inviteLink(roomCode);
   const text='🟤 Шашки онлайн! Комната '+roomCode+'\n'+url;
@@ -300,12 +369,16 @@ function shareInvite(){
 function updateRoomActions(){const box=$('roomActions');[...box.children].forEach(c=>{if(!c.dataset.prompt)c.remove();});if(!onlineMode||!roomRef)return;
  const sh=document.createElement('button');sh.className='rbtn';sh.textContent='📤 Пригласить';sh.onclick=shareInvite;box.appendChild(sh);
  const cb=document.createElement('button');cb.className='rbtn';cb.textContent='🔢 Код';cb.onclick=()=>{navigator.clipboard?.writeText(roomCode);setStatus('Код скопирован');};box.appendChild(cb);
- const s=S();if(s&&!s.result){
+ const s=S();
+ if(s&&s.result){
+   /* v1.6: кнопка Реванш в шторке */
+   const rb=document.createElement('button');rb.className='rbtn accept';rb.textContent='🔄 Реванш';rb.onclick=requestRematch;box.appendChild(rb);
+ }else if(s){
   const db=document.createElement('button');db.className='rbtn';db.textContent='🤝 Ничья';db.onclick=async()=>{if(confirm('Предложить ничью?'))await roomRef.child('flags/drawOffer').set(mySide);};box.appendChild(db);
   const sb=document.createElement('button');sb.className='rbtn danger';sb.textContent='🏳 Сдаться';sb.onclick=async()=>{if(confirm('Сдаться?'))await roomRef.child('flags/surrender').set(mySide);};box.appendChild(sb);}
  const lb=document.createElement('button');lb.className='rbtn danger';lb.textContent='🚪 Выйти';lb.onclick=()=>{if(confirm('Выйти из комнаты?')){leaveRoom();modeOverlay.classList.add('show');}};box.appendChild(lb);}
 function updateLiveBadge(){if(!onlineMode||!roomData)return;const pl=playersList();const live=pl.filter(p=>p.connected).length;$('rbLive').textContent=live;$('rbDot').className='live-dot'+(pl.length>0&&live<pl.length?' some-off':'');$('roomCount').textContent=pl.length+'/2';}
-let watchdog=null;function startWatchdog(){if(watchdog)clearInterval(watchdog);watchdog=setInterval(async()=>{if(!onlineMode||!roomData||roomData.status!=='playing'||roomData.host!==mySide)return;const s=S();if(!s||s.result)return;if(roomData.presence&&roomData.presence[s.turn])return;if(Date.now()-(s.turnAt||0)<30000)return;const mv=botMove(s,s.turn);const ns=clone(s);if(mv){applyMove(ns,s.turn,mv);checkEnd(ns);}else{ns.result={winner:oth(s.turn),at:Date.now()};ns.scores[oth(s.turn)]=(ns.scores[oth(s.turn)]||0)+1;}ns.lastMove={name:nameOf(s.turn),action:'автоход (нет связи)',caps:mv?mv.caps:[],path:mv?mv.path:[],at:Date.now()};try{await roomRef.child('state').set(ns);}catch(e){}},5000);}
+let watchdog=null;function startWatchdog(){if(watchdog)clearInterval(watchdog);watchdog=setInterval(async()=>{if(!onlineMode||!roomData||roomData.status!=='playing'||roomData.host!==mySide)return;const s=S();if(!s||s.result)return;if(roomData.presence&&roomData.presence[s.turn]&&isPresenceFresh(roomData.presence[s.turn]))return;if(Date.now()-(s.turnAt||0)<30000)return;const mv=botMove(s,s.turn);const ns=clone(s);if(mv){applyMove(ns,s.turn,mv);checkEnd(ns);}else{ns.result={winner:oth(s.turn),at:Date.now()};ns.scores[oth(s.turn)]=(ns.scores[oth(s.turn)]||0)+1;}ns.lastMove={name:nameOf(s.turn),action:'автоход (нет связи)',caps:mv?mv.caps:[],path:mv?mv.path:[],at:Date.now()};try{await roomRef.child('state').set(ns);}catch(e){}},5000);}
 function startOffline(side){onlineMode=false;G=newState();playerSide=side;flight=null;sel=-1;dests=[];prevTurnMe=null;capsMe=0;modeOverlay.classList.remove('show');endOverlay.classList.remove('show');buildBoard();renderAll();setStatus(statusText());sDeal();trackEvent('game_start',{game_name:'shashki',mode:'ai',side,difficulty:set.diff});maybeBot();}
 function maybeBot(){if(onlineMode||!G||G.result)return;if(G.turn===playerSide)return;if(botTimer)clearTimeout(botTimer);botTimer=setTimeout(()=>{if(!G||G.result)return;const mv=botMove(G,G.turn);if(!mv){checkEnd(G);renderAll();if(G.result)showEnd();else endTurnFallback();return;}commitMove(G.turn,mv,true);},600);}
 function endTurnFallback(){G.result={winner:oth(G.turn),at:Date.now()};G.scores[G.result.winner]=(G.scores[G.result.winner]||0)+1;renderAll();showEnd();}
@@ -358,20 +431,46 @@ function renderAll(){const s=S();const me=meSide();
 function renderPlayersBar(){const on=$('playersBar'),off=$('offlineBar');on.innerHTML='';off.innerHTML='';const s=S();
  playersList().forEach(p=>{const chip=document.createElement('span');chip.className='chip'+(s&&!s.result&&s.turn===p.side?' turn':'');chip.innerHTML='<span class="dot'+(p.connected?'':' off')+'"></span>'+esc(p.name)+(p.side===meSide()?' (вы)':'')+' · '+(p.side==='w'?'⚪':'')+' '+p.n+(onlineMode?' · 🏆'+p.wins:'');on.appendChild(chip.cloneNode(true));off.appendChild(chip);});
  off.style.display=onlineMode?'none':'flex';}
+/* v1.6: реванш флагом rematch/{side} — доступен ВСЕМ игрокам */
+function requestRematch(){
+  if(!roomRef||!mySide)return;
+  console.log('[SH] propose rematch · side=',mySide,'· current=',JSON.stringify((roomData&&roomData.rematch)||{}));
+  roomRef.child('rematch/'+mySide).set(true).catch(e=>console.warn('[SH] rematch write failed:',e.message));
+  endOverlay.classList.remove('show');
+  setStatus('🔄 Ожидание соперника для реванша…');
+  /* если соперник УЖЕ согласился и я хост — сразу идём в лобби */
+  const rm=(roomData&&roomData.rematch)||{};
+  const active=activeSides();
+  const otherAgreed=active.filter(sd=>sd!==mySide).every(sd=>rm[sd]);
+  if(otherAgreed && active.length>=2 && roomData.host===mySide){
+    console.log('[SH] opponent already agreed -> go to lobby now');
+    const newPlayers={};
+    for(const sd of active)newPlayers[sd]=roomData.players[sd];
+    roomRef.update({
+      status:'waiting',
+      round:(roomData.round||1)+1,
+      rematch:{},
+      players:newPlayers,
+      flags:{drawOffer:null,drawAccept:false,surrender:null,winner:null},
+      state:newState()
+    }).catch(e=>console.warn('[SH] rematch update failed:',e.message));
+  }
+}
 function showEnd(){const s=S();if(!s||!s.result)return;flight=null;const me=meSide();const win=s.result.winner===me;const draw=s.result.winner===null;
  bumpST(win,onlineMode?0:capsMe);
  $('endTitle').textContent=draw?'🤝 Ничья':(win?'🏆 Победа!':'🏁 Победил '+esc(nameOf(s.result.winner)));
  $('endSub').textContent=draw?'По соглашению сторон':'Партия окончена.';draw?sDraw():(win?sWin():sLose());Platform.haptic(win?'success':draw?'light':'error');
  const b=$('endBtns');b.innerHTML='';
- if(onlineMode){if(roomData&&roomData.host===mySide){const r=document.createElement('button');r.className='btn primary';r.textContent='🔄 Реванш';r.onclick=()=>{const st=newState();st.scores=clone(s.scores);shownEndAt=null;roomRef.update({state:st,status:'playing',flags:{drawOffer:null,drawAccept:false,surrender:null,winner:null}});sDeal();endOverlay.classList.remove('show');};b.appendChild(r);}else{const w=document.createElement('div');w.style.cssText='font-size:12px;opacity:.8;width:100%';w.textContent='⏳ Хост готовит реванш…';b.appendChild(w);}
-  const sh=document.createElement('button');sh.className='btn';sh.textContent='📤 Поделиться';sh.onclick=shareInvite;b.appendChild(sh);
-  const lv=document.createElement('button');lv.className='btn';lv.textContent='🚪 Выйти';lv.onclick=()=>{leaveRoom();endOverlay.classList.remove('show');modeOverlay.classList.add('show');};b.appendChild(lv);}
+ if(onlineMode){
+   /* v1.6: кнопка Реванш для ВСЕХ игроков */
+   const rb=document.createElement('button');rb.className='btn primary';rb.textContent='🔄 Реванш';rb.onclick=requestRematch;b.appendChild(rb);
+   const sh=document.createElement('button');sh.className='btn';sh.textContent='📤 Поделиться';sh.onclick=shareInvite;b.appendChild(sh);
+   const lv=document.createElement('button');lv.className='btn';lv.textContent='🚪 Выйти';lv.onclick=()=>{leaveRoom();endOverlay.classList.remove('show');modeOverlay.classList.add('show');};b.appendChild(lv);}
  else{const r=document.createElement('button');r.className='btn primary';r.textContent='🔄 Ещё партию';r.onclick=()=>{endOverlay.classList.remove('show');startOffline(playerSide);};b.appendChild(r);
   const h=document.createElement('button');h.className='btn';h.textContent='🏠 В меню шашек';h.onclick=()=>{endOverlay.classList.remove('show');G=newState();flight=null;buildBoard();renderAll();modeOverlay.classList.add('show');};b.appendChild(h);
   const h2=document.createElement('button');h2.className='btn';h2.textContent='← В меню игр';h2.onclick=goToHub;b.appendChild(h2);}
  endOverlay.classList.add('show');trackEvent('game_end',{game_name:'shashki',mode:onlineMode?'online':'ai',winner:draw?'draw':(win?'player':'other')});}
 
-/* v1.5: все кнопки "В меню игр" через goToHub() */
 $('hubBtn').onclick=()=>{goToHub();};
 $('modeHubBtn').onclick=goToHub;
 $('rulesBtn').onclick=()=>{sClickUi();rulesOverlay.classList.add('show');};$('rulesClose').onclick=()=>rulesOverlay.classList.remove('show');
@@ -392,5 +491,6 @@ $('modeJoin').onclick=()=>{sClickUi();$('joinBox').style.display='flex';$('joinA
 $('joinCancel').onclick=()=>{$('joinBox').style.display='none';$('joinActions').style.display='none';};
 $('joinGo').onclick=async()=>{const c=$('joinInput').value.trim().toUpperCase();if(c.length!==6){alert('6 символов');return;}await joinRoom(c);};
 $('rbToggle').onclick=()=>{const bar=$('roomBar'),ex=$('rbExtra');const open=ex.style.display!=='none';ex.style.display=open?'none':'flex';bar.classList.toggle('open',!open);sClickUi();};
+window.addEventListener('beforeunload',()=>{stopHeartbeat();removePresence();});
 (function init(){$('verTag').textContent='v'+VER;$('verTag2').textContent='v'+VER;applySkins();showST();buildBoard();const r=new URL(location.href).searchParams.get('room');if(r&&r.length===6)joinRoom(r);else modeOverlay.classList.add('show');renderAll();})();
 </script></body></html>
