@@ -132,7 +132,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div></div>
 </div></div>
 <div class="status" id="statusEl">Выбери режим игры</div>
-<div class="ver" id="verTag">v4.23</div>
+<div class="ver" id="verTag">v4.24</div>
 </div>
 <div class="fieldViewBar" id="fieldViewBar"><span class="title">👁 Просмотр поля противника</span><button class="btn" id="closeFieldView">Закрыть</button></div>
 <div class="overlay" id="modeOverlay"><div class="cardbox"><h2>🚢 Морской бой</h2><div class="sub">Выбери режим игры</div>
@@ -154,53 +154,29 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="stat-row"><span>% побед</span><b id="stPct">0%</b></div>
 <div class="stat-row"><span>Серия / рекорд</span><b id="stStreak">0 / 0</b></div>
 <div class="btns"><button class="btn" id="stReset">Сброс</button><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note">Тумблер «🔊 Голос» отключает только речевые подсказки — звуковые эффекты остаются. Звуки берутся из assets/snd (модуль js/snd.js), пока файлов нет — работает синтез. Онлайн защищён анонимной авторизацией Firebase. В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div></div></div>
+<div class="note">Тумблер «🔊 Голос» отключает только речевые подсказки — звуковые эффекты остаются. Онлайн защищён анонимной авторизацией Firebase. Реванш: оба жмут «🔄 Реванш» — новая партия в той же комнате без повторного приглашения. В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Поле 10×10, цифры 1–10 сверху, буквы А–К слева.<br>• Флот 1×4,2×3,3×2,4×1; не касаются углами.<br>• Расстановка: 1‑е нажатие = мигающее превью, 2‑е = подтвердить; либо 🎲 Авто.<br>• Онлайн: создай комнату → 📨 Пригласить → друг открывает ссылку (пилюля станет зелёной с 2) → оба расставляют флот и жмут «⚔️ В бой!».<br>• Над полем противника — легенда остатка флота; потопленный тип прозрачный.<br>• Попадание = доп. ход; промах = всплеск; убитый = метки по всем клеткам + раскрытый контур.<br>• Размер поля: по умолчанию во всю ширину; 🔲 — вписать в экран, ⛶ — обратно.<br>• Шторка инструментов/комнаты сворачивается кнопкой «▴ Свернуть / ▾ Развернуть» справа в её шапке.<br>• После игры: 🔄 Реванш — новая партия с тем же соперником; 👁 Посмотреть поле — раскрыть позиции кораблей противника.</div>
+<div class="note">• Поле 10×10, цифры 1–10 сверху, буквы А–К слева.<br>• Флот 1×4,2×3,3×2,4×1; не касаются углами.<br>• Расстановка: 1‑е нажатие = мигающее превью, 2‑е = подтвердить; либо 🎲 Авто.<br>• Онлайн: создай комнату → 📨 Пригласить → друг открывает ссылку → оба расставляют флот и жмут «⚔️ В бой!».<br>• Попадание = доп. ход; промах = всплеск; убитый = метки по всем клеткам + раскрытый контур.<br>• После игры: 🔄 Реванш — новая партия с тем же соперником; 👁 Посмотреть поле — раскрыть позиции кораблей.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
 var FB={apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"};
-var VER='4.23',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=false;
+var VER='4.24',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=false;
 var fieldViewMode=false;
-var HEARTBEAT_INTERVAL=5000;
-var HEARTBEAT_TTL=15000;
-var heartbeatTimer=null;
+var HEARTBEAT_INTERVAL=5000,HEARTBEAT_TTL=15000,heartbeatTimer=null;
+var myRound=0;
 
 function backHandler(){
   if(fieldViewMode){closeFieldView();return;}
   var a=['setOverlay','rulesOverlay','endOverlay','modeOverlay'];
-  for(var i=0;i<a.length;i++){
-    var e=$(a[i]);
-    if(e&&e.classList.contains('show')){e.classList.remove('show');return;}
-  }
+  for(var i=0;i<a.length;i++){var e=$(a[i]);if(e&&e.classList.contains('show')){e.classList.remove('show');return;}}
   if(NET.conn){netLeave();return;}
   goToHub();
 }
-Platform.init({
-  bg: '#101418',
-  back: backHandler
-});
-function goToHub(){
-  Platform.haptic('light');
-  clearPreview();
-  if(G&&G.online)NET.reset();
-  Platform.goToHub();
-}
-function trk(n,p){
-  p=p||{};
-  p.platform=Platform.name;
-  try{if(typeof gtag=='function')gtag('event',n,p)}catch(e){}
-}
-(function(){
-  try{
-    const k='seabattle_session_tracked';
-    if(!sessionStorage.getItem(k)){
-      sessionStorage.setItem(k,'1');
-      trk('game_open',{game_name:'seabattle',source:Platform.name,ver:VER});
-    }
-  }catch(e){}
-})();
+Platform.init({bg:'#101418',back:backHandler});
+function goToHub(){Platform.haptic('light');clearPreview();if(G&&G.online)NET.reset();Platform.goToHub();}
+function trk(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag=='function')gtag('event',n,p)}catch(e){}}
+(function(){try{const k='seabattle_session_tracked';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trk('game_open',{game_name:'seabattle',source:Platform.name,ver:VER});}}catch(e){}})();
 var G=null,AC=null,MASTER=null,toastT=null,set=null,ST=null,preview=null;
 var renderedShots={my:new Array(100).fill(0),en:new Array(100).fill(0)};
 var FNS={},NET={code:null,role:null,room:null,conn:false,lastPend:0,lastRes:0,L:[]};
@@ -245,54 +221,11 @@ function stopT(){if(G&&G.timer){clearInterval(G.timer);G.timer=null}}
 function startT(){if(!G||G.timer)return;G.timer=setInterval(function(){G.time++;updateStats()},1000)}
 function buildLabels(){var sides=['my','en'];for(var s=0;s<2;s++){var p=sides[s];var t=$(p+'Top'),l=$(p+'Left');if(!t||!l)continue;t.innerHTML='';l.innerHTML='';for(var i=0;i<10;i++){var a=document.createElement('span');a.className='lab';a.textContent=i+1;t.appendChild(a);var cc=document.createElement('span');cc.className='lab';cc.textContent=LETTERS[i];l.appendChild(cc)}}}
 function updateStats(){if(!G)return;var acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;$('statsLine').textContent='⏱ '+fmt(G.time)+' · Выстрелы: '+G.shotsFired+' · Точность: '+acc+'% · '+(G.online?'онлайн':dName())}
-
-/* ========== v4.23: heartbeat через update на уровне комнаты ========== */
-function isPresenceFresh(pres){
-  if(!pres||!pres.at)return false;
-  return (Date.now()-pres.at)<HEARTBEAT_TTL;
-}
-function startHeartbeat(){
-  stopHeartbeat();
-  if(!NET.conn||!NET.code||!NET.role)return;
-  var beat=function(){
-    try{
-      var me=meInfo();
-      var upd={};
-      upd['presence/'+NET.role]={name:me.name, uid:me.id, at:Date.now()};
-      NET.patch(upd);
-    }catch(e){
-      console.warn('[HB] beat failed:', e);
-    }
-  };
-  beat();
-  heartbeatTimer=setInterval(beat,HEARTBEAT_INTERVAL);
-}
-function stopHeartbeat(){
-  if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}
-}
-function removePresence(){
-  if(!NET.conn||!NET.code||!NET.role)return;
-  try{
-    var upd={};
-    upd['presence/'+NET.role]=null;
-    NET.patch(upd);
-  }catch(e){}
-}
-
-function updateRoomBar(){
-  var d=NET.room;if(!d)return 1;
-  var hostPres=d.presence&&d.presence.host;
-  var guestPres=d.presence&&d.presence.guest;
-  var hostOn=isPresenceFresh(hostPres);
-  var guestOn=isPresenceFresh(guestPres);
-  var onl=(hostOn?1:0)+(guestOn?1:0);
-  var h='';
-  if(d.host)h+='👤 '+((d.host&&d.host.name)||'Игрок 1')+' · хост '+(hostOn?'🟢 онлайн':'⚪ офлайн')+'<br>';
-  if(d.guest)h+='👤 '+((d.guest&&d.guest.name)||'Игрок 2')+' · гость '+(guestOn?'🟢 онлайн':'⚪ офлайн')+'<br>';
-  if(!d.guest)h+='<i>Ожидание второго игрока… нажми «📨 Пригласить».</i>';
-  $('rbPlayers').innerHTML=h;
-  return onl;
-}
+function isPresenceFresh(p){return !!(p&&p.at&&(Date.now()-p.at)<HEARTBEAT_TTL)}
+function startHeartbeat(){stopHeartbeat();if(!NET.conn||!NET.code||!NET.role)return;var beat=function(){try{var me=meInfo();var u={};u['presence/'+NET.role]={name:me.name,uid:me.id,at:Date.now()};NET.patch(u);}catch(e){console.warn('[HB] beat failed:',e)}};beat();heartbeatTimer=setInterval(beat,HEARTBEAT_INTERVAL);}
+function stopHeartbeat(){if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}}
+function removePresence(){if(!NET.conn||!NET.code||!NET.role)return;try{var u={};u['presence/'+NET.role]=null;NET.patch(u);}catch(e){}}
+function updateRoomBar(){var d=NET.room;if(!d)return 1;var hOn=isPresenceFresh(d.presence&&d.presence.host),gOn=isPresenceFresh(d.presence&&d.presence.guest);var onl=(hOn?1:0)+(gOn?1:0);var h='';if(d.host)h+='👤 '+((d.host&&d.host.name)||'Игрок 1')+' · хост '+(hOn?'🟢 онлайн':'⚪ офлайн')+'<br>';if(d.guest)h+='👤 '+((d.guest&&d.guest.name)||'Игрок 2')+' · гость '+(gOn?'🟢 онлайн':' офлайн')+'<br>';if(!d.guest)h+='<i>Ожидание второго игрока… нажми «📨 Пригласить».</i>';$('rbPlayers').innerHTML=h;return onl}
 function updateFold(){var f=$('barFold');if(!f)return;f.textContent=$('mainBar').classList.contains('expanded')?'▴ Свернуть':'▾ Развернуть'}
 function refreshBar(){var on=G&&G.online;var ht=$('barHeadTxt');
  if(on){var onl=updateRoomBar();ht.innerHTML='👥 Комната <b>'+(NET.code||'------')+'</b><span class="pill'+(onl>=2?' g2':'')+'"><i></i><b>'+onl+'</b></span>';
@@ -347,93 +280,42 @@ NET.roomRef=function(){return FNS.ref(FNS.db,'rooms/'+NET.code)};
 NET.patch=function(o){try{FNS.upd(NET.roomRef(),o)}catch(e){}};
 NET.attach=function(path,cb){var r=FNS.ref(FNS.db,path);var un=FNS.on(r,cb);NET.L.push(un);return un};
 NET.detach=function(){NET.L.forEach(function(u){try{u()}catch(e){}});NET.L=[]};
-NET.reset=function(){
-  stopHeartbeat();
-  removePresence();
-  NET.detach();
-  NET.conn=false;NET.room=null;NET.lastPend=0;NET.lastRes=0;
-};
+NET.reset=function(){stopHeartbeat();removePresence();NET.detach();NET.conn=false;NET.room=null;NET.lastPend=0;NET.lastRes=0;};
 function genCode(){var s='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',o='';for(var i=0;i<6;i++)o+=s[Math.random()*s.length|0];return o}
 function ourTurn(){return NET.room&&NET.room.turn===NET.role}
 function otherRole(){return NET.role==='host'?'guest':'host'}
-function meInfo(){
-  var id='anon';
-  try{if(FNS.auth&&FNS.auth.currentUser)id=FNS.auth.currentUser.uid}catch(e){}
-  var name='Гость';
-  try{
-    var u=Platform.user();
-    if(u&&u.name)name=u.name;
-    else if(u&&u.id)name='Игрок'+u.id;
-  }catch(e){}
-  return{id:id,name:name};
-}
+function meInfo(){var id='anon';try{if(FNS.auth&&FNS.auth.currentUser)id=FNS.auth.currentUser.uid}catch(e){}
+ var name='Гость';try{var u=Platform.user();if(u&&u.name)name=u.name;else if(u&&u.id)name='Игрок'+u.id;}catch(e){}
+ return{id:id,name:name};}
 async function netCreate(){
-  try{await NET.ensure()}catch(e){return}
-  NET.reset();
-  NET.code=genCode();NET.role='host';
-  var me=meInfo();
-  try{
-    await FNS.set(NET.roomRef(),{
-      createdAt:Date.now(),
-      host:me,
-      guest:null,
-      state:'placing',
-      hostReady:false,
-      guestReady:false,
-      turn:'host',
-      pending:null,
-      resolve:null,
-      winner:null,
-      rematchHost:false,
-      rematchGuest:false,
-      presence:{}
-    });
-  }catch(e){
-    console.error('[netCreate] set failed:', e);
-    toast('Ошибка создания: '+e.message);
-    return;
-  }
-  NET.conn=true;
-  NET.attach('rooms/'+NET.code,function(s){onRoom(s.val())});
-  startHeartbeat();
-  resetOnlinePlace();hideMode();refreshBar();
-  setStatus('Комната '+NET.code+' создана · нажми 📨 Пригласить');
-  trk('net_create',{role:'host'});
-}
+ try{await NET.ensure()}catch(e){return}
+ NET.reset();NET.code=genCode();NET.role='host';myRound=1;
+ var me=meInfo();
+ try{await FNS.set(NET.roomRef(),{createdAt:Date.now(),round:1,host:me,guest:null,state:'placing',hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null,rematchHost:false,rematchGuest:false,presence:{}});}
+ catch(e){console.error('[netCreate] set failed:',e);toast('Ошибка создания: '+e.message);return;}
+ NET.conn=true;NET.attach('rooms/'+NET.code,function(s){onRoom(s.val())});startHeartbeat();
+ resetOnlinePlace();hideMode();refreshBar();setStatus('Комната '+NET.code+' создана · нажми 📨 Пригласить');trk('net_create',{role:'host'});}
 async function netJoin(code){
-  code=(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
-  if(code.length<4){toast('Введи код комнаты');return}
-  try{await NET.ensure()}catch(e){return}
-  NET.reset();
-  var s=await FNS.get(FNS.ref(FNS.db,'rooms/'+code));
-  if(!s.exists()){toast('Комната не найдена: '+code);return}
-  var d=s.val();
-  if(d.guest&&d.guest.id&&d.guest.id!==meInfo().id){toast('Комната уже занята');return}
-  NET.code=code;NET.role='guest';
-  var me=meInfo();
-  try{
-    await FNS.set(FNS.ref(FNS.db,'rooms/'+code+'/guest'),me);
-  }catch(e){
-    console.error('[netJoin] set failed:', e);
-    toast('Ошибка входа: '+e.message);
-    return;
-  }
-  NET.conn=true;
-  NET.attach('rooms/'+code,function(sn){onRoom(sn.val())});
-  startHeartbeat();
-  resetOnlinePlace();hideMode();refreshBar();
-  setStatus('Подключено к комнате '+code+' · расставь флот и жми «⚔️ В бой!»');
-  trk('net_join',{role:'guest'});
-}
+ code=(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+ if(code.length<4){toast('Введи код комнаты');return}
+ try{await NET.ensure()}catch(e){return}
+ NET.reset();
+ var s=await FNS.get(FNS.ref(FNS.db,'rooms/'+code));
+ if(!s.exists()){toast('Комната не найдена: '+code);return}
+ var d=s.val();
+ if(d.guest&&d.guest.id&&d.guest.id!==meInfo().id){toast('Комната уже занята');return}
+ NET.code=code;NET.role='guest';myRound=d.round||1;
+ var me=meInfo();
+ try{await FNS.set(FNS.ref(FNS.db,'rooms/'+code+'/guest'),me);}
+ catch(e){console.error('[netJoin] set failed:',e);toast('Ошибка входа: '+e.message);return;}
+ NET.conn=true;NET.attach('rooms/'+code,function(sn){onRoom(sn.val())});startHeartbeat();
+ resetOnlinePlace();hideMode();refreshBar();setStatus('Подключено к комнате '+code+' · расставь флот и жми «⚔️ В бой!»');trk('net_join',{role:'guest'});}
 function netReady(){if(!NET.room)return;var o={};o[NET.role+'Ready']=true;NET.patch(o);setStatus('Ты готов · ожидание соперника…')}
 function netFire(r,c){if(!ourTurn())return;if(NET.room.pending)return;NET.patch({pending:{by:NET.role,r:r,c:c,at:Date.now()}});setStatus('Выстрел отправлен…')}
-function netLeave(){
-  NET.reset();
-  resetRendered();
-  if(G)G.online=false;
-  newGame();showMode('menu');
-}
-function resetOnlinePlace(){G.online=true;G.phase='place';G.my=eBoard();rndFleet(G.my);G.myShipsVer=(G.myShipsVer||0)+1;G.qi=G.queue.length;G.oppView=eBoard();G.en=eBoard();G.over=false;G.won=false;G.shotsFired=0;G.hits=0;G.time=0;G.turn='player';stopT();resetRendered();buildLabels();renderAll();alignPaper()}
+function netLeave(){NET.reset();resetRendered();if(G)G.online=false;myRound=0;newGame();showMode('menu');}
+function resetOnlinePlace(){G.online=true;G.phase='place';G.my=eBoard();rndFleet(G.my);G.myShipsVer=(G.myShipsVer||0)+1;G.qi=G.queue.length;G.oppView=eBoard();G.en=eBoard();G.over=false;G.won=false;G.shotsFired=0;G.hits=0;G.time=0;G.turn='player';stopT();resetRendered();buildLabels();renderAll();alignPaper();}
+/* v4.24: локальный сброс под реванш (ручная расстановка), онлайн сохраняется */
+function resetRematch(){G.online=true;G.phase='place';G.my=eBoard();G.myShipsVer=(G.myShipsVer||0)+1;G.qi=0;G.oppView=eBoard();G.en=eBoard();G.over=false;G.won=false;G.shotsFired=0;G.hits=0;G.time=0;G.turn='player';stopT();resetRendered();buildLabels();renderAll();alignPaper();}
 function applyPending(d){if(!(d.pending&&d.pending.by!==NET.role&&d.pending.at!==NET.lastPend))return;NET.lastPend=d.pending.at;
  var sh=shipAt(G.my,d.pending.r,d.pending.c);
  var res=shot(G.my,d.pending.r,d.pending.c);var win=false,cs=null;
@@ -452,86 +334,62 @@ function applyResolve(d){if(!(d.resolve&&d.resolve.by===NET.role&&d.resolve.at!=
   if(d.resolve.res=='hit'){sHit();addBoom($('enFx'),i,false)}
   if(d.resolve.res=='dead'){sBoom();addBoom($('enFx'),i,true);Platform.haptic('success');V('v_sunk','Корабль потоплен')}}
  renderAll();if(d.resolve.win)end(true)}
-function onRoom(d){if(!d){if(NET.conn){toast('Комната закрыта');netLeave()}return}NET.room=d;NET.conn=true;G.online=true;refreshBar();
- var oppRole=(NET.role==='host')?'guest':'host';
- var oppPres=d.presence&&d.presence[oppRole];
- var oppOn=isPresenceFresh(oppPres);
+function onRoom(d){
+ if(!d){if(NET.conn){toast('Комната закрыта');netLeave()}return}
+ NET.room=d;NET.conn=true;G.online=true;refreshBar();
+ var oppOn=isPresenceFresh(d.presence&&d.presence[otherRole()]);
  if(d.state=='placing'){G.phase='place';
   if(d.hostReady&&d.guestReady&&NET.role=='host'){NET.patch({state:'battle',turn:'host'})}
   setStatus(NET.role=='host'&&!d.guest?('Ждём соперника · код '+NET.code):((d.hostReady&&d.guestReady)?'Оба готовы — старт!':'Расставь флот и жми «⚔️ В бой!»'))}
  else if(d.state=='battle'){if(G.phase!='battle'){G.phase='battle';startT();V('v_battle','В бой!')}
   setStatus(ourTurn()?'ТВОЙ ХОД — стреляй по полю соперника':'Ход соперника…'+(oppOn?'':' · ⚠️ соперник офлайн'))}
  else if(d.state=='over'){stopT();if(!G.over)end(d.winner===NET.role);
-  if(d.rematchHost&&d.rematchGuest){
-   NET.patch({state:'placing',hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null,rematchHost:false,rematchGuest:false});
-   G.my.ships=[];G.myShipsVer++;rndFleet(G.my);G.qi=0;G.oppView=eBoard();G.en=eBoard();G.over=false;G.won=false;G.shotsFired=0;G.hits=0;G.time=0;
-   resetRendered();buildLabels();renderAll();$('endOverlay').classList.remove('show');setStatus('Реванш! Расставь флот и жми «⚔️ В бой!»');trk('net_rematch',{role:NET.role})}}
+  /* v4.24: реванш — сброс пишет ТОЛЬКО хост, оба реагируют на смену round */
+  if(d.rematchHost&&d.rematchGuest&&NET.role=='host'){
+   NET.patch({state:'placing',round:(d.round||1)+1,hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null,rematchHost:false,rematchGuest:false});
+  }
+  var rr=d.round||1;
+  if(rr!==myRound){
+   myRound=rr;
+   resetRematch();
+   fieldViewMode=false;$('fieldViewBar').classList.remove('show');
+   $('endOverlay').classList.remove('show');
+   setStatus('🔄 Реванш! Расставь флот и жми «⚔️ В бой!»');
+   trk('net_rematch',{role:NET.role});
+  }
+ }
  if(d.pending&&d.pending.by!==NET.role)applyPending(d);
  if(d.resolve&&d.resolve.by===NET.role)applyResolve(d);
  renderAll()}
 function end(w){if(G.over)return;G.over=true;G.won=w;stopT();if(w){sWin();Platform.haptic('success');V('v_win','Победа!')}else{sLose();Platform.haptic('error');V('v_lose','Поражение')}ST.games++;if(w){ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak}else ST.streak=0;saveST();trk('game_end',{game_name:'seabattle',win:w?1:0,time:G.time,shots:G.shotsFired,acc:G.shotsFired?Math.round(G.hits/G.shotsFired*100):0,online:G.online?1:0,difficulty:set.diff});showEnd(w)}
-function smartShare(url,text,fallbackToast){
-  Platform.share(url,text,{
-    title:'Морской бой',
-    onCopied:function(){toast(fallbackToast||'Ссылка скопирована, отправьте её другу')}
-  });
-}
-function invite(){
-  if(!NET.code){toast('Сначала создай комнату');return}
-  var url=location.origin+location.pathname+'?room='+NET.code+'&plat='+Platform.name+'&v='+VER;
-  var text='🚢 Морской бой! Комната '+NET.code+'. Сыграем?';
-  smartShare(url,text,'Ссылка для приглашения скопирована, отправьте её другу');
-}
-function share(){
-  var acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;
-  var text='🚢 Морской бой: '+(G.won?'ПОБЕДА!':'поражение')+'! Время '+fmt(G.time)+', точность '+acc+'%. Сможешь лучше?';
-  var url=location.origin+location.pathname+'?plat='+Platform.name;
-  smartShare(url,text,'Результат скопирован, поделитесь с другом');
-}
+function smartShare(url,text,fb){Platform.share(url,text,{title:'Морской бой',onCopied:function(){toast(fb||'Ссылка скопирована, отправьте её другу')}});}
+function invite(){if(!NET.code){toast('Сначала создай комнату');return}var url=location.origin+location.pathname+'?room='+NET.code+'&plat='+Platform.name+'&v='+VER;smartShare(url,'🚢 Морской бой! Комната '+NET.code+'. Сыграем?','Ссылка для приглашения скопирована');}
+function share(){var acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;smartShare(location.origin+location.pathname+'?plat='+Platform.name,'🚢 Морской бой: '+(G.won?'ПОБЕДА!':'поражение')+'! Время '+fmt(G.time)+', точность '+acc+'%. Сможешь лучше?','Результат скопирован');}
 function copyCode(){if(!NET.code)return;try{navigator.clipboard.writeText(NET.code).catch(function(){});toast('Код '+NET.code+' скопирован')}catch(e){toast('Код: '+NET.code)}}
 function ebtn(t,f,p){var b=document.createElement('button');b.className='btn'+(p?' primary':'');b.textContent=t;b.onclick=f;$('endBtns').appendChild(b)}
 function showEnd(w){var ov=$('endOverlay'),acc=G.shotsFired?Math.round(G.hits/G.shotsFired*100):0;$('endTitle').textContent=w?'🏆 Победа!':'💥 Флот потоплен';$('endSub').innerHTML='Время: <b>'+fmt(G.time)+'</b> · Выстрелы: <b>'+G.shotsFired+'</b> · Точность: <b>'+acc+'%</b><br>Режим: '+(G.online?'онлайн‑дуэль':'ИИ ('+dName()+')');$('endBtns').innerHTML='';ebtn('📨 Отправить результат другу',share,true);
  if(G.online){ebtn('🔄 Реванш',function(){requestRematch();},false);}
  else{ebtn('🔄 Сыграть ещё',function(){ov.classList.remove('show');newGame();showMode('menu')},false);}
- ebtn('👁 Посмотреть поле',function(){showFieldView()},false);
+ ebtn('👁 Посмотреть поле',function(){showFieldView();},false);
  ebtn('🏠 В меню',function(){ov.classList.remove('show');if(G.online)NET.reset();goToHub();},false);ov.classList.add('show')}
 function requestRematch(){
  if(!NET.room)return;
  var o={};o[NET.role+'Rematch']=true;NET.patch(o);
- setStatus('Ожидание соперника для реванша…');
+ setStatus('🔄 Ожидание соперника для реванша…');
  $('endOverlay').classList.remove('show');
 }
-function showFieldView(){
- $('endOverlay').classList.remove('show');
- fieldViewMode=true;
- $('fieldViewBar').classList.add('show');
- if(G.online){
-  G.en.ships.forEach(function(sh){
-   var dup=false;
-   G.oppView.ships.forEach(function(s){if(s.r===sh.r&&s.c===sh.c&&s.len===sh.len)dup=true});
-   if(!dup){G.oppView.ships.push({r:sh.r,c:sh.c,len:sh.len,hor:sh.hor,hits:sh.len,dead:true});cells(sh).forEach(function(x){G.oppView.shots[x]=2})}
-  });
- }else{
-  G.en.ships.forEach(function(sh){
-   var dup=false;
-   G.en.ships.forEach(function(s){if(s.r===sh.r&&s.c===sh.c&&s.len===sh.len&&s.dead)dup=true});
-   if(!dup){sh.dead=true;cells(sh).forEach(function(x){G.en.shots[x]=2})}
-  });
- }
- renderAll();
-}
-function closeFieldView(){
- fieldViewMode=false;
- $('fieldViewBar').classList.remove('show');
- if(G.over){showEnd(G.won);}
-}
+function showFieldView(){$('endOverlay').classList.remove('show');fieldViewMode=true;$('fieldViewBar').classList.add('show');
+ if(G.online){G.en.ships.forEach(function(sh){var dup=false;G.oppView.ships.forEach(function(s){if(s.r===sh.r&&s.c===sh.c&&s.len===sh.len)dup=true});if(!dup){G.oppView.ships.push({r:sh.r,c:sh.c,len:sh.len,hor:sh.hor,hits:sh.len,dead:true});cells(sh).forEach(function(x){G.oppView.shots[x]=2})}});}
+ else{G.en.ships.forEach(function(sh){var dup=false;G.en.ships.forEach(function(s){if(s.r===sh.r&&s.c===sh.c&&s.len===sh.len&&s.dead)dup=true});if(!dup){sh.dead=true;cells(sh).forEach(function(x){G.en.shots[x]=2})}});}
+ renderAll();}
+function closeFieldView(){fieldViewMode=false;$('fieldViewBar').classList.remove('show');if(G.over){showEnd(G.won);}}
 function tryPlace(r,c){if(!G||G.phase!='place')return;if(G.online&&NET.room&&(!NET.room.guest||NET.room.state!='placing'||NET.room[NET.role+'Ready']))return;if(G.qi>=G.queue.length)return;var l=G.queue[G.qi];
  if(preview&&preview.r===r&&preview.c===c){if(place(G.my,r,c,l,preview.hor)){preview=null;$('myPreview').innerHTML='';G.qi++;G.myShipsVer++;sPlace();renderAll();if(!G.online&&G.qi>=G.queue.length)setStatus('Флот готов — жми «В бой!»')}else{tn(150,90,.1,'sawtooth',.1);Platform.haptic('error');clearPreview();setStatus('Здесь нельзя — выбери другое место')}return}
  clearPreview();preview={r:r,c:c,len:l,hor:G.hor};addShip($('myPreview'),preview,true);sPlace();setStatus(canPlace(G.my,r,c,l,G.hor)?'Нажми ещё раз, чтобы подтвердить':'Место занято — нажми ещё раз, чтобы убрать')}
 function autoPlace(){if(!G||G.phase!='place')return;if(G.online&&NET.room&&(!NET.room.guest||NET.room[NET.role+'Ready']))return;clearPreview();while(G.qi<G.queue.length){var l=G.queue[G.qi],ok=false,g=0;while(!ok&&g++<400)ok=place(G.my,Math.random()*10|0,Math.random()*10|0,l,Math.random()<.5);if(!ok)break;G.qi++}G.myShipsVer++;sPlace();renderAll();if(!G.online&&G.qi>=G.queue.length)setStatus('Флот готов — жми «В бой!»')}
 function clearPlace(){if(!G||G.phase!='place')return;if(G.online&&NET.room&&NET.room[NET.role+'Ready'])return;clearPreview();G.my.ships=[];G.qi=0;G.myShipsVer++;renderAll();setStatus('Расставь корабли: 1‑е нажатие превью, 2‑е подтверждение')}
 function startBattle(){if(!G||G.online)return;if(G.qi<G.queue.length)return;G.phase='battle';G.turn='player';startT();setStatus('Твой ход: стреляй по полю противника.');V('v_battle','В бой!');renderAll()}
-function newGame(){stopT();NET.reset();resetRendered();G={phase:'place',online:false,my:eBoard(),en:eBoard(),oppView:null,myShipsVer:1,queue:FLEET.slice(),qi:FLEET.length,hor:true,turn:'player',time:0,timer:null,shotsFired:0,hits:0,over:false,won:false,ai:{queue:[]}};rndFleet(G.my);rndFleet(G.en);$('endOverlay').classList.remove('show');buildLabels();renderAll();refreshBar();alignPaper();if(window.SND)SND.preload();setStatus('Выбери режим: 🖥 компьютер или 👥 онлайн');V('v_new','Новая партия')}
+function newGame(){stopT();NET.reset();resetRendered();myRound=0;G={phase:'place',online:false,my:eBoard(),en:eBoard(),oppView:null,myShipsVer:1,queue:FLEET.slice(),qi:FLEET.length,hor:true,turn:'player',time:0,timer:null,shotsFired:0,hits:0,over:false,won:false,ai:{queue:[]}};rndFleet(G.my);rndFleet(G.en);$('endOverlay').classList.remove('show');buildLabels();renderAll();refreshBar();alignPaper();if(window.SND)SND.preload();setStatus('Выбери режим: 🖥 компьютер или 👥 онлайн');V('v_new','Новая партия')}
 function cellFrom(f,e){var r=f.getBoundingClientRect(),c=(e.clientX-r.left)/CELL|0,rr=(e.clientY-r.top)/CELL|0;return(c<0||c>9||rr<0||rr>9)?null:{r:rr,c:c}}
 function showStats(){$('stGW').textContent=ST.games+' / '+ST.wins;$('stPct').textContent=(ST.games?Math.round(ST.wins/ST.games*100):0)+'%';$('stStreak').textContent=ST.streak+' / '+ST.bestStreak}
 function applySkin(){var w=$('wrap');if(w)w.setAttribute('data-skin',set.skin)}
@@ -578,8 +436,7 @@ $('hubBtn').onclick=function(){goToHub();};
 $('closeFieldView').onclick=function(){closeFieldView()};
 window.addEventListener('resize',function(){rescale()});
 window.addEventListener('orientationchange',function(){setTimeout(function(){rescale()},120)});
-window.addEventListener('beforeunload',function(){stopHeartbeat();removePresence();});
-}
+window.addEventListener('beforeunload',function(){stopHeartbeat();removePresence();});}
 function boot(){document.documentElement.classList.add('ls');document.documentElement.style.colorScheme='light';
  set=Object.assign({diff:'medium',skin:'classic',vol:.7,voice:true},JSON.parse(lsGet('sb_set','{}')));delete set.mode;ST=Object.assign({games:0,wins:0,streak:0,bestStreak:0},JSON.parse(lsGet('sb_stats','{}')));
  if(window.SND){SND.setVol(set.vol);SND.setVoice(set.voice)}
