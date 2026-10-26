@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<link rel="icon" href="data:,">
 <title>Домино</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -58,6 +59,7 @@
 .room-actions .rbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit}
 .room-actions .rbtn:active{transform:scale(.95)}
 .room-actions .rbtn.danger{border-color:rgba(255,80,80,.4);color:#ff9a9a}
+.room-actions .rbtn.accept{border-color:rgba(124,255,196,.5);color:var(--accent)}
 .players-bar{display:flex;gap:6px;flex-wrap:wrap}
 .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px 9px;font-size:11px;color:var(--text)}
 .chip.turn{border-color:var(--accent);color:var(--accent);font-weight:700}
@@ -203,13 +205,13 @@
 <button class="btn btn-primary" id="newGameBtn">🔄 Новая игра</button>
 </div>
 <div class="message" id="message">🎯 Нажмите на кость, чтобы сыграть</div>
-<div class="ver" id="verTag">v2.2</div>
+<div class="ver" id="verTag">v2.3</div>
 </div>
 
 <div class="overlay" id="modeOverlay">
   <div class="cardbox">
     <button class="btn-hub card-hub-btn" id="modeHubBtn">← В меню игр</button>
-    <h2>🎲 Домино <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.2</span></h2>
+    <h2>🎲 Домино <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.3</span></h2>
     <div class="sub">Выбери режим</div>
     <div class="mode-choice">
       <button class="mode-btn" id="modeAi"><div class="icon">💻</div><div class="txt"><b>Против компьютера</b><small>3 уровня сложности</small></div></button>
@@ -258,11 +260,11 @@
 </div>
 
 <script>
-const VER='2.2';
+const VER='2.3';
+const HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000;
+let heartbeatTimer=null, myRound=0;
 
 /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
-/* v2.2: BackButton-логика закрытия оверлеев перенесена в callback back.
-   Platform сам определит платформу и навесит обработчик. */
 function backHandler(){
   try {
     if(settingsModal.classList.contains('show')){settingsModal.classList.remove('show');return;}
@@ -285,13 +287,10 @@ async function ensureAuth(){
  if(fbAuth.currentUser)return;
  try{await fbAuth.signInAnonymously();}catch(e){console.warn('signInAnonymously failed',e);}
 }
-/* v2.1 STAGE-2: getUid возвращает firebase anonymous uid */
 function getUid(){return (fbAuth&&fbAuth.currentUser)?fbAuth.currentUser.uid:null;}
 
-/* v2.2: возвращаемся в хаб, сохраняя платформу */
 function goToHub(){Platform.haptic('light');location.href='../?plat='+Platform.name;}
 
-/* v2.2: трекер с автоматической меткой платформы */
 function trackEvent(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
 (function(){try{const k='domino_session_tracked';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'domino',source:Platform.name,ver:VER});}}catch(e){}})();
 
@@ -309,7 +308,6 @@ let boardEnds=null;
 /* ========== ОНЛАЙН-СОСТОЯНИЕ ========== */
 let onlineMode=false,roomCode=null,myUid=null,myName=null,roomRef=null,roomData=null,shownResultAt=null;
 
-/* v2.2: имя пользователя из любой платформы через Platform.user() */
 function getUserName(){
   try {
     const u = Platform.user();
@@ -323,14 +321,20 @@ function getUserName(){
   return n;
 }
 function genRoomCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
-/* v2.2: ссылка-приглашение несёт метку платформы */
 function inviteLink(c){const u=new URL(location.href);u.searchParams.set('room',c);u.searchParams.set('plat',Platform.name);u.hash='';return u.toString();}
-function onlinePlayers(){if(!roomData)return[];const order=roomData.order||[];return order.map(uid=>({uid,name:((roomData.players||{})[uid]||{}).name||'?',connected:!!(roomData.presence&&roomData.presence[uid]),hand:((roomData.hands||{})[uid]||[]),wins:((roomData.scores||{})[uid]||0)}));}
+function isPresenceFresh(p){return !!(p&&p.at&&(Date.now()-p.at)<HEARTBEAT_TTL);}
+function onlinePlayers(){if(!roomData)return[];const order=roomData.order||[];return order.map(uid=>({uid,name:((roomData.players||{})[uid]||{}).name||'?',connected:isPresenceFresh(roomData.presence&&roomData.presence[uid]),hand:((roomData.hands||{})[uid]||[]),wins:((roomData.scores||{})[uid]||0)}));}
 function turnUid(){const o=(roomData&&roomData.order)||[];return o[(roomData&&roomData.turnIndex)||0];}
 function isHost(){return roomData&&roomData.host===myUid;}
 function isMyTurn(){return onlineMode&&roomData&&roomData.status==='playing'&&turnUid()===myUid;}
 function playerName(uid){const p=onlinePlayers().find(x=>x.uid===uid);return p?p.name:'?';}
 function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+/* v2.3: список активных игроков (с presence) */
+function activePlayers(){
+  if(!roomData)return[];
+  const order=roomData.order||[];
+  return order.filter(uid=>isPresenceFresh(roomData.presence&&roomData.presence[uid]));
+}
 /* ========== ЗВУК ========== */
 function getVolume(){return parseFloat(volumeSlider.value)/100}
 function ensureAudioContext(){if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();}
@@ -431,17 +435,35 @@ function computerTurn(){if(state.gameOver||state.currentTurn!=='computer'||state
  else{let chosenMove;if(diff==='easy')chosenMove=moves[Math.floor(Math.random()*moves.length)];else if(diff==='hard'){let bm=moves.filter(m=>m.ends.length===2);chosenMove=bm.length?bm.reduce((a,b)=>(a.tile[0]+a.tile[1])>(b.tile[0]+b.tile[1])?a:b):moves.reduce((a,b)=>(a.tile[0]+a.tile[1])>(b.tile[0]+b.tile[1])?a:b);}else chosenMove=moves.reduce((a,b)=>{let sa=a.tile[0]+a.tile[1]+(a.tile[0]===a.tile[1]?10:0)+(a.ends.includes('right')?2:0),sb=b.tile[0]+b.tile[1]+(b.tile[0]===b.tile[1]?10:0)+(b.ends.includes('right')?2:0);return sa>sb?a:b});
   let tile=chosenMove.tile,idx=chosenMove.index,chosenEnd=chosenMove.ends.includes('right')?'right':chosenMove.ends[0];hand.splice(idx,1);playTile(tile,chosenEnd);state.passCount=0;playSound('move');render();updateMessage('💻 Компьютер сыграл ['+tile[0]+'|'+tile[1]+']');if(checkOfflineEnd()){render();state.turnLock=false;return}switchTurn();state.turnLock=false}}
 /* ========== ОНЛАЙН ========== */
+/* v2.3: heartbeat с логами */
+function startHeartbeat(){
+  stopHeartbeat();
+  if(!roomRef||!myUid)return;
+  console.log('[DO] startHeartbeat, uid=',myUid);
+  const beat=()=>{
+    try{
+      roomRef.child('presence/'+myUid).set({name:myName,at:Date.now()})
+        .catch(e=>console.warn('[DO] presence write failed:',e.message||e));
+    }catch(e){console.warn('[DO] heartbeat error:',e);}
+  };
+  beat();
+  heartbeatTimer=setInterval(beat,HEARTBEAT_INTERVAL);
+}
+function stopHeartbeat(){if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}}
+function removePresence(){if(!roomRef||!myUid)return;try{roomRef.child('presence/'+myUid).remove();}catch(e){}}
 async function createRoom(){
   if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
   await ensureAuth();
-  myUid=getUid();myName=getUserName();roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);
+  myUid=getUid();myName=getUserName();roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);myRound=1;
   try{
     const initialPlayers = {};
     initialPlayers[myUid] = {name:myName};
-    await roomRef.set({game:'domino',host:myUid,createdAt:Date.now(),status:'waiting',maxPlayers:MAX_PLAYERS,order:[myUid],players:initialPlayers,presence:{},scores:{},hands:{},boneyard:[],board:[],leftEnd:null,rightEnd:null,turnIndex:0,turnAt:Date.now(),passCount:0,result:null,lastMove:null});
+    await roomRef.set({game:'domino',host:myUid,createdAt:Date.now(),round:1,status:'waiting',maxPlayers:MAX_PLAYERS,order:[myUid],players:initialPlayers,presence:{},scores:{},hands:{},boneyard:[],board:[],leftEnd:null,rightEnd:null,turnIndex:0,turnAt:Date.now(),passCount:0,result:null,lastMove:null,rematch:{}});
     onlineMode=true;
     $('roomBar').style.display='block';$('roomCode').textContent=roomCode;
-    modeOverlay.classList.remove('show');subscribeRoom();trackEvent('room_created',{game_name:'domino',max_players:MAX_PLAYERS});
+    modeOverlay.classList.remove('show');
+    setTimeout(()=>{startHeartbeat();subscribeRoom();},500);
+    trackEvent('room_created',{game_name:'domino',max_players:MAX_PLAYERS});
   }catch(e){console.error(e);alert('Ошибка создания: '+e.message);}
 }
 async function joinRoom(code){
@@ -451,15 +473,19 @@ async function joinRoom(code){
   try{
     const snap=await roomRef.once('value');if(!snap.exists()){alert('Комната не найдена: '+roomCode);return;}
     const r=snap.val();if(r.game!=='domino'){alert('Это комната другой игры.');return;}
-    if(r.status!=='waiting'){alert('Игра уже идёт. Дождитесь новой партии или создайте свою комнату.');return;}
-    if((r.order||[]).length>=MAX_PLAYERS){alert('Комната заполнена ('+MAX_PLAYERS+' игрока).');return;}
+    /* v2.3: разрешаем вход в waiting и в finished (для реванша с новыми игроками) */
+    if(r.status!=='waiting'&&r.status!=='finished'){alert('Игра уже идёт. Дождитесь новой партии или создайте свою комнату.');return;}
+    if((r.order||[]).length>=MAX_PLAYERS && !(r.order||[]).includes(myUid)){alert('Комната заполнена ('+MAX_PLAYERS+' игрока).');return;}
     await roomRef.child('players/'+myUid).set({name:myName});
     let ok=true;
     await roomRef.child('order').transaction(a=>{const arr=Array.isArray(a)?a:[];if(arr.includes(myUid))return arr;if(arr.length>=MAX_PLAYERS){ok=false;return undefined;}arr.push(myUid);return arr;},(e,c)=>{ok=c;});
     if(!ok){alert('Комната заполнена.');return;}
+    myRound=r.round||1;
     onlineMode=true;
     $('roomBar').style.display='block';$('roomCode').textContent=roomCode;
-    modeOverlay.classList.remove('show');subscribeRoom();trackEvent('room_joined',{game_name:'domino'});
+    modeOverlay.classList.remove('show');
+    setTimeout(()=>{startHeartbeat();subscribeRoom();},500);
+    trackEvent('room_joined',{game_name:'domino'});
   }catch(e){console.error(e);alert('Ошибка входа: '+e.message);}
 }
 function subscribeRoom(){
@@ -471,6 +497,49 @@ function subscribeRoom(){
     syncFromRoom();
     render();
     updateRoomActions();updateLiveBadge();
+    
+    /* v2.3: триггер реванша ТОЛЬКО при status='finished' */
+    if(roomData.status==='finished' && roomData.result){
+      const rm=roomData.rematch||{};
+      const active=activePlayers();
+      const allAgreed=active.length>=2 && active.every(uid=>rm[uid]);
+      if(allAgreed && isHost()){
+        console.log('[DO] all agreed -> back to lobby, round+1');
+        /* очищаем seats ушедших */
+        const newPlayers={};
+        const newOrder=[];
+        for(const uid of active){
+          newPlayers[uid]=roomData.players[uid];
+          newOrder.push(uid);
+        }
+        roomRef.update({
+          status:'waiting',
+          round:(roomData.round||1)+1,
+          rematch:{},
+          players:newPlayers,
+          order:newOrder,
+          hands:{},
+          boneyard:[],
+          board:[],
+          leftEnd:null,
+          rightEnd:null,
+          turnIndex:0,
+          passCount:0,
+          result:null,
+          lastMove:null
+        }).catch(e=>console.warn('[DO] rematch update failed:',e.message));
+      }
+    }
+    
+    /* v2.3: синхронизация round */
+    const rr=roomData.round||1;
+    if(rr!==myRound){
+      console.log('[DO] round change',myRound,'->',rr);
+      myRound=rr;
+      shownResultAt=null;
+      endOverlay.classList.remove('show');
+    }
+    
     if(roomData.status==='finished'&&roomData.result&&roomData.result.at!==shownResultAt){shownResultAt=roomData.result.at;showOnlineEnd();}
     const lm=roomData.lastMove;
     if(lm&&roomData.status==='playing'){
@@ -480,7 +549,7 @@ function subscribeRoom(){
       else if(lm.action==='pass-absent')updateMessage('🎲 '+escapeHtml(lm.name)+' отсутствует — автоход');
     }
   });
-  const p=roomRef.child('presence/'+myUid);p.set({name:myName,at:Date.now()});p.onDisconnect().remove();
+  /* v2.3: НЕ вызываем startHeartbeat здесь — он уже запущен в createRoom/joinRoom */
   startWatchdog();
 }
 function syncFromRoom(){
@@ -496,9 +565,11 @@ function syncFromRoom(){
   state.pending=null;
 }
 function leaveRoom(){
+  stopHeartbeat();
+  removePresence();
   onlineMode=false;
-  if(roomRef){roomRef.off();if(myUid)roomRef.child('presence/'+myUid).remove();roomRef=null;}
-  roomData=null;roomCode=null;shownResultAt=null;
+  if(roomRef){roomRef.off();roomRef=null;}
+  roomData=null;roomCode=null;shownResultAt=null;myRound=0;
   $('roomBar').style.display='none';$('roomBar').classList.remove('open');$('rbExtra').style.display='none';
   lobbyOverlay.classList.remove('show');endOverlay.classList.remove('show');
   cancelChoice();
@@ -506,7 +577,7 @@ function leaveRoom(){
 function showLobby(){
   lobbyOverlay.classList.add('show');$('lobbyCode').textContent=roomCode;
   const list=$('lobbyList');list.innerHTML='';
-  onlinePlayers().forEach((p,i)=>{const r=document.createElement('div');r.className='row'+(p.uid===roomData.host?' host':'');r.innerHTML='<span>'+(i+1)+'. '+escapeHtml(p.name)+(p.uid===myUid?' (вы)':'')+(p.uid===roomData.host?' 👑':'')+'</span><span>'+(p.connected?'🟢':'')+'</span>';list.appendChild(r);});
+  onlinePlayers().forEach((p,i)=>{const r=document.createElement('div');r.className='row'+(p.uid===roomData.host?' host':'');r.innerHTML='<span>'+(i+1)+'. '+escapeHtml(p.name)+(p.uid===myUid?' (вы)':'')+(p.uid===roomData.host?' 👑':'')+'</span><span>'+(p.connected?'🟢':'⚪')+'</span>';list.appendChild(r);});
   for(let i=onlinePlayers().length;i<MAX_PLAYERS;i++){const r=document.createElement('div');r.className='row';r.innerHTML='<span style="opacity:.5">— свободно —</span><span>⚪</span>';list.appendChild(r);}
   $('lobbyStart').style.display=isHost()?'inline-flex':'none';
   $('lobbyStart').disabled=onlinePlayers().length<2;
@@ -528,8 +599,9 @@ function dealNewRound(){
   roomRef.update({
     hands,boneyard,board:[best],leftEnd:best[0],rightEnd:best[1],
     turnIndex:(starterIdx+1)%n,turnAt:Date.now(),passCount:0,status:'playing',result:null,
-    lastMove:{by:bestUid,name:playerName(bestUid),action:'start',tile:best,at:Date.now()}
-  });
+    lastMove:{by:bestUid,name:playerName(bestUid),action:'start',tile:best,at:Date.now()},
+    rematch:{}
+  }).catch(e=>console.warn('[DO] dealNewRound failed:',e.message));
 }
 async function playOnline(idx,end){
   if(!isMyTurn())return;
@@ -580,14 +652,52 @@ function showOnlineEnd(){
   else{title='🏁 Победил '+escapeHtml(playerName(res.winner));sub=res.reason==='domino'?'Выложил все кости':'Меньше всех очков';playSound('lose');Platform.haptic('error');}
   endTitle.textContent=title;endSub.textContent=sub;
   endBtns.innerHTML='';
-  if(isHost()){const b=document.createElement('button');b.className='btn btn-primary';b.textContent='🔄 Новая партия';b.onclick=()=>{dealNewRound();endOverlay.classList.remove('show');shownResultAt=null;};endBtns.appendChild(b);}
-  else{const w=document.createElement('div');w.style.cssText='font-size:13px;opacity:.8;width:100%';w.textContent='⏳ Хост готовит новую партию...';endBtns.appendChild(w);}
+  
+  /* v2.3: кнопка Реванш для ВСЕХ игроков */
+  const rb=document.createElement('button');rb.className='btn btn-primary';rb.textContent='🔄 Реванш';rb.onclick=requestRematch;endBtns.appendChild(rb);
+  
   const sh=document.createElement('button');sh.className='btn';sh.textContent='📤 Поделиться';sh.onclick=shareOnline;endBtns.appendChild(sh);
   const lv=document.createElement('button');lv.className='btn btn-secondary';lv.textContent='🚪 Выйти';lv.onclick=()=>{leaveRoom();modeOverlay.classList.add('show');};endBtns.appendChild(lv);
   endOverlay.classList.add('show');
   trackEvent('game_end',{game_name:'domino',mode:'online',winner:res.winner===myUid?'player':(res.winner===null?'draw':'other'),reason:res.reason});
 }
-/* v2.2: шеринг через платформу */
+/* v2.3: реванш флагом rematch/{uid} */
+function requestRematch(){
+  if(!roomRef||!myUid)return;
+  console.log('[DO] propose rematch · uid=',myUid,'· current=',JSON.stringify((roomData&&roomData.rematch)||{}));
+  roomRef.child('rematch/'+myUid).set(true).catch(e=>console.warn('[DO] rematch write failed:',e.message));
+  endOverlay.classList.remove('show');
+  updateMessage('🔄 Ожидание игроков для реванша…');
+  /* если все остальные уже согласились — сразу идём в лобби */
+  const rm=(roomData&&roomData.rematch)||{};
+  const active=activePlayers();
+  const othersAgreed=active.filter(uid=>uid!==myUid).every(uid=>rm[uid]);
+  if(othersAgreed && active.length>=2 && isHost()){
+    console.log('[DO] others already agreed -> go to lobby now');
+    const newPlayers={};
+    const newOrder=[];
+    for(const uid of active){
+      newPlayers[uid]=roomData.players[uid];
+      newOrder.push(uid);
+    }
+    roomRef.update({
+      status:'waiting',
+      round:(roomData.round||1)+1,
+      rematch:{},
+      players:newPlayers,
+      order:newOrder,
+      hands:{},
+      boneyard:[],
+      board:[],
+      leftEnd:null,
+      rightEnd:null,
+      turnIndex:0,
+      passCount:0,
+      result:null,
+      lastMove:null
+    }).catch(e=>console.warn('[DO] rematch update failed:',e.message));
+  }
+}
 function shareOnline(){
   const url=inviteLink(roomCode);
   const text='🎲 Домино онлайн! Комната '+roomCode+'. Присоединяйся: '+url;
@@ -599,6 +709,10 @@ function updateRoomActions(){
   if(!onlineMode)return;
   const sh=document.createElement('button');sh.className='rbtn';sh.textContent='📤 Пригласить';sh.onclick=shareOnline;box.appendChild(sh);
   const cb=document.createElement('button');cb.className='rbtn';cb.textContent='🔢 Код';cb.onclick=()=>{navigator.clipboard?.writeText(roomCode);updateMessage('Код '+roomCode+' скопирован');};box.appendChild(cb);
+  /* v2.3: кнопка Реванш в шторке после окончания партии */
+  if(roomData&&roomData.status==='finished'&&roomData.result){
+    const rb=document.createElement('button');rb.className='rbtn accept';rb.textContent='🔄 Реванш';rb.onclick=requestRematch;box.appendChild(rb);
+  }
   const lb=document.createElement('button');lb.className='rbtn danger';lb.textContent='🚪 Выйти';lb.onclick=()=>{if(confirm('Выйти из комнаты?')){leaveRoom();modeOverlay.classList.add('show');}};box.appendChild(lb);
 }
 function updateLiveBadge(){
@@ -615,7 +729,7 @@ function startWatchdog(){
   watchdog=setInterval(async()=>{
     if(!onlineMode||!roomData||roomData.status!=='playing'||!isHost())return;
     const tu=turnUid();
-    if(roomData.presence&&roomData.presence[tu])return;
+    if(roomData.presence&&roomData.presence[tu]&&isPresenceFresh(roomData.presence[tu]))return;
     if(Date.now()-(roomData.turnAt||0)<30000)return;
     const hand=(roomData.hands||{})[tu]||[];
     const st={board:roomData.board||[],leftEnd:roomData.leftEnd,rightEnd:roomData.rightEnd,boneyard:(roomData.boneyard||[]).slice(),playerHand:hand.slice(),passCount:roomData.passCount||0};
@@ -767,7 +881,6 @@ function loadStats(){try{let s=JSON.parse(localStorage.getItem('dominoStats'));i
 function saveStats(s){localStorage.setItem('dominoStats',JSON.stringify(s))}
 function updateStats(winner){let s=loadStats();s.total++;if(winner==='player')s.playerWins++;else if(winner==='computer')s.computerWins++;else if(winner==='draw')s.draws++;saveStats(s);displayStats()}
 function displayStats(){let s=loadStats();totalGames.textContent=s.total;playerWins.textContent=s.playerWins;computerWins.textContent=s.computerWins;draws.textContent=s.draws}
-/* v2.2: смена темы сообщает платформе цвет для шапки мессенджера */
 function applyTheme(theme){
   const colors={green:'#1a3a1a',light:'#e8e0d0',dark:'#0e0e1a'};
   document.documentElement.setAttribute('data-theme',theme);
@@ -803,6 +916,7 @@ render();
   else{modeOverlay.classList.add('show');}
 })();
 let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{updateTileSize();if(!state.gameOver||onlineMode)render()},300)});
+window.addEventListener('beforeunload',()=>{stopHeartbeat();removePresence();});
 </script>
 </body>
 </html>
