@@ -133,7 +133,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div></div>
 </div></div>
 <div class="status" id="statusEl">Выбери режим игры</div>
-<div class="ver" id="verTag">v4.27</div>
+<div class="ver" id="verTag">v4.28</div>
 </div>
 <div class="fieldViewBar" id="fieldViewBar"><span class="title">👁 Просмотр поля противника</span><button class="btn" id="closeFieldView">Закрыть</button></div>
 <div class="overlay" id="modeOverlay"><div class="cardbox"><h2>🚢 Морской бой</h2><div class="sub">Выбери режим игры</div>
@@ -155,14 +155,14 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="stat-row"><span>% побед</span><b id="stPct">0%</b></div>
 <div class="stat-row"><span>Серия / рекорд</span><b id="stStreak">0 / 0</b></div>
 <div class="btns"><button class="btn" id="stReset">Сброс</button><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note">Расстановка флота: вручную (превью→подтверждение) или 🎲 Авто — и в новой партии, и после реванша. Реванш: оба жмут «🔄 Реванш» — поле очищается, новая партия в той же комнате.</div></div></div>
+<div class="note">Расстановка флота: вручную или 🎲 Авто — и в новой партии, и после реванша. Реванш: оба жмут «🔄 Реванш» — поле очищается, новая партия в той же комнате.</div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
 <div class="note">• Поле 10×10, цифры 1–10 сверху, буквы А–К слева.<br>• Флот 1×4,2×3,3×2,4×1; не касаются углами.<br>• Расстановка: вручную или 🎲 Авто.<br>• Онлайн: создай комнату → 📨 Пригласить → оба расставляют флот и жмут «⚔️ В бой!».<br>• Попадание = доп. ход; промах = всплеск; убитый = метки по всем клеткам.<br>• После игры: 🔄 Реванш — новая партия с тем же соперником; 👁 Посмотреть поле.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
 var FB={apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"};
-var VER='4.27',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=false;
+var VER='4.28',IMG='img/',FLEET=[4,3,3,2,2,2,1,1,1,1],LETTERS=['А','Б','В','Г','Д','Е','Ж','З','И','К'],CELL=30,FIT=false;
 var fieldViewMode=false;
 var HEARTBEAT_INTERVAL=5000,HEARTBEAT_TTL=15000,heartbeatTimer=null;
 var myRound=0;
@@ -190,9 +190,9 @@ function dName(){return set.diff=='easy'?'Новичок':set.diff=='hard'?'Сл
 function aud(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=set.vol;MASTER.connect(AC.destination)}catch(e){}}if(AC&&AC.resume)AC.resume();if(MASTER)MASTER.gain.value=set.vol}
 function tn(f0,f1,d,tp,v){if(!AC)return;var o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;o.type=tp;o.frequency.setValueAtTime(f0,n);o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(MASTER);o.start(n);o.stop(n+d)}
 function nz(d,v,f,q){if(!AC)return;var n=AC.createBufferSource(),b=AC.createBuffer(1,AC.sampleRate*d|0,AC.sampleRate),a=b.getChannelData(0);for(var i=0;i<a.length;i++)a[i]=(Math.random()*2-1)*Math.exp(-i/(AC.sampleRate*d*.4));n.buffer=b;var bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f;bp.Q.value=q||1;var g=AC.createGain();g.gain.setValueAtTime(v,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);n.connect(bp);bp.connect(g);g.connect(MASTER);n.start()}
-/* синтез в приоритете — не дёргаем отсутствующие mp3 */
-function S(k,fb){if(fb){fb();return;}if(window.SND){SND.play(k,1);}}
-function V(k,t){if(window.SND){SND.say(k,t)}else{say(t)}}
+/* v4.28: ТОЛЬКО синтез — SND.play не вызываем, mp3 не запрашиваются */
+function S(k,fb){if(fb){fb();}}
+function V(k,t){if(!set.voice)return;if(window.SND&&SND.tts){try{SND.tts(t);return;}catch(e){}}say(t);}
 function sShot(){S('shot',function(){tn(900,300,.06,'square',.1)})}
 function sSplash(){S('splash',function(){nz(.28,.4,420,2);setTimeout(function(){nz(.18,.25,650,1.5)},90);setTimeout(function(){nz(.12,.15,900,1.2)},180)})}
 function sHit(){S('hit',function(){tn(300,120,.12,'sawtooth',.2);nz(.15,.25,1500,1)})}
@@ -200,7 +200,7 @@ function sBoom(){S('boom',function(){nz(.55,.55,110,.7);tn(85,28,.45,'sawtooth',
 function sPlace(){S('place',function(){tn(600,700,.05,'triangle',.12)})}
 function sWin(){S('win',function(){[523,659,784,1046].forEach(function(f,i){setTimeout(function(){tn(f,f,.15,'triangle',.16)},i*110)})})}
 function sLose(){S('lose',function(){[400,340,280,220].forEach(function(f,i){setTimeout(function(){tn(f,f,.18,'sawtooth',.14)},i*130)})})}
-function say(t){if(!set.voice)return;if(window.SND){SND.tts(t);return}try{if(!window.speechSynthesis)return;speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='ru-RU';u.rate=1.05;speechSynthesis.speak(u)}catch(e){}}
+function say(t){if(!set.voice)return;try{if(!window.speechSynthesis)return;speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='ru-RU';u.rate=1.05;speechSynthesis.speak(u);}catch(e){}}
 function toast(t){var e=$('toast');if(!e){e=document.createElement('div');e.id='toast';e.className='toast';document.body.appendChild(e)}e.textContent=t;e.classList.add('show');if(toastT)clearTimeout(toastT);toastT=setTimeout(function(){e.classList.remove('show')},2500)}
 function setStatus(t){var e=$('statusEl');if(e){e.innerHTML=t;e.style.color=''}}
 function fmt(t){var m=t/60|0,s=t%60;return(m<10?'0':'')+m+':'+(s<10?'0':'')+s}
@@ -281,10 +281,10 @@ function pShoot(r,c){if(!G||G.over||G.online||G.phase!='battle'||G.turn!='player
 function aiPick(){var a=G.ai;while(a.queue.length){var c=a.queue.shift();if(!G.my.shots[c])return c}var o=[];for(var i=0;i<100;i++){if(G.my.shots[i])continue;var r=i/10|0,cc=i%10;if(set.diff=='easy'||(r+cc)%2==0)o.push(i)}if(!o.length)for(var j=0;j<100;j++)if(!G.my.shots[j])o.push(j);return o[Math.random()*o.length|0]}
 function aiAround(i){var r=i/10|0,c=i%10;[[1,0],[-1,0],[0,1],[0,-1]].forEach(function(v){var nr=r+v[0],nc=c+v[1];if(nr<0||nr>9||nc<0||nc>9)return;var ni=nr*10+nc;if(!G.my.shots[ni])G.ai.queue.push(ni)})}
 function aiTurn(){if(!G||G.over||G.online||G.phase!='battle')return;var i=aiPick(),r=i/10|0,c=i%10;sShot();var res=shot(G.my,r,c);if(res=='miss')sSplash();if(res=='hit'){sHit();addBoom($('myFx'),i,false);aiAround(i);Platform.haptic('error')}if(res=='dead'){sBoom();addBoom($('myFx'),i,true);Platform.haptic('error');V('v_sunk','Твой корабль потоплен')}renderAll();if(allDead(G.my)){end(false);return}if(res!='miss')setTimeout(aiTurn,650);else{G.turn='player';setStatus('Твой ход: стреляй по полю противника.')}}
-async function loadFb(){if(FNS.ref)return;var a=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');var d=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');var au=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');var app=a.initializeApp(FB);FNS.db=d.getDatabase(app);FNS.ref=d.ref;FNS.on=d.onValue;FNS.set=d.set;FNS.get=d.get;FNS.upd=d.update;FNS.od=d.onDisconnect;FNS.auth=au.getAuth(app);FNS.signIn=au.signInAnonymously;FNS.tx=d.runTransaction}
+async function loadFb(){if(FNS.ref)return;var a=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');var d=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');var au=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');var app=a.initializeApp(FB);FNS.db=d.getDatabase(app);FNS.ref=d.ref;FNS.on=d.onValue;FNS.set=d.set;FNS.get=d.get;FNS.upd=d.update;FNS.od=d.onDisconnect;FNS.auth=au.getAuth(app);FNS.signIn=au.signInAnonymously}
 NET.ensure=async function(){if(!FB.apiKey){alert('🔥 Firebase не настроен.');throw new Error('no-fb')}await loadFb();if(!FNS.auth.currentUser){try{await FNS.signIn(FNS.auth)}catch(e){console.warn('signIn failed',e)}}};
 NET.roomRef=function(){return FNS.ref(FNS.db,'rooms/'+NET.code)};
-NET.patch=function(o){try{FNS.upd(NET.roomRef(),o)}catch(e){}};
+NET.patch=function(o){try{FNS.upd(NET.roomRef(),o)}catch(e){console.warn('[SB] patch failed:',e);}};
 NET.attach=function(path,cb){var r=FNS.ref(FNS.db,path);var un=FNS.on(r,cb);NET.L.push(un);return un};
 NET.detach=function(){NET.L.forEach(function(u){try{u()}catch(e){}});NET.L=[]};
 NET.reset=function(){stopHeartbeat();removePresence();NET.detach();NET.conn=false;NET.room=null;NET.lastPend=0;NET.lastRes=0;};
@@ -294,13 +294,12 @@ function otherRole(){return NET.role==='host'?'guest':'host'}
 function meInfo(){var id='anon';try{if(FNS.auth&&FNS.auth.currentUser)id=FNS.auth.currentUser.uid}catch(e){}
  var name='Гость';try{var u=Platform.user();if(u&&u.name)name=u.name;else if(u&&u.id)name='Игрок'+u.id;}catch(e){}
  return{id:id,name:name};}
-/* чистое поле + РУЧНАЯ расстановка; Авто — кнопкой 🎲 */
 function resetPlacing(){G.online=true;G.phase='place';G.my=eBoard();G.myShipsVer=(G.myShipsVer||0)+1;G.qi=0;G.oppView=eBoard();G.en=eBoard();G.over=false;G.won=false;G.shotsFired=0;G.hits=0;G.time=0;G.turn='player';stopT();resetRendered();buildLabels();renderAll();alignPaper();}
 async function netCreate(){
  try{await NET.ensure()}catch(e){return}
  NET.reset();NET.code=genCode();NET.role='host';myRound=1;
  var me=meInfo();
- try{await FNS.set(NET.roomRef(),{createdAt:Date.now(),round:1,rematchCount:0,host:me,guest:null,state:'placing',hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null,presence:{}});}
+ try{await FNS.set(NET.roomRef(),{createdAt:Date.now(),round:1,host:me,guest:null,state:'placing',hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null,rematch:{host:false,guest:false},presence:{}});}
  catch(e){console.error('[netCreate] set failed:',e);toast('Ошибка создания: '+e.message);return;}
  NET.conn=true;NET.attach('rooms/'+NET.code,function(s){onRoom(s.val())});startHeartbeat();
  resetPlacing();hideMode();refreshBar();setStatus('Комната '+NET.code+' · расставь флот (или 🎲 Авто) и жми «⚔️ В бой!»');trk('net_create',{role:'host'});}
@@ -351,11 +350,22 @@ function onRoom(d){
   setStatus(NET.role=='host'&&!d.guest?('Ждём соперника · код '+NET.code):((d.hostReady&&d.guestReady)?'Оба готовы — старт!':(G.qi<G.queue.length?'Расставь флот (или 🎲 Авто) и жми «⚔️ В бой!»':'Жми «⚔️ В бой!»')))}
  else if(d.state=='battle'){if(G.phase!='battle'){G.phase='battle';startT();V('v_battle','В бой!')}
   setStatus(ourTurn()?'ТВОЙ ХОД — стреляй по полю соперника':'Ход соперника…'+(oppOn?'':' · ⚠️ соперник офлайн'))}
- else if(d.state=='over'){stopT();if(!G.over)end(d.winner===NET.role);}
- /* смена раунда = сигнал реванша; сброс у обоих */
+ else if(d.state=='over'){
+  stopT();if(!G.over)end(d.winner===NET.role);
+  var rm=d.rematch||{};
+  console.log('[SB] onRoom over · round=',d.round,'myRound=',myRound,'rematch=',JSON.stringify(rm),'role=',NET.role);
+  /* оба согласны → пишем новый раунд (идемпотентно, пишут оба) */
+  if(rm.host&&rm.guest){
+    var newRound=(d.round||1)+1;
+    if(myRound!==newRound){
+      console.log('[SB] both agreed -> reset round to',newRound);
+      NET.patch({state:'placing',round:newRound,hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null,rematch:{host:false,guest:false}});
+    }
+  }
+ }
  var rr=d.round||1;
  if(rr!==myRound){
-  console.log('[SB] round change', myRound, '->', rr);
+  console.log('[SB] round change',myRound,'->',rr);
   myRound=rr;
   resetPlacing();
   fieldViewMode=false;$('fieldViewBar').classList.remove('show');
@@ -378,22 +388,23 @@ function showEnd(w){var ov=$('endOverlay'),acc=G.shotsFired?Math.round(G.hits/G.
  else{ebtn('🔄 Сыграть ещё',function(){ov.classList.remove('show');newGame();showMode('menu')},false);}
  ebtn('👁 Посмотреть поле',function(){showFieldView();},false);
  ebtn('🏠 В меню',function(){ov.classList.remove('show');if(G.online)NET.reset();goToHub();},false);ov.classList.add('show')}
-/* v4.27: реванш через атомарный transaction-счётчик rematchCount */
+/* v4.28: реванш флагами rematch/{role} + логи */
 function requestRematch(){
- if(!NET.room||!FNS.tx)return;
+ if(!NET.room)return;
+ console.log('[SB] propose rematch · role=',NET.role,'· current rematch=',JSON.stringify((NET.room.rematch||{})));
+ var o={};o['rematch/'+NET.role]=true;NET.patch(o);
  $('endOverlay').classList.remove('show');
- setStatus('🔄 Предлагаю реванш…');
- var rcRef=FNS.ref(FNS.db,'rooms/'+NET.code+'/rematchCount');
- FNS.tx(rcRef,function(cur){return (cur||0)+1;},function(err,committed,snap){
-   if(err||!committed){console.warn('[SB] rematch tx failed',err);setStatus('⚠️ Не удалось предложить реванш');return;}
-   var v=snap.val()||0;
-   console.log('[SB] rematchCount =',v);
-   if(v>=2){
-     NET.patch({state:'placing',round:(NET.room.round||1)+1,hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null,rematchCount:0});
-   }else{
-     setStatus('🔄 Ожидание соперника для реванша…');
+ setStatus('🔄 Ожидание соперника для реванша…');
+ /* если соперник УЖЕ предложил — сразу сброс (оба флага станут true в следующем onRoom) */
+ var rm=NET.room.rematch||{};
+ var other=otherRole();
+ if(rm[other]){
+   var newRound=(NET.room.round||1)+1;
+   if(myRound!==newRound){
+     console.log('[SB] opponent already agreed -> reset round to',newRound);
+     NET.patch({state:'placing',round:newRound,hostReady:false,guestReady:false,turn:'host',pending:null,resolve:null,winner:null,rematch:{host:false,guest:false}});
    }
- },false);
+ }
 }
 function showFieldView(){$('endOverlay').classList.remove('show');fieldViewMode=true;$('fieldViewBar').classList.add('show');
  if(G.online){G.en.ships.forEach(function(sh){var dup=false;G.oppView.ships.forEach(function(s){if(s.r===sh.r&&s.c===sh.c&&s.len===sh.len)dup=true});if(!dup){G.oppView.ships.push({r:sh.r,c:sh.c,len:sh.len,hor:sh.hor,hits:sh.len,dead:true});cells(sh).forEach(function(x){G.oppView.shots[x]=2})}});}
@@ -445,8 +456,8 @@ $('modeCancel').onclick=function(){hideMode()};
 $('setClose').onclick=function(){$('setOverlay').classList.remove('show')};
 $('diffSel').onchange=function(e){set.diff=e.target.value;saveSet();renderAll()};
 $('skinSel').onchange=function(e){set.skin=e.target.value;saveSet();applySkin()};
-$('voiceChk').onchange=function(e){set.voice=e.target.checked;saveSet();if(window.SND)SND.setVoice(set.voice);if(set.voice)say('Озвучка включена')};
-$('volSlider').oninput=function(e){set.vol=e.target.value/100;$('volV').textContent=e.target.value+'%';saveSet();aud();if(window.SND)SND.setVol(set.vol)};
+$('voiceChk').onchange=function(e){set.voice=e.target.checked;saveSet();};
+$('volSlider').oninput=function(e){set.vol=e.target.value/100;$('volV').textContent=e.target.value+'%';saveSet();aud();};
 $('stReset').onclick=function(){if(confirm('Сбросить статистику?')){ST={games:0,wins:0,streak:0,bestStreak:0};saveST();showStats()}};
 $('rulesClose').onclick=function(){$('rulesOverlay').classList.remove('show')};
 $('hubBtn').onclick=function(){goToHub();};
@@ -456,7 +467,6 @@ window.addEventListener('orientationchange',function(){setTimeout(function(){res
 window.addEventListener('beforeunload',function(){stopHeartbeat();removePresence();});}
 function boot(){document.documentElement.classList.add('ls');document.documentElement.style.colorScheme='light';
  set=Object.assign({diff:'medium',skin:'classic',vol:.7,voice:true},JSON.parse(lsGet('sb_set','{}')));delete set.mode;ST=Object.assign({games:0,wins:0,streak:0,bestStreak:0},JSON.parse(lsGet('sb_stats','{}')));
- if(window.SND){SND.setVol(set.vol);SND.setVoice(set.voice)}
  applySkin();layout();bind();newGame();$('verTag').textContent='v'+VER;updateFold();
  var qp=new URLSearchParams(location.search);var room=qp.get('room');if(room){setTimeout(function(){netJoin(room)},400)}else{showMode('menu')}}
 boot();
