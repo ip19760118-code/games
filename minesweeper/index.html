@@ -1,6 +1,5 @@
 <!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/><title>Сапёр</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<!-- Единый слой платформ (TG / VK / MAX / web) -->
 <script src="../js/platform.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
@@ -9,7 +8,8 @@
 [data-skin="emerald"]{--cellClosed:#79b28a;--cellOpen:#dcefd8;--frame:#2c5e46}
 [data-skin="night"]{--cellClosed:#3a4666;--cellOpen:#232c47;--frame:#141a2e;--num1:#7db4ff;--num2:#7dff9a;--num3:#ff7d7d;--num4:#9aa8ff;--num5:#ff9a9a;--num6:#7dffe0;--num7:#e8e8e8;--num8:#bbb}
 [data-skin="sand"]{--cellClosed:#d9c08f;--cellOpen:#f2e6c8;--frame:#7a5c33}
-*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;overscroll-behavior-y:none}
+html,body{overscroll-behavior:none;overscroll-behavior-y:none}
 body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:10px;padding-top:calc(10px + env(safe-area-inset-top));padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .wrap{max-width:760px;width:100%;background:var(--panel);border-radius:24px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08)}
 .header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
@@ -23,7 +23,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .lives{font-size:14px;letter-spacing:2px;line-height:1}
 .smiley{font-size:30px;background:var(--cellClosed);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:inset 2px 2px 0 rgba(255,255,255,.7),inset -2px -2px 0 rgba(0,0,0,.35)}
 .smiley:active{transform:scale(.94)}
-.boardwrap{overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;border-radius:12px;background:var(--frame);padding:8px;box-shadow:inset 0 2px 10px rgba(0,0,0,.5)}
+.boardwrap{overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;border-radius:12px;background:var(--frame);padding:8px;box-shadow:inset 0 2px 10px rgba(0,0,0,.5);overscroll-behavior:contain;overscroll-behavior-y:contain}
 @media (max-width:700px){.boardwrap{max-height:min(60vh,520px)}}
 .board{display:grid;grid-template-columns:repeat(var(--cols,9),var(--cs,32px));grid-auto-rows:var(--cs,32px);gap:0;margin:0 auto;width:max-content}
 .cell{width:var(--cs,32px);height:var(--cs,32px);background:var(--cellClosed);box-shadow:inset 2px 2px 0 rgba(255,255,255,.65),inset -2px -2px 0 rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(var(--cs,32px)*.5);cursor:pointer;position:relative}
@@ -58,7 +58,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="boardwrap" id="boardwrap"><div class="board" id="board"></div></div>
 <div class="status" id="statusEl">Выбери сложность в ⚙️ и нажми 🙂</div>
 <div class="modes"><button class="modebtn active" id="btnDig">🔨</button><button class="modebtn" id="btnFlag">🚩</button></div>
-<div class="ver" id="verTag">v1.5</div>
+<div class="ver" id="verTag">v1.6</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Сложность<select id="diffSel"><option value="novice">Новичок · 9×9 · 10 мин</option><option value="inter">Любитель · 16×16 · 40 мин</option><option value="expert">Эксперт · 30×16 · 99 мин</option></select></div>
@@ -79,11 +79,8 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="note" style="text-align:left">• Открывай клетки 🔨 (ПК — левый клик). Цифра — сколько мин вокруг.<br>• 🚩 — флажок (ПК — правый клик; на телефоне режим 🚩, повторный тап снимает).<br>• Тап/двойной клик по открытой цифре открывает соседей, если флажков вокруг столько же, сколько цифра.<br>• Первый клик всегда безопасен.<br>• ❤️❤️❤️ — 3 жизни: мина снимает жизнь и помечается 💥; третья мина — поражение.<br>• Чем меньше жизней потратил — тем больше очков в статистику.<br>• Победа — открыты все клетки без мин.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='1.5';
+const VER='1.6';
 
-/* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
-/* v1.5: BackButton-логика закрытия оверлеев перенесена в callback back.
-   Platform сам определит платформу и навесит обработчик. */
 function backHandler(){
   try {
     if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}
@@ -97,13 +94,12 @@ Platform.init({
   back: backHandler
 });
 
-/* v1.5: возвращаемся в хаб, сохраняя платформу */
+/* v1.6: возврат в хаб через единый слой платформ */
 function goToHub(){
   Platform.haptic('light');
-  location.href='../?plat='+Platform.name;
+  Platform.goToHub();
 }
 
-/* v1.5: трекер с автоматической меткой платформы */
 function trackEvent(n,p){
   p=p||{};
   p.platform=Platform.name;
@@ -182,7 +178,6 @@ $('volSlider').oninput=e=>{set.vol=e.target.value/100;$('volV').textContent=e.ta
 $('stReset').onclick=()=>{if(confirm('Сбросить статистику?')){ST={played:0,wins:0,losses:0,streak:0,bestStreak:0,points:0,livesUsed:0,best:{novice:null,inter:null,expert:null},byDiff:{novice:{p:0,w:0},inter:{p:0,w:0},expert:{p:0,w:0}}};saveST();showStats();}};
 $('rulesBtn').onclick=()=>$('rulesOverlay').classList.add('show');
 $('rulesClose').onclick=()=>$('rulesOverlay').classList.remove('show');
-/* v1.5: кнопка "В меню игр" передаёт платформу */
 $('hubBtn').onclick=()=>{goToHub();};
 window.addEventListener('resize',()=>{if(G)newGame();});
 applySkin();$('verTag').textContent='v'+VER;newGame();
