@@ -1,12 +1,17 @@
-/* tg-games: единый слой платформ v2.4 — Telegram / VK / MAX / web.
-   v2.4: блокировка pull-to-refresh в MAX/VK (свайп вниз не обновляет страницу);
-   улучшенный close() — корректный возврат в хаб из web/браузерной версии MAX.
+/* tg-games: единый слой платформ v2.5 — Telegram / VK / MAX / web.
+   v2.5: ЭКСПЕРИМЕНТ MAX_NAV_MODE:
+     'container' — игры открываются ВНУТРИ клиента MAX (навигация в веб-вью);
+     'external'  — старая проверенная схема (игры во внешнем браузере через openLink).
+     Переключение одной строкой ниже. Сторожевой флаг max_nav_try в sessionStorage:
+     если контейнер «проглотил» переход, хаб сам откроет внешнее окно.
+   v2.4: блокировка pull-to-refresh в MAX/VK; улучшенный close()/goToHub().
    v2.3: честный детект клиента MAX по initData/UA/referrer. */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
  var TG_SDK_URL='https://telegram.org/js/telegram-web-app.js';
  var MAX_DEEPLINK='https://max.ru/se14729332_bot';
+ var MAX_NAV_MODE='container';   /* ← ЭКСПЕРИМЕНТ: 'container' | 'external' */
  var name='web',user=null,backFn=null,inited=false;
 
  function qs(k){try{return new URLSearchParams(location.search).get(k)||''}catch(e){return ''}}
@@ -31,7 +36,19 @@ var Platform=(function(){
   }catch(e){}
  })();
 
- /* ---------- v2.4: настоящий ли клиент MAX? ---------- */
+ /* ---------- v2.5: сброс сторожевого флага навигации MAX ---------- */
+ (function(){
+  try{
+   if(name==='max'){
+    sessionStorage.removeItem('max_nav_try');
+    window.addEventListener('pagehide',function(){
+     try{sessionStorage.removeItem('max_nav_try')}catch(e){}
+    });
+   }
+  }catch(e){}
+ })();
+
+ /* ---------- v2.3: настоящий ли клиент MAX? ---------- */
  function maxClientReal(){
   try{
    if(window.WebApp&&window.WebApp.initData&&String(window.WebApp.initData).length>10)return true;
@@ -45,6 +62,7 @@ var Platform=(function(){
   return false;
  }
  function isMaxExternal(){ return name==='max' && !maxClientReal(); }
+ function maxInContainer(){ return name==='max' && maxClientReal() && MAX_NAV_MODE==='container'; }
 
  function ensureSdk(cb){
   if(name==='tg'&&!window.Telegram)load(TG_SDK_URL).then(cb);
@@ -63,14 +81,12 @@ var Platform=(function(){
     }catch(e){}}
   if(!user)user={id:'g'+Math.floor(Math.random()*1e9),name:'Гость'}}
 
- /* ---------- v2.4: возврат в хаб (универсальный) ---------- */
+ /* ---------- v2.5: возврат в хаб ---------- */
  function hubBase(){
   try{
-   /* пытаемся найти корень хаба: ищем в пути сегмент /games/ */
    var p=location.pathname;
    var i=p.indexOf('/games/');
-   if(i>=0)return location.origin+p.substring(0,i+7); /* включая /games/ */
-   /* fallback: на одну директорию вверх */
+   if(i>=0)return location.origin+p.substring(0,i+7);
    var parts=p.split('/').filter(Boolean);
    if(parts.length>=2)parts.pop();
    return location.origin+'/'+parts.join('/')+'/';
@@ -80,16 +96,23 @@ var Platform=(function(){
  }
  function goToHub(){
   try{
-   if(name==='max'&&maxClientReal()&&window.WebApp&&window.WebApp.close){window.WebApp.close();return}
+   if(isMaxExternal()){backToMessenger();return}
+   if(name==='max'&&maxClientReal()){
+    if(MAX_NAV_MODE==='container'){
+     var u=hubBase()+'?plat=max';
+     try{
+      var cur=new URL(location.href);
+      var tgt=new URL(u);
+      if(cur.pathname!==tgt.pathname){location.href=u;return}
+     }catch(e){location.href=u;return}
+     return;
+    }
+    if(window.WebApp&&window.WebApp.close){window.WebApp.close();return}
+   }
    if(name==='tg'&&window.Telegram&&Telegram.WebApp){Telegram.WebApp.close();return}
    if(name==='vk'&&window.vkBridge){vkBridge.send('VKWebAppClose',{payload:'igrovoj-centr'}).catch(function(){});return}
-   if(isMaxExternal()){backToMessenger();return}
-   /* web / браузерная MAX / fallback */
    var url=hubBase()+'?plat='+name;
-   if(location.href.replace(/\/$/,'')===url.replace(/\/$/,'')){
-    /* уже в хабе — ничего не делаем */
-    return;
-   }
+   if(location.href.replace(/\/$/,'')===url.replace(/\/$/,'')){return}
    location.href=url;
   }catch(e){
    try{history.back()}catch(e2){location.href='../?plat='+name}
@@ -129,7 +152,6 @@ var Platform=(function(){
    document.documentElement.style.overscrollBehaviorY='none';
    document.body.style.overscrollBehavior='none';
    document.body.style.overscrollBehaviorY='none';
-   /* предотвращаем pull-to-refresh на самом верху */
    var lastY=0;
    document.addEventListener('touchstart',function(e){
     if(e.touches.length===1)lastY=e.touches[0].clientY;
@@ -138,8 +160,6 @@ var Platform=(function(){
     if(window.scrollY===0&&e.touches.length===1){
      var dy=e.touches[0].clientY-lastY;
      if(dy>0){
-      /* тянем вниз из самого верха — не даём браузеру обновлять страницу */
-      /* но если внутри есть скроллируемый контейнер, он сам обработает */
       var el=e.target;
       var inScroller=false;
       while(el&&el!==document.body){
@@ -220,6 +240,8 @@ var Platform=(function(){
   user:function(){return user||{id:'g0',name:'Гость'}},
   maxClientReal:maxClientReal,
   isMaxExternal:isMaxExternal,
+  maxInContainer:maxInContainer,
+  maxNavMode:function(){return MAX_NAV_MODE},
   backToMessenger:backToMessenger,
   goToHub:goToHub,
   hubBase:hubBase,

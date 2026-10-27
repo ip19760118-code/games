@@ -65,11 +65,11 @@
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.20 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.21 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
   <script>
-    const HUB_VER = '3.20';
+    const HUB_VER = '3.21';
 
     Platform.init({
       bg: '#070b16',
@@ -77,6 +77,11 @@
     });
 
     try { document.getElementById('platTag').textContent = Platform.name; } catch(e) {}
+
+    /* v3.21: отмена сторожевого таймера, если страница реально уходит */
+    window.addEventListener('pagehide', function(){
+      try { if (window.__maxNavTimer) { clearTimeout(window.__maxNavTimer); window.__maxNavTimer = null; } } catch(e) {}
+    });
 
     function trackEvent(name, params){
       params = params || {};
@@ -94,6 +99,8 @@
       } catch (e) {}
     })();
 
+    /* v3.21: MAX — эксперимент container: игры внутри клиента;
+       сторожевой таймер: если веб-вью «проглотил» переход — фолбэк во внешнее окно */
     function openGame(url, gameName) {
       trackEvent('hub_game_click', { game_name: gameName });
       try { Platform.haptic('light'); } catch (e) {}
@@ -103,11 +110,38 @@
       try { abs = new URL(target, location.href).href; } catch (e) {}
 
       if (Platform.name === 'max') {
-        try { Platform.toast('Открываю игру…'); } catch (e) {}
-        try {
-          if (window.WebApp && window.WebApp.openLink) { window.WebApp.openLink(abs); return; }
-        } catch (e) {}
-        try { window.open(abs, '_blank'); return; } catch (e) {}
+        let real = false;
+        try { real = Platform.maxClientReal(); } catch (e) {}
+
+        if (real && Platform.maxNavMode() === 'container') {
+          try { sessionStorage.setItem('max_nav_try', String(Date.now())); } catch (e) {}
+          try { Platform.toast('Открываю игру…'); } catch (e) {}
+          location.href = target;
+          window.__maxNavTimer = setTimeout(function(){
+            window.__maxNavTimer = null;
+            try {
+              if (sessionStorage.getItem('max_nav_try')) {
+                sessionStorage.removeItem('max_nav_try');
+                Platform.toast('MAX не пустил внутрь — открываю в браузере');
+                if (window.WebApp && window.WebApp.openLink) { window.WebApp.openLink(abs); }
+                else { window.open(abs, '_blank'); }
+              }
+            } catch (e) {}
+          }, 3000);
+          return;
+        }
+
+        if (real) {
+          try { Platform.toast('Открываю игру…'); } catch (e) {}
+          try {
+            if (window.WebApp && window.WebApp.openLink) { window.WebApp.openLink(abs); return; }
+          } catch (e) {}
+          try { window.open(abs, '_blank'); return; } catch (e) {}
+          location.href = target;
+          return;
+        }
+
+        /* внешний браузер с plat=max — обычная навигация */
         location.href = target;
         return;
       }
