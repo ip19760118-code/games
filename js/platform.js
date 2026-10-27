@@ -1,9 +1,10 @@
 /* tg-games: единый слой платформ v2.5 — Telegram / VK / MAX / web.
-   v2.5: ЭКСПЕРИМЕНТ MAX_NAV_MODE:
-     'container' — игры открываются ВНУТРИ клиента MAX (навигация в веб-вью);
-     'external'  — старая проверенная схема (игры во внешнем браузере через openLink).
-     Переключение одной строкой ниже. Сторожевой флаг max_nav_try в sessionStorage:
-     если контейнер «проглотил» переход, хаб сам откроет внешнее окно.
+   v2.5: флаг MAX_NAV_MODE:
+     'container' — игры внутри веб-вью клиента MAX (ЭКСПЕРИМЕНТ, НЕ РАБОТАЕТ:
+                   контейнер глушит top-level navigation, окно со спиннером виснет,
+                   JS хаба паузится → watchdog не срабатывает; ретест 2026-10-27);
+     'external'  — РАБОЧАЯ СХЕМА: игры во внешнем браузере через WebApp.openLink.
+     Откат 2026-10-27: значение 'external'.
    v2.4: блокировка pull-to-refresh в MAX/VK; улучшенный close()/goToHub().
    v2.3: честный детект клиента MAX по initData/UA/referrer. */
 var Platform=(function(){
@@ -11,7 +12,7 @@ var Platform=(function(){
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
  var TG_SDK_URL='https://telegram.org/js/telegram-web-app.js';
  var MAX_DEEPLINK='https://max.ru/se14729332_bot';
- var MAX_NAV_MODE='container';   /* ← ЭКСПЕРИМЕНТ: 'container' | 'external' */
+ var MAX_NAV_MODE='external';    /* ← РАБОЧАЯ СХЕМА. 'container' не использовать без анонса от MAX */
  var name='web',user=null,backFn=null,inited=false;
 
  function qs(k){try{return new URLSearchParams(location.search).get(k)||''}catch(e){return ''}}
