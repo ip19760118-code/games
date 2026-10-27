@@ -1,7 +1,10 @@
 # PLATFORM-SPEC — МК «Игровой центр»: кроссплатформенная спецификация и грабли
 
-Версия документа: 1.0 | Статус: TG ✅ / MAX ✅ / VK ✅ / web ✅
-Репозиторий: github.com/ip19760118-code/games (Pages: https://ip19760118-code.github.io/games/)
+**Версия документа: 2.0** | Статус: TG ✅ / MAX ✅ / VK ✅ / web ✅
+Репозиторий: `github.com/ip19760118-code/games`
+Pages: `https://ip19760118-code.github.io/games/`
+
+> **⚠️ Чувствительные данные (API-ключи, токены, Firebase credentials, webhook-секреты) в этом документе НЕ хранятся. Используй env-переменные на Vercel и локальные `.env`.**
 
 ---
 
@@ -9,14 +12,15 @@
 
 | Компонент | Где живёт | Комментарий |
 |---|---|---|
-| Хаб (витрина 15 игр) | GitHub Pages, корень репо `games/` | `index.html` v3.16+ |
+| Хаб (витрина 15 игр) | GitHub Pages, корень репо `games/` | `index.html` **v3.20** |
 | Игры | папки `chess/ … trend-catch/` | каждая мультиплатформенная через `js/platform.js` |
-| Онлайн-комнаты | Firebase RTDB, проект `tg-games-69c06` | ⚠️ НЕ путать с именем репозитория! Не переименовывать |
-| MAX-бот | Vercel проект `tg-games`, Root Dir `max-bot`, вебхук `/max` | Callback: platform-api2.max.ru |
-| VK-бот | Vercel проект `vk-bot`, Root Dir `vk-bot`, вебхук `/vk` | Callback API api.vk.com |
+| Онлайн-комнаты | Firebase RTDB | проект не переименовывать |
+| Единая схема реванша | все 6 онлайн-игр | флаги, round, heartbeat/presence, автостарт |
+| MAX-бот | Vercel проект, Root Dir `max-bot`, вебхук `/max` | Callback: platform-api2.max.ru |
+| VK-бот | Vercel проект, Root Dir `vk-bot`, вебхук `/vk` | Callback API api.vk.com |
 | TG-бот | меню-кнопка «Играть» → hub `?plat=tg` | Web App |
 | Кэш | `sw.js` (service worker) | навигации network-first, статика stale-while-revalidate |
-| Аналитика | GA `G-ZD8QE6XKTR` | событие hub_open/hub_game_click с меткой platform |
+| Аналитика | Google Analytics 4 | событие hub_open/hub_game_click с меткой platform |
 
 Единый слой платформ: `js/platform.js` → глобальный `Platform`
 (init, haptic, share, toast, onBack/fireBack, close, colors, user, name, maxClientReal).
@@ -71,7 +75,7 @@
   В обычном браузере `openLink` — пустышка: сначала проверка `maxClientReal()`,
   затем `window.open`, затем `location.href`.
 - **Грабля кнопки «В меню»:** во внешнем браузере перехватываем клики по элементам со словом
-  «меню» (capture-фаза) → `window.close()` → fallback диплинк `https://max.ru/se14729332_bot`.
+  «меню» (capture-фаза) → `window.close()` → fallback диплинк на бота.
 - Описание бота в портале: **лимит 200 символов**, без списков игр.
 - **Организационная грабля:** у профиля самозанятого раздела «Мини-приложения» в портале нет;
   кнопка «Играть» ожила после обращения в поддержку/волны раскатки. Тикет-шаблон лежит в истории чата разработки.
@@ -86,7 +90,6 @@
 - Отвечать `ok` быстро (<3 c), всю работу ДО ответа.
 - Русские имена событий в UI: «Входящее сообщение» = message_new,
   **«Действие с сообщением» = message_event** (нажатия callback-кнопок!).
-- group_id виден в payload confirmation (у нас 242534673 → owner_id = -242534673).
 
 ### 3.2 Клавиатуры (главный источник 911)
 - Ошибка **912** «This is a chat bot feature» → включить: Управление → «Настройки для бота» →
@@ -133,70 +136,16 @@
 - Service worker `sw.js`: навигации — network-first с кэш-фолбэком; статика — cache-first
   с фоновым обновлением; имя кэша `igrovoj-centr-vN` менять при принудительном сбросе.
   Регистрация из `platform.js` по маске пути `^(.*\/games\/)` только на github.io.
-- Prefetch топовых игр (chess/seabattle/durak) через `<link rel=prefetch>` в простое,
+- Prefetch топовых игр (chess/seabattle/durak/tetris) через `<link rel=prefetch>` в простое,
   пропуск при `navigator.connection.saveData`.
 - Firebase-комнаты работают ТОЛЬКО в first-party контексте: никаких iframe с играми
   внутри мессенджерских веб-вью (см. 2.2).
--window.open может блокироваться popup-блокером → всегда иметь fallback `location.href`.
+- `window.open` может блокироваться popup-блокером → всегда иметь fallback `location.href`.
 
 ---
 
-## 5. Таблица «симптом → причина → лечение»
+## 5. Единая архитектура онлайн-комнат (v2.0)
 
-| Симптом | Причина | Лечение |
-|---|---|---|
-| MAX: сообщения не уходят, тишина в логах | вызовы после res.send (freeze) | всё ДО ответа |
-| MAX: 404/сертификат при вызовах API | УЦ Минцифры | rejectUnauthorized:false |
-| MAX: меню без клавиатуры | адресат не в query | user_id в query-строке |
-| MAX: игра «виснет» из хаба | контейнер глушит location.href | openLink во внешнее окно |
-| MAX: PERMISSION_DENIED комнаты | iframe = third-party storage | убрать iframe |
-| MAX: кнопка «меню» не возвращает | внешний браузер, нет WebApp | перехват клика + window.close/диплинк |
-| VK: 912 | не включены «Возможности ботов» | включить в настройках для бота |
-| VK: 911 too much rows/buttons | лимиты клавиатур | ≤4 рядов, ≤10 кнопок, пагинация |
-| VK: 911 not compatible with colors | color у open_app/open_link | убрать color |
-| VK: спиннер на кнопке | нет sendMessageEventAnswer | отвечать снакбаром/open_app |
-| VK: письма-дубли раз в ~15 мин | ретраи message_event | дедуп по event_id |
-| VK: пропала нижняя клавиатура | сообщение без keyboard | keyboard в каждом send |
-| VK: Rate limit reached (модерация) | лимит попыток подачи | одна попытка в сутки |
-| TG: платформа определилась как tg в VK/MAX | хардкод TG SDK в hub | ленивая загрузка SDK |
+**Применяется во всех 6 онлайн-играх**: Морской бой, Шахматы, Дурак, Домино, Шашки, Нарды.
 
----
-
-## 6. Чек-листы
-
-### Новая игра
-1. Папка игры + кнопка в `index.html` хаба + алиасы в `GAME_MAP` (боты шлют `?game=<alias>`).
-2. Внутри игры: `Platform.init({bg, back})`, звук/вибро только через `Platform.haptic/share`.
-3. Онлайн: Firebase-пути комнат, инвайт через `location.origin+pathname` (никаких хардкодов домена).
-4. GA-события через `trackEvent` (хаб) — платформа подставляется автоматически.
-
-### Новая платформа (бот)
-1. Сервер-вебхук на Vercel (отдельный проект, Root Dir), ответ событию ДО обработки/после — по заморозке платформы.
-2. Реестр: подписка/вебхук + секрет + строка подтверждения.
-3. Клавиатура: постоянная кнопка входа в мини-апп/хаб; лимиты платформы изучить ДО разработки.
-4. Витрина: имя «Игровой центр», описание без числа игр (лимиты!), аватар 🎮, кнопка действия.
-5. `platform.js`: ветка detect/ensureSdk/init/haptic/share/close + мост платформы.
-
-### Деплой/переезд
-1. Rename репо → `git remote set-url`, Pages пересобирается сам, Vercel едет по ID репо.
-2. Env-переменные правим → обязателен Redeploy (сами не применяются).
-3. Кэш SW: поднять версию `CACHE`, если пользователи должны срочно увидеть новое.
-
----
-
-## 7. Справочник конфигурации
-
-| Ключ | Значение |
-|---|---|
-| Hub URL | https://ip19760118-code.github.io/games/ |
-| MAX webhook | https://tg-games-mu.vercel.app/max |
-| VK webhook | https://vk-bot-omega.vercel.app/vk |
-| VK Mini App | id 54850501, диплинк https://vk.com/app54850501 |
-| VK group_id | 242534673 (owner_id = -242534673) |
-| MAX bot | @se14729332_bot |
-| Firebase | tg-games-69c06 (не трогать имя) |
-| Env MAX | MAX_TOKEN, MAX_SECRET |
-| Env VK | VK_TOKEN, VK_SECRET, VK_CONFIRM |
-| GA | G-ZD8QE6XKTR |
-
-Конец документа. Обновлять при каждой новой грабле — цена ошибки уже оплачена.
+### 5.1 Структура комнаты в Firebase RTDB
