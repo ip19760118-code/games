@@ -26,11 +26,8 @@
     h1 { margin: 0 0 6px; font-size: clamp(24px, 7vw, 32px); color: #7cffc4; }
     .hub-subtitle { margin: 0 0 8px; color: #7cffc4; font-size: clamp(13px, 3.6vw, 15px); font-weight: 700; }
     .hub-desc { margin: 0 0 16px; color: #a8b4d8; font-size: clamp(12px, 3.4vw, 14px); line-height: 1.45; }
-
-    /* v3.22: кнопка «Скачать приложение» */
     .download-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px 16px; margin-bottom: 16px; border-radius: 18px; border: 1px solid rgba(124, 255, 196, 0.5); background: linear-gradient(135deg, rgba(124, 255, 196, 0.14), rgba(51, 214, 255, 0.12)); color: #7cffc4; font-size: clamp(14px, 4vw, 16px); font-weight: 700; cursor: pointer; transition: transform 0.08s ease, background 0.15s ease; font-family: inherit; }
     .download-btn:active { transform: scale(0.98); background: linear-gradient(135deg, rgba(124, 255, 196, 0.24), rgba(51, 214, 255, 0.22)); }
-
     .game-btn { width: 100%; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; background: rgba(255, 255, 255, 0.06); color: #eaf0ff; padding: 12px; margin-bottom: 10px; cursor: pointer; text-align: left; transition: transform 0.08s ease, background 0.15s ease; font-family: inherit; font-size: inherit; touch-action: manipulation; min-width: 0; }
     .game-btn:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.10); }
     .game-btn.disabled { opacity: 0.45; cursor: default; }
@@ -42,8 +39,6 @@
     .hub-ver { margin: 6px 0 0; color: #4d5670; font-size: 10px; font-family: monospace; letter-spacing: 1px; }
     .hub-ver .plat { color: #7cffc4; font-weight: 700; }
     .tag-online { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 10px; background: rgba(124, 255, 196, 0.15); border: 1px solid rgba(124, 255, 196, 0.4); color: #7cffc4; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; vertical-align: middle; }
-
-    /* v3.22: оверлей скачивания */
     .dl-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 16px; }
     .dl-overlay.show { display: flex; }
     .dl-card { background: #1b2228; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 24px; padding: 22px; max-width: 420px; width: 100%; text-align: center; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); color: #eaf0ff; }
@@ -55,7 +50,7 @@
     .dl-opt .txt { flex: 1; min-width: 0; }
     .dl-opt .txt b { display: block; font-size: 15px; margin-bottom: 2px; }
     .dl-opt .txt small { display: block; font-size: 12px; color: #8a94a6; }
-    .dl-share { margin-top: 12px; padding: 12px; border-radius: 16px; border: 1px dashed rgba(124, 255, 196, 0.3); background: transparent; color: #a8b4d8; cursor: pointer; font-family: inherit; width: 100%; font-size: 13px; transition: color 0.15s ease, border-color 0.15s ease; }
+    .dl-share { margin-top: 10px; padding: 12px; border-radius: 16px; border: 1px dashed rgba(124, 255, 196, 0.3); background: transparent; color: #a8b4d8; cursor: pointer; font-family: inherit; width: 100%; font-size: 13px; transition: color 0.15s ease, border-color 0.15s ease; }
     .dl-share:active { color: #7cffc4; border-color: rgba(124, 255, 196, 0.6); }
     .dl-close { position: absolute; top: 12px; right: 12px; background: rgba(255, 255, 255, 0.08); border: none; color: #eaf0ff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center; }
   </style>
@@ -66,7 +61,6 @@
       <h1>🎮 Игровой центр</h1>
       <p class="hub-subtitle">Мини-игры в Telegram, VK и MAX</p>
 
-      <!-- v3.22: кнопка скачивания в самом верху, перед описанием -->
       <button class="download-btn" id="downloadBtn">📥 Скачать приложение</button>
 
       <p class="hub-desc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. Работает в трёх мессенджерах, в браузере и в десктоп‑приложении для Windows: без установки лишних SDK, нажми и играй. Новые игры добавляются регулярно.</p>
@@ -90,32 +84,34 @@
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.22 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.23 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
-  <!-- v3.22: оверлей скачивания -->
   <div class="dl-overlay" id="dlOverlay">
     <div class="dl-card">
       <button class="dl-close" id="dlClose" aria-label="Закрыть">×</button>
       <h2>📥 Скачать приложение</h2>
       <button class="dl-opt" id="dlWin">
         <span class="emoji">🪟</span>
-        <span class="txt"><b>Windows (ПК)</b><small>Установщик .exe — игры + офлайн + автообновление контента</small></span>
+        <span class="txt"><b>Windows (ПК)</b><small>Прямое скачивание установщика .exe (~100 МБ)</small></span>
       </button>
       <button class="dl-opt disabled" disabled>
         <span class="emoji">🤖</span>
         <span class="txt"><b>Android</b><small>Скоро — в разработке</small></span>
       </button>
-      <button class="dl-share" id="dlShare">📤 Отправить ссылку другу (почта, мессенджер, SMS)</button>
+      <button class="dl-share" id="dlShare">📤 Отправить ссылку на скачивание другу</button>
+      <button class="dl-share" id="dlReleasePage">📄 Страница релиза: описание и история версий</button>
     </div>
   </div>
 
   <script>
-    const HUB_VER = '3.22';
-    /* v3.22: ссылки на релиз и установщик (обновлять при новой версии exe) */
-    const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
+    const HUB_VER = '3.23';
+    /* v3.23: прямая ссылка ассета = мгновенное «Сохранить как…»;
+       страница релиза = только для чтения описания/истории и будущего APK.
+       При новом релизе меняй тег и имя файла в WIN_EXE_URL. */
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/download/v0.1.0/IgrovojCentr-Setup-0.1.0.exe';
+    const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
 
     Platform.init({
       bg: '#070b16',
@@ -213,13 +209,35 @@
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
-    /* ---------- v3.22: оверлей скачивания ---------- */
+    /* ---------- v3.23: оверлей скачивания ---------- */
     (function(){
       const ov = document.getElementById('dlOverlay');
       const closeBtn = document.getElementById('dlClose');
       const winBtn = document.getElementById('dlWin');
       const shareBtn = document.getElementById('dlShare');
+      const releaseBtn = document.getElementById('dlReleasePage');
       const mainBtn = document.getElementById('downloadBtn');
+
+      /* прямое скачивание exe: браузер показывает «Сохранить как…», хаб остаётся открытым */
+      function startExeDownload(){
+        trackEvent('hub_download_win', {});
+        try { Platform.haptic('light'); } catch(e){}
+        if (Platform.name === 'pc') {
+          try { if (window.AppBridge && window.AppBridge.openExternal) { window.AppBridge.openExternal(WIN_EXE_URL); return; } } catch(e){}
+        }
+        try {
+          const a = document.createElement('a');
+          a.href = WIN_EXE_URL;
+          a.rel = 'noopener';
+          a.setAttribute('download', '');
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          try { Platform.toast('Загрузка установщика началась — проверь загрузки браузера'); } catch(e){}
+        } catch(e){
+          location.href = WIN_EXE_URL;
+        }
+      }
 
       mainBtn.addEventListener('click', function(){
         trackEvent('hub_download_open', {});
@@ -229,29 +247,26 @@
       closeBtn.addEventListener('click', function(){ ov.classList.remove('show'); });
       ov.addEventListener('click', function(ev){ if (ev.target === ov) ov.classList.remove('show'); });
 
-      winBtn.addEventListener('click', function(){
-        trackEvent('hub_download_win', {});
-        try { Platform.haptic('light'); } catch(e){}
-        /* на ПК — скачиваем напрямую; на остальных платформах — открываем страницу релиза (там exe и будущий APK) */
-        if (Platform.name === 'pc') {
-          try { if (window.AppBridge && window.AppBridge.openExternal) { window.AppBridge.openExternal(WIN_EXE_URL); return; } } catch(e){}
-          window.open(WIN_EXE_URL, '_blank');
-        } else {
-          try { if (window.AppBridge && window.AppBridge.openExternal) { window.AppBridge.openExternal(RELEASE_URL); return; } } catch(e){}
-          window.open(RELEASE_URL, '_blank');
-        }
-      });
+      winBtn.addEventListener('click', startExeDownload);
 
       shareBtn.addEventListener('click', function(){
         trackEvent('hub_download_share', {});
-        const shareText = '📥 Игровой центр — мини-игры офлайн и онлайн. Скачай приложение для ПК или открой в Telegram / VK / MAX:\n';
         try { Platform.haptic('light'); } catch(e){}
+        const shareText = '📥 Игровой центр — мини-игры офлайн и онлайн для Windows. Скачай установщик:\n';
         try {
-          Platform.share(RELEASE_URL, shareText, {
+          Platform.share(WIN_EXE_URL, shareText, {
             title: 'Игровой центр — скачать приложение',
             copiedToast: 'Ссылка на скачивание скопирована'
           });
         } catch(e){}
+      });
+
+      releaseBtn.addEventListener('click', function(){
+        trackEvent('hub_download_release_page', {});
+        if (Platform.name === 'pc') {
+          try { if (window.AppBridge && window.AppBridge.openExternal) { window.AppBridge.openExternal(RELEASE_URL); return; } } catch(e){}
+        }
+        window.open(RELEASE_URL, '_blank');
       });
     })();
 
