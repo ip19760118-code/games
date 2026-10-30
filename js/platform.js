@@ -1,14 +1,14 @@
-/* tg-games: единый слой платформ v2.6 — Telegram / VK / MAX / web / PC(Electron).
-   v2.6: ветка 'pc': детект по window.AppBridge, Back/Esc через мост,
-   hubBase() для app://, close()->quit, canonicalUrl() для универсальных инвайтов.
-   v2.5: флаг MAX_NAV_MODE ('external' — продакшен).
-   v2.4: блокировка pull-to-refresh; улучшенный close()/goToHub(). */
+/* tg-games: единый слой платформ v2.7 — Telegram / VK / MAX / web / PC(Electron).
+   v2.7: pc-ветка: тосты из оболочки (AppBridge.onToast) + предупреждения обновлений
+   («Обновите приложение» / «Обновите игру…», 3 с, 1 раз за сессию).
+   v2.6: ветка 'pc': детект по window.AppBridge, Esc/back, app:// hubBase, canonicalUrl.
+   v2.5: флаг MAX_NAV_MODE ('external' — продакшен). */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
  var TG_SDK_URL='https://telegram.org/js/telegram-web-app.js';
  var MAX_DEEPLINK='https://max.ru/se14729332_bot';
- var MAX_NAV_MODE='external';    /* 'container' не использовать без анонса от MAX */
+ var MAX_NAV_MODE='external';
  var CANONICAL_ORIGIN='https://ip19760118-code.github.io/games';
  var name='web',user=null,backFn=null,inited=false;
 
@@ -23,7 +23,6 @@ var Platform=(function(){
   return 'web'}
  name=detect();
 
- /* ---------- service worker (только github.io) ---------- */
  (function(){
   try{
    if(!('serviceWorker' in navigator))return;
@@ -35,7 +34,6 @@ var Platform=(function(){
   }catch(e){}
  })();
 
- /* ---------- сторожевой флаг навигации MAX ---------- */
  (function(){
   try{
    if(name==='max'){
@@ -72,7 +70,6 @@ var Platform=(function(){
     }catch(e){}}
   if(!user)user={id:'g'+Math.floor(Math.random()*1e9),name:'Гость'}}
 
- /* ---------- canonical URL для универсальных инвайтов ---------- */
  function canonicalUrl(){
   try{
    if(name==='pc'){
@@ -139,6 +136,39 @@ var Platform=(function(){
   }catch(e){}
  }, true);
 
+ var toastEl=null,toastT=null;
+ function platToast(msg,ms){
+  if(!toastEl){toastEl=document.createElement('div');toastEl.id='platToast';
+   toastEl.style.cssText='position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(30,150,90,.95);color:#fff;font-weight:800;font-size:12px;padding:9px 18px;border-radius:24px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .25s;max-width:90vw;text-align:center;font-family:system-ui,sans-serif';
+   document.body.appendChild(toastEl)}
+  toastEl.textContent=msg;toastEl.style.opacity='1';
+  if(toastT)clearTimeout(toastT);
+  toastT=setTimeout(function(){toastEl.style.opacity='0'},ms||2600)}
+ function copyText(t){try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t);return true}}catch(e){}return false}
+
+ /* v2.7: предупреждения обновлений для pc (1 раз за сессию, 3 с) */
+ function showPcUpdateWarnings(){
+  try{
+   if(name!=='pc'||!window.AppBridge||!AppBridge.getUpdateWarnings)return;
+   if(sessionStorage.getItem('pc_upd_warn_shown'))return;
+   AppBridge.getUpdateWarnings().then(function(list){
+    if(!list||!list.length)return;
+    sessionStorage.setItem('pc_upd_warn_shown','1');
+    var parts=(location.pathname||'').split('/').filter(Boolean);
+    var isHub=(parts.length===1&&parts[0]==='index.html')||parts.length===0;
+    var gameId=parts.length>1?parts[0]:null;
+    for(var i=0;i<list.length;i++){
+     var w=list[i];
+     if(w.type==='hub'&&isHub){platToast('Обновите приложение',3000);return;}
+     if(w.type==='game'&&gameId===w.id){
+      platToast(w.online?'Обновите игру до новой версии, без обновления онлайн версия игры может не работать':'Обновите игру до новой версии',3000);
+      return;
+     }
+    }
+   }).catch(function(){});
+  }catch(e){}
+ }
+
  function init(o){o=o||{};if(inited)return;inited=true;
 
   try{
@@ -168,6 +198,8 @@ var Platform=(function(){
    try{
     if(name==='pc'){
      if(o.back){backFn=o.back;try{window.AppBridge.onBack(o.back)}catch(e){}}
+     try{window.AppBridge.onToast&&window.AppBridge.onToast(function(m){platToast(m,3000)});}catch(e){}
+     showPcUpdateWarnings();
     }
     else if(name==='tg'){var t=Telegram.WebApp;t.ready();t.expand();
      if(t.setHeaderColor&&o.bg)t.setHeaderColor(o.bg);
@@ -192,16 +224,6 @@ var Platform=(function(){
       try{ if(window.WebApp.BackButton){window.WebApp.BackButton.show();window.WebApp.BackButton.onClick(o.back)} }catch(e){}}}
     else if(o.back)backFn=o.back;
    }catch(e){}})}
-
- var toastEl=null,toastT=null;
- function platToast(msg){
-  if(!toastEl){toastEl=document.createElement('div');toastEl.id='platToast';
-   toastEl.style.cssText='position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(30,150,90,.95);color:#fff;font-weight:800;font-size:12px;padding:9px 18px;border-radius:24px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .25s;max-width:90vw;text-align:center;font-family:system-ui,sans-serif';
-   document.body.appendChild(toastEl)}
-  toastEl.textContent=msg;toastEl.style.opacity='1';
-  if(toastT)clearTimeout(toastT);
-  toastT=setTimeout(function(){toastEl.style.opacity='0'},2600)}
- function copyText(t){try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t);return true}}catch(e){}return false}
 
  function share(url,text,opts){
   opts=opts||{};
@@ -236,7 +258,7 @@ var Platform=(function(){
   goToHub:goToHub,
   hubBase:hubBase,
   haptic:function(t){
-   if(name==='pc')return; /* на ПК вибро нет — noop */
+   if(name==='pc')return;
    try{
    if(name==='tg'&&window.Telegram&&Telegram.WebApp.HapticFeedback){var h=Telegram.WebApp.HapticFeedback;
     if(t==='success')h.notificationOccurred('success');else if(t==='error')h.notificationOccurred('error');else if(t==='warning')h.notificationOccurred('warning');else h.impactOccurred(t==='heavy'?'heavy':(t==='medium'?'medium':'light'));return}

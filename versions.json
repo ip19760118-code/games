@@ -1,0 +1,357 @@
+{
+ "generatedAt": "2026-10-30T12:08:41.272Z",
+ "baseUrl": "https://ip19760118-code.github.io/games",
+ "hub": {
+  "version": "3.21",
+  "files": [
+   {
+    "path": "index.html",
+    "sha256": "40d5bd71e64977b58487c042788e9d4a906fe39a164e0cec398ab8e869e69415",
+    "size": 15622
+   },
+   {
+    "path": "js/platform.js",
+    "sha256": "3069d10110942e754ba6f92a02cec11412b23473980003a2493e71917efc529f",
+    "size": 14792
+   },
+   {
+    "path": "js/snd.js",
+    "sha256": "2bd12f43edae2b94503f2c38555aaa8842eae325177a387c8e6fcc6c13a80b63",
+    "size": 3334
+   },
+   {
+    "path": "sw.js",
+    "sha256": "c6bb2142ebe818e6346cbd1a27e8dd0721009bd3e88bb07f14e1655241344d74",
+    "size": 2048
+   }
+  ]
+ },
+ "games": {
+  "chess": {
+   "version": "2.8",
+   "online": true,
+   "files": [
+    {
+     "path": "chess/index.html",
+     "sha256": "ba6ee954f49c94b3d034838c487cf166563274deabda267a8a3e8876d1009984",
+     "size": 51299
+    }
+   ]
+  },
+  "seabattle": {
+   "version": "4.28",
+   "online": true,
+   "files": [
+    {
+     "path": "seabattle/img/boom.png",
+     "sha256": "1b20fdec85b7c3fa2c6e3b09bb2691f8f2f84991cadcc742819f2b2ec10089ac",
+     "size": 224343
+    },
+    {
+     "path": "seabattle/img/cross_blue.png",
+     "sha256": "091b8711f9c4448c7477334f3cb1bddc6d23a4b1d8ffc0f1b189727202459971",
+     "size": 41694
+    },
+    {
+     "path": "seabattle/img/hit.png",
+     "sha256": "909421babfbae8587407f5ad5a5149c1fe6aa13b68bccef4df756247ba3bb4cc",
+     "size": 41012
+    },
+    {
+     "path": "seabattle/img/miss.png",
+     "sha256": "f3d436ed75eaa936bf5311ec1b85de33b727269edf22008f2e625b051e4f7407",
+     "size": 39316
+    },
+    {
+     "path": "seabattle/img/paper.png",
+     "sha256": "c1a3e6116197b6ca1cf058be2a0ce43ff238bd7e9a93889ecb6d8ff327fc0ac0",
+     "size": 819631
+    },
+    {
+     "path": "seabattle/img/ship1.png",
+     "sha256": "03da1c90f7e10b435be23ade16b3c3017e0f323cb6bbe7b2a754c0cd20d22921",
+     "size": 51982
+    },
+    {
+     "path": "seabattle/img/ship2.png",
+     "sha256": "ce9dc992a56f65a6202886f25766aad4d72cd2e5dfc8fd861f91199bd49c4192",
+     "size": 94921
+    },
+    {
+     "path": "seabattle/img/ship3.png",
+     "sha256": "b6af5b1f8dd78c0b3c070a1106613d5e27f6997b6ac13f74de7b3e76e50b5887",
+     "size": 163700
+    },
+    {
+     "path": "seabattle/img/ship4.png",
+     "sha256": "9bb5ee3350242289351b6962d9527aeef3bc361c90db9475e3ef62aea54821af",
+     "size": 178126
+    },
+    {
+     "path": "seabattle/index.html",
+     "sha256": "0c9e9f1bb437bee9c019da41c350279bd383e45ff9f3ef3c257aa138017fa6bd",
+     "size": 54896
+    }
+   ]
+  },
+  "durak": {
+   "version": "3.8",
+   "online": true,
+   "files": [
+    {
+     "path": "durak/index.html",
+     "sha256": "76fe1552abb96d56be3b5e65293d397c2a67bce825ff51a51182d9101bdbc4aa",
+     "size": 73301
+    }
+   ]
+  },
+  "domino": {
+   "version": "2.3",
+   "online": true,
+   "files": [
+    {
+     "path": "domino/index.html",
+     "sha256": "6ac9d3fcc1c2ccbf07df2042270e5853902d261e76766076bc8b5c7621166795",
+     "size": 77004
+    }
+   ]
+  },
+  "shashki": {
+   "version": "1.7",
+   "online": true,
+   "files": [
+    {
+     "path": "shashki/index.html",
+     "sha256": "7ecb77dba1589d629ce0ff0b7046ab793f903bc6e3fc5e84eaa3acbb9e028cf5",
+     "size": 53426
+    }
+   ]
+  },
+  "nardy": {
+   "version": "2.4",
+   "online": true,
+   "files": [
+    {
+     "path": "nardy/index.html",
+     "sha256": "7faf8ac16017bc27a4b630cf6694a1d1dffcd903a1e98a4d071ba48a4bc4f8f8",
+     "size": 53916
+    }
+   ]
+  },
+  "tetris": {
+   "version": "1.2",
+   "online": false,
+   "files": [
+    {
+     "path": "tetris/index.html",
+     "sha256": "0f91254408c4451356d7bc44ce59e66a5bdb3abc398d9217a29d660c5980f8f5",
+     "size": 32026
+    }
+   ]
+  },
+  "minesweeper": {
+   "version": "1.6",
+   "online": false,
+   "files": [
+    {
+     "path": "minesweeper/index.html",
+     "sha256": "173e23607be4ac38e4ee94db45e52adab0cd73852951f8fc55ae0cd5e5e751c5",
+     "size": 21687
+    }
+   ]
+  },
+  "crystals": {
+   "version": "4.16",
+   "online": false,
+   "files": [
+    {
+     "path": "crystals/img/arrow_h.png",
+     "sha256": "d9060552834befb479b87b253eb54917e927aa37e241bfc5460129172c02b025",
+     "size": 7999
+    },
+    {
+     "path": "crystals/img/arrow_v.png",
+     "sha256": "d0bb9f466b2469dfbc8ad395692a12fad4f660c31175d84abd668bf39709cc7f",
+     "size": 18758
+    },
+    {
+     "path": "crystals/img/basket0.png",
+     "sha256": "f25b948a62411adced2a2ca71c12b2e85bf3c0df418743e680e3d6ca6fa8f7ec",
+     "size": 87324
+    },
+    {
+     "path": "crystals/img/basket1.png",
+     "sha256": "f247540721b22f567ec1e18d67207edc424749cf1781478bc7592ca0a28a7b54",
+     "size": 87937
+    },
+    {
+     "path": "crystals/img/basket2.png",
+     "sha256": "4f3ff44c15ddbcd8d6f15443ae7c110949851670ba99ec87d60aba25eb914162",
+     "size": 93263
+    },
+    {
+     "path": "crystals/img/basket3.png",
+     "sha256": "469663a3769e12419ae48de511bdcaacd19f5598c0ec0c059de9ec3d7931c667",
+     "size": 104080
+    },
+    {
+     "path": "crystals/img/basket4.png",
+     "sha256": "98b84ee18217882d53ae8c48991d55166ed76236668db3468ef657d7e5bd7d3b",
+     "size": 76550
+    },
+    {
+     "path": "crystals/img/basket5.png",
+     "sha256": "46c25e6f28ff69567f8dfc66d7802957a5cb92ad46658b33a8770ead20a868f5",
+     "size": 82490
+    },
+    {
+     "path": "crystals/img/basket6.png",
+     "sha256": "2ed9cf80d51d475f62f680e2e2d106d7fc0392e385b8f32adcd7b34dc35e4295",
+     "size": 91030
+    },
+    {
+     "path": "crystals/img/cat.png",
+     "sha256": "74a15991e696b6d1677a6db5d4b624df764d89ca777a4b1b8f35488af7dd6c76",
+     "size": 70751
+    },
+    {
+     "path": "crystals/img/cat_black.png",
+     "sha256": "77642a42096cdf1b89a61ddcd1148af563966a1d3679b12c337182014a3468b3",
+     "size": 70951
+    },
+    {
+     "path": "crystals/img/cat_white.png",
+     "sha256": "2814b76a2d04ad4504b2ee489813419cfe0e3f16eb654ff50424e15a57437c35",
+     "size": 80429
+    },
+    {
+     "path": "crystals/img/gem0.png",
+     "sha256": "b113429b5a9ad2a9b27bd7e63d461b9b4341694635f47e35c665725504a032c4",
+     "size": 55605
+    },
+    {
+     "path": "crystals/img/gem1.png",
+     "sha256": "fcbc73ccd3467796ff63040cdbe7aa8122787d48f23a9f73a38e1bff9d89452d",
+     "size": 39693
+    },
+    {
+     "path": "crystals/img/gem2.png",
+     "sha256": "a4235dd6c06ec5171b7e89e4afe2f0cfb4865d46a87ea020f6a57fa1b670660f",
+     "size": 93913
+    },
+    {
+     "path": "crystals/img/gem3.png",
+     "sha256": "bce3415b1434f2124830d716fce32600a3ebfc74a7390617d88a426e44054d3d",
+     "size": 118812
+    },
+    {
+     "path": "crystals/img/gem4.png",
+     "sha256": "98e923bb131f46a475801573865d1f642287d63f692ee9d965e5690828da5f18",
+     "size": 87728
+    },
+    {
+     "path": "crystals/img/gem5.png",
+     "sha256": "28687ae2c9ee41db1ca60f010c3bf2de67c27f615ac29e909ad83839f6cf6a25",
+     "size": 77954
+    },
+    {
+     "path": "crystals/img/gem6.png",
+     "sha256": "b093a8fe7bb4b93049f43d2acab8f01091253e6c15abaeeb2ef658ebd1395faf",
+     "size": 82328
+    },
+    {
+     "path": "crystals/img/spec_bomb.png",
+     "sha256": "a23e04899ff6157082a47cccafe58377d7daaa5485ca42eb274eeea8edffe815",
+     "size": 64155
+    },
+    {
+     "path": "crystals/img/spec_rainbow.png",
+     "sha256": "29c42ac7fba07b022562d32628b630a9a6227ff40b27653514d96a6fde62878a",
+     "size": 74924
+    },
+    {
+     "path": "crystals/index.html",
+     "sha256": "fa1e50d955b3d942a77cc4892bc37ea6a1484dac94aedc42c9c9c4b0e1f45932",
+     "size": 65588
+    }
+   ]
+  },
+  "solitaire": {
+   "version": "2.2",
+   "online": false,
+   "files": [
+    {
+     "path": "solitaire/index.html",
+     "sha256": "388bf23abe312613ee6df71015dd36bdffbb3de9ca7d8ea9bb3354d49497bfe3",
+     "size": 39716
+    }
+   ]
+  },
+  "mahjong": {
+   "version": "2.2",
+   "online": false,
+   "files": [
+    {
+     "path": "mahjong/index.html",
+     "sha256": "718286e9f39f18b3cbb7fca28a67da502a6a0dc294e16c35d06f0047bea47e12",
+     "size": 28815
+    }
+   ]
+  },
+  "arkanoid": {
+   "version": "0",
+   "online": false,
+   "files": [
+    {
+     "path": "arkanoid/index.html",
+     "sha256": "13ef57031e3d29ab933752168f1738fbc3a50f0f9b1b11b92225eabe390de4ce",
+     "size": 47795
+    }
+   ]
+  },
+  "shooter": {
+   "version": "1.1",
+   "online": false,
+   "files": [
+    {
+     "path": "shooter/index.html",
+     "sha256": "fd7b73398640dc35b9ad2de17c584a27d846fe603cdc5852ece07f812a5d5b5c",
+     "size": 56014
+    }
+   ]
+  },
+  "fruit-samurai": {
+   "version": "0",
+   "online": false,
+   "files": [
+    {
+     "path": "fruit-samurai/index.html",
+     "sha256": "0ae0382d87b46ecd9c7d5d6a9d613fd862c44cb902f56ceec895cd0a8effb1f1",
+     "size": 40769
+    }
+   ]
+  },
+  "lights-out": {
+   "version": "2.1",
+   "online": false,
+   "files": [
+    {
+     "path": "lights-out/index.html",
+     "sha256": "374872678cf4f6eacc017716bc163acea9b065d1ec2039e3f61cd7000861f616",
+     "size": 23017
+    }
+   ]
+  },
+  "trend-catch": {
+   "version": "1.1",
+   "online": false,
+   "files": [
+    {
+     "path": "trend-catch/index.html",
+     "sha256": "ec17d08ccb46233318007a12d09ab48885ef5c424a6b6709c75ff26a4c3fc748",
+     "size": 39310
+    }
+   ]
+  }
+ }
+}
