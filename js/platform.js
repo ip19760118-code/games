@@ -1,31 +1,29 @@
-/* tg-games: единый слой платформ v2.5 — Telegram / VK / MAX / web.
-   v2.5: флаг MAX_NAV_MODE:
-     'container' — игры внутри веб-вью клиента MAX (ЭКСПЕРИМЕНТ, НЕ РАБОТАЕТ:
-                   контейнер глушит top-level navigation, окно со спиннером виснет,
-                   JS хаба паузится → watchdog не срабатывает; ретест 2026-10-27);
-     'external'  — РАБОЧАЯ СХЕМА: игры во внешнем браузере через WebApp.openLink.
-     Откат 2026-10-27: значение 'external'.
-   v2.4: блокировка pull-to-refresh в MAX/VK; улучшенный close()/goToHub().
-   v2.3: честный детект клиента MAX по initData/UA/referrer. */
+/* tg-games: единый слой платформ v2.6 — Telegram / VK / MAX / web / PC(Electron).
+   v2.6: ветка 'pc': детект по window.AppBridge, Back/Esc через мост,
+   hubBase() для app://, close()->quit, canonicalUrl() для универсальных инвайтов.
+   v2.5: флаг MAX_NAV_MODE ('external' — продакшен).
+   v2.4: блокировка pull-to-refresh; улучшенный close()/goToHub(). */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
  var TG_SDK_URL='https://telegram.org/js/telegram-web-app.js';
  var MAX_DEEPLINK='https://max.ru/se14729332_bot';
- var MAX_NAV_MODE='external';    /* ← РАБОЧАЯ СХЕМА. 'container' не использовать без анонса от MAX */
+ var MAX_NAV_MODE='external';    /* 'container' не использовать без анонса от MAX */
+ var CANONICAL_ORIGIN='https://ip19760118-code.github.io/games';
  var name='web',user=null,backFn=null,inited=false;
 
  function qs(k){try{return new URLSearchParams(location.search).get(k)||''}catch(e){return ''}}
  function load(src){return new Promise(function(res){var s=document.createElement('script');s.src=src;s.onload=function(){res(true)};s.onerror=function(){res(false)};document.head.appendChild(s)})}
  function detect(){var p=(qs('plat')||'').toLowerCase();
-  if(p==='tg'||p==='vk'||p==='max')return p;
+  if(p==='tg'||p==='vk'||p==='max'||p==='pc')return p;
+  if(window.AppBridge&&window.AppBridge.platform==='pc')return 'pc';
   if(window.Telegram&&window.Telegram.WebApp)return 'tg';
   if(window.vkBridge)return 'vk';
   if(window.WebApp&&window.WebApp.version)return 'max';
   return 'web'}
  name=detect();
 
- /* ---------- service worker (кэш игр на github.io) ---------- */
+ /* ---------- service worker (только github.io) ---------- */
  (function(){
   try{
    if(!('serviceWorker' in navigator))return;
@@ -37,33 +35,23 @@ var Platform=(function(){
   }catch(e){}
  })();
 
- /* ---------- v2.5: сброс сторожевого флага навигации MAX ---------- */
+ /* ---------- сторожевой флаг навигации MAX ---------- */
  (function(){
   try{
    if(name==='max'){
     sessionStorage.removeItem('max_nav_try');
-    window.addEventListener('pagehide',function(){
-     try{sessionStorage.removeItem('max_nav_try')}catch(e){}
-    });
+    window.addEventListener('pagehide',function(){try{sessionStorage.removeItem('max_nav_try')}catch(e){}});
    }
   }catch(e){}
  })();
 
- /* ---------- v2.3: настоящий ли клиент MAX? ---------- */
  function maxClientReal(){
-  try{
-   if(window.WebApp&&window.WebApp.initData&&String(window.WebApp.initData).length>10)return true;
-  }catch(e){}
-  try{
-   if(/MaxApp|MAX\/|ru\.max/i.test(navigator.userAgent||''))return true;
-  }catch(e){}
-  try{
-   if((document.referrer||'').indexOf('max.ru')>=0)return true;
-  }catch(e){}
+  try{ if(window.WebApp&&window.WebApp.initData&&String(window.WebApp.initData).length>10)return true; }catch(e){}
+  try{ if(/MaxApp|MAX\/|ru\.max/i.test(navigator.userAgent||''))return true; }catch(e){}
+  try{ if((document.referrer||'').indexOf('max.ru')>=0)return true; }catch(e){}
   return false;
  }
  function isMaxExternal(){ return name==='max' && !maxClientReal(); }
- function maxInContainer(){ return name==='max' && maxClientReal() && MAX_NAV_MODE==='container'; }
 
  function ensureSdk(cb){
   if(name==='tg'&&!window.Telegram)load(TG_SDK_URL).then(cb);
@@ -72,6 +60,8 @@ var Platform=(function(){
   else cb(true)}
 
  function pickUser(){
+  try{
+   if(name==='pc'&&window.AppBridge&&AppBridge.getProfile){AppBridge.getProfile().then(function(p){if(p&&p.name)user={id:'pc',name:p.name};}).catch(function(){});return}}catch(e){}
   try{
    if(name==='tg'&&window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initDataUnsafe&&Telegram.WebApp.initDataUnsafe.user){
     var u=Telegram.WebApp.initDataUnsafe.user;user={id:'tg'+u.id,name:u.first_name||'Игрок'};return}}catch(e){}
@@ -82,9 +72,23 @@ var Platform=(function(){
     }catch(e){}}
   if(!user)user={id:'g'+Math.floor(Math.random()*1e9),name:'Гость'}}
 
- /* ---------- v2.5: возврат в хаб ---------- */
+ /* ---------- canonical URL для универсальных инвайтов ---------- */
+ function canonicalUrl(){
+  try{
+   if(name==='pc'){
+    var p=location.pathname||'/';
+    if(p.slice(-10)==='index.html')p=p.slice(0,p.length-10);
+    if(p.charAt(p.length-1)!=='/')p+='/';
+    if(p==='/')return CANONICAL_ORIGIN+'/';
+    return CANONICAL_ORIGIN+p;
+   }
+   return location.origin+location.pathname;
+  }catch(e){return location.href}
+ }
+
  function hubBase(){
   try{
+   if(location.protocol==='app:')return location.origin+'/';
    var p=location.pathname;
    var i=p.indexOf('/games/');
    if(i>=0)return location.origin+p.substring(0,i+7);
@@ -102,8 +106,7 @@ var Platform=(function(){
     if(MAX_NAV_MODE==='container'){
      var u=hubBase()+'?plat=max';
      try{
-      var cur=new URL(location.href);
-      var tgt=new URL(u);
+      var cur=new URL(location.href);var tgt=new URL(u);
       if(cur.pathname!==tgt.pathname){location.href=u;return}
      }catch(e){location.href=u;return}
      return;
@@ -120,18 +123,11 @@ var Platform=(function(){
   }
  }
 
- /* ---------- возврат в MAX из внешнего браузера ---------- */
  function backToMessenger(){
   try{ platToast('Возвращаем в MAX…'); }catch(e){}
   try{ window.close(); }catch(e){}
-  setTimeout(function(){
-   try{
-    if(document.hidden)return;
-    location.href=MAX_DEEPLINK;
-   }catch(e){}
-  },400);
+  setTimeout(function(){ try{ if(document.hidden)return; location.href=MAX_DEEPLINK; }catch(e){} },400);
  }
- /* перехват кликов по кнопкам/ссылкам со словом "меню" во внешнем MAX-браузере */
  document.addEventListener('click', function(ev){
   try{
    if(!isMaxExternal())return;
@@ -139,30 +135,24 @@ var Platform=(function(){
    if(!el)return;
    var txt=(el.textContent||'');
    if(txt.indexOf('меню')<0&&txt.indexOf('Меню')<0)return;
-   ev.preventDefault();
-   ev.stopPropagation();
-   backToMessenger();
+   ev.preventDefault();ev.stopPropagation();backToMessenger();
   }catch(e){}
  }, true);
 
  function init(o){o=o||{};if(inited)return;inited=true;
 
-  /* ---------- v2.4: блокируем pull-to-refresh и overscroll в MAX/VK/web ---------- */
   try{
    document.documentElement.style.overscrollBehavior='none';
    document.documentElement.style.overscrollBehaviorY='none';
    document.body.style.overscrollBehavior='none';
    document.body.style.overscrollBehaviorY='none';
    var lastY=0;
-   document.addEventListener('touchstart',function(e){
-    if(e.touches.length===1)lastY=e.touches[0].clientY;
-   },{passive:true});
+   document.addEventListener('touchstart',function(e){if(e.touches.length===1)lastY=e.touches[0].clientY;},{passive:true});
    document.addEventListener('touchmove',function(e){
     if(window.scrollY===0&&e.touches.length===1){
      var dy=e.touches[0].clientY-lastY;
      if(dy>0){
-      var el=e.target;
-      var inScroller=false;
+      var el=e.target;var inScroller=false;
       while(el&&el!==document.body){
        var os=getComputedStyle(el).overflowY;
        if((os==='auto'||os==='scroll')&&el.scrollTop>0){inScroller=true;break}
@@ -176,7 +166,10 @@ var Platform=(function(){
 
   ensureSdk(function(){pickUser();
    try{
-    if(name==='tg'){var t=Telegram.WebApp;t.ready();t.expand();
+    if(name==='pc'){
+     if(o.back){backFn=o.back;try{window.AppBridge.onBack(o.back)}catch(e){}}
+    }
+    else if(name==='tg'){var t=Telegram.WebApp;t.ready();t.expand();
      if(t.setHeaderColor&&o.bg)t.setHeaderColor(o.bg);
      if(t.setBackgroundColor&&o.bg)t.setBackgroundColor(o.bg);
      if(t.disableVerticalSwipes)t.disableVerticalSwipes();
@@ -196,11 +189,7 @@ var Platform=(function(){
      if(o.bg)try{window.WebApp.setHeaderColor&&window.WebApp.setHeaderColor(o.bg)}catch(e){}
      if(o.back){
       backFn=o.back;
-      try{
-       if(window.WebApp.BackButton){
-        window.WebApp.BackButton.show();
-        window.WebApp.BackButton.onClick(o.back)}
-      }catch(e){}}}
+      try{ if(window.WebApp.BackButton){window.WebApp.BackButton.show();window.WebApp.BackButton.onClick(o.back)} }catch(e){}}}
     else if(o.back)backFn=o.back;
    }catch(e){}})}
 
@@ -241,12 +230,14 @@ var Platform=(function(){
   user:function(){return user||{id:'g0',name:'Гость'}},
   maxClientReal:maxClientReal,
   isMaxExternal:isMaxExternal,
-  maxInContainer:maxInContainer,
   maxNavMode:function(){return MAX_NAV_MODE},
+  canonicalUrl:canonicalUrl,
   backToMessenger:backToMessenger,
   goToHub:goToHub,
   hubBase:hubBase,
-  haptic:function(t){try{
+  haptic:function(t){
+   if(name==='pc')return; /* на ПК вибро нет — noop */
+   try{
    if(name==='tg'&&window.Telegram&&Telegram.WebApp.HapticFeedback){var h=Telegram.WebApp.HapticFeedback;
     if(t==='success')h.notificationOccurred('success');else if(t==='error')h.notificationOccurred('error');else if(t==='warning')h.notificationOccurred('warning');else h.impactOccurred(t==='heavy'?'heavy':(t==='medium'?'medium':'light'));return}
    if(name==='vk'&&window.vkBridge){
@@ -259,11 +250,13 @@ var Platform=(function(){
   share:share,
   toast:platToast,
   onBack:function(fn){backFn=fn;
+   if(name==='pc')try{window.AppBridge.onBack(fn)}catch(e){}
    if(name==='tg')try{Telegram.WebApp.BackButton.show();Telegram.WebApp.BackButton.onClick(fn)}catch(e){}
    if(name==='vk'&&window.vkBridge)try{vkBridge.subscribe(function(e){if(e&&e.detail&&e.detail.type==='VKWebAppSwipeBack')fn()})}catch(e){}
    if(name==='max'&&window.WebApp&&maxClientReal()&&window.WebApp.BackButton)try{window.WebApp.BackButton.show();window.WebApp.BackButton.onClick(fn)}catch(e){}},
   fireBack:function(){if(backFn)backFn()},
   close:function(){try{
+   if(name==='pc'){try{window.AppBridge.quit();return}catch(e){window.close();return}}
    if(name==='tg')Telegram.WebApp.close();
    else if(name==='vk'&&window.vkBridge)vkBridge.send('VKWebAppClose',{payload:'igrovoj-centr'}).catch(function(){});
    else if(name==='max'&&maxClientReal()&&window.WebApp&&window.WebApp.close)window.WebApp.close();
