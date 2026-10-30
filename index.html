@@ -26,6 +26,11 @@
     h1 { margin: 0 0 6px; font-size: clamp(24px, 7vw, 32px); color: #7cffc4; }
     .hub-subtitle { margin: 0 0 8px; color: #7cffc4; font-size: clamp(13px, 3.6vw, 15px); font-weight: 700; }
     .hub-desc { margin: 0 0 16px; color: #a8b4d8; font-size: clamp(12px, 3.4vw, 14px); line-height: 1.45; }
+
+    /* v3.22: кнопка «Скачать приложение» */
+    .download-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px 16px; margin-bottom: 16px; border-radius: 18px; border: 1px solid rgba(124, 255, 196, 0.5); background: linear-gradient(135deg, rgba(124, 255, 196, 0.14), rgba(51, 214, 255, 0.12)); color: #7cffc4; font-size: clamp(14px, 4vw, 16px); font-weight: 700; cursor: pointer; transition: transform 0.08s ease, background 0.15s ease; font-family: inherit; }
+    .download-btn:active { transform: scale(0.98); background: linear-gradient(135deg, rgba(124, 255, 196, 0.24), rgba(51, 214, 255, 0.22)); }
+
     .game-btn { width: 100%; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; background: rgba(255, 255, 255, 0.06); color: #eaf0ff; padding: 12px; margin-bottom: 10px; cursor: pointer; text-align: left; transition: transform 0.08s ease, background 0.15s ease; font-family: inherit; font-size: inherit; touch-action: manipulation; min-width: 0; }
     .game-btn:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.10); }
     .game-btn.disabled { opacity: 0.45; cursor: default; }
@@ -37,6 +42,22 @@
     .hub-ver { margin: 6px 0 0; color: #4d5670; font-size: 10px; font-family: monospace; letter-spacing: 1px; }
     .hub-ver .plat { color: #7cffc4; font-weight: 700; }
     .tag-online { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 10px; background: rgba(124, 255, 196, 0.15); border: 1px solid rgba(124, 255, 196, 0.4); color: #7cffc4; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; vertical-align: middle; }
+
+    /* v3.22: оверлей скачивания */
+    .dl-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 16px; }
+    .dl-overlay.show { display: flex; }
+    .dl-card { background: #1b2228; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 24px; padding: 22px; max-width: 420px; width: 100%; text-align: center; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); color: #eaf0ff; }
+    .dl-card h2 { font-size: 20px; margin: 0 0 14px; color: #7cffc4; }
+    .dl-opt { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); cursor: pointer; text-align: left; font-family: inherit; color: #eaf0ff; width: 100%; transition: background 0.15s ease; }
+    .dl-opt:active { background: rgba(255, 255, 255, 0.1); }
+    .dl-opt.disabled { opacity: 0.4; cursor: default; }
+    .dl-opt .emoji { font-size: 28px; width: 44px; height: 44px; border-radius: 12px; background: rgba(124, 255, 196, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .dl-opt .txt { flex: 1; min-width: 0; }
+    .dl-opt .txt b { display: block; font-size: 15px; margin-bottom: 2px; }
+    .dl-opt .txt small { display: block; font-size: 12px; color: #8a94a6; }
+    .dl-share { margin-top: 12px; padding: 12px; border-radius: 16px; border: 1px dashed rgba(124, 255, 196, 0.3); background: transparent; color: #a8b4d8; cursor: pointer; font-family: inherit; width: 100%; font-size: 13px; transition: color 0.15s ease, border-color 0.15s ease; }
+    .dl-share:active { color: #7cffc4; border-color: rgba(124, 255, 196, 0.6); }
+    .dl-close { position: absolute; top: 12px; right: 12px; background: rgba(255, 255, 255, 0.08); border: none; color: #eaf0ff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center; }
   </style>
 </head>
 <body>
@@ -44,7 +65,11 @@
     <div class="panel">
       <h1>🎮 Игровой центр</h1>
       <p class="hub-subtitle">Мини-игры в Telegram, VK и MAX</p>
-      <p class="hub-desc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. Работает в трёх мессенджерах и в браузере: без установки, нажми и играй. Новые игры добавляются регулярно.</p>
+
+      <!-- v3.22: кнопка скачивания в самом верху, перед описанием -->
+      <button class="download-btn" id="downloadBtn">📥 Скачать приложение</button>
+
+      <p class="hub-desc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. Работает в трёх мессенджерах, в браузере и в десктоп‑приложении для Windows: без установки лишних SDK, нажми и играй. Новые игры добавляются регулярно.</p>
 
       <button class="game-btn" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
       <button class="game-btn" id="lightsOutBtn"><span class="game-emoji">💡</span><span class="game-text"><b>Выключи Свет</b><small>Логическая головоломка: выключи всё поле</small></span></button>
@@ -65,23 +90,43 @@
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.21 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.22 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
+
+  <!-- v3.22: оверлей скачивания -->
+  <div class="dl-overlay" id="dlOverlay">
+    <div class="dl-card">
+      <button class="dl-close" id="dlClose" aria-label="Закрыть">×</button>
+      <h2>📥 Скачать приложение</h2>
+      <button class="dl-opt" id="dlWin">
+        <span class="emoji">🪟</span>
+        <span class="txt"><b>Windows (ПК)</b><small>Установщик .exe — игры + офлайн + автообновление контента</small></span>
+      </button>
+      <button class="dl-opt disabled" disabled>
+        <span class="emoji">🤖</span>
+        <span class="txt"><b>Android</b><small>Скоро — в разработке</small></span>
+      </button>
+      <button class="dl-share" id="dlShare">📤 Отправить ссылку другу (почта, мессенджер, SMS)</button>
+    </div>
+  </div>
+
   <script>
-    const HUB_VER = '3.21';
+    const HUB_VER = '3.22';
+    /* v3.22: ссылки на релиз и установщик (обновлять при новой версии exe) */
+    const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
+    const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/download/v0.1.0/IgrovojCentr-Setup-0.1.0.exe';
 
     Platform.init({
       bg: '#070b16',
-      back: function() { Platform.close(); }
+      back: function() {
+        var ov = document.getElementById('dlOverlay');
+        if (ov && ov.classList.contains('show')) { ov.classList.remove('show'); return; }
+        Platform.close();
+      }
     });
 
     try { document.getElementById('platTag').textContent = Platform.name; } catch(e) {}
-
-    /* v3.21: отмена сторожевого таймера, если страница реально уходит */
-    window.addEventListener('pagehide', function(){
-      try { if (window.__maxNavTimer) { clearTimeout(window.__maxNavTimer); window.__maxNavTimer = null; } } catch(e) {}
-    });
 
     function trackEvent(name, params){
       params = params || {};
@@ -99,8 +144,6 @@
       } catch (e) {}
     })();
 
-    /* v3.21: MAX — эксперимент container: игры внутри клиента;
-       сторожевой таймер: если веб-вью «проглотил» переход — фолбэк во внешнее окно */
     function openGame(url, gameName) {
       trackEvent('hub_game_click', { game_name: gameName });
       try { Platform.haptic('light'); } catch (e) {}
@@ -112,36 +155,13 @@
       if (Platform.name === 'max') {
         let real = false;
         try { real = Platform.maxClientReal(); } catch (e) {}
-
-        if (real && Platform.maxNavMode() === 'container') {
-          try { sessionStorage.setItem('max_nav_try', String(Date.now())); } catch (e) {}
-          try { Platform.toast('Открываю игру…'); } catch (e) {}
-          location.href = target;
-          window.__maxNavTimer = setTimeout(function(){
-            window.__maxNavTimer = null;
-            try {
-              if (sessionStorage.getItem('max_nav_try')) {
-                sessionStorage.removeItem('max_nav_try');
-                Platform.toast('MAX не пустил внутрь — открываю в браузере');
-                if (window.WebApp && window.WebApp.openLink) { window.WebApp.openLink(abs); }
-                else { window.open(abs, '_blank'); }
-              }
-            } catch (e) {}
-          }, 3000);
-          return;
-        }
-
         if (real) {
           try { Platform.toast('Открываю игру…'); } catch (e) {}
-          try {
-            if (window.WebApp && window.WebApp.openLink) { window.WebApp.openLink(abs); return; }
-          } catch (e) {}
+          try { if (window.WebApp && window.WebApp.openLink) { window.WebApp.openLink(abs); return; } } catch (e) {}
           try { window.open(abs, '_blank'); return; } catch (e) {}
           location.href = target;
           return;
         }
-
-        /* внешний браузер с plat=max — обычная навигация */
         location.href = target;
         return;
       }
@@ -163,27 +183,15 @@
     })();
 
     const GAME_MAP = {
-      'trend_catch': './trend-catch/',
-      'trend': './trend-catch/',
-      'lights_out': './lights-out/',
-      'lights': './lights-out/',
-      'arkanoid': './arkanoid/',
-      'domino': './domino/',
-      'shooter': './shooter/',
-      'fruit_samurai': './fruit-samurai/',
-      'samurai': './fruit-samurai/',
-      'chess': './chess/',
-      'durak': './durak/',
-      'nardy': './nardy/',
-      'shashki': './shashki/',
-      'minesweeper': './minesweeper/',
-      'mines': './minesweeper/',
-      'crystals': './crystals/',
-      'solitaire': './solitaire/',
-      'seabattle': './seabattle/',
-      'mahjong': './mahjong/',
-      'tetris': './tetris/',
-      'tetris_classic': './tetris/'
+      'trend_catch': './trend-catch/', 'trend': './trend-catch/',
+      'lights_out': './lights-out/', 'lights': './lights-out/',
+      'arkanoid': './arkanoid/', 'domino': './domino/', 'shooter': './shooter/',
+      'fruit_samurai': './fruit-samurai/', 'samurai': './fruit-samurai/',
+      'chess': './chess/', 'durak': './durak/', 'nardy': './nardy/', 'shashki': './shashki/',
+      'minesweeper': './minesweeper/', 'mines': './minesweeper/',
+      'crystals': './crystals/', 'solitaire': './solitaire/',
+      'seabattle': './seabattle/', 'mahjong': './mahjong/',
+      'tetris': './tetris/', 'tetris_classic': './tetris/'
     };
 
     document.getElementById('trendCatchBtn').addEventListener('click', () => openGame('./trend-catch/', 'trend_catch'));
@@ -204,6 +212,48 @@
     document.getElementById('tetrisBtn').addEventListener('click', () => openGame('./tetris/', 'tetris'));
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
+
+    /* ---------- v3.22: оверлей скачивания ---------- */
+    (function(){
+      const ov = document.getElementById('dlOverlay');
+      const closeBtn = document.getElementById('dlClose');
+      const winBtn = document.getElementById('dlWin');
+      const shareBtn = document.getElementById('dlShare');
+      const mainBtn = document.getElementById('downloadBtn');
+
+      mainBtn.addEventListener('click', function(){
+        trackEvent('hub_download_open', {});
+        try { Platform.haptic('light'); } catch(e){}
+        ov.classList.add('show');
+      });
+      closeBtn.addEventListener('click', function(){ ov.classList.remove('show'); });
+      ov.addEventListener('click', function(ev){ if (ev.target === ov) ov.classList.remove('show'); });
+
+      winBtn.addEventListener('click', function(){
+        trackEvent('hub_download_win', {});
+        try { Platform.haptic('light'); } catch(e){}
+        /* на ПК — скачиваем напрямую; на остальных платформах — открываем страницу релиза (там exe и будущий APK) */
+        if (Platform.name === 'pc') {
+          try { if (window.AppBridge && window.AppBridge.openExternal) { window.AppBridge.openExternal(WIN_EXE_URL); return; } } catch(e){}
+          window.open(WIN_EXE_URL, '_blank');
+        } else {
+          try { if (window.AppBridge && window.AppBridge.openExternal) { window.AppBridge.openExternal(RELEASE_URL); return; } } catch(e){}
+          window.open(RELEASE_URL, '_blank');
+        }
+      });
+
+      shareBtn.addEventListener('click', function(){
+        trackEvent('hub_download_share', {});
+        const shareText = '📥 Игровой центр — мини-игры офлайн и онлайн. Скачай приложение для ПК или открой в Telegram / VK / MAX:\n';
+        try { Platform.haptic('light'); } catch(e){}
+        try {
+          Platform.share(RELEASE_URL, shareText, {
+            title: 'Игровой центр — скачать приложение',
+            copiedToast: 'Ссылка на скачивание скопирована'
+          });
+        } catch(e){}
+      });
+    })();
 
     (function handleDeepLink() {
       try {
