@@ -1,6 +1,7 @@
-/* tg-games: единый слой платформ v2.7 — Telegram / VK / MAX / web / PC(Electron).
-   v2.7: pc-ветка: тосты из оболочки (AppBridge.onToast) + предупреждения обновлений
-   («Обновите приложение» / «Обновите игру…», 3 с, 1 раз за сессию).
+/* tg-games: единый слой платформ v2.8 — Telegram / VK / MAX / web / PC(Electron).
+   v2.8: goToHub() в TG/VK больше НЕ закрывает Web App — внутренняя навигация на хаб
+   (хаб и игры = одна сессия Web App); close() остаётся единственным выходом в чат.
+   v2.7: pc-ветка: тосты из оболочки + предупреждения обновлений (3 с).
    v2.6: ветка 'pc': детект по window.AppBridge, Esc/back, app:// hubBase, canonicalUrl.
    v2.5: флаг MAX_NAV_MODE ('external' — продакшен). */
 var Platform=(function(){
@@ -96,22 +97,21 @@ var Platform=(function(){
    return location.origin+'/games/';
   }
  }
+ /* v2.8: возврат в хаб ВНУТРИ контейнера/Web App; закрытие — только в close() */
  function goToHub(){
   try{
    if(isMaxExternal()){backToMessenger();return}
    if(name==='max'&&maxClientReal()){
     if(MAX_NAV_MODE==='container'){
-     var u=hubBase()+'?plat=max';
+     var u0=hubBase()+'?plat=max';
      try{
-      var cur=new URL(location.href);var tgt=new URL(u);
-      if(cur.pathname!==tgt.pathname){location.href=u;return}
-     }catch(e){location.href=u;return}
+      var cur=new URL(location.href);var tgt=new URL(u0);
+      if(cur.pathname!==tgt.pathname){location.href=u0;return}
+     }catch(e){location.href=u0;return}
      return;
     }
     if(window.WebApp&&window.WebApp.close){window.WebApp.close();return}
    }
-   if(name==='tg'&&window.Telegram&&Telegram.WebApp){Telegram.WebApp.close();return}
-   if(name==='vk'&&window.vkBridge){vkBridge.send('VKWebAppClose',{payload:'igrovoj-centr'}).catch(function(){});return}
    var url=hubBase()+'?plat='+name;
    if(location.href.replace(/\/$/,'')===url.replace(/\/$/,'')){return}
    location.href=url;
