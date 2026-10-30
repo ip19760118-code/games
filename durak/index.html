@@ -12,9 +12,6 @@
   window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
   gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});
 </script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
 :root{--bg1:#0d1b2a;--bg2:#1b263b;--bg3:#070d15;--panel:rgba(20,32,48,.88);--text:#e0e1dd;--accent:#ffd166;--red:#e63946;--felt:#14532d;--cw:clamp(46px,11.5vw,64px)}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
@@ -176,10 +173,24 @@ Platform.init({
 
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
-let fbDb=null,fbAuth=null;
-try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();fbAuth=firebase.auth();}catch(e){console.error(e);}
-async function ensureAuth(){
- if(!fbAuth)return;
+/* Firebase грузится ЛЕНИВО при первом входе в онлайн (не блокирует старт игры) */
+let fbDb=null,fbAuth=null,fbLoading=null;
+function ensureFirebase(){
+  if(fbDb)return Promise.resolve(true);
+  if(fbLoading)return fbLoading;
+  fbLoading=new Promise(function(res){
+    function tag(src){return new Promise(function(r){var s=document.createElement('script');s.src=src;s.onload=function(){r(true)};s.onerror=function(){r(false)};document.head.appendChild(s);});}
+    tag('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js')
+    .then(function(ok){if(!ok)throw new Error('fb-app');return tag('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js');})
+    .then(function(ok){if(!ok)throw new Error('fb-auth');return tag('https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js');})
+    .then(function(ok){if(!ok)throw new Error('fb-db');
+      firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});
+      fbDb=firebase.database();fbAuth=firebase.auth();res(true);})
+    .catch(function(e){console.warn('Firebase lazy load failed:',e);fbLoading=null;res(false);});
+  });
+  return fbLoading;
+}
+async function ensureAuth(){ await ensureFirebase(); if(!fbAuth)return;
  if(fbAuth.currentUser)return;
  try{await fbAuth.signInAnonymously();}catch(e){console.warn('signInAnonymously failed',e);}
 }
@@ -433,8 +444,7 @@ function removePresence(){if(!roomRef||!mySeat)return;try{roomRef.child('presenc
 function setPresence(){if(!roomRef||!mySeat)return;const p=roomRef.child('presence/'+mySeat);p.set({uid:myUid,name:myName,at:Date.now()}).catch(e=>console.warn('[DU] setPresence failed:',e.message||e));p.onDisconnect().remove();startHeartbeat();}
 function recoverSeat(){const m=seatsMap();for(const k of SEAT_KEYS){if(m[k]&&m[k].uid===myUid)return k;}return null;}
 async function createRoom(){
- if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
- await ensureAuth();
+ await ensureAuth(); if(!fbDb){alert("Не удалось загрузить Firebase — проверь сеть.");return;}
  myUid=getUid();myName=getUserName();roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);mySeat='p0';myRound=1;
  try{
   await roomRef.set({game:'durak',host:'p0',createdAt:Date.now(),round:1,status:'waiting',
@@ -458,8 +468,7 @@ function claimSeat(k){
  });
 }
 async function joinRoom(code){
- if(!fbDb){alert('Firebase не загружен.');return;}
- await ensureAuth();
+ await ensureAuth(); if(!fbDb){alert("Не удалось загрузить Firebase — проверь сеть.");return;}
  myUid=getUid();myName=getUserName();roomCode=code.toUpperCase();roomRef=fbDb.ref('rooms/'+roomCode);
  try{
   const snap=await roomRef.once('value');

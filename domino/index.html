@@ -20,9 +20,6 @@
   });
 </script>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <style>
 :root{--bg1:#1a3a1a;--bg2:#2d5e2d;--bg3:#0f2a0f;--card:#fcf9f0;--border:#d0c8b0;--text:#f5f0d7;--shadow:rgba(0,0,0,0.8);--accent:#f5c542;--panel:rgba(30,70,30,0.7);--label:#9bb88a;--score:#fff5d6;--btn-bg:rgba(255,255,255,0.06);--btn-border:rgba(255,255,255,0.12);--btn-text:#e8e0c8;--msg:#e8ddc0}
@@ -279,10 +276,24 @@ Platform.init({
 });
 
 /* ========== FIREBASE ========== */
-let fbDb=null,fbAuth=null;
-try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();fbAuth=firebase.auth();}catch(e){console.error(e);}
-async function ensureAuth(){
- if(!fbAuth)return;
+/* Firebase грузится ЛЕНИВО при первом входе в онлайн (не блокирует старт игры) */
+let fbDb=null,fbAuth=null,fbLoading=null;
+function ensureFirebase(){
+  if(fbDb)return Promise.resolve(true);
+  if(fbLoading)return fbLoading;
+  fbLoading=new Promise(function(res){
+    function tag(src){return new Promise(function(r){var s=document.createElement('script');s.src=src;s.onload=function(){r(true)};s.onerror=function(){r(false)};document.head.appendChild(s);});}
+    tag('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js')
+    .then(function(ok){if(!ok)throw new Error('fb-app');return tag('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js');})
+    .then(function(ok){if(!ok)throw new Error('fb-auth');return tag('https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js');})
+    .then(function(ok){if(!ok)throw new Error('fb-db');
+      firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});
+      fbDb=firebase.database();fbAuth=firebase.auth();res(true);})
+    .catch(function(e){console.warn('Firebase lazy load failed:',e);fbLoading=null;res(false);});
+  });
+  return fbLoading;
+}
+async function ensureAuth(){ await ensureFirebase(); if(!fbAuth)return;
  if(fbAuth.currentUser)return;
  try{await fbAuth.signInAnonymously();}catch(e){console.warn('signInAnonymously failed',e);}
 }
@@ -451,8 +462,7 @@ function startHeartbeat(){
 function stopHeartbeat(){if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}}
 function removePresence(){if(!roomRef||!myUid)return;try{roomRef.child('presence/'+myUid).remove();}catch(e){}}
 async function createRoom(){
-  if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
-  await ensureAuth();
+  await ensureAuth(); if(!fbDb){alert("Не удалось загрузить Firebase — проверь сеть.");return;}
   myUid=getUid();myName=getUserName();roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);myRound=1;
   try{
     const initialPlayers = {};
@@ -466,8 +476,7 @@ async function createRoom(){
   }catch(e){console.error(e);alert('Ошибка создания: '+e.message);}
 }
 async function joinRoom(code){
-  if(!fbDb){alert('Firebase не загружен.');return;}
-  await ensureAuth();
+  await ensureAuth(); if(!fbDb){alert("Не удалось загрузить Firebase — проверь сеть.");return;}
   myUid=getUid();myName=getUserName();roomCode=code.toUpperCase();roomRef=fbDb.ref('rooms/'+roomCode);
   try{
     const snap=await roomRef.once('value');if(!snap.exists()){alert('Комната не найдена: '+roomCode);return;}

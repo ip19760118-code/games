@@ -2,9 +2,6 @@
 <script src="../js/platform.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
 :root{--bg1:#241a10;--bg2:#3a2a18;--bg3:#150e07;--panel:rgba(46,32,18,.9);--text:#f0e6d2;--accent:#e6b366;--pt1:#c89b6a;--pt2:#8a5a33;--shadow:rgba(0,0,0,.6)}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
@@ -143,14 +140,24 @@ function goToHub(){Platform.haptic('light');location.href='../?plat='+Platform.n
 function trackEvent(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
 (function(){try{const k='nardy_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'nardy',source:Platform.name,ver:VER});}}catch(e){}})();
 
-let fbDb=null,fbAuth=null;
-try{
- firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});
- fbDb=firebase.database();
- fbAuth=firebase.auth();
-}catch(e){console.error(e);}
-async function ensureAuth(){
- if(!fbAuth)return;
+/* Firebase грузится ЛЕНИВО при первом входе в онлайн (не блокирует старт игры) */
+let fbDb=null,fbAuth=null,fbLoading=null;
+function ensureFirebase(){
+  if(fbDb)return Promise.resolve(true);
+  if(fbLoading)return fbLoading;
+  fbLoading=new Promise(function(res){
+    function tag(src){return new Promise(function(r){var s=document.createElement('script');s.src=src;s.onload=function(){r(true)};s.onerror=function(){r(false)};document.head.appendChild(s);});}
+    tag('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js')
+    .then(function(ok){if(!ok)throw new Error('fb-app');return tag('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js');})
+    .then(function(ok){if(!ok)throw new Error('fb-auth');return tag('https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js');})
+    .then(function(ok){if(!ok)throw new Error('fb-db');
+      firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});
+      fbDb=firebase.database();fbAuth=firebase.auth();res(true);})
+    .catch(function(e){console.warn('Firebase lazy load failed:',e);fbLoading=null;res(false);});
+  });
+  return fbLoading;
+}
+async function ensureAuth(){ await ensureFirebase(); if(!fbAuth)return;
  if(fbAuth.currentUser)return;
  try{await fbAuth.signInAnonymously();}catch(e){console.warn('signInAnonymously failed',e);}
 }
@@ -321,16 +328,14 @@ function startHeartbeat(){
 function stopHeartbeat(){if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}}
 function removePresence(){if(!roomRef||!mySide)return;try{roomRef.child('presence/'+mySide).remove();}catch(e){}}
 async function createRoom(){
- if(!fbDb){alert('Firebase не загружен.');return;}
- await ensureAuth();
+ await ensureAuth(); if(!fbDb){alert("Не удалось загрузить Firebase — проверь сеть.");return;}
  myUid=getUid();myName=getUserName();mySide='w';roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);myRound=1;
  try{const st=newState();await roomRef.set({game:'nardy',host:mySide,createdAt:Date.now(),round:1,status:'waiting',players:{w:{name:myName,uid:myUid}},presence:{},rematch:{},state:st});
  onlineMode=true;$('roomBar').style.display='block';$('roomCode').textContent=roomCode;modeOverlay.classList.remove('show');buildBoard();
  setTimeout(()=>{startHeartbeat();subscribeRoom();},500);
  trackEvent('room_created',{game_name:'nardy'});}catch(e){alert('Ошибка: '+e.message);}}
 async function joinRoom(code){
- if(!fbDb){alert('Firebase не загружен.');return;}
- await ensureAuth();
+ await ensureAuth(); if(!fbDb){alert("Не удалось загрузить Firebase — проверь сеть.");return;}
  myUid=getUid();myName=getUserName();roomCode=code.toUpperCase();roomRef=fbDb.ref('rooms/'+roomCode);
  try{const snap=await roomRef.once('value');if(!snap.exists()){alert('Комната не найдена.');return;}const r=snap.val();if(r.game!=='nardy'){alert('Другая игра.');return;}
   if(r.status!=='waiting'&&r.status!=='finished'&&r.status!=='playing'){alert('Игра уже идёт. Дождитесь окончания или создайте новую комнату.');return;}

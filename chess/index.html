@@ -14,9 +14,6 @@
   gtag('js', new Date());
   gtag('config', 'G-ZD8QE6XKTR', {'page_title': document.title,'page_path': location.pathname});
 </script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
 :root{--bg1:#101418;--bg2:#1c2430;--bg3:#080a0d;--panel:rgba(24,32,44,0.85);--text:#e8ecf2;--accent:#7cffc4;--sq-light:#f0d9b5;--sq-dark:#b58863;--shadow:rgba(0,0,0,0.6);--bs:min(calc(100vw - 64px), 460px);}
 [data-theme="green"]{--sq-light:#eeeed2;--sq-dark:#769656;}
@@ -204,12 +201,24 @@ function backHandler() {
 }
 Platform.init({ bg: '#101418', back: backHandler });
 
-let fbDb=null,fbAuth=null;
-try{
-  firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});
-  fbDb=firebase.database();fbAuth=firebase.auth();
-}catch(e){console.error(e);}
-async function ensureAuth(){if(!fbAuth)return;if(fbAuth.currentUser)return;try{await fbAuth.signInAnonymously();}catch(e){console.warn('signIn failed',e);}}
+/* Firebase грузится ЛЕНИВО при первом входе в онлайн (не блокирует старт игры) */
+let fbDb=null,fbAuth=null,fbLoading=null;
+function ensureFirebase(){
+  if(fbDb)return Promise.resolve(true);
+  if(fbLoading)return fbLoading;
+  fbLoading=new Promise(function(res){
+    function tag(src){return new Promise(function(r){var s=document.createElement('script');s.src=src;s.onload=function(){r(true)};s.onerror=function(){r(false)};document.head.appendChild(s);});}
+    tag('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js')
+    .then(function(ok){if(!ok)throw new Error('fb-app');return tag('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js');})
+    .then(function(ok){if(!ok)throw new Error('fb-auth');return tag('https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js');})
+    .then(function(ok){if(!ok)throw new Error('fb-db');
+      firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});
+      fbDb=firebase.database();fbAuth=firebase.auth();res(true);})
+    .catch(function(e){console.warn('Firebase lazy load failed:',e);fbLoading=null;res(false);});
+  });
+  return fbLoading;
+}
+async function ensureAuth(){ await ensureFirebase(); if(!fbAuth)return;if(fbAuth.currentUser)return;try{await fbAuth.signInAnonymously();}catch(e){console.warn('signIn failed',e);}}
 function getUid(){return (fbAuth&&fbAuth.currentUser)?fbAuth.currentUser.uid:null;}
 function trackEvent(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
 (function(){try{const k='chess_session_tracked';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'chess',source:Platform.name,ver:VER});}}catch(e){}})();
@@ -351,8 +360,7 @@ function updateOnlineStatus(){if(gameOver)return;const waiting=!opponentOnline;
  else showStatus(waiting?'🔗 Поделись ссылкой с другом':'🤔 Ход соперника...');}
 function showDrawOffer(){const box=$('roomActions');if(box.querySelector('[data-prompt="draw"]'))return;const el=document.createElement('div');el.dataset.prompt='draw';el.style.cssText='display:flex;gap:6px;align-items:center;font-size:12px;color:var(--accent);width:100%';el.innerHTML='<span>Ничья?</span><button class="rbtn accept" id="aD">Принять</button><button class="rbtn" id="dD">Нет</button>';box.appendChild(el);el.querySelector('#aD').onclick=()=>roomRef.child('flags/drawAccept').set(true);el.querySelector('#dD').onclick=()=>{roomRef.child('flags/drawOffer').set(null);el.remove();};}
 async function createRoom(){
-  if(!fbDb){alert('Firebase не настроен.');return;}
-  await ensureAuth();myUid=getUid();
+  await ensureAuth(); if(!fbDb){alert("Не удалось загрузить Firebase — проверь сеть.");return;}myUid=getUid();
   roomCode=genRoomCode();mySideOnline='w';myName=getUserName();myRound=1;roomRef=fbDb.ref('rooms/'+roomCode);
   try{await roomRef.set({game:'chess',createdAt:Date.now(),round:1,status:'waiting',players:{w:{name:myName,uid:myUid}},flags:{drawOffer:null,drawAccept:false,surrender:null,winner:null},rematch:{w:false,b:false},presence:{},moves:{},scores:{}});}
   catch(e){console.error('[createRoom] set failed:',e);alert('Ошибка создания: '+e.message);return;}
@@ -361,8 +369,7 @@ async function createRoom(){
   modeOverlay.classList.remove('show');subscribeRoom();updateRoomActions();renderPlayersBar();updateLiveBadge();
   showStatus('🔗 Поделись ссылкой или кодом');trackEvent('room_created',{game_name:'chess'});}
 async function joinRoom(code){
-  if(!fbDb){alert('Firebase не настроен.');return;}
-  await ensureAuth();myUid=getUid();
+  await ensureAuth(); if(!fbDb){alert("Не удалось загрузить Firebase — проверь сеть.");return;}myUid=getUid();
   roomCode=code.toUpperCase();mySideOnline='b';myName=getUserName();roomRef=fbDb.ref('rooms/'+roomCode);
   try{const snap=await roomRef.once('value');if(!snap.exists()){alert('Комната не найдена: '+roomCode);return;}
    const room=snap.val();myRound=room.round||1;
