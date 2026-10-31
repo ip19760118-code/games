@@ -29,9 +29,9 @@
     .hub-logo { width: 34px; height: 34px; border-radius: 9px; margin-right: 8px; vertical-align: -4px; box-shadow: 0 2px 10px rgba(124, 255, 196, 0.35); }
     .hub-subtitle { margin: 0 0 8px; color: #7cffc4; font-size: clamp(13px, 3.6vw, 15px); font-weight: 700; }
     .hub-desc { margin: 0 0 16px; color: #a8b4d8; font-size: clamp(12px, 3.4vw, 14px); line-height: 1.45; }
-    .download-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px 16px; margin-bottom: 16px; border-radius: 18px; border: 1px solid rgba(124, 255, 196, 0.5); background: linear-gradient(135deg, rgba(124, 255, 196, 0.14), rgba(51, 214, 255, 0.12)); color: #7cffc4; font-size: clamp(14px, 4vw, 16px); font-weight: 700; cursor: pointer; transition: transform 0.08s ease, background 0.15s ease; font-family: inherit; }
+    .download-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px 16px; margin-bottom: 16px; border-radius: 18px; border: 1px solid rgba(124, 255, 196, 0.5); background: linear-gradient(135deg, rgba(124, 255, 196, 0.14), rgba(51, 214, 255, 0.12)); color: #7cffc4; font-size: clamp(14px, 4vw, 16px); font-weight: 700; cursor: pointer; transition: transform 0.08s ease, background 0.15s ease, box-shadow 0.15s ease; font-family: inherit; }
     .download-btn:active { transform: scale(0.98); background: linear-gradient(135deg, rgba(124, 255, 196, 0.24), rgba(51, 214, 255, 0.22)); }
-    .game-btn { width: 100%; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; background: rgba(255, 255, 255, 0.06); color: #eaf0ff; padding: 12px; margin-bottom: 10px; cursor: pointer; text-align: left; transition: transform 0.08s ease, background 0.15s ease; font-family: inherit; font-size: inherit; touch-action: manipulation; min-width: 0; }
+    .game-btn { width: 100%; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; background: rgba(255, 255, 255, 0.06); color: #eaf0ff; padding: 12px; margin-bottom: 10px; cursor: pointer; text-align: left; transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease; font-family: inherit; font-size: inherit; touch-action: manipulation; min-width: 0; }
     .game-btn:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.10); }
     .game-btn.disabled { opacity: 0.45; cursor: default; }
     .game-emoji { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; background: rgba(124, 255, 196, 0.12); border: 1px solid rgba(124, 255, 196, 0.18); flex-shrink: 0; }
@@ -46,16 +46,26 @@
     .dl-overlay.show { display: flex; }
     .dl-card { background: #1b2228; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 24px; padding: 22px; max-width: 420px; width: 100%; text-align: center; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); color: #eaf0ff; }
     .dl-card h2 { font-size: 20px; margin: 0 0 14px; color: #7cffc4; }
-    .dl-opt { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); cursor: pointer; text-align: left; font-family: inherit; color: #eaf0ff; width: 100%; transition: background 0.15s ease; }
+    .dl-opt { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); cursor: pointer; text-align: left; font-family: inherit; color: #eaf0ff; width: 100%; transition: background 0.15s ease, border-color 0.15s ease; }
     .dl-opt:active { background: rgba(255, 255, 255, 0.1); }
     .dl-opt.disabled { opacity: 0.4; cursor: default; }
     .dl-opt .emoji { font-size: 28px; width: 44px; height: 44px; border-radius: 12px; background: rgba(124, 255, 196, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .dl-opt .txt { flex: 1; min-width: 0; }
     .dl-opt .txt b { display: block; font-size: 15px; margin-bottom: 2px; }
     .dl-opt .txt small { display: block; font-size: 12px; color: #8a94a6; }
-    .dl-share { margin-top: 10px; padding: 12px; border-radius: 16px; border: 1px dashed rgba(124, 255, 196, 0.3); background: transparent; color: #a8b4d8; cursor: pointer; font-family: inherit; width: 100%; font-size: 13px; transition: color 0.15s ease, border-color 0.15s ease; }
+    .dl-share { margin-top: 10px; padding: 12px; border-radius: 16px; border: 1px dashed rgba(124, 255, 196, 0.3); background: transparent; color: #a8b4d8; cursor: pointer; font-family: inherit; width: 100%; font-size: 13px; transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease; }
     .dl-share:active { color: #7cffc4; border-color: rgba(124, 255, 196, 0.6); }
-    .dl-close { position: absolute; top: 12px; right: 12px; background: rgba(255, 255, 255, 0.08); border: none; color: #eaf0ff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+    .dl-close { position: absolute; top: 12px; right: 12px; background: rgba(255, 255, 255, 0.08); border: none; color: #eaf0ff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background 0.15s ease; }
+    /* v3.27: hover-подсветка кнопок для мыши (ПК/приложение); на тач-устройствах не применяется */
+    @media (hover: hover) and (pointer: fine) {
+      .game-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(124, 255, 196, 0.45); transform: translateY(-1px); }
+      .game-btn.disabled:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.08); transform: none; }
+      .download-btn:hover { background: linear-gradient(135deg, rgba(124, 255, 196, 0.26), rgba(51, 214, 255, 0.22)); box-shadow: 0 4px 18px rgba(124, 255, 196, 0.25); }
+      .dl-opt:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(124, 255, 196, 0.4); }
+      .dl-opt.disabled:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
+      .dl-share:hover { color: #7cffc4; border-color: rgba(124, 255, 196, 0.6); background: rgba(124, 255, 196, 0.06); }
+      .dl-close:hover { background: rgba(255, 255, 255, 0.16); }
+    }
   </style>
 </head>
 <body>
@@ -87,7 +97,7 @@
       <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.26 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.27 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
@@ -97,7 +107,7 @@
       <h2>📥 Скачать приложение</h2>
       <button class="dl-opt" id="dlWin">
         <span class="emoji">🪟</span>
-        <span class="txt"><b>Windows (ПК)</b><small>Прямое скачивание установщика .exe (~100 МБ)</small></span>
+        <span class="txt"><b>Windows (ПК)</b><small>Прямое скачивание установщика .exe</small></span>
       </button>
       <button class="dl-opt disabled" disabled>
         <span class="emoji">🤖</span>
@@ -109,7 +119,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.26';
+    const HUB_VER = '3.27';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
 
