@@ -1,13 +1,13 @@
 {
- "generatedAt": "2026-10-30T18:06:13.236Z",
+ "generatedAt": "2026-10-31T07:34:39.150Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
-  "version": "3.23",
+  "version": "3.26",
   "files": [
    {
     "path": "index.html",
-    "sha256": "ddd364ce2ad0e0fd9e2b6271807b991c4abe7e549bec6219961cb9404dd91c26",
-    "size": 21347
+    "sha256": "f87c8a84a58484d01fe5e0693901a830b6ce17d84b59892037180b0cdb8cc90e",
+    "size": 21279
    },
    {
     "path": "js/platform.js",
@@ -18,6 +18,21 @@
     "path": "js/snd.js",
     "sha256": "2bd12f43edae2b94503f2c38555aaa8842eae325177a387c8e6fcc6c13a80b63",
     "size": 3334
+   },
+   {
+    "path": "icon-512.png",
+    "sha256": "d486b1c9f22b1155375bf210d736de310854275ededc0fac473e67f399917aa7",
+    "size": 259987
+   },
+   {
+    "path": "icon-32.png",
+    "sha256": "2d4ea0b1b8eba5300397e6fdb9fd1cf5034190baa585746082b98bbb29299dd8",
+    "size": 2088
+   },
+   {
+    "path": "icon-180.png",
+    "sha256": "be63920cd1285873a9ebbfd20be23c96ea976b82f03f4ff2729d7f2de1c8df71",
+    "size": 39487
    },
    {
     "path": "sw.js",
@@ -33,8 +48,8 @@
    "files": [
     {
      "path": "chess/index.html",
-     "sha256": "dff627862ac24eb9105beee698405de59336fa82dce862f9fc8519dd3c0176b1",
-     "size": 52152
+     "sha256": "31953e6d6245b1669e65546bbfd11db93b6e704c45df6e26686143c640dec313",
+     "size": 52191
     }
    ]
   },
@@ -89,8 +104,8 @@
     },
     {
      "path": "seabattle/index.html",
-     "sha256": "0c9e9f1bb437bee9c019da41c350279bd383e45ff9f3ef3c257aa138017fa6bd",
-     "size": 54896
+     "sha256": "9242fcbc574a792a20d85a228206b1fbf58b9e9e60f0638a642a78aacec8d28f",
+     "size": 54935
     }
    ]
   },
@@ -100,8 +115,8 @@
    "files": [
     {
      "path": "durak/index.html",
-     "sha256": "50664d6fb990d492035d3fb1abe88ccaee52670ff61f0193644e776ce4b8e100",
-     "size": 74130
+     "sha256": "65db0df550e9444c44ec14d07fa565082c528a40dd449f574e3f86e2521a70fc",
+     "size": 74169
     }
    ]
   },
@@ -111,8 +126,8 @@
    "files": [
     {
      "path": "domino/index.html",
-     "sha256": "8f0568992e8a3fdada81841defef947186e646359b38d3025ff1a95ebd027007",
-     "size": 77831
+     "sha256": "77bf1a5b75d3cfe8f22a7649d4b0080ed9c87a900cc143bc676a21e20fcc21b0",
+     "size": 77870
     }
    ]
   },
@@ -122,8 +137,8 @@
    "files": [
     {
      "path": "shashki/index.html",
-     "sha256": "e20c67590675a5a7ac78796ed65be2a56cdf8d70bbf37dbb5c6aef9f89c965fc",
-     "size": 54279
+     "sha256": "b4f6f2a2dda37cec994944cfa229d705cf3bb4a3fbf63ae052d397db75f9f622",
+     "size": 54318
     }
    ]
   },
@@ -133,8 +148,8 @@
    "files": [
     {
      "path": "nardy/index.html",
-     "sha256": "a917d09a6530358b64196b680566c289383ad0f3f88622d79c1202874e315eba",
-     "size": 54769
+     "sha256": "c32771dd9d308c6209199a3e225f6758ae87b8cf091ce3c01e40434a2d027456",
+     "size": 54808
     }
    ]
   },
