@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-31T07:55:34.410Z",
+ "generatedAt": "2026-10-31T09:00:43.834Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.27",
@@ -36,8 +36,8 @@
    },
    {
     "path": "sw.js",
-    "sha256": "c6bb2142ebe818e6346cbd1a27e8dd0721009bd3e88bb07f14e1655241344d74",
-    "size": 2048
+    "sha256": "ecb9bbe53b2f14e04fcad4f3b67d786e3c13fb68a1fe1e10fa99f38ad553c194",
+    "size": 1997
    }
   ]
  },
@@ -159,8 +159,8 @@
    "files": [
     {
      "path": "tetris/index.html",
-     "sha256": "0f91254408c4451356d7bc44ce59e66a5bdb3abc398d9217a29d660c5980f8f5",
-     "size": 32026
+     "sha256": "41cab35b0dfac13ac2430ce8db4dc1589705c83f0ee9e504037d0a95843c7f88",
+     "size": 31651
     }
    ]
   },
@@ -286,8 +286,8 @@
     },
     {
      "path": "crystals/index.html",
-     "sha256": "fa1e50d955b3d942a77cc4892bc37ea6a1484dac94aedc42c9c9c4b0e1f45932",
-     "size": 65588
+     "sha256": "c4f10de3ecf02cccd987b0376c9f7653962e96b8771fc5a9b06b37fda77ae2d6",
+     "size": 64905
     }
    ]
   },
@@ -297,8 +297,8 @@
    "files": [
     {
      "path": "solitaire/index.html",
-     "sha256": "388bf23abe312613ee6df71015dd36bdffbb3de9ca7d8ea9bb3354d49497bfe3",
-     "size": 39716
+     "sha256": "b402699a99004f1a1c90e749935160d975891edcabb37f20be9882537c67bc9b",
+     "size": 39276
     }
    ]
   },
@@ -308,8 +308,8 @@
    "files": [
     {
      "path": "mahjong/index.html",
-     "sha256": "718286e9f39f18b3cbb7fca28a67da502a6a0dc294e16c35d06f0047bea47e12",
-     "size": 28815
+     "sha256": "2a953e9495ee044502cb97a0af0fc541c8afb089c6603f6c784c87784ce0207d",
+     "size": 28521
     }
    ]
   },
@@ -319,8 +319,8 @@
    "files": [
     {
      "path": "arkanoid/index.html",
-     "sha256": "13ef57031e3d29ab933752168f1738fbc3a50f0f9b1b11b92225eabe390de4ce",
-     "size": 47795
+     "sha256": "1e062d035450663019764a812662b3aca1d457741d118d44b7f615f3b3578aea",
+     "size": 46985
     }
    ]
   },
@@ -330,8 +330,8 @@
    "files": [
     {
      "path": "shooter/index.html",
-     "sha256": "fd7b73398640dc35b9ad2de17c584a27d846fe603cdc5852ece07f812a5d5b5c",
-     "size": 56014
+     "sha256": "552fecae846fc0fbc63e016d5247df2227b6f58af5243e1628ad6ef642a49196",
+     "size": 54642
     }
    ]
   },
@@ -341,8 +341,8 @@
    "files": [
     {
      "path": "fruit-samurai/index.html",
-     "sha256": "0ae0382d87b46ecd9c7d5d6a9d613fd862c44cb902f56ceec895cd0a8effb1f1",
-     "size": 40769
+     "sha256": "c51cb6d7838a94e8bacdc8bc5b8a5cd5b7bfc7ffe4e1dcb484d6d1858c2aa4c8",
+     "size": 39629
     }
    ]
   },
@@ -352,8 +352,8 @@
    "files": [
     {
      "path": "lights-out/index.html",
-     "sha256": "374872678cf4f6eacc017716bc163acea9b065d1ec2039e3f61cd7000861f616",
-     "size": 23017
+     "sha256": "d4b6126e54c8a85199190d2265651eb40cf5014de8584ff24e79f08392ab0b1b",
+     "size": 22517
     }
    ]
   },
@@ -363,8 +363,8 @@
    "files": [
     {
      "path": "trend-catch/index.html",
-     "sha256": "ec17d08ccb46233318007a12d09ab48885ef5c424a6b6709c75ff26a4c3fc748",
-     "size": 39310
+     "sha256": "2069778329f67624867a36dbab41216f9ac5eb0097139fcb92968e7f2b2560cf",
+     "size": 38119
     }
    ]
   }
