@@ -40,8 +40,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .rbtn.danger{border-color:rgba(255,80,80,.4);color:#ff9a9a}
 .rbtn.accept{border-color:rgba(124,255,196,.5);color:var(--accent)}
 .roles{text-align:center;font-size:12px;opacity:.9;margin:0 0 6px;min-height:16px;color:var(--text)}
-
-/* ===== v3.11: овальный стол ПО ЦЕНТРУ, сиденья по верхней дуге, колода ниже слева ===== */
 .felt-oval{
   position:relative;
   width:min(100%,760px);
@@ -55,7 +53,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
     0 10px 30px rgba(0,0,0,.5);
   border:2px solid rgba(255,209,102,.22);
 }
-/* сиденья на верхней кромке овала: Б1 слева, Б2 сверху, Б3 справа */
 .seat{
   position:absolute;
   transform:translate(-50%,-50%);
@@ -69,7 +66,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .seat-top{left:50%;top:0}
 .seat-left{left:10%;top:20%}
 .seat-right{left:90%;top:20%}
-/* колода с козырем — внутри овала, ниже и левее центра */
 .deckbox{
   position:absolute;
   left:16%;
@@ -87,7 +83,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .trumpcard .center{font-size:calc(var(--cw) * .55)}
 .deckcount{font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 3px #000}
 .trumpbadge{font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,.4);border-radius:12px;padding:2px 8px;border:1px solid rgba(255,209,102,.25);white-space:nowrap}
-/* пары карт — строго по центру овала */
 .table{
   position:absolute;
   left:50%;
@@ -102,8 +97,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
   min-height:130px;
   z-index:1;
 }
-
-/* ===== пары карт: атака снизу, отбитие поверх со сдвигом ===== */
 .pair{
   position:relative;
   width:calc(var(--cw) * 1.15);
@@ -114,7 +107,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .pair.drop-ok{box-shadow:0 0 0 3px rgba(120,220,255,.85),0 0 14px rgba(120,220,255,.5);border-radius:10px}
 .pair .atk{position:absolute;left:0;top:calc(var(--cw) * 0.15)}
 .pair .def{position:absolute;left:18%;top:0;transform:rotate(8deg);box-shadow:-3px 5px 12px rgba(0,0,0,.55);z-index:2}
-
 .card{width:var(--cw);height:calc(var(--cw)*1.4);border-radius:8px;background:linear-gradient(160deg,#fff,#e8e8e8);box-shadow:0 3px 8px rgba(0,0,0,.45);position:relative;display:flex;align-items:center;justify-content:center;font-weight:700;border:1px solid #bbb;touch-action:none}
 .card.spade{color:#101418}.card.club{color:#0a8a0a}.card.heart{color:#e63946}.card.diamond{color:#ff7a00}
 .card .corner{position:absolute;font-size:calc(var(--cw)*.22);line-height:1.05;text-align:center;font-weight:800}
@@ -129,8 +121,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .card.hi{box-shadow:0 0 0 3px var(--accent),0 3px 8px rgba(0,0,0,.45)}
 .card.selcard{box-shadow:0 0 0 3px #9be2ff,0 6px 16px rgba(0,0,0,.5);transform:translateY(-6px)}
 .card.dragghost{position:fixed;width:46px;height:64px;z-index:400;pointer-events:none;opacity:.92;transform:rotate(4deg);box-shadow:0 8px 20px rgba(0,0,0,.6)}
-
-/* ===== чипы игроков ===== */
 .player-chip{
   pointer-events:auto;
   display:flex;
@@ -173,7 +163,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .role-tag{font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;letter-spacing:.5px;text-transform:uppercase}
 .role-tag.att{background:rgba(255,209,102,.2);color:var(--accent);border:1px solid var(--accent)}
 .role-tag.def{background:rgba(230,57,70,.22);color:#ff9a9a;border:1px solid var(--red)}
-
 .status{text-align:center;font-size:14px;font-weight:600;margin:8px 0;min-height:20px;color:var(--accent)}
 .status.warn{color:#ff8f8f}
 .status.hold{color:#9be2ff;animation:holdPulse 1s infinite alternate}
@@ -210,6 +199,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .lobby-list .row.host{border:1px solid rgba(255,209,102,.35)}
 .switch-label{display:flex;gap:10px;align-items:center;margin:12px 0 4px;font-size:14px;cursor:pointer}
 .switch-label input{width:20px;height:20px;accent-color:var(--accent)}
+.switch-label input:disabled{opacity:.4;cursor:not-allowed}
 .note{font-size:12px;opacity:.7;line-height:1.45;margin-bottom:10px}
 .selrow{margin:12px 0 4px;font-size:14px;font-weight:600;text-align:left}
 .selrow select{width:100%;margin-top:6px;padding:7px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);color:var(--text);font-size:14px}
@@ -247,9 +237,9 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <button class="btn primary" id="finishBtn" style="display:none">🏁 Завершить</button>
 <button class="btn" id="menuBtn" style="display:none">🏠 В меню игр</button>
 </div>
-<div class="ver" id="verTag">v3.11</div>
+<div class="ver" id="verTag">v3.12</div>
 </div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v3.11</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>2–4 игрока, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока, старт вручную</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v3.12</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>2–4 игрока, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока, старт вручную</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="lobbyOverlay"><div class="cardbox"><h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2><div class="sub">Ожидание игроков (2–4). Хост запускает партию кнопкой «▶ Начать».</div><div class="lobby-list" id="lobbyList"></div><div class="btns"><button class="btn" id="lobbyInvite">📤 Пригласить</button><button class="btn primary" id="lobbyStart">▶ Начать</button><button class="btn" id="lobbyLeave">🚪 Выйти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="setOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">⚙️ Настройки</h2>
@@ -258,17 +248,17 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div>
 <div class="note">Лёгкие боты ошибаются и бьют наугад, средние играют аккуратно, сложные берегут козыри и грамотно подкидывают.</div>
 <label class="switch-label"><input type="checkbox" id="transferChk"> Переводной дурак</label>
-<div class="note">Пока ни одна карта не покрыта, отбивающийся может положить ОДНУ карту того же ранга, что и атака, и перевести всю стопку на следующего игрока. Если таких карт несколько — игра предложит выбрать, какой именно переводить; вторая останется в руке (её можно подкинуть позже).</div>
+<div class="note">Пока ни одна карта не покрыта, отбивающийся может положить ОДНУ карту того же ранга, что и атака, и перевести всю стопку на следующего игрока. Если таких карт несколько — игра предложит выбрать, какой именно переводить; вторая останется в руке (её можно подкинуть позже).<br><b>v3.12:</b> переключатель действует СРАЗУ на текущую партию. В онлайн правила меняет только хост — изменение применяется у всех сразу; у гостей переключатель заблокирован и показывает правила комнаты.</div>
 <label class="switch-label"><input type="checkbox" id="allAddChk"> Подкидывают все игроки</label>
-<div class="note">Только для партии вчетвером. Выключено (классика): подкидывают лишь крайние к отбивающемуся. Включено: любой, кроме отбивающегося.</div>
+<div class="note">Только для партии вчетвером. Выключено (классика): подкидывают лишь крайние к отбивающемуся. Включено: любой, кроме отбивающегося. Действует сразу на текущую партию; в онлайн меняет только хост.</div>
 <div class="selrow">Пауза на подкидывание перед закрытием раунда (офлайн)
 <select id="pauseSel"><option value="0">Без паузы</option><option value="2">2 секунды</option><option value="3" selected>3 секунды</option><option value="5">5 секунд</option></select>
 </div>
-<div class="note">Когда бот собирается сказать «Бито» или завершить взятие, игра даёт время подкинуть карты и подсвечивает их. Игрок без карт становится наблюдателем только после того, как колода опустеет.</div>
+<div class="note">Когда бот собирается сказать «Бито» или завершить взятие, игра даёт время подкинуть карты и подсвечивает их. Игрок с пустой рукой становится наблюдателем только после того, как колода опустеет.</div>
 <div class="btns"><button class="btn primary" id="setClose">Готово</button></div></div></div>
-<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила</h2><div class="sub">• Козырь — масть последней карты колоды; первый ход — у младшего козыря.<br>• Атакующий кладёт карту, отбивающийся бьёт её старшей той же масти или козырем.<br>• Отбиваться можно в любом порядке: подсветятся все карты, бьющие хотя бы одну неотбитую. Тапни карту руки и, если целей несколько, тапни нужную карту стола; или <b>перетащи</b> карту руки на атакованную.<br>• Подкидывать можно тапом или <b>перетаскиванием</b> карты на стол/колоду.<br>• Подкинуть можно, пока число неотбитых карт + 1 не превышает руку отбивающегося (и не больше 6 пар).<br>• «Бито» — всё отбито, карты в сброс; отбившийся становится атакующим.<br>• «Взять» — отбивающийся забирает стол и пропускает ход атаки (вдвоём следующий раунд снова «под него»).<br>• Переводной: пока ни одна карта не покрыта и все неотбитые карты одного ранга, отбивающийся кладёт одну свою карту того же ранга (при нескольких — выбирает какую) и переводит всю стопку на следующего игрока.<br>• После раунда все добирают из колоды до 6 (отбивающийся последним).<br>• Проигравший — последний с картами («дурак»). Игрок с пустой рукой при опустевшей колоде становится наблюдателем.<br>• Онлайн: 2–4 игрока; после партии все жмут «🔄 Реванш» — можно догнать новых игроков или отпустить ушедших, и хост снова запускает партию.<br>• Онлайн защищён анонимной авторизацией Firebase: каждое место занято уникальным uid, чужой клиент не сможет подменить игрока.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
+<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила</h2><div class="sub">• Козырь — масть последней карты колоды; первый ход — у младшего козыря.<br>• Атакующий кладёт карту, отбивающийся бьёт её старшей той же масти или козырем.<br>• Отбиваться можно в любом порядке: подсветятся все карты, бьющие хотя бы одну неотбитую. Тапни карту руки и, если целей несколько, тапни нужную карту стола; или <b>перетащи</b> карту руки на атакованную.<br>• Подкидывать можно тапом или <b>перетаскиванием</b> карты на стол/колоду.<br>• Подкинуть можно, пока число неотбитых карт + 1 не превышает руку отбивающегося (и не больше 6 пар).<br>• «Бито» — всё отбито, карты в сброс; отбившийся становится атакующим.<br>• «Взять» — отбивающийся забирает стол и пропускает ход атаки (вдвоём следующий раунд снова «под него»).<br>• Переводной: пока ни одна карта не покрыта и все неотбитые карты одного ранга, отбивающийся кладёт одну свою карту того же ранга (при нескольких — выбирает какую) и переводит всю стопку на следующего игрока. Значок ⇄ у козыря означает, что перевод в текущей партии включён.<br>• После раунда все добирают из колоды до 6 (отбивающийся последним).<br>• Проигравший — последний с картами («дурак»). Игрок с пустой рукой при опустевшей колоде становится наблюдателем.<br>• Онлайн: 2–4 игрока; после партии все жмут «🔄 Реванш» — можно догнать новых игроков или отпустить ушедших, и хост снова запускает партию.<br>• Онлайн защищён анонимной авторизацией Firebase: каждое место занято уникальным uid, чужой клиент не сможет подменить игрока.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='3.11';
+const VER='3.12';
 const HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000;
 let heartbeatTimer=null, myRound=0;
 
@@ -963,8 +953,6 @@ function beatTargets(s,c){
  if(!s||s.result||s.phase!=='attack'||me!==s.defender)return[];
  return unbeatenIdx(s).filter(i=>cbeats(c,s.table[i].a,s.trump));
 }
-
-/* ===== v3.11: рассадка по верхней дуге: 2→top; 3→left+right; 4→left+top+right ===== */
 function getSeatPositions(order, myUid){
   const meIdx = order.indexOf(myUid);
   if (meIdx < 0) return {};
@@ -978,7 +966,6 @@ function getSeatPositions(order, myUid){
   }
   return result;
 }
-
 function buildPlayerChip(p, s){
   const chip = document.createElement('div');
   chip.className = 'player-chip';
@@ -1023,7 +1010,6 @@ function buildPlayerChip(p, s){
   }
   return chip;
 }
-
 function renderPlayersBar(){
   const s = S();
   const me = meUid();
@@ -1031,7 +1017,6 @@ function renderPlayersBar(){
   $('seatLeft').innerHTML = '';
   $('seatRight').innerHTML = '';
   $('myChip').innerHTML = '';
-
   if (!s || !Array.isArray(s.order)){
     $('myChip').style.display = 'none';
     return;
@@ -1048,14 +1033,12 @@ function renderPlayersBar(){
       if (pos && seatEls[pos]) seatEls[pos].appendChild(buildPlayerChip(p, s));
     }
   });
-
   const rl = $('rolesLine');
   if (s && !s.result && s.attacker && s.defender && s.attacker !== s.defender){
     rl.style.display = 'block';
     rl.innerHTML = '⚔ ' + esc(nameOf(s.attacker)) + ' ходит под 🛡 ' + esc(nameOf(s.defender));
   } else rl.style.display = 'none';
 }
-
 function renderAll(){
  const s=S();
  const me=meUid();
@@ -1290,11 +1273,62 @@ function attachUI(){
  $('modeHubBtn').onclick=goToHub;
  $('rulesBtn').onclick=function(){sClickUi();$('rulesOverlay').classList.add('show');};
  $('rulesClose').onclick=function(){$('rulesOverlay').classList.remove('show');};
- $('setBtn').onclick=function(){sClickUi();$('diffSel').value=DIFF();$('transferChk').checked=!!set.transfer;$('allAddChk').checked=!!set.allAdd;$('pauseSel').value=String(set.throwPause);$('setOverlay').classList.add('show');};
+ /* v3.12: открытие настроек — галки правил показывают СОСТОЯНИЕ ТЕКУЩЕЙ ПАРТИИ;
+    в онлайн менять их может только хост, у гостей чекбоксы заблокированы */
+ $('setBtn').onclick=function(){sClickUi();
+  $('diffSel').value=DIFF();
+  $('pauseSel').value=String(set.throwPause);
+  const st=S();
+  if(onlineMode&&st&&!st.result){
+    $('transferChk').checked=!!st.transferEnabled;
+    $('allAddChk').checked=!!st.allAddEnabled;
+    $('transferChk').disabled=!isHost();
+    $('allAddChk').disabled=!isHost();
+  }else{
+    $('transferChk').checked=!!set.transfer;
+    $('allAddChk').checked=!!set.allAdd;
+    $('transferChk').disabled=false;
+    $('allAddChk').disabled=false;
+  }
+  $('setOverlay').classList.add('show');};
  $('setClose').onclick=function(){$('setOverlay').classList.remove('show');};
  $('diffSel').onchange=function(e){set.diff=e.target.value;saveSet();trackEvent('settings_change',{game_name:'durak',setting:'difficulty',value:set.diff});};
- $('transferChk').onchange=function(e){set.transfer=e.target.checked;saveSet();trackEvent('settings_change',{game_name:'durak',setting:'transfer',value:set.transfer});};
- $('allAddChk').onchange=function(e){set.allAdd=e.target.checked;saveSet();trackEvent('settings_change',{game_name:'durak',setting:'all_add',value:set.allAdd});};
+ /* v3.12: переводной применяется СРАЗУ к текущей партии (офлайн) или к состоянию комнаты (онлайн, только хост) */
+ $('transferChk').onchange=function(e){
+  set.transfer=e.target.checked;saveSet();
+  trackEvent('settings_change',{game_name:'durak',setting:'transfer',value:set.transfer});
+  if(onlineMode){
+    if(isHost()){
+      const st=S();
+      if(st&&!st.result){
+        roomRef.child('state/transferEnabled').set(!!set.transfer).catch(err=>console.warn('[DU] transfer toggle failed:',err.message));
+        updateMessage('⇄ Переводной '+(set.transfer?'включён':'выключен')+' для текущей партии у всех');
+      }
+    }
+  }else if(G&&!G.result){
+    G.transferEnabled=!!set.transfer;
+    selTransfer=false;
+    renderAll();
+    updateMessage('⇄ Переводной '+(set.transfer?'включён':'выключен')+' с этого момента');
+  }
+ };
+ $('allAddChk').onchange=function(e){
+  set.allAdd=e.target.checked;saveSet();
+  trackEvent('settings_change',{game_name:'durak',setting:'all_add',value:set.allAdd});
+  if(onlineMode){
+    if(isHost()){
+      const st=S();
+      if(st&&!st.result){
+        roomRef.child('state/allAddEnabled').set(!!set.allAdd).catch(err=>console.warn('[DU] allAdd toggle failed:',err.message));
+        updateMessage('👥 Подкидывание всех '+(set.allAdd?'включено':'выключено')+' для текущей партии у всех');
+      }
+    }
+  }else if(G&&!G.result){
+    G.allAddEnabled=!!set.allAdd;
+    renderAll();
+    updateMessage('👥 Подкидывание всех '+(set.allAdd?'включено':'выключено')+' с этого момента');
+  }
+ };
  $('pauseSel').onchange=function(e){set.throwPause=+e.target.value;saveSet();trackEvent('settings_change',{game_name:'durak',setting:'throw_pause',value:set.throwPause});};
  document.querySelectorAll('#botsSeg b').forEach(function(b){b.onclick=function(){sClickUi();document.querySelectorAll('#botsSeg b').forEach(function(x){x.classList.remove('on');});b.classList.add('on');botCount=+b.dataset.n;};});
  $('modeAi').onclick=function(){ensureAudio();sClickUi();startOffline(botCount);};
