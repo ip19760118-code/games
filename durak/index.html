@@ -39,47 +39,71 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .rbtn:active{transform:scale(.95)}
 .rbtn.danger{border-color:rgba(255,80,80,.4);color:#ff9a9a}
 .rbtn.accept{border-color:rgba(124,255,196,.5);color:var(--accent)}
-.players-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
-.chip{display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px 9px;font-size:11px}
-.chip.turn{border-color:var(--accent);color:var(--accent);font-weight:700}
-.chip .dot{width:7px;height:7px;border-radius:50%;background:#57c85b;box-shadow:0 0 5px #57c85b}
-.chip .dot.off{background:#777;box-shadow:none}
 .roles{text-align:center;font-size:12px;opacity:.9;margin:0 0 6px;min-height:16px;color:var(--text)}
 
-/* ===== v3.10: овальный стол с игроками вокруг ===== */
+/* ===== v3.11: овальный стол ПО ЦЕНТРУ, сиденья по верхней дуге, колода ниже слева ===== */
 .felt-oval{
   position:relative;
-  width:100%;
-  min-height:300px;
+  width:min(100%,760px);
+  margin:46px auto 22px;
+  min-height:320px;
   background:radial-gradient(ellipse at center,#2a8c4f 0%,#1d7a3f 40%,#14532d 75%,#0d3a1f 100%);
   border-radius:50% / 45%;
-  padding:40px 25px;
-  margin:45px 25px 25px;
   box-shadow:
     inset 0 4px 20px rgba(0,0,0,.55),
     inset 0 -3px 12px rgba(255,255,255,.06),
     0 10px 30px rgba(0,0,0,.5);
   border:2px solid rgba(255,209,102,.22);
 }
-.table-area{
-  position:relative;
-  z-index:1;
+/* сиденья на верхней кромке овала: Б1 слева, Б2 сверху, Б3 справа */
+.seat{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  z-index:3;
   display:flex;
-  align-items:flex-start;
-  justify-content:center;
-  gap:18px;
-  min-height:220px;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  pointer-events:none;
 }
-.deckbox{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;margin-right:calc(var(--cw) * 0.4)}
+.seat-top{left:50%;top:0}
+.seat-left{left:10%;top:20%}
+.seat-right{left:90%;top:20%}
+/* колода с козырем — внутри овала, ниже и левее центра */
+.deckbox{
+  position:absolute;
+  left:16%;
+  top:62%;
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  z-index:1;
+}
 .deckpile{position:relative;width:var(--cw);height:calc(var(--cw)*1.4)}
 .trumpcard{position:absolute;right:calc(var(--cw) * -0.42);top:50%;width:calc(var(--cw) * 1.15);height:calc(var(--cw) * 1.6);transform:translateY(-50%) rotate(90deg)}
 .trumpcard .corner{font-size:calc(var(--cw) * .30)}
 .trumpcard .center{font-size:calc(var(--cw) * .55)}
 .deckcount{font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 3px #000}
-.trumpbadge{font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,.4);border-radius:12px;padding:2px 8px;border:1px solid rgba(255,209,102,.25)}
-.table{flex:1;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-content:flex-start;min-height:120px}
+.trumpbadge{font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,.4);border-radius:12px;padding:2px 8px;border:1px solid rgba(255,209,102,.25);white-space:nowrap}
+/* пары карт — строго по центру овала */
+.table{
+  position:absolute;
+  left:50%;
+  top:45%;
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:center;
+  align-content:center;
+  width:min(60%,430px);
+  min-height:130px;
+  z-index:1;
+}
 
-/* ===== v3.10: пары карт — друг на друге со сдвигом ===== */
+/* ===== пары карт: атака снизу, отбитие поверх со сдвигом ===== */
 .pair{
   position:relative;
   width:calc(var(--cw) * 1.15);
@@ -88,21 +112,8 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 }
 .pair.dst{box-shadow:0 0 0 3px rgba(90,220,130,.85),0 0 14px rgba(90,220,130,.5);border-radius:10px;cursor:pointer}
 .pair.drop-ok{box-shadow:0 0 0 3px rgba(120,220,255,.85),0 0 14px rgba(120,220,255,.5);border-radius:10px}
-/* атака — базовая карта */
-.pair .atk{
-  position:absolute;
-  left:0;
-  top:calc(var(--cw) * 0.15);
-}
-/* отбитие — поверх со сдвигом и поворотом */
-.pair .def{
-  position:absolute;
-  left:18%;
-  top:0;
-  transform:rotate(8deg);
-  box-shadow:-3px 5px 12px rgba(0,0,0,.55);
-  z-index:2;
-}
+.pair .atk{position:absolute;left:0;top:calc(var(--cw) * 0.15)}
+.pair .def{position:absolute;left:18%;top:0;transform:rotate(8deg);box-shadow:-3px 5px 12px rgba(0,0,0,.55);z-index:2}
 
 .card{width:var(--cw);height:calc(var(--cw)*1.4);border-radius:8px;background:linear-gradient(160deg,#fff,#e8e8e8);box-shadow:0 3px 8px rgba(0,0,0,.45);position:relative;display:flex;align-items:center;justify-content:center;font-weight:700;border:1px solid #bbb;touch-action:none}
 .card.spade{color:#101418}.card.club{color:#0a8a0a}.card.heart{color:#e63946}.card.diamond{color:#ff7a00}
@@ -119,28 +130,13 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .card.selcard{box-shadow:0 0 0 3px #9be2ff,0 6px 16px rgba(0,0,0,.5);transform:translateY(-6px)}
 .card.dragghost{position:fixed;width:46px;height:64px;z-index:400;pointer-events:none;opacity:.92;transform:rotate(4deg);box-shadow:0 8px 20px rgba(0,0,0,.6)}
 
-/* ===== v3.10: сиденья игроков вокруг стола ===== */
-.seat{
-  position:absolute;
-  transform:translate(-50%,-50%);
-  z-index:3;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:4px;
-  pointer-events:none;
-}
-.seat-top{top:-18px;left:50%}
-.seat-left{top:50%;left:8px;transform:translate(0,-50%)}
-.seat-right{top:50%;right:8px;transform:translate(0,-50%);align-items:center}
-.seat-bottom{bottom:-18px;left:50%}
-
+/* ===== чипы игроков ===== */
 .player-chip{
   pointer-events:auto;
   display:flex;
   align-items:center;
   gap:6px;
-  background:rgba(13,27,42,.9);
+  background:rgba(13,27,42,.92);
   border:2px solid rgba(255,255,255,.15);
   border-radius:16px;
   padding:5px 12px;
@@ -153,8 +149,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 }
 .player-chip .dot{width:8px;height:8px;border-radius:50%;background:#57c85b;box-shadow:0 0 5px #57c85b}
 .player-chip .dot.off{background:#777;box-shadow:none}
-
-/* Атакующий — золото */
 .player-chip.attacking{
   border-color:var(--accent);
   color:var(--accent);
@@ -165,8 +159,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
   0%,100%{box-shadow:0 0 0 2px rgba(255,209,102,.25),0 0 12px rgba(255,209,102,.4);}
   50%{box-shadow:0 0 0 3px rgba(255,209,102,.4),0 0 22px rgba(255,209,102,.75);}
 }
-
-/* Отбивающийся — красная «мишень» */
 .player-chip.defending{
   border-color:var(--red);
   color:#ffc9c9;
@@ -177,21 +169,8 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
   0%,100%{box-shadow:0 0 0 2px rgba(230,57,70,.3),0 0 14px rgba(230,57,70,.5);}
   50%{box-shadow:0 0 0 4px rgba(230,57,70,.5),0 0 28px rgba(230,57,70,.9);}
 }
-
-/* Я (текущий игрок) */
-.player-chip.me{
-  border-color:rgba(124,255,196,.5);
-  background:rgba(124,255,196,.08);
-}
-
-.role-tag{
-  font-size:10px;
-  font-weight:800;
-  padding:2px 7px;
-  border-radius:8px;
-  letter-spacing:.5px;
-  text-transform:uppercase;
-}
+.player-chip.me{border-color:rgba(124,255,196,.5);background:rgba(124,255,196,.08)}
+.role-tag{font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;letter-spacing:.5px;text-transform:uppercase}
 .role-tag.att{background:rgba(255,209,102,.2);color:var(--accent);border:1px solid var(--accent)}
 .role-tag.def{background:rgba(230,57,70,.22);color:#ff9a9a;border:1px solid var(--red)}
 
@@ -199,14 +178,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .status.warn{color:#ff8f8f}
 .status.hold{color:#9be2ff;animation:holdPulse 1s infinite alternate}
 @keyframes holdPulse{from{opacity:.75}to{opacity:1}}
-
-.my-seat{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:8px;
-  padding:10px 6px 4px;
-}
+.my-seat{display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 6px 4px}
 .hand{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;min-height:calc(var(--cw)*1.45);padding:4px;max-width:100%}
 .actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
 .btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--text);padding:9px 18px;border-radius:30px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
@@ -242,9 +214,11 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .selrow{margin:12px 0 4px;font-size:14px;font-weight:600;text-align:left}
 .selrow select{width:100%;margin-top:6px;padding:7px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);color:var(--text);font-size:14px}
 @media (max-width:520px){
-  .felt-oval{margin:38px 14px 20px;padding:30px 14px;min-height:270px}
-  .seat-left{left:2px}
-  .seat-right{right:2px}
+  .felt-oval{min-height:280px;margin:40px 4px 18px}
+  .seat-left{left:12%;top:18%}
+  .seat-right{left:88%;top:18%}
+  .deckbox{left:18%;top:64%}
+  .table{width:66%}
   .player-chip{min-width:74px;padding:4px 8px;font-size:11px}
 }
 </style>
@@ -258,10 +232,8 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
   <div class="seat seat-top" id="seatTop"></div>
   <div class="seat seat-left" id="seatLeft"></div>
   <div class="seat seat-right" id="seatRight"></div>
-  <div class="table-area">
-    <div class="deckbox"><div class="deckpile" id="deckPile"></div><div class="deckcount" id="deckCount">0</div><div class="trumpbadge" id="trumpBadge">—</div></div>
-    <div class="table" id="tableEl"></div>
-  </div>
+  <div class="deckbox"><div class="deckpile" id="deckPile"></div><div class="deckcount" id="deckCount">0</div><div class="trumpbadge" id="trumpBadge">—</div></div>
+  <div class="table" id="tableEl"></div>
 </div>
 <div class="status" id="statusEl">Выбери режим</div>
 <div class="my-seat" id="mySeatEl">
@@ -275,9 +247,9 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <button class="btn primary" id="finishBtn" style="display:none">🏁 Завершить</button>
 <button class="btn" id="menuBtn" style="display:none">🏠 В меню игр</button>
 </div>
-<div class="ver" id="verTag">v3.10</div>
+<div class="ver" id="verTag">v3.11</div>
 </div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v3.10</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>2–4 игрока, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока, старт вручную</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v3.11</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>2–4 игрока, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока, старт вручную</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="lobbyOverlay"><div class="cardbox"><h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2><div class="sub">Ожидание игроков (2–4). Хост запускает партию кнопкой «▶ Начать».</div><div class="lobby-list" id="lobbyList"></div><div class="btns"><button class="btn" id="lobbyInvite">📤 Пригласить</button><button class="btn primary" id="lobbyStart">▶ Начать</button><button class="btn" id="lobbyLeave">🚪 Выйти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="setOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">⚙️ Настройки</h2>
@@ -296,7 +268,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="btns"><button class="btn primary" id="setClose">Готово</button></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила</h2><div class="sub">• Козырь — масть последней карты колоды; первый ход — у младшего козыря.<br>• Атакующий кладёт карту, отбивающийся бьёт её старшей той же масти или козырем.<br>• Отбиваться можно в любом порядке: подсветятся все карты, бьющие хотя бы одну неотбитую. Тапни карту руки и, если целей несколько, тапни нужную карту стола; или <b>перетащи</b> карту руки на атакованную.<br>• Подкидывать можно тапом или <b>перетаскиванием</b> карты на стол/колоду.<br>• Подкинуть можно, пока число неотбитых карт + 1 не превышает руку отбивающегося (и не больше 6 пар).<br>• «Бито» — всё отбито, карты в сброс; отбившийся становится атакующим.<br>• «Взять» — отбивающийся забирает стол и пропускает ход атаки (вдвоём следующий раунд снова «под него»).<br>• Переводной: пока ни одна карта не покрыта и все неотбитые карты одного ранга, отбивающийся кладёт одну свою карту того же ранга (при нескольких — выбирает какую) и переводит всю стопку на следующего игрока.<br>• После раунда все добирают из колоды до 6 (отбивающийся последним).<br>• Проигравший — последний с картами («дурак»). Игрок с пустой рукой при опустевшей колоде становится наблюдателем.<br>• Онлайн: 2–4 игрока; после партии все жмут «🔄 Реванш» — можно догнать новых игроков или отпустить ушедших, и хост снова запускает партию.<br>• Онлайн защищён анонимной авторизацией Firebase: каждое место занято уникальным uid, чужой клиент не сможет подменить игрока.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='3.10';
+const VER='3.11';
 const HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000;
 let heartbeatTimer=null, myRound=0;
 
@@ -699,7 +671,7 @@ function leaveRoom(){stopHeartbeat();removePresence();onlineMode=false;if(roomRe
  lobbyOverlay.classList.remove('show');endOverlay.classList.remove('show');renderPlayersBar();}
 function showLobby(){lobbyOverlay.classList.add('show');$('lobbyCode').textContent=roomCode;
  const list=$('lobbyList');list.innerHTML='';
- playersList().forEach(function(p,i){const r=document.createElement('div');r.className='row'+(p.host?' host':'');r.innerHTML='<span>'+(i+1)+'. '+esc(p.name)+(p.seat===mySeat?' (вы)':'')+(p.host?' 👑':'')+'</span><span>'+(p.connected?'🟢':'⚪')+'</span>';list.appendChild(r);});
+ playersList().forEach(function(p,i){const r=document.createElement('div');r.className='row'+(p.host?' host':'');r.innerHTML='<span>'+(i+1)+'. '+esc(p.name)+(p.seat===mySeat?' (вы)':'')+(p.host?' 👑':'')+'</span><span>'+(p.connected?'🟢':'')+'</span>';list.appendChild(r);});
  for(let i=playersList().length;i<MAX_PLAYERS;i++){const r=document.createElement('div');r.className='row';r.innerHTML='<span style="opacity:.5">— место свободно —</span><span>⚪</span>';list.appendChild(r);}
  $('lobbyStart').style.display=isHost()?'inline-flex':'none';
  $('lobbyStart').disabled=playersList().length<2;}
@@ -992,7 +964,7 @@ function beatTargets(s,c){
  return unbeatenIdx(s).filter(i=>cbeats(c,s.table[i].a,s.trump));
 }
 
-/* ===== v3.10: расстановка игроков вокруг овального стола ===== */
+/* ===== v3.11: рассадка по верхней дуге: 2→top; 3→left+right; 4→left+top+right ===== */
 function getSeatPositions(order, myUid){
   const meIdx = order.indexOf(myUid);
   if (meIdx < 0) return {};
@@ -1001,7 +973,7 @@ function getSeatPositions(order, myUid){
   for (let k = 1; k < n; k++) {
     const u = order[(meIdx + k) % n];
     if (n === 2) result[u] = 'top';
-    else if (n === 3) result[u] = (k === 1 ? 'left' : 'top');
+    else if (n === 3) result[u] = (k === 1 ? 'left' : 'right');
     else result[u] = (k === 1 ? 'left' : (k === 2 ? 'top' : 'right'));
   }
   return result;
@@ -1095,7 +1067,6 @@ function renderAll(){
  const tbl=(s&&Array.isArray(s.table))?s.table:[];
  const aimTargets=selCard?beatTargets(s,selCard):[];
  tbl.forEach(function(p,ti){
-  /* v3.10: пара с двумя слоями — .atk (нижняя) и .def (верхняя со сдвигом) */
   const pr=document.createElement('div');pr.className='pair';pr.dataset.ti=ti;
   const atk=cardEl(p.a,false,false);
   atk.classList.add('atk');
