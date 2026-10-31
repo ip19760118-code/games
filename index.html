@@ -76,28 +76,31 @@
 
       <button class="download-btn" id="downloadBtn">📥 Скачать приложение</button>
 
-      <p class="hub-desc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. В браузере и мессенджерах игры запускаются без установки: нажми и играй. Для ПК есть приложение Windows: оно устанавливается один раз, хранит игры на устройстве (работают офлайн) и само обновляет контент. Новые игры добавляются регулярно.</p>
+      <p class="hub-desc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. В браузере и мессенджерах игры запускаются без установки: нажми и играй. Для ПК есть приложение Windows: оно устанавливается один раз, хранит игры на устройстве (работают офлайн) и само обновляет контент. Список игр умный: любимые игры поднимаются наверх сами. Новые игры добавляются регулярно.</p>
 
-      <button class="game-btn" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
-      <button class="game-btn" id="lightsOutBtn"><span class="game-emoji">💡</span><span class="game-text"><b>Выключи Свет</b><small>Логическая головоломка: выключи всё поле</small></span></button>
-      <button class="game-btn" id="arkanoidBtn"><span class="game-emoji">🧱</span><span class="game-text"><b>Neon Arkanoid 3D</b><small>Классический арканоид с бонусами и ловушками</small></span></button>
-      <button class="game-btn" id="dominoBtn"><span class="game-emoji">🧩</span><span class="game-text"><b>Домино <span class="tag-online">ONLINE</span></b><small>Классика против бота или онлайн до 4 игроков</small></span></button>
-      <button class="game-btn" id="shooterBtn"><span class="game-emoji">🔫</span><span class="game-text"><b>3D Shooter</b><small>3D-шутер с волнами врагов и тремя видами оружия</small></span></button>
-      <button class="game-btn" id="fruitSamuraiBtn"><span class="game-emoji">🍉</span><span class="game-text"><b>Фруктовый самурай</b><small>Режь фрукты на лету и уворачивайся от бомб</small></span></button>
-      <button class="game-btn" id="chessBtn"><span class="game-emoji">♟️</span><span class="game-text"><b>Шахматы <span class="tag-online">ONLINE</span></b><small>Полные правила: против бота или друга онлайн</small></span></button>
-      <button class="game-btn" id="durakBtn"><span class="game-emoji">🃏</span><span class="game-text"><b>Дурак <span class="tag-online">ONLINE</span></b><small>Подкидной и переводной: боты или онлайн до 4</small></span></button>
-      <button class="game-btn" id="nardyBtn"><span class="game-emoji">🎲</span><span class="game-text"><b>Нарды <span class="tag-online">ONLINE</span></b><small>Классические длинные: бот или онлайн вдвоём</small></span></button>
-      <button class="game-btn" id="shashkiBtn"><span class="game-emoji">⚫</span><span class="game-text"><b>Шашки <span class="tag-online">ONLINE</span></b><small>Русские шашки: бот или онлайн вдвоём</small></span></button>
-      <button class="game-btn" id="minesBtn"><span class="game-emoji">💣</span><span class="game-text"><b>Сапёр</b><small>3 жизни, 3 уровня, скины, очки за жизни</small></span></button>
-      <button class="game-btn" id="crystalsBtn"><span class="game-emoji">💎</span><span class="game-text"><b>Кристаллы</b><small>Match‑3: бонусы, молнии, котики, корзины, 4 режима</small></span></button>
-      <button class="game-btn" id="solitaireBtn"><span class="game-emoji">♠️</span><span class="game-text"><b>Косынка</b><small>Классический пасьянс: перетаскивание, подсказки, скины</small></span></button>
-      <button class="game-btn" id="seabattleBtn"><span class="game-emoji">🚢</span><span class="game-text"><b>Морской бой <span class="tag-online">ONLINE</span></b><small>1 игрок vs ИИ или онлайн‑дуэль по коду комнаты</small></span></button>
-      <button class="game-btn" id="mahjongBtn"><span class="game-emoji">🀄</span><span class="game-text"><b>Маджонг</b><small>Пасьянс: 72/120/180 плиток, наборы, подсказки, отмена</small></span></button>
-      <button class="game-btn" id="tetrisBtn"><span class="game-emoji">🧱</span><span class="game-text"><b>Тетрис</b><small>Классика: 6 уровней, ghost, hold, wall kicks, рекорды</small></span></button>
-      <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
+      <!-- v3.28: контейнер списка игр для умной сортировки; data-game = ключ статистики -->
+      <div id="gamesList">
+        <button class="game-btn" data-game="trend_catch" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
+        <button class="game-btn" data-game="lights_out" id="lightsOutBtn"><span class="game-emoji">💡</span><span class="game-text"><b>Выключи Свет</b><small>Логическая головоломка: выключи всё поле</small></span></button>
+        <button class="game-btn" data-game="arkanoid" id="arkanoidBtn"><span class="game-emoji">🧱</span><span class="game-text"><b>Neon Arkanoid 3D</b><small>Классический арканоид с бонусами и ловушками</small></span></button>
+        <button class="game-btn" data-game="domino" id="dominoBtn"><span class="game-emoji">🧩</span><span class="game-text"><b>Домино <span class="tag-online">ONLINE</span></b><small>Классика против бота или онлайн до 4 игроков</small></span></button>
+        <button class="game-btn" data-game="shooter" id="shooterBtn"><span class="game-emoji">🔫</span><span class="game-text"><b>3D Shooter</b><small>3D-шутер с волнами врагов и тремя видами оружия</small></span></button>
+        <button class="game-btn" data-game="fruit_samurai" id="fruitSamuraiBtn"><span class="game-emoji">🍉</span><span class="game-text"><b>Фруктовый самурай</b><small>Режь фрукты на лету и уворачивайся от бомб</small></span></button>
+        <button class="game-btn" data-game="chess" id="chessBtn"><span class="game-emoji">♟️</span><span class="game-text"><b>Шахматы <span class="tag-online">ONLINE</span></b><small>Полные правила: против бота или друга онлайн</small></span></button>
+        <button class="game-btn" data-game="durak" id="durakBtn"><span class="game-emoji">🃏</span><span class="game-text"><b>Дурак <span class="tag-online">ONLINE</span></b><small>Подкидной и переводной: боты или онлайн до 4</small></span></button>
+        <button class="game-btn" data-game="nardy" id="nardyBtn"><span class="game-emoji">🎲</span><span class="game-text"><b>Нарды <span class="tag-online">ONLINE</span></b><small>Классические длинные: бот или онлайн вдвоём</small></span></button>
+        <button class="game-btn" data-game="shashki" id="shashkiBtn"><span class="game-emoji">⚫</span><span class="game-text"><b>Шашки <span class="tag-online">ONLINE</span></b><small>Русские шашки: бот или онлайн вдвоём</small></span></button>
+        <button class="game-btn" data-game="minesweeper" id="minesBtn"><span class="game-emoji">💣</span><span class="game-text"><b>Сапёр</b><small>3 жизни, 3 уровня, скины, очки за жизни</small></span></button>
+        <button class="game-btn" data-game="crystals" id="crystalsBtn"><span class="game-emoji">💎</span><span class="game-text"><b>Кристаллы</b><small>Match‑3: бонусы, молнии, котики, корзины, 4 режима</small></span></button>
+        <button class="game-btn" data-game="solitaire" id="solitaireBtn"><span class="game-emoji">♠️</span><span class="game-text"><b>Косынка</b><small>Классический пасьянс: перетаскивание, подсказки, скины</small></span></button>
+        <button class="game-btn" data-game="seabattle" id="seabattleBtn"><span class="game-emoji">🚢</span><span class="game-text"><b>Морской бой <span class="tag-online">ONLINE</span></b><small>1 игрок vs ИИ или онлайн‑дуэль по коду комнаты</small></span></button>
+        <button class="game-btn" data-game="mahjong" id="mahjongBtn"><span class="game-emoji">🀄</span><span class="game-text"><b>Маджонг</b><small>Пасьянс: 72/120/180 плиток, наборы, подсказки, отмена</small></span></button>
+        <button class="game-btn" data-game="tetris" id="tetrisBtn"><span class="game-emoji">🧱</span><span class="game-text"><b>Тетрис</b><small>Классика: 6 уровней, ghost, hold, wall kicks, рекорды</small></span></button>
+        <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
+      </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.27 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.28 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
@@ -119,7 +122,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.27';
+    const HUB_VER = '3.28';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
 
@@ -150,8 +153,56 @@
       } catch (e) {}
     })();
 
+    /* ---------- v3.28: умная сортировка списка игр ---------- */
+    const SORT_KEY = 'hub_sort_stats';
+    const HALF_LIFE_DAYS = 30;   /* вклад запуска падает вдвое за 30 дней простоя */
+
+    function loadSortStats(){ try { return JSON.parse(localStorage.getItem(SORT_KEY)) || {}; } catch(e){ return {}; } }
+    function saveSortStats(s){ try { localStorage.setItem(SORT_KEY, JSON.stringify(s)); } catch(e){} }
+    function bumpGameStat(key){
+      if (!key) return;
+      const s = loadSortStats();
+      const e = s[key] || { n: 0, t: 0 };
+      e.n = (e.n || 0) + 1;
+      e.t = Date.now();
+      s[key] = e;
+      saveSortStats(s);
+    }
+    function scoreOf(e){
+      if (!e || !e.n) return 0;
+      const days = (Date.now() - (e.t || 0)) / 86400000;
+      return e.n * Math.pow(0.5, days / HALF_LIFE_DAYS);
+    }
+    function applySmartSort(){
+      const list = document.getElementById('gamesList');
+      if (!list) return;
+      const stats = loadSortStats();
+      const items = Array.prototype.slice.call(list.children).map(function(el, i){
+        const key = el.getAttribute('data-game') || '';
+        return { el: el, orig: i, score: scoreOf(stats[key]) };
+      });
+      items.sort(function(a, b){
+        if (b.score !== a.score) return b.score - a.score;  /* частые и свежие выше */
+        return a.orig - b.orig;                              /* равенство = кураторский порядок */
+      });
+      items.forEach(function(it){ list.appendChild(it.el); });
+    }
+    (function handleSortReset(){
+      try {
+        const u = new URL(location.href);
+        if (u.searchParams.get('sort') === 'reset') {
+          localStorage.removeItem(SORT_KEY);
+        }
+      } catch (e) {}
+    })();
+
     function openGame(url, gameName) {
       trackEvent('hub_game_click', { game_name: gameName });
+      /* v3.28: статистика запусков; ключ = папка игры без ./ и слэшей, дефисы→нижние */
+      try {
+        const key = String(url).replace(/^\.\//, '').replace(/\/$/, '').replace(/-/g, '_');
+        bumpGameStat(key);
+      } catch (e) {}
       try { Platform.haptic('light'); } catch (e) {}
       const sep = url.indexOf('?') >= 0 ? '&' : '?';
       const target = url + sep + 'plat=' + Platform.name;
@@ -290,6 +341,9 @@
         }
       } catch (e) {}
     })();
+
+    /* v3.28: пересортировка списка при каждой загрузке хаба */
+    applySmartSort();
   </script>
 </body>
 </html>
