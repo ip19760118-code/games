@@ -237,9 +237,9 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <button class="btn primary" id="finishBtn" style="display:none">🏁 Завершить</button>
 <button class="btn" id="menuBtn" style="display:none">🏠 В меню игр</button>
 </div>
-<div class="ver" id="verTag">v3.14</div>
+<div class="ver" id="verTag">v3.15</div>
 </div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v3.14</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>2–4 игрока, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока, старт вручную</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v3.15</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>2–4 игрока, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока, старт вручную</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="lobbyOverlay"><div class="cardbox"><h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2><div class="sub">Ожидание игроков (2–4). Хост запускает партию кнопкой «▶ Начать».</div><div class="lobby-list" id="lobbyList"></div><div class="btns"><button class="btn" id="lobbyInvite">📤 Пригласить</button><button class="btn primary" id="lobbyStart">▶ Начать</button><button class="btn" id="lobbyLeave">🚪 Выйти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="setOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">⚙️ Настройки</h2>
@@ -250,15 +250,15 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <label class="switch-label"><input type="checkbox" id="transferChk"> Переводной дурак</label>
 <div class="note">Пока ни одна карта не покрыта, отбивающийся может положить ОДНУ карту того же ранга, что и атака, и перевести всю стопку на следующего игрока. Если таких карт несколько — игра предложит выбрать, какой именно переводить; вторая останется в руке (её можно подкинуть позже).<br><b>v3.12:</b> переключатель действует СРАЗУ на текущую партию. В онлайн правила меняет только хост — изменение применяется у всех сразу; у гостей переключатель заблокирован и показывает правила комнаты.</div>
 <label class="switch-label"><input type="checkbox" id="allAddChk"> Крайние игроки могут подкидывать</label>
-<div class="note"><b>v3.14, новые правила подкидывания:</b> включено — подкидывать могут только крайние к отбивающемуся соседи; выключено — подкидывания нет вовсе, карты кидает только атакующий. Атакующий добавляет карты в обоих режимах. Действует сразу на текущую партию; в онлайн меняет только хост.<br>В режиме с ИИ боты подкидывают не чаще одной карты в 2 секунды, чтобы у тебя оставалось место и время.</div>
+<div class="note"><b>Правила подкидывания:</b> включено — подкидывать могут только крайние к отбивающемуся соседи; выключено — подкидывания нет вовсе, карты кидает только атакующий. Атакующий добавляет карты в обоих режимах и ходит без пауз. Действует сразу на текущую партию; в онлайн меняет только хост.<br>В режиме с ИИ боты-подкидыватели ждут 2 с перед первой картой и кидают не чаще одной карты в 2 секунды — у тебя всегда остаётся окно для своего подкидывания.</div>
 <div class="selrow">Пауза на подкидывание перед закрытием раунда (офлайн)
 <select id="pauseSel"><option value="0">Без паузы</option><option value="2">2 секунды</option><option value="3" selected>3 секунды</option><option value="5">5 секунд</option></select>
 </div>
 <div class="note">Когда бот собирается сказать «Бито» или завершить взятие, игра даёт время подкинуть карты и подсвечивает их. Игрок с пустой рукой становится наблюдателем только после того, как колода опустеет.</div>
 <div class="btns"><button class="btn primary" id="setClose">Готово</button></div></div></div>
-<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила</h2><div class="sub">• Козырь — масть последней карты колоды; первый ход — у младшего козыря.<br>• Атакующий кладёт карту, отбивающийся бьёт её старшей той же масти или козырем.<br>• Отбиваться можно в любом порядке: подсветятся все карты, бьющие хотя бы одну неотбитую. Тапни карту руки и, если целей несколько, тапни нужную карту стола; или <b>перетащи</b> карту руки на атакованную.<br>• Подкидывать можно тапом или <b>перетаскиванием</b> карты на стол/колоду.<br>• <b>Подкидывание (v3.14):</b> при включённой галочке «Крайние игроки могут подкидывать» подкидывать могут только крайние к отбивающемуся соседи; без галочки подкидывания нет вовсе — карты кидает только атакующий. Атакующий добавляет карты в обоих режимах.<br>• Подкинуть можно, пока число неотбитых карт + 1 не превышает руку отбивающегося (и не больше 6 пар).<br>• В режиме с ИИ боты подкидывают не чаще одной карты в 2 секунды — у тебя всегда остаётся окно для своего подкидывания.<br>• «Бито» — всё отбито, карты в сброс; отбившийся становится атакующим.<br>• «Взять» — отбивающийся забирает стол и пропускает ход атаки (вдвоём следующий раунд снова «под него»).<br>• Переводной: пока ни одна карта не покрыта и все неотбитые карты одного ранга, отбивающийся кладёт одну свою карту того же ранга (при нескольких — выбирает какую) и переводит всю стопку на следующего игрока. Значок ⇄ у козыря означает, что перевод в текущей партии включён.<br>• После раунда все добирают из колоды до 6 (отбивающийся последним).<br>• Проигравший — последний с картами («дурак»). Игрок с пустой рукой при опустевшей колоде становится наблюдателем.<br>• Онлайн: 2–4 игрока; после партии все жмут «🔄 Реванш» — можно догнать новых игроков или отпустить ушедших, и хост снова запускает партию.<br>• Онлайн защищён анонимной авторизацией Firebase: каждое место занято уникальным uid, чужой клиент не сможет подменить игрока.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
+<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила</h2><div class="sub">• Козырь — масть последней карты колоды; первый ход — у младшего козыря.<br>• Атакующий кладёт карту, отбивающийся бьёт её старшей той же масти или козырем.<br>• Отбиваться можно в любом порядке: подсветятся все карты, бьющие хотя бы одну неотбитую. Тапни карту руки и, если целей несколько, тапни нужную карту стола; или <b>перетащи</b> карту руки на атакованную.<br>• Подкидывать можно тапом или <b>перетаскиванием</b> карты на стол/колоду.<br>• <b>Подкидывание:</b> при включённой галочке «Крайние игроки могут подкидывать» подкидывать могут только крайние к отбивающемуся соседи; без галочки подкидывания нет вовсе — карты кидает только атакующий. Атакующий добавляет карты в обоих режимах.<br>• Подкинуть можно, пока число неотбитых карт + 1 не превышает руку отбивающегося (и не больше 6 пар).<br>• В режиме с ИИ боты-подкидыватели действуют не чаще одной карты в 2 секунды — у тебя всегда остаётся окно для своего подкидывания.<br>• «Бито» — всё отбито, карты в сброс; отбившийся становится атакующим.<br>• «Взять» — отбивающийся забирает стол и пропускает ход атаки (вдвоём следующий раунд снова «под него»).<br>• Переводной: пока ни одна карта не покрыта и все неотбитые карты одного ранга, отбивающийся кладёт одну свою карту того же ранга (при нескольких — выбирает какую) и переводит всю стопку на следующего игрока. Значок ⇄ у козыря означает, что перевод в текущей партии включён.<br>• После раунда все добирают из колоды до 6 (отбивающийся последним).<br>• Проигравший — последний с картами («дурак»). Игрок с пустой рукой при опустевшей колоде становится наблюдателем.<br>• Онлайн: 2–4 игрока; после партии все жмут «🔄 Реванш» — можно догнать новых игроков или отпустить ушедших, и хост снова запускает партию.<br>• Онлайн защищён анонимной авторизацией Firebase: каждое место занято уникальным uid, чужой клиент не сможет подменить игрока.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='3.14';
+const VER='3.15';
 const HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000;
 let heartbeatTimer=null, myRound=0;
 
@@ -499,9 +499,10 @@ let onlineMode=false,roomCode=null,myUid=null,mySeat=null,myName=null,roomRef=nu
 let G=null,botCount=2,botTimer=null,prevTurnMe=null,prevLastAt=0,repairTick=null;
 let closeHoldUntil=0,holdKey='',selCard=null,selTransfer=false;
 let dragCard=null,dragGhost=null,dragMoved=false,downX=0,downY=0,dragJustEndedAt=0;
-/* v3.14: дозирование подкидывания ботов — не чаще одной карты в 2 c на бота */
+/* v3.15: пауза 2 c ТОЛЬКО для подкидывания (бот не атакующий); штампы привязаны к эпизоду
+   раунда (botEpisode), чтобы периодические тики не сбрасывали отсчёт (фикс зависания v3.14) */
 const BOT_ADD_GAP=2000;
-let botLastAddAt={},botAddOppAt={};
+let botLastAddAt={},botAddOppAt={},botEpisode=0;
 function getUid(){return (fbAuth&&fbAuth.currentUser)?fbAuth.currentUser.uid:(lsGet('durak_uid_fallback','')||'');}
 
 function getUserName(){
@@ -751,7 +752,7 @@ setInterval(()=>{
 },250);
 function startOffline(n){
  onlineMode=false;G=null;prevTurnMe=null;closeHoldUntil=0;holdKey='';selCard=null;selTransfer=false;
- botLastAddAt={};botAddOppAt={};
+ botEpisode=0;botLastAddAt={};botAddOppAt={};
  const order=['p0'];for(let i=1;i<n;i++)order.push('b'+i);
  G=dealState(order,{},set.transfer,set.allAdd);
  hideMode();endOverlay.classList.remove('show');
@@ -843,19 +844,22 @@ function humanCanAddNow(s){
  if(!canPodkid(s,me))return false;
  return (s.hands[me]||[]).some(c=>canAddCard(s,me,c,false));
 }
-/* v3.14: бот-подкидывание с паузами: 2 c от первой возможности, затем не чаще 1 карты в 2 c */
+/* v3.15: бот-подкидывание с паузами ТОЛЬКО для не-атакующих:
+   2 c от первой возможности в раунде, затем не чаще 1 карты в 2 c.
+   Атакующий бот атакует/докидывает без пауз (иначе первый ход зависал, баг v3.14). */
 function botStepOnce(){
  if(!G||G.result)return;
- if(G.phase==='add'&&G.table.length===0){botLastAddAt={};botAddOppAt={};}
  let retryAt=0;
  for(const uid of G.order){
   if(uid==='p0')continue;
   const act=botDecide(uid);
   if(!act)continue;
-  if(act.type==='add'){
+  if(act.type==='add'&&uid!==G.attacker){
    const now=Date.now();
-   if(!botAddOppAt[uid])botAddOppAt[uid]=now;
-   const readyAt=Math.max(botAddOppAt[uid]+BOT_ADD_GAP,(botLastAddAt[uid]||0)+BOT_ADD_GAP);
+   const st=botAddOppAt[uid];
+   if(!st||st.ep!==botEpisode){botAddOppAt[uid]={ep:botEpisode,at:now};}
+   const opp=botAddOppAt[uid].at;
+   const readyAt=Math.max(opp+BOT_ADD_GAP,(botLastAddAt[uid]||0)+BOT_ADD_GAP);
    if(now<readyAt){
      if(!retryAt||readyAt<retryAt)retryAt=readyAt;
      continue;
@@ -882,7 +886,7 @@ function botStepOnce(){
   else if(act.type==='finish')done=applyRaw(st=>actFinishTake(st,uid),sTake);
   else if(act.type==='transfer')done=applyRaw(st=>actTransfer(st,uid,act.card),sTrans);
   if(done){
-    if(act.type==='add')botLastAddAt[uid]=Date.now();
+    if(act.type==='add'&&uid!==G.attacker)botLastAddAt[uid]=Date.now();
     closeHoldUntil=0;holdKey='';selCard=null;selTransfer=false;renderAll();
     if(G.result){showEnd();return;}
     updateMessage(statusText());botThink();
@@ -934,7 +938,11 @@ function applyMove(fn,label,snd){
   });
   return;
  }
- const ns=fn(G);if(!ns)return;G=ns;closeHoldUntil=0;holdKey='';snd&&snd();renderAll();if(G.result)showEnd();else{updateMessage(statusText());botThink();}
+ const hadTable=!!(G&&G.table&&G.table.length>0);
+ const ns=fn(G);if(!ns)return;G=ns;closeHoldUntil=0;holdKey='';snd&&snd();
+ /* v3.15: стол очистился (бито/взял/конец раунда) → новый эпизод подкидывания */
+ if(hadTable&&G.table.length===0){botEpisode++;botLastAddAt={};botAddOppAt={};}
+ renderAll();if(G.result)showEnd();else{updateMessage(statusText());botThink();}
 }
 function cardEl(c,faceDown,clickable,hi,dim){
  const d=document.createElement('div');
@@ -1290,7 +1298,7 @@ function showEnd(){
   const lv=document.createElement('button');lv.className='btn';lv.textContent='🚪 Выйти';lv.onclick=function(){leaveRoom();endOverlay.classList.remove('show');showMode();};b.appendChild(lv);
  }else{
   const r=document.createElement('button');r.className='btn primary';r.textContent='🔄 Ещё партию';r.onclick=function(){endOverlay.classList.remove('show');startOffline(botCount);};b.appendChild(r);
-  const m=document.createElement('button');m.className='btn';m.textContent='🏠 В меню дурака';m.onclick=function(){sClickUi();endOverlay.classList.remove('show');G=null;closeHoldUntil=0;holdKey='';selCard=null;selTransfer=false;botLastAddAt={};botAddOppAt={};renderAll();showMode();};b.appendChild(m);
+  const m=document.createElement('button');m.className='btn';m.textContent='🏠 В меню дурака';m.onclick=function(){sClickUi();endOverlay.classList.remove('show');G=null;closeHoldUntil=0;holdKey='';selCard=null;selTransfer=false;botEpisode=0;botLastAddAt={};botAddOppAt={};renderAll();showMode();};b.appendChild(m);
   const h=document.createElement('button');h.className='btn';h.textContent='← В меню игр';h.onclick=goToHub;b.appendChild(h);
  }
  endOverlay.classList.add('show');
