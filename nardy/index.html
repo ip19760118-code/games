@@ -60,6 +60,9 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .pt.sel{box-shadow:inset 0 0 0 3px var(--accent)}
 .pt.can{box-shadow:inset 0 0 0 2px rgba(124,255,196,.55)}
 .pt.dst::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(var(--ck)*.62);height:calc(var(--ck)*.62);border-radius:50%;background:rgba(90,220,130,.75);box-shadow:0 0 10px rgba(90,220,130,.9);z-index:4}
+/* v2.6: бейдж с суммой для комбо-хода */
+.pt.combo::before{content:attr(data-sum);position:absolute;top:3px;right:3px;background:rgba(230,179,102,.96);color:#241505;font-size:10px;font-weight:900;padding:1px 5px;border-radius:6px;z-index:5;line-height:1.2;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.pt.bot.combo::before{top:auto;bottom:3px}
 .cks{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:1px}
 .pt.top .cks{padding-top:3px}
 .pt.bot .cks{position:absolute;left:0;right:0;bottom:3px;flex-direction:column-reverse}
@@ -102,15 +105,15 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="board" id="board"></div>
 <div class="status" id="statusEl">Выбери режим</div>
 <div class="actions"><button class="btn primary" id="rollBtn" style="display:none">🎲 Бросить кости</button><button class="btn" id="menuBtn" style="display:none">🏠 Меню нарды</button><button class="btn" id="newBtn" style="display:none">🔄 Новая игра</button></div>
-<div class="ver" id="verTag">v2.5</div>
+<div class="ver" id="verTag">v2.6</div>
 </div>
 <div class="fieldViewBar" id="fieldViewBar"><span class="title">👁 Просмотр партии</span><button class="btn" id="closeFieldView">Закрыть</button></div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🎲 Нарды <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.5</span></h2><div class="sub">Классические длинные · против часовой</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🎲 Нарды <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.6</span></h2><div class="sub">Классические длинные · против часовой</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="statsOverlay"><div class="cardbox"><h2>📊 Статистика</h2><div class="stat-row"><span>Партий сыграно</span><b id="stT">0</b></div><div class="stat-row"><span>Побед</span><b id="stW">0</b></div><div class="stat-row"><span>Поражений</span><b id="stL">0</b></div><div class="stat-row"><span>Процент побед</span><b id="stPct">—</b></div><div class="stat-row"><span>Серия побед сейчас</span><b id="stSt">0</b></div><div class="stat-row"><span>Рекордная серия</span><b id="stBest">0</b></div><div class="stat-row"><span>Всего снято шашек</span><b id="stBorne">0</b></div><div class="btns"><button class="btn" id="stReset">Сбросить</button><button class="btn primary" id="stClose">Закрыть</button></div></div></div>
-<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (длинные)</h2><div class="sub">• Твоя голова — нижний левый угол, твой дом — верхняя левая четверть; голова соперника — верхний правый угол, его дом — нижняя правая четверть.<br>• Движение против часовой: низ слева→направо, затем верх справа→налево; каждый проходит полный круг и возвращает шашки в свой дом.<br>• Бить нельзя: занятая точка блокирует соперника.<br>• С головы — одна шашка за ход (в первом броске 3-3, 4-4, 6-6 — две).<br>• Нельзя строить шесть точек подряд, если впереди блока нет шашки соперника.<br>• Сброс с дома: точное значение или старше, если позади нет своих.<br>• В свой ход нажми «🎲 Бросить кости»; зелёная рамка показывает шашки, которые могут ходить; конец хода автоматический.<br>• «🏠 Меню нарды» прерывает партию и возвращает к выбору режима.<br>• Победил — кто первым снял все 15.<br>• После партии жми «🔄 Реванш» — когда оба согласятся, новая партия начнётся автоматически.<br>• Онлайн защищён анонимной авторизацией Firebase.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
+<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (длинные)</h2><div class="sub">• Твоя голова — нижний левый угол, твой дом — верхняя левая четверть; голова соперника — верхний правый угол, его дом — нижняя правая четверть.<br>• Движение против часовой: низ слева→направо, затем верх справа→налево; каждый проходит полный круг и возвращает шашки в свой дом.<br>• Бить нельзя: занятая точка блокирует соперника.<br>• С головы — одна шашка за ход (в первом броске 3-3, 4-4, 6-6 — две).<br>• Нельзя строить шесть точек подряд, если впереди блока нет шашки соперника.<br>• Сброс с дома: точное значение или старше, если позади нет своих.<br>• <b>Комбо-ход (v2.6):</b> одной шашкой можно пройти сумму костей (например, 2+3=5) или при дубле 2a/3a/4a — если все промежуточные клетки свободны. Зелёная точка = обычный ход, золотой бейдж с цифрой = комбо-ход.<br>• В свой ход нажми «🎲 Бросить кости»; зелёная рамка показывает шашки, которые могут ходить; конец хода автоматический.<br>• «🏠 Меню нарды» прерывает партию и возвращает к выбору режима.<br>• Победил — кто первым снял все 15.<br>• После партии жми «🔄 Реванш» — когда оба согласятся, новая партия начнётся автоматически.<br>• Онлайн защищён анонимной авторизацией Firebase.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='2.5',FLIGHT_DUR=340;
+const VER='2.6',FLIGHT_DUR=340;
 const HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000;
 let heartbeatTimer=null, myRound=0, fieldViewMode=false;
 
@@ -206,21 +209,121 @@ function primeViolation(s,side){const o=own(s,side),op=opp(s,side);
  return false;}
 function moveTarget(s,side,idx,v){const t=legalTarget(s,side,idx,v);if(t===null)return null;const ns=clone(s);applyMove(ns,side,idx,t,v);if(primeViolation(ns,side))return null;return t;}
 function applyMove(s,side,idx,to,v){const o=own(s,side);o[idx]--;if(to==='off')s.borne[side]++;else o[to]++;if(idx===HEAD[side])s.headUsed++;const di=s.dice.indexOf(v);if(di>-1)s.dice.splice(di,1);s.turnAt=Date.now();return s;}
-function anyMove(s,side){const vals=[...new Set(s.dice||[])],o=own(s,side);for(const v of vals)for(let i=0;i<24;i++){if(o[i]>0&&moveTarget(s,side,i,v)!==null)return true;}return false;}
+/* v2.6: комбо-ход одной шашкой на сумму нескольких костей */
+function comboTarget(s,side,idx,steps){
+  if(!steps||!steps.length)return null;
+  const ns=clone(s);
+  let cur=idx,last=null;
+  for(let i=0;i<steps.length;i++){
+    const v=steps[i];
+    const t=legalTarget(ns,side,cur,v);
+    if(t===null)return null;
+    applyMove(ns,side,cur,t,v);
+    last=t;
+    if(t==='off'){
+      if(i<steps.length-1)return null; // шашка сошла, а кости ещё остались — комбо невозможно
+      cur=null;break;
+    }
+    cur=t;
+  }
+  if(primeViolation(ns,side))return null;
+  return cur===null?'off':cur;
+}
+/* v2.6: применение комбо-хода (списывает все кости steps из s.dice) */
+function applyComboMove(s,side,idx,steps){
+  let cur=idx;
+  for(const v of steps){
+    const o=own(s,side);
+    const p=pOf(side,cur),q=p+v;
+    let to;
+    if(q<24)to=idxOf(side,q);
+    else if(q===24)to='off';
+    else{to='off';}
+    o[cur]--;
+    if(to==='off')s.borne[side]++;else o[to]++;
+    if(cur===HEAD[side])s.headUsed++;
+    const di=s.dice.indexOf(v);
+    if(di>-1)s.dice.splice(di,1);
+    cur=to==='off'?null:to;
+    if(cur===null)break;
+  }
+  s.turnAt=Date.now();
+  return s;
+}
+/* v2.6: все возможные ходы (одиночные + комбо) с шашки idx */
+function allDests(s,side,idx){
+  const out=[];
+  const seen=new Set();
+  [...new Set(s.dice||[])].forEach(v=>{
+    const t=moveTarget(s,side,idx,v);
+    if(t!==null){
+      out.push({from:idx,t:t,v:v});
+      seen.add((t==='off'?'off':t)+'|'+v);
+    }
+  });
+  const dices=s.dice||[];
+  if(dices.length===2 && dices[0]!==dices[1]){
+    const [a,b]=dices;
+    for(const steps of [[a,b],[b,a]]){
+      const t=comboTarget(s,side,idx,steps);
+      if(t!==null){
+        const sum=a+b;
+        const key=(t==='off'?'off':t)+'|combo|'+sum;
+        if(!seen.has(key)){
+          out.push({from:idx,t:t,v:sum,combo:steps});
+          seen.add(key);
+        }
+        break; // нашли рабочий порядок
+      }
+    }
+  }else if(dices.length===4){
+    const a=dices[0];
+    for(const len of [2,3,4]){
+      const steps=Array(len).fill(a);
+      const t=comboTarget(s,side,idx,steps);
+      if(t!==null){
+        const sum=a*len;
+        const key=(t==='off'?'off':t)+'|combo|'+sum;
+        if(!seen.has(key)){
+          out.push({from:idx,t:t,v:sum,combo:steps});
+          seen.add(key);
+        }
+      }
+    }
+  }
+  return out;
+}
+/* v2.6: есть ли хоть какой-то ход (одиночный или комбо) */
+function anyMove(s,side){
+  const o=own(s,side);
+  for(let i=0;i<24;i++){
+    if(o[i]===0)continue;
+    if(allDests(s,side,i).length>0)return true;
+  }
+  return false;
+}
 function endTurn(s){s.first[s.turn]=false;s.turn=s.turn==='w'?'b':'w';s.dice=[];s.headUsed=0;s.turnAt=Date.now();return s;}
 function setRoll(s,d1,d2){s.rolled=[d1,d2];s.dice=d1===d2?[d1,d1,d1,d1]:[d1,d2];s.turnAt=Date.now();return s;}
 function roll(s){return setRoll(s,1+Math.floor(Math.random()*6),1+Math.floor(Math.random()*6));}
 function checkWin(s){if(s.borne.w===15){s.result={winner:'w',at:Date.now()};s.scores.w++;}else if(s.borne.b===15){s.result={winner:'b',at:Date.now()};s.scores.b++;}return s;}
 function clone(o){return JSON.parse(JSON.stringify(o));}
 function evalS(s,side){const o=own(s,side),op=opp(s,side);let ps=0,po=0,made=0;for(let i=0;i<24;i++){ps+=o[i]>0?pOf(side,i):0;po+=op[i]>0?pOf(side,i):0;if(o[i]>=2)made++;}return (s.borne[side]-s.borne[side==='w'?'b':'w'])*120+(ps-po)+made*3+Math.random()*2;}
-function dfs(s,side,depth){const vals=[...new Set(s.dice||[])];let best=null;
- for(const v of vals)for(let i=0;i<24;i++){if(own(s,side)[i]===0)continue;const t=moveTarget(s,side,i,v);if(t===null)continue;
-  const ns=clone(s);applyMove(ns,side,i,t,v);checkWin(ns);
-  if(ns.result)return{score:100000,moves:[{i,t,v}]};
-  let seq=null,sc;
-  if(ns.dice.length&&depth<5){seq=dfs(ns,side,depth+1);sc=seq?seq.score:evalS(ns,side);}else sc=evalS(ns,side);
-  const full=[{i,t,v}].concat(seq&&seq.moves?seq.moves:[]);
-  if(!best||sc>best.score)best={score:sc,moves:full};}
+/* v2.6: dfs теперь использует allDests — учитывает комбо-ходы */
+function dfs(s,side,depth){let best=null;
+ for(let i=0;i<24;i++){
+  if(own(s,side)[i]===0)continue;
+  const ds=allDests(s,side,i);
+  for(const d of ds){
+   const ns=clone(s);
+   if(d.combo)applyComboMove(ns,side,i,d.combo);else applyMove(ns,side,i,d.t,d.v);
+   checkWin(ns);
+   if(ns.result)return{score:100000,moves:[{i:i,t:d.t,v:d.v,combo:d.combo}]};
+   let seq=null,sc;
+   if(ns.dice.length&&depth<5){seq=dfs(ns,side,depth+1);sc=seq?seq.score:evalS(ns,side);}else sc=evalS(ns,side);
+   const full=[{i:i,t:d.t,v:d.v,combo:d.combo}].concat(seq&&seq.moves?seq.moves:[]);
+   if(!best||sc>best.score)best={score:sc,moves:full};
+  }
+ }
  return best;}
 let onlineMode=false,roomCode=null,myUid=null,mySide=null,myName=null,roomRef=null,roomData=null,shownEndAt=null,G=null,aiTimer=null,autoEndTimer=null,sel=-1,dests=[],playerViewSide='w',diceAnim=false,prevTurnMe=null,seenFlyAt=0,flight=null;
 function getUid(){return (fbAuth&&fbAuth.currentUser)?fbAuth.currentUser.uid:null;}
@@ -248,7 +351,6 @@ function activeSides(){
   const pres=roomData.presence||{};
   return ['w','b'].filter(sd=>(roomData.players||{})[sd]&&isPresenceFresh(pres[sd]));
 }
-/* v2.5: FIX — isGameActive работает и в офлайн-режиме (раньше всегда возвращала false вне онлайна) */
 function isGameActive(){
   if(onlineMode) return roomData && roomData.status==='playing';
   return G && !G.result;
@@ -503,7 +605,8 @@ function aiSteps(){if(!G||G.result)return;
    return;}
   const mv=moves[i++];
   flyArc(side,mv.i,mv.t);
-  applyMove(G,side,mv.i,mv.t,mv.v);checkWin(G);
+  if(mv.combo)applyComboMove(G,side,mv.i,mv.combo);else applyMove(G,side,mv.i,mv.t,mv.v);
+  checkWin(G);
   flight={side:side,from:mv.i,to:mv.t};
   renderAll();
   aiTimer=setTimeout(()=>{flight=null;mv.t==='off'?sBear():sMove();
@@ -519,16 +622,32 @@ function renderAll(){const s=S();
  prevTurnMe=(!s.result&&isActive && s.turn===me);
  const D=dispCounts(s);
  const canSet=new Set();
- if(!s.result&&isActive&&s.turn===me&&s.dice.length){const o=own(s,me);for(let i=0;i<24;i++){if(o[i]>0&&(s.dice||[]).some(v=>moveTarget(s,me,i,v)!==null))canSet.add(i);}}
+ if(!s.result&&isActive&&s.turn===me&&s.dice.length){const o=own(s,me);for(let i=0;i<24;i++){if(o[i]>0&&allDests(s,me,i).length>0)canSet.add(i);}}
  for(let i=0;i<24;i++){const el=ptEls[i];if(!el)continue;const cks=el.querySelector('.cks');cks.innerHTML='';
-  el.classList.toggle('sel',sel===i);el.classList.toggle('dst',dests.some(d=>d.t===i));el.classList.toggle('can',canSet.has(i));
+  el.classList.toggle('sel',sel===i);
+  el.classList.remove('dst','combo');
+  delete el.dataset.sum;
+  el.classList.toggle('can',canSet.has(i));
   const w=D.W[i]||0,b=D.B[i]||0,n=Math.max(w,b),col=w?'w':'b',show=Math.min(n,7);
   for(let k=0;k<show;k++){const c=document.createElement('div');c.className='ck '+col;cks.appendChild(c);}
   if(n>7){const t=document.createElement('span');t.className='ckn';t.textContent='+'+(n-7);cks.appendChild(t);}}
+ /* v2.6: отрисовка dests с бейджем для комбо */
+ dests.forEach(d=>{
+  if(d.t==='off'){
+    const bear=me==='w'?$('bearW'):$('bearB');
+    if(bear){bear.classList.toggle('dst',true);if(d.combo){bear.dataset.sum=String(d.v);bear.classList.add('combo');}}
+  }else if(ptEls[d.t]){
+    const el=ptEls[d.t];
+    el.classList.add('dst');
+    if(d.combo){el.classList.add('combo');el.dataset.sum=String(d.v);}
+  }
+ });
  if(!diceAnim){const db=$('diceBox');db.innerHTML='';const rem=[...(s.dice||[])];(s.rolled||[0,0]).forEach(v=>{const used=!rem.includes(v);if(!used)rem.splice(rem.indexOf(v),1);const d=document.createElement('div');d.className='die'+(used?' used':'');d.textContent=v;db.appendChild(d);});}
  $('bearW').textContent='⚪ снято: '+D.borne.w;$('bearB').textContent='⚫ снято: '+D.borne.b;
- $('bearW').classList.toggle('dst',isActive && dests.some(d=>d.t==='off'&&me==='w'));
- $('bearB').classList.toggle('dst',isActive && dests.some(d=>d.t==='off'&&me==='b'));
+ const hasOffW=dests.some(d=>d.t==='off'&&me==='w');
+ const hasOffB=dests.some(d=>d.t==='off'&&me==='b');
+ $('bearW').classList.toggle('dst',isActive && hasOffW);
+ $('bearB').classList.toggle('dst',isActive && hasOffB);
  const menuHidden=modeOverlay.classList.contains('show');
  $('rollBtn').style.display=(!s.result&&isActive&&s.turn===me&&!s.dice.length&&!diceAnim)?'inline-flex':'none';
  $('menuBtn').style.display=(!s.result&&!menuHidden)?'inline-flex':'none';
@@ -546,19 +665,22 @@ function onPt(idx){
   const me=meSide();if(s.turn!==me)return;
  if(sel===idx){sel=-1;dests=[];renderAll();return;}
  const d=dests.find(x=>x.t===idx);
- if(d&&sel>=0){const from=sel,v=d.v;sel=-1;dests=[];
+ if(d&&sel>=0){const from=sel;sel=-1;dests=[];
   if(onlineMode){
    flyArc(me,from,d.t);
-   const ns=clone(s);applyMove(ns,me,from,d.t,v);checkWin(ns);
+   const ns=clone(s);
+   if(d.combo)applyComboMove(ns,me,from,d.combo);else applyMove(ns,me,from,d.t,d.v);
+   checkWin(ns);
    if(!ns.result&&(!ns.dice.length||!anyMove(ns,me)))endTurn(ns);
-   ns.lastMove={name:myName,action:'ход',from:from,to:d.t,at:Date.now()};
+   ns.lastMove={name:myName,action:d.combo?'ход-комбо':'ход',from:from,to:d.t,combo:d.combo||null,v:d.v,at:Date.now()};
    flight={side:me,from:from,to:d.t};
    roomRef.update({state:ns});
    renderAll();
    setTimeout(()=>{flight=null;d.t==='off'?sBear():sMove();renderAll();},FLIGHT_DUR);
   }else{
    flyArc(me,from,d.t);
-   applyMove(G,me,from,d.t,v);checkWin(G);
+   if(d.combo)applyComboMove(G,me,from,d.combo);else applyMove(G,me,from,d.t,d.v);
+   checkWin(G);
    flight={side:me,from:from,to:d.t};
    renderAll();
    setTimeout(()=>{flight=null;d.t==='off'?sBear():sMove();renderAll();
@@ -567,7 +689,7 @@ function onPt(idx){
     else maybeAi();},FLIGHT_DUR);
   }
   return;}
- if(own(s,me)[idx]>0&&s.dice.length){sel=idx;dests=[];[...new Set(s.dice)].forEach(v=>{const t=moveTarget(s,me,idx,v);if(t!==null)dests.push({from:idx,t,v});});
+ if(own(s,me)[idx]>0&&s.dice.length){sel=idx;dests=allDests(s,me,idx);
   if(!dests.length){sDeny();sel=-1;}
   renderAll();return;}
  sel=-1;dests=[];renderAll();}
@@ -577,8 +699,8 @@ function tapOff(side){
   if(onlineMode && !isGameActive()){sDeny();setStatus('⏳ Игра ещё не началась',true);return;}
   const d=dests.find(x=>x.t==='off');if(!d)return;const from=sel;sel=-1;dests=[];
  flyArc(side,from,'off');
- if(onlineMode){const ns=clone(s);applyMove(ns,side,from,'off',d.v);checkWin(ns);if(!ns.result&&(!ns.dice.length||!anyMove(ns,side)))endTurn(ns);ns.lastMove={name:myName,action:'сброс',from:from,to:'off',at:Date.now()};flight={side:side,from:from,to:'off'};roomRef.update({state:ns});renderAll();setTimeout(()=>{flight=null;sBear();renderAll();},FLIGHT_DUR);}
- else{applyMove(G,side,from,'off',d.v);checkWin(G);flight={side:side,from:from,to:'off'};renderAll();setTimeout(()=>{flight=null;sBear();renderAll();if(G.result){showEnd();return;}if(!G.dice.length||!anyMove(G,side)){endTurn(G);renderAll();setStatus(statusText());maybeAi();}},FLIGHT_DUR);}}
+ if(onlineMode){const ns=clone(s);if(d.combo)applyComboMove(ns,side,from,d.combo);else applyMove(ns,side,from,'off',d.v);checkWin(ns);if(!ns.result&&(!ns.dice.length||!anyMove(ns,side)))endTurn(ns);ns.lastMove={name:myName,action:d.combo?'сброс-комбо':'сброс',from:from,to:'off',combo:d.combo||null,v:d.v,at:Date.now()};flight={side:side,from:from,to:'off'};roomRef.update({state:ns});renderAll();setTimeout(()=>{flight=null;sBear();renderAll();},FLIGHT_DUR);}
+ else{if(d.combo)applyComboMove(G,side,from,d.combo);else applyMove(G,side,from,'off',d.v);checkWin(G);flight={side:side,from:from,to:'off'};renderAll();setTimeout(()=>{flight=null;sBear();renderAll();if(G.result){showEnd();return;}if(!G.dice.length||!anyMove(G,side)){endTurn(G);renderAll();setStatus(statusText());maybeAi();}},FLIGHT_DUR);}}
 $('rollBtn').onclick=()=>{
   ensureAudio();
   const s=S();if(!s||s.result||s.turn!==meSide()||s.dice.length||diceAnim||flight||fieldViewMode)return;
