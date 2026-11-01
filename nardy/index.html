@@ -60,7 +60,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .pt.sel{box-shadow:inset 0 0 0 3px var(--accent)}
 .pt.can{box-shadow:inset 0 0 0 2px rgba(124,255,196,.55)}
 .pt.dst::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(var(--ck)*.62);height:calc(var(--ck)*.62);border-radius:50%;background:rgba(90,220,130,.75);box-shadow:0 0 10px rgba(90,220,130,.9);z-index:4}
-/* v2.6: бейдж с суммой для комбо-хода */
 .pt.combo::before{content:attr(data-sum);position:absolute;top:3px;right:3px;background:rgba(230,179,102,.96);color:#241505;font-size:10px;font-weight:900;padding:1px 5px;border-radius:6px;z-index:5;line-height:1.2;box-shadow:0 1px 3px rgba(0,0,0,.4)}
 .pt.bot.combo::before{top:auto;bottom:3px}
 .cks{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:1px}
@@ -105,15 +104,15 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="board" id="board"></div>
 <div class="status" id="statusEl">Выбери режим</div>
 <div class="actions"><button class="btn primary" id="rollBtn" style="display:none">🎲 Бросить кости</button><button class="btn" id="menuBtn" style="display:none">🏠 Меню нарды</button><button class="btn" id="newBtn" style="display:none">🔄 Новая игра</button></div>
-<div class="ver" id="verTag">v2.6</div>
+<div class="ver" id="verTag">v2.7</div>
 </div>
 <div class="fieldViewBar" id="fieldViewBar"><span class="title">👁 Просмотр партии</span><button class="btn" id="closeFieldView">Закрыть</button></div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🎲 Нарды <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.6</span></h2><div class="sub">Классические длинные · против часовой</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🎲 Нарды <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.7</span></h2><div class="sub">Классические длинные · против часовой</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="statsOverlay"><div class="cardbox"><h2>📊 Статистика</h2><div class="stat-row"><span>Партий сыграно</span><b id="stT">0</b></div><div class="stat-row"><span>Побед</span><b id="stW">0</b></div><div class="stat-row"><span>Поражений</span><b id="stL">0</b></div><div class="stat-row"><span>Процент побед</span><b id="stPct">—</b></div><div class="stat-row"><span>Серия побед сейчас</span><b id="stSt">0</b></div><div class="stat-row"><span>Рекордная серия</span><b id="stBest">0</b></div><div class="stat-row"><span>Всего снято шашек</span><b id="stBorne">0</b></div><div class="btns"><button class="btn" id="stReset">Сбросить</button><button class="btn primary" id="stClose">Закрыть</button></div></div></div>
-<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (длинные)</h2><div class="sub">• Твоя голова — нижний левый угол, твой дом — верхняя левая четверть; голова соперника — верхний правый угол, его дом — нижняя правая четверть.<br>• Движение против часовой: низ слева→направо, затем верх справа→налево; каждый проходит полный круг и возвращает шашки в свой дом.<br>• Бить нельзя: занятая точка блокирует соперника.<br>• С головы — одна шашка за ход (в первом броске 3-3, 4-4, 6-6 — две).<br>• Нельзя строить шесть точек подряд, если впереди блока нет шашки соперника.<br>• Сброс с дома: точное значение или старше, если позади нет своих.<br>• <b>Комбо-ход (v2.6):</b> одной шашкой можно пройти сумму костей (например, 2+3=5) или при дубле 2a/3a/4a — если все промежуточные клетки свободны. Зелёная точка = обычный ход, золотой бейдж с цифрой = комбо-ход.<br>• В свой ход нажми «🎲 Бросить кости»; зелёная рамка показывает шашки, которые могут ходить; конец хода автоматический.<br>• «🏠 Меню нарды» прерывает партию и возвращает к выбору режима.<br>• Победил — кто первым снял все 15.<br>• После партии жми «🔄 Реванш» — когда оба согласятся, новая партия начнётся автоматически.<br>• Онлайн защищён анонимной авторизацией Firebase.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
+<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (длинные)</h2><div class="sub">• Твоя голова — нижний левый угол, твой дом — верхняя левая четверть; голова соперника — верхний правый угол, его дом — нижняя правая четверть.<br>• Движение против часовой: низ слева→направо, затем верх справа→налево; каждый проходит полный круг и возвращает шашки в свой дом.<br>• Бить нельзя: занятая точка блокирует соперника.<br>• С головы — одна шашка за ход (в первом броске 3-3, 4-4, 6-6 — две).<br>• Нельзя строить шесть точек подряд, если впереди блока нет шашки соперника.<br>• Сброс с дома: точное значение или старше, если позади нет своих.<br>• <b>Комбо-ход:</b> одной шашкой можно пройти сумму костей (например, 2+3=5) или при дубле 2a/3a/4a — если все промежуточные клетки свободны. Зелёная точка = обычный ход, золотой бейдж с цифрой = комбо-ход.<br>• <b>Частичный дубль (v2.7):</b> после использования части костей дубля (например, одной 3 из 3-3-3-3), оставшиеся кости продолжают суммироваться на любую фишку (3, 6, 9).<br>• В свой ход нажми «🎲 Бросить кости»; зелёная рамка показывает шашки, которые могут ходить; конец хода автоматический.<br>• «🏠 Меню нарды» прерывает партию и возвращает к выбору режима.<br>• Победил — кто первым снял все 15.<br>• После партии жми «🔄 Реванш» — когда оба согласятся, новая партия начнётся автоматически.<br>• Онлайн защищён анонимной авторизацией Firebase.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='2.6',FLIGHT_DUR=340;
+const VER='2.7',FLIGHT_DUR=340;
 const HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000;
 let heartbeatTimer=null, myRound=0, fieldViewMode=false;
 
@@ -209,7 +208,6 @@ function primeViolation(s,side){const o=own(s,side),op=opp(s,side);
  return false;}
 function moveTarget(s,side,idx,v){const t=legalTarget(s,side,idx,v);if(t===null)return null;const ns=clone(s);applyMove(ns,side,idx,t,v);if(primeViolation(ns,side))return null;return t;}
 function applyMove(s,side,idx,to,v){const o=own(s,side);o[idx]--;if(to==='off')s.borne[side]++;else o[to]++;if(idx===HEAD[side])s.headUsed++;const di=s.dice.indexOf(v);if(di>-1)s.dice.splice(di,1);s.turnAt=Date.now();return s;}
-/* v2.6: комбо-ход одной шашкой на сумму нескольких костей */
 function comboTarget(s,side,idx,steps){
   if(!steps||!steps.length)return null;
   const ns=clone(s);
@@ -221,7 +219,7 @@ function comboTarget(s,side,idx,steps){
     applyMove(ns,side,cur,t,v);
     last=t;
     if(t==='off'){
-      if(i<steps.length-1)return null; // шашка сошла, а кости ещё остались — комбо невозможно
+      if(i<steps.length-1)return null;
       cur=null;break;
     }
     cur=t;
@@ -229,7 +227,6 @@ function comboTarget(s,side,idx,steps){
   if(primeViolation(ns,side))return null;
   return cur===null?'off':cur;
 }
-/* v2.6: применение комбо-хода (списывает все кости steps из s.dice) */
 function applyComboMove(s,side,idx,steps){
   let cur=idx;
   for(const v of steps){
@@ -250,50 +247,64 @@ function applyComboMove(s,side,idx,steps){
   s.turnAt=Date.now();
   return s;
 }
-/* v2.6: все возможные ходы (одиночные + комбо) с шашки idx */
+/* v2.7: все возможные ходы с учётом частичного дубля */
 function allDests(s,side,idx){
   const out=[];
   const seen=new Set();
-  [...new Set(s.dice||[])].forEach(v=>{
+  const dices=s.dice||[];
+  const uniqueVals=[...new Set(dices)];
+  
+  // Одиночные ходы на каждую уникальную кость
+  uniqueVals.forEach(v=>{
     const t=moveTarget(s,side,idx,v);
     if(t!==null){
       out.push({from:idx,t:t,v:v});
       seen.add((t==='off'?'off':t)+'|'+v);
     }
   });
-  const dices=s.dice||[];
-  if(dices.length===2 && dices[0]!==dices[1]){
-    const [a,b]=dices;
-    for(const steps of [[a,b],[b,a]]){
-      const t=comboTarget(s,side,idx,steps);
-      if(t!==null){
-        const sum=a+b;
-        const key=(t==='off'?'off':t)+'|combo|'+sum;
-        if(!seen.has(key)){
-          out.push({from:idx,t:t,v:sum,combo:steps});
-          seen.add(key);
-        }
-        break; // нашли рабочий порядок
-      }
-    }
-  }else if(dices.length===4){
-    const a=dices[0];
-    for(const len of [2,3,4]){
-      const steps=Array(len).fill(a);
-      const t=comboTarget(s,side,idx,steps);
-      if(t!==null){
-        const sum=a*len;
-        const key=(t==='off'?'off':t)+'|combo|'+sum;
-        if(!seen.has(key)){
-          out.push({from:idx,t:t,v:sum,combo:steps});
-          seen.add(key);
+  
+  // Комбо-ходы: проверяем все возможные длины от 2 до dices.length
+  // Работает для любого количества костей (2, 3, 4)
+  if(dices.length>=2){
+    // Проверяем, все ли кости одинаковые (дубль)
+    const isDouble=uniqueVals.length===1;
+    
+    if(isDouble){
+      // Дубль: генерируем комбо для всех длин от 2 до dices.length
+      const a=uniqueVals[0];
+      for(let len=2;len<=dices.length;len++){
+        const steps=Array(len).fill(a);
+        const t=comboTarget(s,side,idx,steps);
+        if(t!==null){
+          const sum=a*len;
+          const key=(t==='off'?'off':t)+'|combo|'+sum;
+          if(!seen.has(key)){
+            out.push({from:idx,t:t,v:sum,combo:steps});
+            seen.add(key);
+          }
         }
       }
+    }else if(dices.length===2){
+      // Обычный бросок из 2 разных костей: проверяем оба порядка
+      const [a,b]=dices;
+      for(const steps of [[a,b],[b,a]]){
+        const t=comboTarget(s,side,idx,steps);
+        if(t!==null){
+          const sum=a+b;
+          const key=(t==='off'?'off':t)+'|combo|'+sum;
+          if(!seen.has(key)){
+            out.push({from:idx,t:t,v:sum,combo:steps});
+            seen.add(key);
+          }
+          break;
+        }
+      }
     }
+    // Для 3+ разных костей комбо не генерируем (только дубли)
   }
+  
   return out;
 }
-/* v2.6: есть ли хоть какой-то ход (одиночный или комбо) */
 function anyMove(s,side){
   const o=own(s,side);
   for(let i=0;i<24;i++){
@@ -308,7 +319,6 @@ function roll(s){return setRoll(s,1+Math.floor(Math.random()*6),1+Math.floor(Mat
 function checkWin(s){if(s.borne.w===15){s.result={winner:'w',at:Date.now()};s.scores.w++;}else if(s.borne.b===15){s.result={winner:'b',at:Date.now()};s.scores.b++;}return s;}
 function clone(o){return JSON.parse(JSON.stringify(o));}
 function evalS(s,side){const o=own(s,side),op=opp(s,side);let ps=0,po=0,made=0;for(let i=0;i<24;i++){ps+=o[i]>0?pOf(side,i):0;po+=op[i]>0?pOf(side,i):0;if(o[i]>=2)made++;}return (s.borne[side]-s.borne[side==='w'?'b':'w'])*120+(ps-po)+made*3+Math.random()*2;}
-/* v2.6: dfs теперь использует allDests — учитывает комбо-ходы */
 function dfs(s,side,depth){let best=null;
  for(let i=0;i<24;i++){
   if(own(s,side)[i]===0)continue;
@@ -631,7 +641,6 @@ function renderAll(){const s=S();
   const w=D.W[i]||0,b=D.B[i]||0,n=Math.max(w,b),col=w?'w':'b',show=Math.min(n,7);
   for(let k=0;k<show;k++){const c=document.createElement('div');c.className='ck '+col;cks.appendChild(c);}
   if(n>7){const t=document.createElement('span');t.className='ckn';t.textContent='+'+(n-7);cks.appendChild(t);}}
- /* v2.6: отрисовка dests с бейджем для комбо */
  dests.forEach(d=>{
   if(d.t==='off'){
     const bear=me==='w'?$('bearW'):$('bearB');
