@@ -1,6 +1,6 @@
 # PLATFORM-SPEC — МК «Игровой центр»: кроссплатформенная спецификация и грабли
 
-**Версия документа: 2.3** | Дата: 2026-10-31 | Статус: TG ✅ / MAX ✅ / VK ✅ / web ✅ / PC(Electron) ✅
+**Версия документа: 2.3** | Дата: 2026-11-01 | Статус: TG ✅ / MAX ✅ / VK ✅ / web ✅ / PC (Electron, Windows 7 SP1–11) ✅
 Репозиторий: `github.com/ip19760118-code/games`
 Pages: `https://ip19760118-code.github.io/games/`
 
@@ -13,15 +13,15 @@ Pages: `https://ip19760118-code.github.io/games/`
 
 | Компонент | Где живёт | Комментарий |
 |---|---|---|
-| Хаб (витрина 16 игр + кнопка «Скачать приложение») | GitHub Pages, корень репо `games/` | `index.html` **v3.27** |
+| Хаб (витрина 16 игр + «Скачать приложение» + умная сортировка) | GitHub Pages, корень репо `games/` | `index.html` **v3.28** |
 | Игры | папки `chess/ … trend-catch/`, `tetris/` | мультиплатформенные через `js/platform.js` |
 | Онлайн-комнаты | Firebase RTDB (имя проекта не менять!) | единая схема: раздел 5 |
-| Desktop-оболочка (Windows) | локальный проект `gc-desktop/` (**НЕ в репо**) | Electron, релизы через GitHub Releases: раздел 6 |
+| Desktop-оболочка (Windows) | локальный проект `gc-desktop/` (**НЕ в репо**) | Electron **22**, релизы через GitHub Releases: раздел 6 |
 | MAX-бот | Vercel, Root Dir `max-bot`, вебхук `/max` | Callback: platform-api2.max.ru |
 | VK-бот | Vercel, Root Dir `vk-bot`, вебхук `/vk` | Callback API api.vk.com |
 | TG-бот | меню-кнопка «Играть» → hub `?plat=tg` | Web App |
 | Кэш web | `sw.js` (service worker) | навигации network-first, статика cache-first |
-| Аналитика | GA4 | hub_open / hub_game_click / hub_download_* с меткой platform |
+| Аналитика | GA4 | hub_open / hub_game_click / hub_download_* / game_* с меткой platform |
 
 Единый слой платформ: `js/platform.js` (**v2.8**) → глобальный `Platform`
 (init, haptic, share, toast, onBack/fireBack, close, colors, user, name,
@@ -31,19 +31,19 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 
 | Компонент | Версия |
 |---|---|
-| hub `index.html` | v3.27 |
+| hub `index.html` | v3.28 |
 | `js/platform.js` | v2.8 |
 | vk-bot `server.js` | v1.13 |
 | max-bot `server.js` | v2.0 |
-| Морской бой | v4.28 |
+| Морской бой | v4.30 |
 | Шахматы | v2.8 |
-| Дурак | v3.8 |
+| Дурак | v3.15 |
 | Домино | v2.3 |
 | Шашки | v1.7 |
-| Нарды | v2.4 |
+| Нарды | v2.7 |
 | Тетрис | v1.2 |
 | Сапёр | v1.6 |
-| Desktop-оболочка (Electron) | v0.2.2 |
+| Desktop-оболочка | v0.3.1 (Electron 22.3.27) |
 
 ---
 
@@ -157,12 +157,16 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 - Prefetch топовых игр (chess/seabattle/durak/tetris) через `<link rel=prefetch>`; пропуск при `saveData`.
 - Firebase-комнаты работают ТОЛЬКО в first-party контексте: никаких iframe внутри мессенджер-вью.
 - `window.open` может блокироваться popup-блокером → всегда fallback `location.href`.
-- **Favicon:** во всех играх и хабе `<link rel="icon" … icon-32.png>` (ранее `data:,`); убирает 404 `/favicon.ico`.
+- **Favicon:** во всех играх и хабе `<link rel="icon" … icon-32.png>` (+apple-touch 180); убирает 404 `/favicon.ico`.
 - **Звук:** mp3 в `assets/snd` отсутствуют → эффекты через синтез в приоритете; `SND.preload()` не вызывать (404).
 - **Кнопка «📥 Скачать приложение» в хабе (v3.22+):** модалка с вариантами Windows (прямая загрузка exe),
   Android (disabled, «скоро»), «Отправить ссылку другу», «Страница релиза».
   Прямая ссылка ассета стабильна: `…/releases/latest/download/IgrovojCentr-Setup.exe`
   (artifactName без версии в electron-builder.yaml).
+- **Умная сортировка списка игр (hub v3.28):** локальная статистика запусков `localStorage['hub_sort_stats']`
+  `{key:{n,t}}`; score = `n × 0.5^(дней простоя/30)`; пересортировка DOM при загрузке хаба;
+  нулевые — в кураторском порядке; «Скоро» всегда последняя; сброс `?sort=reset`.
+  Ключ нормализуется из пути папки (`./trend-catch/` → `trend_catch`), работает и для диплинков.
 - Описания витрин без чисел игр (лимиты платформ).
 
 ---
@@ -234,7 +238,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 
 - Вход разрешён в `waiting` **и** `finished` (deeplink-реванш с новыми игроками).
 - При автостарте `players/seats` перезаписываются только активными — ушедшие удаляются.
-- «📤 Пригласить» disabled при полном составе; вне лобби скрывается.
+- «📤 Пригласить» disabled при полном составе; вне лобби скрывается или недоступна.
 
 ### 5.6 Лобби в выпадающей шторке
 
@@ -305,51 +309,65 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 ### 5.11 Watchdog автоходов
 
 Хост каждые 5 c: если актёр без fresh presence и `turnAt` старше 30 с → автоход по правилам игры
-(взятие/пропуск/бито/ролл) с `lastMove.action='автоход (нет связи)'`.
+(взятие/пропуск/бито/ролл/бросок костей) с `lastMove.action='автоход (нет связи)'`.
 
 ---
 
-## 6. Desktop-оболочка (Windows, Electron) — v0.2.2
+## 6. Desktop-оболочка (Windows, Electron 22) — v0.3.1
 
 ### 6.1 Состав и расположение
 
-- Проект **локальный**: `C:\Telegram\gc-desktop\` (в репо НЕ коммитится; в `.gitignore` были бы
-  `node_modules/`, `release/` — репо не трогает).
+- Проект **локальный**: `C:\Telegram\gc-desktop\` (в репо НЕ коммитится).
 - `src/main/`: `main.js` (окно, протокол, меню, IPC), `config.js` (JSON в userData),
-  `updater.js` (контент), `shell-updater.js` (оболочка, electron-updater).
-- `src/preload/preload.js` → `window.AppBridge` (platform='pc').
+  `updater.js` (контент, v1.3), `shell-updater.js` (оболочка, electron-updater).
+- `src/preload/preload.js` → `window.AppBridge` (platform='pc'): share/openExternal/notify/
+  getProfile/getVersions/quit/onBack/onToast/getUpdateWarnings/getShellInfo/setProfile/
+  setUpdateMode/setContentSource/openPath/checkUpdates/getShellUpdateStatus/shellUpdateCheck/
+  shellUpdateInstall/onShellUpdateState.
 - `src/renderer/settings.html` — экран настроек (`app://shell/settings.html`).
-- `tools/gen-versions.js` — генератор манифеста `versions.json` **в корень репо**.
+- `tools/gen-versions.js` (v1.2) — генератор манифеста `versions.json` **в корень репо**.
 - `assets/icons/` — вывод electron-icon-builder (`win/icon.ico`, `png/*`).
 - `electron-builder.yaml`, `package.json` (version = версия оболочки).
+- **Electron 22.3.27** — последняя линейка с поддержкой Windows 7 SP1/8/8.1 (Chromium 108, Node 16).
+  Electron 23+ требует Windows 10 (см. 7.3). electron-builder 24.x: NSIS per-user,
+  `artifactName: IgrovojCentr-Setup.exe`, `compression: maximum`, `electronLanguages: [ru, en]`,
+  `publish: github`, иконки `assets/icons/win/icon.ico`.
 
-### 6.2 Контент: паки и протокол
+### 6.2 Контент: паки и протокол app://
 
-- Привилегированный scheme `app://games` (`standard, secure, corsEnabled`) → стабильный origin →
-  localStorage (uid Firebase, статистика) переживает обновления.
-- Паки: `%APPDATA%\igrovoj-centr\packs\current\` (зеркало структуры репо);
-  `staging/` → атомарный swap → `old/` удаляется; sha256 каждого файла сверяется с манифестом.
-- Источники: `local` (dev: паки = рабочая копия репо) | `pages` (боевой: загрузка с GitHub Pages).
-  В установленном exe дефолт `pages` (если локального репо нет).
+- `registerSchemesAsPrivileged([{scheme:'app',privileges:{standard,secure,supportFetchAPI,corsEnabled,stream}}])`
+  ДО ready → стабильный origin → localStorage (uid Firebase, статистика) переживает обновления.
+- **Отдача контента ТОЛЬКО через `protocol.registerFileProtocol` (v0.11):** Chromium сам выставляет
+  MIME по расширению файла.
+  **ГРАБЛЯ (2026-10-31, v0.3.0 на Win10):** `protocol.registerBufferProtocol` с объектом
+  `{mimeType, data}` на Electron 22 для standard-схемы отдаёт `text/plain` → хаб открывается
+  как исходный текст. `protocol.handle` в Electron 22 отсутствует вовсе. Не использовать
+  buffer/handle-протоколы в оболочке на Electron 22.
+- Паки: `%APPDATA%\igrovoj-centr\packs\{current,staging,old}` + `installed.json`;
+  скачивание в staging → проверка sha256 каждого файла → атомарный swap current↔staging → old удаляется.
+- Источники: `local` (dev: паки = рабочая копия репо) | `pages` (боевой: GitHub Pages).
+  В установленном exe дефолт `pages`, если локального репо нет.
 - Бутстрап: `pages` + (`auto` ИЛИ нет валидного контента) → синхронизация ДО окна (таймаут 60 с).
 - Самовосстановление `packsRoot` при старте: local-репо → packs/current → pages.
-- Если index.html контента нет — русская страница-ошибка с кнопками «Настройки / Повторить /
-  Открыть в браузере» вместо чёрного экрана.
-- **Селективная синхронизация (v1.1):** скачиваются только паки, чьи версии отличаются от
+- Страницы-ошибки (v0.11): статические файлы `error.html` / `404.html` в userData
+  («⚠️ Контент игр не найден» с кнопками Настройки/Повторить/Открыть в браузере) вместо чёрного экрана.
+- **Селективная синхронизация (updater v1.1+):** скачиваются только паки, чьи версии отличаются от
   `installed.json`; если менять нечего — тост «Версии игр актуальны», загрузка не стартует.
-- Прогресс: тосты `Обновление: N/M` (последний тик не троттлится), финал
+- Прогресс: тосты `Обновление: N/M` (последний тик `d===t` не троттлится); финал
   «✅ Приложения обновлены: N/N файлов» до перезагрузки окна и повторно после (`did-finish-load`).
-  Ошибка = тост + системное уведомление (не пропадает бесследно).
+  Ошибка = тост + системное `Notification` (не пропадает бесследно).
+- Service worker в оболочке НЕ регистрируется (platform.js gated по host github.io).
 
 ### 6.3 Манифест versions.json и грабля хэшей
 
-- Лежит в корне репо, публикуется на Pages; структура: `hub{version,files[]}`, `games{id:{version,online,files[]}}`,
-  каждый файл `{path, sha256, size}`; `baseUrl` = Pages.
+- Лежит в корне репо, публикуется на Pages; структура: `hub{version,files[]}`,
+  `games{id:{version,online,files[]}}`, каждый файл `{path, sha256, size}`; `baseUrl` = Pages.
 - **Грабля (2026-10-31, `sha256 mismatch: sw.js`):** генератор хэшировал байты рабочей папки,
   а Pages отдаёт байты git-блоба (CRLF-нормализация git на Windows / устаревший манифест после
   коммита без регенерации). **Лечение (gen-versions v1.2): байты берутся из `git show HEAD:path`**;
   незакоммиченные файлы → фолбэк на рабочую папку + предупреждение в консоли.
-- **Правило деплоя:** коммит контента → `node tools/gen-versions.js` → коммит `versions.json` → push одним пакетом.
+- **Правило деплоя:** коммит контента → `node tools/gen-versions.js` → коммит `versions.json` →
+  push одним пакетом.
 
 ### 6.4 Обновление оболочки (electron-updater)
 
@@ -360,42 +378,59 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 - Тихая проверка через 6 c после старта (только `app.isPackaged`); в dev — заглушка с пояснением.
 - Обновления дельтовые (differential downloader) — обычно единицы МБ.
 - v0.1.0 обновиться сама не может (кода апдейтера не было) — только ручная переустановка.
+- **Грабля Node 16 (Electron 22):** глобального `fetch` в main-процессе нет →
+  `updater.js` v1.3 качает через `node:https`-хелпер `httpGetBuffer` (редиректы до 5,
+  `Accept-Encoding: identity`, таймаут 30 с, 1 ретрай на файл).
 
-### 6.5 Релизы оболочки
+### 6.5 Релизы оболочки и ссылки скачивания
 
-- Тег `vN.N.N`, title «Игровой центр N.N.N (Windows)», ассеты: `IgrovojCentr-Setup.exe` + `latest.yml`.
+- Тег `vN.N.N`, title «Игровой центр N.N.N (Windows)»; ассеты: `IgrovojCentr-Setup.exe` + `latest.yml`.
 - `artifactName: IgrovojCentr-Setup.exe` (без версии) → стабильная ссылка хаба
   `…/releases/latest/download/IgrovojCentr-Setup.exe`; шеринг = `…/releases/latest`.
-- NSIS per-user (админ не нужен), oneClick=false, ярлыки desktop+start.
-- Подписи нет → SmartScreen предупреждает («Подробнее → Выполнить всё равно»); это ожидаемо до сертификата/Store.
+- Кнопка хаба «📥 Скачать приложение» (v3.22+): модалка Windows (прямая загрузка), Android (disabled),
+  «Отправить ссылку другу», «Страница релиза»; в оболочке exe открывается через `AppBridge.openExternal`.
+- Подписи нет → SmartScreen предупреждает («Подробнее → Выполнить всё равно»); ожидаемо до сертификата/Store.
 
 ### 6.6 Иконки
 
-- Источник: `icon-512.png` в корне репо (он же og:image и логотип хаба `.hub-logo`).
+- Источник: `icon-512.png` в корне репо (он же og:image, логотип хаба `.hub-logo`, источник favicon).
 - `npx electron-icon-builder --input=…\icon-512.png --output=assets` → `assets/icons/win/icon.ico`,
-  `assets/icons/png/*.png` (**именно `icons/`, не `icon/` — грабля путей v0.2.2**).
+  `assets/icons/png/*.png` (**именно папка `icons/`** — грабля путей v0.2.2: yml искал `assets/icon.ico`).
 - yml: `win.icon` и `nsis.installerIcon/uninstallerIcon` = `assets/icons/win/icon.ico`.
-- `pickAppIcon()` в main.js: цепочка фолбэков `icons/png/512x512.png → icons/win/icon.ico → … → icon-512.png репо`
-  (иначе в dev окно получает дефолтную иконку Electron, отличную от логотипа хаба).
-- Производные favicon: `icon-32.png`, `icon-180.png` генерируются PowerShell-скриптом (System.Drawing).
+- `pickAppIcon()` в main.js: цепочка фолбэков `icons/png/512x512.png → icons/win/icon.ico →
+  assets/icon.png → assets/icon.ico → icon-512.png репо`; иначе в dev окно получает дефолтную
+  иконку Electron, отличную от логотипа хаба.
+- Производные favicon: `icon-32.png`, `icon-180.png` (PowerShell System.Drawing).
 
-### 6.7 Размер установщика и roadmap
+### 6.7 Размер установщика и совместимость с ОС
 
 - 150 МБ → 143 МБ после `compression: maximum` + `electronLanguages: [ru, en]` (минус 53 локали).
-- **~140 МБ — пол Electron x64** (Chromium+V8+Node ~300 МБ unpacked); игры/хаб в установщике = 0 байт.
+- **~140 МБ — пол Electron x64** (Chromium+V8+Node ~300 МБ unpacked); игры/хаб в установщике = 0 байт
+  (докaчиваются при первом запуске).
+- **Грабля ОС:** Electron 31 на Windows 8.1 даёт системное «Невозможно запустить это приложение
+  на вашем ПК» (манифест exe требует Win10). С v0.3.0 оболочка на **Electron 22** →
+  работает на Windows 7 SP1 / 8 / 8.1 / 10 / 11 одним установщиком.
+- Electron 22 = EOL (Chromium 108, без обновлений безопасности) — осознанный компромисс ради старых ОС;
+  веб-контент изолирован (`contextIsolation`, `sandbox:true`), внешних страниц внутри оболочки нет.
+- На очень старых 8.1 без обновлений может понадобиться UCRT (KB2999226).
 - Roadmap «мало»: (A) Tauri v2 на системном WebView2 → 3–10 МБ, контракт `AppBridge` сохраняется,
   веб-часть не меняется; (B) PWA-установка из браузера → 0 МБ (manifest + существующий sw.js).
 
 ### 6.8 UX оболочки
 
 - Меню RU: Файл (Настройки Ctrl+,, Проверить обновления игр, Обновить приложение…, Выход),
-  Вид, Помощь. Вкладка «Правка» удалена; Ctrl+Z/X/C/V/A/Y перехватываются `before-input-event`
-  (копирование кода комнаты/имени не ломается).
-- Esc = системная «Назад» для страниц `app://games` → backHandler игры → оверлеи → хаб.
-- Настройки: имя игрока (видно в онлайн-комнатах), источник контента, режим обновлений,
-  статус автообновления оболочки (живой прогресс), сведения (пути, версии), кнопки
+  Вид, Помощь. Вкладка «Правка» удалена; **Ctrl+Z/X/C/V/A/Y перехватываются `before-input-event`**
+  (`wc.undo/cut/copy/paste/selectAll/redo`) — копирование кода комнаты/имени не ломается.
+- Esc = системная «Назад» для страниц `app://` → backHandler игры → оверлеи → хаб;
+  на хабе back → `AppBridge.quit()` (выход из приложения).
+- Настройки: имя игрока (видно в онлайн-комнатах через `Platform.user()`), источник контента,
+  режим обновлений, живой статус автообновления оболочки, сведения (пути/версии), кнопки
   «Проверить обновления игр/оболочки», «Установить обновление», «Папка контента».
-- Внешние ссылки (`http(s)`) всегда уходят в системный браузер; навигация вне `app://` запрещена.
+- Внешние ссылки (`http(s)`) всегда уходят в системный браузер (`setWindowOpenHandler` +
+  `will-navigate`); навигация вне `app://` запрещена.
+- Тосты: IPC `app-toast` → `Platform.toast` в странице (3 с); тосты оболочки через hooks shellUpdater.
+
+### 6.9 Сводка граблей desktop — см. таблицу 7.3.
 
 ---
 
@@ -446,7 +481,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 
 | Симптом | Причина | Лечение |
 |---|---|---|
-| Чёрное окно + бледный «404: /index.html» | packsRoot указывает на пустую/битую папку | самовосстановление packsRoot + страница-ошибка (v0.5) |
+| Чёрное окно + бледный «404: /index.html» | packsRoot указывает на пустую/битую папку | самовосстановление packsRoot + страница-ошибка (v0.5; с v0.11 — статические error.html/404.html) |
 | Сборка: «Cannot create symbolic link … darwin» | winCodeSign-7z с simlink-ами macOS; нет прав | ручная распаковка кэша + удалить `darwin/` ИЛИ `signAndEditExecutable:false` |
 | Сборка: «cannot find specified resource assets/icon.ico» | electron-icon-builder пишет в `assets/icons/…` | пути `assets/icons/win/icon.ico` в yml |
 | Иконка окна ≠ логотип хаба | `assets/icon.png` не существует → дефолт Electron | pickAppIcon() с цепочкой фолбэков |
@@ -454,15 +489,32 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | Прогресс обновления «исчезает» | троттлинг последнего тика + тост стирался перезагрузкой | финальный тост N/N + повтор после did-finish-load + системное уведомление при ошибке |
 | Качает все файлы всегда | sync без диффа | селективная синхронизация по версиям (updater v1.1) |
 | Ctrl+C/V не работают без меню «Правка» | роли меню удалены | перехват Ctrl+Z/X/C/V/A/Y в before-input-event |
-| Установщик 143 МБ | пол Electron x64 | compression maximum + electronLanguages ru/en; дальше — Tauri/PWA (6.7) |
+| Установщик 143 МБ | пол Electron x64 | compression maximum + electronLanguages ru/en; игры вне установщика; roadmap Tauri/PWA |
 | Автообновление не видит релиз | в релизе нет `latest.yml` | прикреплять latest.yml в каждый релиз |
+| **Win 8.1: «Невозможно запустить это приложение на вашем ПК»** | Electron 23+ манифест exe требует Win10 | Electron 22 (оболочка v0.3.0+); один установщик на Win 7 SP1–11 |
+| **Win10: хаб открывается как текст (исходник)** | `registerBufferProtocol` на Electron 22 для standard-схемы отдаёт `text/plain` | `registerFileProtocol` (v0.11): MIME по расширению; страницы-ошибки файлами |
+| Updater: `fetch is not defined` | Node 16 (Electron 22) без глобального fetch | https-хелпер `httpGetBuffer` в updater.js v1.3 |
+
+### 7.4 Игры (геймплейные грабли 2026-10/11)
+
+| Симптом | Причина | Лечение |
+|---|---|---|
+| Дурак: «Ход компьютера» и вечное зависание, логов нет | v3.14: пауза 2 c применялась к первой атаке бота + штампы сбрасывались каждым тиком repairTick | v3.15: пауза только для подкидывания (бот ≠ атакующий); штампы по эпизодам раунда |
+| Дурак: галка «переводной» снята, а перевод работает | правило фиксировалось при раздаче партии | v3.12: переключатель действует сразу на текущую партию; онлайн меняет только хост (`state/transferEnabled`) |
+| Дурак: боты подкидывают всё сразу, игроку нет места | нет дозирования | v3.14: `BOT_ADD_GAP=2000` — 2 c от первой возможности и не чаще 1 карты в 2 c на бота |
+| Нарды: статус «Нажми Бросить кости», кнопки нет | `isGameActive()` возвращала false вне онлайна | v2.5: офлайн-ветка `G && !G.result` |
+| Нарды: после частичного дубля суммы не работают на других фишках | allDests генерировал комбо только для длин 2 и 4 | v2.7: комбо для любого числа оставшихся костей (2..N) на любую фишку |
+| Морской бой: «В бой!» disabled пока не сбросишь/расставишь | newGame: флот расставлен, но `qi=0` | v4.29: `qi=queue.length`; онлайн `resetPlacing()` авто-расставляет флот |
+| Морской бой: непонятно, что нажимать дальше | нет подсказок | v4.29: pulse-подсветка кнопок (Пригласить → Авто → В бой → Реванш/Сыграть ещё) |
+| Морской бой: панель инструментов мешает в бою | ручное сворачивание | v4.30: авто-сворачивание при старте боя, авто-разворачивание при реванше; ручное переключение всегда доступно |
+| Хаб: популярные игры внизу списка | статический порядок | v3.28: умная сортировка по частоте запусков (score с полураспадом 30 дней, `?sort=reset`) |
 
 ---
 
 ## 8. Чек-листы
 
 ### 8.1 Новая игра (офлайн)
-1. Папка игры + кнопка в хабе + алиасы в `GAME_MAP` (боты шлют `?game=<alias>`).
+1. Папка игры + кнопка в хабе (с `data-game` для умной сортировки) + алиасы в `GAME_MAP`.
 2. `Platform.init({bg, back})`; звук/вибро только через `Platform.haptic/share`.
 3. GA через `trackEvent`; платформа подставляется автоматически.
 4. BackHandler: просмотр партии → rules → stats → set → lobby/room → mode → hub.
@@ -473,14 +525,15 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 1. Структура комнаты по 5.1. 2. Heartbeat 5/15 с, запуск +500 мс после записи места.
 3. `removePresence()` в leaveRoom/beforeunload. 4. Реванш у всех; requestRematch только пишет флаг.
 5. Триггер автостарта по 5.4 (условие status='finished'!). 6. Round-триггер. 7. Лобби в шторке.
-8. `isGameActive()` + блокировка ходов. 9. Умные кнопки шторки. 10. fieldView. 11. Вход в finished.
-12. Rules Firebase под свою схему мест. 13. Префикс логов `[XX]`. 14. Если движок не ставит
-status='finished' сам — авто-перевод (грабля Нард). 15. Watchdog автоходов.
+8. `isGameActive()` + блокировка ходов (учитывать офлайн-ветку! грабля Нард v2.5). 9. Умные кнопки шторки.
+10. fieldView. 11. Вход в finished. 12. Rules Firebase под свою схему мест. 13. Префикс логов `[XX]`.
+14. Если движок не ставит status='finished' сам — авто-перевод (грабля Нард). 15. Watchdog автоходов.
 
 ### 8.3 Релиз desktop-оболочки
 1. Bump `version` в `package.json`. 2. `npm run dist`. 3. Release: tag `vN.N.N`,
    ассеты `IgrovojCentr-Setup.exe` + `latest.yml`. 4. Publish → hub-кнопка подхватит через
    `latest/download` автоматически. 5. Проверка автообновления с предыдущей установленной версии.
+6. Проверка на Win 8.1 (или виртуалке): установка и запуск без системной ошибки манифеста.
 
 ### 8.4 Деплой контента
 1. Коммит контента → 2. `node tools/gen-versions.js` (v1.2, из git-блобов) →
@@ -508,10 +561,13 @@ status='finished' сам — авто-перевод (грабля Нард). 15
 | EXE (стабильная ссылка) | `…/releases/latest/download/IgrovojCentr-Setup.exe` |
 | Манифест контента | `…/games/versions.json` |
 | Паки оболочки | `%APPDATA%\igrovoj-centr\packs\current` |
+| Оболочка: runtime | Electron 22.3.27 (Windows 7 SP1–11), electron-builder 24, NSIS per-user |
 | HEARTBEAT_INTERVAL / TTL | 5000 / 15000 мс |
 | Watchdog комнат | тик 5 с, порог неактивности 30 с |
 | MAX_NAV_MODE | `'external'` (продакшен) |
 | Бутстрап контента | таймаут 60 с до окна |
+| BOT_ADD_GAP (Дурак) | 2000 мс на бота-подкидывателя |
+| Hub smart-sort | полураспад 30 дней, ключ `hub_sort_stats`, сброс `?sort=reset` |
 
 > 🔒 Значения секретов — только Vercel Environment Variables и локальные `.env`.
 
@@ -525,7 +581,7 @@ status='finished' сам — авто-перевод (грабля Нард). 15
 | 2.0 | 2026-10-27 | Единая архитектура онлайн-комнат (реванш, heartbeat, лобби в шторке, автостарт, просмотр партии); rules под все схемы; префиксы логов; чек-листы; секреты вынесены |
 | 2.1 | 2026-10-27 | Ретест MAX container: спиннер-зависание, пауза JS → watchdog мёртв; `MAX_NAV_MODE='external'`; таблица версий; грабли chess/nardy/seabattle/durak; 404 mp3/favicon |
 | 2.2 | 2026-10-28 | Официальный ответ поддержки MAX: нет navigate; openLink только внешний; зависание = ожидание LoadingCompleted; рекомендована SPA; SetCanGoBack/BackButtonPressed/SetTitle; док dev.max.ru |
-| 2.3 | 2026-10-31 | Desktop-оболочка Electron v0.2.2 целиком (раздел 6): протокол app://, паки и селективный апдейтер, manifest-грабля sha256 и gen из git-блобов, electron-updater + latest.yml, иконки assets/icons/, размер 143 МБ и roadmap Tauri/PWA; TG goToHub-фикс (v2.8); hub v3.27 (кнопка скачивания, hover, логотип); меню без «Правки» + перехват Ctrl |
+| 2.3 | 2026-11-01 | Desktop-оболочка финально: Electron 22 (Win 7 SP1–11, фикс «Невозможно запустить…» на 8.1), `registerFileProtocol` вместо buffer (фикс «хаб как текст» на Win10), https-апдейтер без fetch, иконки `assets/icons/`, релизы exe+latest.yml, размер 143 МБ и roadmap Tauri/PWA; игры: Дурак v3.9–3.15 (drag, овальный стол, рассадка по дуге, правила подкидывания, паузы ботов, фикс зависания), Нарды v2.5–2.7 (кнопка броска в офлайне, комбо-ходы и частичный дубль), Морской бой v4.29–4.30 (авто-расстановка, pulse-подсказки, авто-сворачивание панели); hub v3.28 (умная сортировка); platform.js v2.8 (goToHub TG/VK) |
 
 ---
 
