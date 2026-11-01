@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-01T07:21:15.204Z",
+ "generatedAt": "2026-11-01T07:41:11.480Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.28",
@@ -54,7 +54,7 @@
    ]
   },
   "seabattle": {
-   "version": "4.29",
+   "version": "4.30",
    "online": true,
    "files": [
     {
@@ -104,8 +104,8 @@
     },
     {
      "path": "seabattle/index.html",
-     "sha256": "0f49affc27c1d88b0a302907b0d5d587f8fd56530217d8c28527482d67144305",
-     "size": 55515
+     "sha256": "f0bbddb0d8ad4a013492edaa613d5613ab581467f3cf24591eae74c118c888d4",
+     "size": 55684
     }
    ]
   },
