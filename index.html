@@ -24,13 +24,15 @@
     *, *::before, *::after { box-sizing: border-box; overscroll-behavior: none; overscroll-behavior-y: none; }
     html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #070b16; font-family: system-ui, -apple-system, sans-serif; touch-action: pan-y; user-select: none; -webkit-user-select: none; overscroll-behavior: none; overscroll-behavior-y: none; }
     .wrap { width: 100vw; height: 100vh; display: flex; padding: 16px; padding-top: calc(16px + env(safe-area-inset-top)); padding-bottom: calc(16px + env(safe-area-inset-bottom)); overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
-    .panel { margin: auto; width: 100%; max-width: min(420px, 100%); padding: 22px 16px; border-radius: 24px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28); text-align: center; color: #eaf0ff; flex-shrink: 0; }
+    .panel { position: relative; margin: auto; width: 100%; max-width: min(420px, 100%); padding: 22px 16px; border-radius: 24px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28); text-align: center; color: #eaf0ff; flex-shrink: 0; }
     h1 { margin: 0 0 6px; font-size: clamp(24px, 7vw, 32px); color: #7cffc4; }
     .hub-logo { width: 34px; height: 34px; border-radius: 9px; margin-right: 8px; vertical-align: -4px; box-shadow: 0 2px 10px rgba(124, 255, 196, 0.35); }
     .hub-subtitle { margin: 0 0 8px; color: #7cffc4; font-size: clamp(13px, 3.6vw, 15px); font-weight: 700; }
     .hub-desc { margin: 0 0 16px; color: #a8b4d8; font-size: clamp(12px, 3.4vw, 14px); line-height: 1.45; }
     .download-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px 16px; margin-bottom: 16px; border-radius: 18px; border: 1px solid rgba(124, 255, 196, 0.5); background: linear-gradient(135deg, rgba(124, 255, 196, 0.14), rgba(51, 214, 255, 0.12)); color: #7cffc4; font-size: clamp(14px, 4vw, 16px); font-weight: 700; cursor: pointer; transition: transform 0.08s ease, background 0.15s ease, box-shadow 0.15s ease; font-family: inherit; }
     .download-btn:active { transform: scale(0.98); background: linear-gradient(135deg, rgba(124, 255, 196, 0.24), rgba(51, 214, 255, 0.22)); }
+    /* v3.34: шестерёнка настроек оболочки (видна только в android-приложении) */
+    .set-btn { position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(255, 255, 255, 0.07); color: #eaf0ff; font-size: 20px; line-height: 1; cursor: pointer; display: none; align-items: center; justify-content: center; padding: 0; font-family: inherit; }
     .game-btn { width: 100%; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; background: rgba(255, 255, 255, 0.06); color: #eaf0ff; padding: 12px; margin-bottom: 10px; cursor: pointer; text-align: left; transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease; font-family: inherit; font-size: inherit; touch-action: manipulation; min-width: 0; }
     .game-btn:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.10); }
     .game-btn.disabled { opacity: 0.45; cursor: default; }
@@ -61,6 +63,7 @@
       .game-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(124, 255, 196, 0.45); transform: translateY(-1px); }
       .game-btn.disabled:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.08); transform: none; }
       .download-btn:hover { background: linear-gradient(135deg, rgba(124, 255, 196, 0.26), rgba(51, 214, 255, 0.22)); box-shadow: 0 4px 18px rgba(124, 255, 196, 0.25); }
+      .set-btn:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(124, 255, 196, 0.45); }
       .dl-opt:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(124, 255, 196, 0.4); }
       .dl-opt.disabled:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
       .dl-share:hover { color: #7cffc4; border-color: rgba(124, 255, 196, 0.6); background: rgba(124, 255, 196, 0.06); }
@@ -71,6 +74,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
+      <button class="set-btn" id="hubSetBtn" aria-label="Настройки">⚙️</button>
       <h1><img class="hub-logo" src="./icon-512.png" alt="">Игровой центр</h1>
       <p class="hub-subtitle">Мини-игры в Telegram, VK и MAX</p>
 
@@ -99,11 +103,11 @@
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.31 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.34 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
-  <!-- двухэтапная модалка: действие → платформа (v3.29+, android включён в v3.31) -->
+  <!-- двухэтапная модалка: действие → платформа -->
   <div class="dl-overlay" id="dlOverlay" data-screen="1">
     <div class="dl-card">
       <button class="dl-close" id="dlClose" aria-label="Закрыть">×</button>
@@ -127,7 +131,7 @@
         <h2 id="dlScreen2Title">Выберите платформу</h2>
         <button class="dl-opt" id="dlPlatWin">
           <span class="emoji">🪟</span>
-          <span class="txt"><b>Windows 7 и новее</b><small>Для ПК и ноутбуков. (~140Мб) с офлайн-играми</small></span>
+          <span class="txt"><b>Windows 7 и новее</b><small>Для ПК и ноутбуков. (~140Мб)</small></span>
         </button>
         <button class="dl-opt" id="dlPlatAndroid">
           <span class="emoji">🤖</span>
@@ -139,7 +143,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.33';
+    const HUB_VER = '3.34';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
@@ -157,6 +161,22 @@
     });
 
     try { document.getElementById('platTag').textContent = Platform.name; } catch(e) {}
+
+    /* v3.34: шестерёнка настроек — только в android-оболочке */
+    (function(){
+      try {
+        if (Platform.name === 'android' && window.AppBridge && window.AppBridge.openSettings) {
+          var b = document.getElementById('hubSetBtn');
+          if (b) {
+            b.style.display = 'flex';
+            b.addEventListener('click', function(){
+              try { Platform.haptic('light'); } catch(e){}
+              try { window.AppBridge.openSettings(); } catch(e){}
+            });
+          }
+        }
+      } catch(e){}
+    })();
 
     function trackEvent(name, params){
       params = params || {};
