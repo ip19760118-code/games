@@ -1,9 +1,7 @@
-/* tg-games: единый слой платформ v2.8 — Telegram / VK / MAX / web / PC(Electron).
-   v2.8: goToHub() в TG/VK больше НЕ закрывает Web App — внутренняя навигация на хаб
-   (хаб и игры = одна сессия Web App); close() остаётся единственным выходом в чат.
-   v2.7: pc-ветка: тосты из оболочки + предупреждения обновлений (3 с).
-   v2.6: ветка 'pc': детект по window.AppBridge, Esc/back, app:// hubBase, canonicalUrl.
-   v2.5: флаг MAX_NAV_MODE ('external' — продакшен). */
+/* tg-games: единый слой платформ v2.9 — Telegram / VK / MAX / web / PC(Electron) / Android(WebView).
+   v2.9: ветка 'android': детект по AppBridge.platform, back через window.__androidBack,
+   share через нативный chooser, close→quit, SW в оболочках (pc/android) не регистрируется.
+   v2.8: goToHub в TG/VK — внутренняя навигация (не close). */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
@@ -16,8 +14,9 @@ var Platform=(function(){
  function qs(k){try{return new URLSearchParams(location.search).get(k)||''}catch(e){return ''}}
  function load(src){return new Promise(function(res){var s=document.createElement('script');s.src=src;s.onload=function(){res(true)};s.onerror=function(){res(false)};document.head.appendChild(s)})}
  function detect(){var p=(qs('plat')||'').toLowerCase();
-  if(p==='tg'||p==='vk'||p==='max'||p==='pc')return p;
-  if(window.AppBridge&&window.AppBridge.platform==='pc')return 'pc';
+  if(p==='tg'||p==='vk'||p==='max'||p==='pc'||p==='android')return p;
+  var bp=(window.AppBridge&&window.AppBridge.platform)?String(window.AppBridge.platform):'';
+  if(bp==='pc'||bp==='android')return bp;
   if(window.Telegram&&window.Telegram.WebApp)return 'tg';
   if(window.vkBridge)return 'vk';
   if(window.WebApp&&window.WebApp.version)return 'max';
@@ -27,6 +26,7 @@ var Platform=(function(){
  (function(){
   try{
    if(!('serviceWorker' in navigator))return;
+   if(window.AppBridge)return; /* v2.9: в оболочках (pc/android) кэшем управляет апдейтер, SW не нужен */
    if(location.protocol!=='https:')return;
    if(location.host.indexOf('github.io')<0)return;
    var m=location.pathname.match(/^(.*\/games\/)/);
@@ -60,7 +60,7 @@ var Platform=(function(){
 
  function pickUser(){
   try{
-   if(name==='pc'&&window.AppBridge&&AppBridge.getProfile){AppBridge.getProfile().then(function(p){if(p&&p.name)user={id:'pc',name:p.name};}).catch(function(){});return}}catch(e){}
+   if((name==='pc'||name==='android')&&window.AppBridge&&AppBridge.getProfile){AppBridge.getProfile().then(function(p){if(p&&p.name)user={id:name,name:p.name};}).catch(function(){});return}}catch(e){}
   try{
    if(name==='tg'&&window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initDataUnsafe&&Telegram.WebApp.initDataUnsafe.user){
     var u=Telegram.WebApp.initDataUnsafe.user;user={id:'tg'+u.id,name:u.first_name||'Игрок'};return}}catch(e){}
@@ -73,7 +73,7 @@ var Platform=(function(){
 
  function canonicalUrl(){
   try{
-   if(name==='pc'){
+   if(name==='pc'||name==='android'){
     var p=location.pathname||'/';
     if(p.slice(-10)==='index.html')p=p.slice(0,p.length-10);
     if(p.charAt(p.length-1)!=='/')p+='/';
@@ -97,7 +97,6 @@ var Platform=(function(){
    return location.origin+'/games/';
   }
  }
- /* v2.8: возврат в хаб ВНУТРИ контейнера/Web App; закрытие — только в close() */
  function goToHub(){
   try{
    if(isMaxExternal()){backToMessenger();return}
@@ -146,14 +145,14 @@ var Platform=(function(){
   toastT=setTimeout(function(){toastEl.style.opacity='0'},ms||2600)}
  function copyText(t){try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t);return true}}catch(e){}return false}
 
- /* v2.7: предупреждения обновлений для pc (1 раз за сессию, 3 с) */
- function showPcUpdateWarnings(){
+ /* v2.9: предупреждения обновлений для оболочек pc/android */
+ function showUpdateWarnings(){
   try{
-   if(name!=='pc'||!window.AppBridge||!AppBridge.getUpdateWarnings)return;
-   if(sessionStorage.getItem('pc_upd_warn_shown'))return;
+   if((name!=='pc'&&name!=='android')||!window.AppBridge||!AppBridge.getUpdateWarnings)return;
+   if(sessionStorage.getItem('shell_upd_warn_shown'))return;
    AppBridge.getUpdateWarnings().then(function(list){
     if(!list||!list.length)return;
-    sessionStorage.setItem('pc_upd_warn_shown','1');
+    sessionStorage.setItem('shell_upd_warn_shown','1');
     var parts=(location.pathname||'').split('/').filter(Boolean);
     var isHub=(parts.length===1&&parts[0]==='index.html')||parts.length===0;
     var gameId=parts.length>1?parts[0]:null;
@@ -199,7 +198,11 @@ var Platform=(function(){
     if(name==='pc'){
      if(o.back){backFn=o.back;try{window.AppBridge.onBack(o.back)}catch(e){}}
      try{window.AppBridge.onToast&&window.AppBridge.onToast(function(m){platToast(m,3000)});}catch(e){}
-     showPcUpdateWarnings();
+     showUpdateWarnings();
+    }
+    else if(name==='android'){
+     if(o.back){backFn=o.back;window.__androidBack=o.back;}
+     showUpdateWarnings();
     }
     else if(name==='tg'){var t=Telegram.WebApp;t.ready();t.expand();
      if(t.setHeaderColor&&o.bg)t.setHeaderColor(o.bg);
@@ -229,6 +232,7 @@ var Platform=(function(){
   opts=opts||{};
   function onCopied(){copyText(text+'\n'+url);if(opts.onCopied)opts.onCopied();else platToast(opts.copiedToast||'Ссылка скопирована — отправьте её другу')}
   function messengerShare(){
+   if(name==='android'&&window.AppBridge&&window.AppBridge.share){try{window.AppBridge.share(text,url);return true}catch(e){}}
    if(name==='tg'&&window.Telegram&&Telegram.WebApp){var tw=Telegram.WebApp;
     if(tw.switchInlineQuery){try{tw.switchInlineQuery(text+' '+url,['users','groups','channels']);return true}catch(e){}}
     if(tw.openTelegramLink){try{tw.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text));return true}catch(e){}}}
@@ -273,12 +277,14 @@ var Platform=(function(){
   toast:platToast,
   onBack:function(fn){backFn=fn;
    if(name==='pc')try{window.AppBridge.onBack(fn)}catch(e){}
+   if(name==='android'){window.__androidBack=fn;}
    if(name==='tg')try{Telegram.WebApp.BackButton.show();Telegram.WebApp.BackButton.onClick(fn)}catch(e){}
    if(name==='vk'&&window.vkBridge)try{vkBridge.subscribe(function(e){if(e&&e.detail&&e.detail.type==='VKWebAppSwipeBack')fn()})}catch(e){}
    if(name==='max'&&window.WebApp&&maxClientReal()&&window.WebApp.BackButton)try{window.WebApp.BackButton.show();window.WebApp.BackButton.onClick(fn)}catch(e){}},
   fireBack:function(){if(backFn)backFn()},
   close:function(){try{
    if(name==='pc'){try{window.AppBridge.quit();return}catch(e){window.close();return}}
+   if(name==='android'){try{window.AppBridge.quit();return}catch(e){return}}
    if(name==='tg')Telegram.WebApp.close();
    else if(name==='vk'&&window.vkBridge)vkBridge.send('VKWebAppClose',{payload:'igrovoj-centr'}).catch(function(){});
    else if(name==='max'&&maxClientReal()&&window.WebApp&&window.WebApp.close)window.WebApp.close();
