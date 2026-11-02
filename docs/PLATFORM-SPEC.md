@@ -1,6 +1,6 @@
 # PLATFORM-SPEC — МК «Игровой центр»: кроссплатформенная спецификация и грабли
 
-**Версия документа: 2.3** | Дата: 2026-11-01 | Статус: TG ✅ / MAX ✅ / VK ✅ / web ✅ / PC (Electron, Windows 7 SP1–11) ✅
+**Версия документа: 2.4** | Дата: 2026-11-02 | Статус: TG ✅ / MAX ✅ / VK ✅ / web ✅ / PC (Electron, Win 7 SP1–11) ✅ / Android (WebView, 8.0+) ✅
 Репозиторий: `github.com/ip19760118-code/games`
 Pages: `https://ip19760118-code.github.io/games/`
 
@@ -13,26 +13,28 @@ Pages: `https://ip19760118-code.github.io/games/`
 
 | Компонент | Где живёт | Комментарий |
 |---|---|---|
-| Хаб (витрина 16 игр + «Скачать приложение» + умная сортировка) | GitHub Pages, корень репо `games/` | `index.html` **v3.28** |
+| Хаб (витрина 16 игр + модалка скачивания + умная сортировка) | GitHub Pages, корень репо `games/` | `index.html` **v3.33** |
 | Игры | папки `chess/ … trend-catch/`, `tetris/` | мультиплатформенные через `js/platform.js` |
 | Онлайн-комнаты | Firebase RTDB (имя проекта не менять!) | единая схема: раздел 5 |
-| Desktop-оболочка (Windows) | локальный проект `gc-desktop/` (**НЕ в репо**) | Electron **22**, релизы через GitHub Releases: раздел 6 |
+| Desktop-оболочка (Windows) | локальный проект `gc-desktop/` (**НЕ в репо**) | Electron **22**, релизы GitHub Releases: раздел 6 |
+| Android-оболочка | локальный проект `gc-android/` (**НЕ в репо**) | системный WebView, релизы там же: раздел 7 |
 | MAX-бот | Vercel, Root Dir `max-bot`, вебхук `/max` | Callback: platform-api2.max.ru |
 | VK-бот | Vercel, Root Dir `vk-bot`, вебхук `/vk` | Callback API api.vk.com |
 | TG-бот | меню-кнопка «Играть» → hub `?plat=tg` | Web App |
-| Кэш web | `sw.js` (service worker) | навигации network-first, статика cache-first |
+| Кэш web | `sw.js` (service worker) | навигации network-first, статика cache-first; в оболочках НЕ регистрируется |
 | Аналитика | GA4 | hub_open / hub_game_click / hub_download_* / game_* с меткой platform |
 
-Единый слой платформ: `js/platform.js` (**v2.8**) → глобальный `Platform`
+Единый слой платформ: `js/platform.js` (**v2.9**) → глобальный `Platform`
 (init, haptic, share, toast, onBack/fireBack, close, colors, user, name,
 maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
+Детект: `?plat=` → `AppBridge.platform` ('pc'|'android') → глобалки TG/VK/MAX → 'web'.
 
 ### 0.1 Текущие версии компонентов
 
 | Компонент | Версия |
 |---|---|
-| hub `index.html` | v3.28 |
-| `js/platform.js` | v2.8 |
+| hub `index.html` | v3.33 |
+| `js/platform.js` | v2.9 |
 | vk-bot `server.js` | v1.13 |
 | max-bot `server.js` | v2.0 |
 | Морской бой | v4.30 |
@@ -44,6 +46,7 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 | Тетрис | v1.2 |
 | Сапёр | v1.6 |
 | Desktop-оболочка | v0.3.1 (Electron 22.3.27) |
+| Android-оболочка | v0.1.0 (system WebView) |
 
 ---
 
@@ -147,22 +150,32 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 
 ## 4. Общий слой (hub + platform.js + sw.js + релизы)
 
-- Детект платформы: сначала `?plat=` из URL, затем глобалки (Telegram → vkBridge → WebApp+version → AppBridge='pc').
-  SDK грузим лениво (`ensureSdk`), хардкод тегов в hub запрещён.
-- `openGame()`: TG/VK/web/pc — `location.href`; MAX real client — `openLink` во внешнее окно
+- Детект платформы: сначала `?plat=` из URL, затем `AppBridge.platform` ('pc'|'android'),
+  затем глобалки (Telegram → vkBridge → WebApp+version). SDK грузим лениво (`ensureSdk`),
+  хардкод тегов в hub запрещён.
+- `openGame()`: TG/VK/web/pc/android — `location.href`; MAX real client — `openLink` во внешнее окно
   (тост «Открываю игру…» обязателен); MAX external browser — обычная навигация.
 - Service worker `sw.js`: навигации network-first с кэш-фолбэком; статика cache-first;
   имя кэша `igrovoj-centr-vN` менять при принудительном сбросе. Регистрация из `platform.js`
-  по маске `^(.*\/games\/)` только на github.io. **В desktop-оболочке SW не регистрируется** (кэшем управляет апдейтер).
+  по маске `^(.*\/games\/)` только на github.io **и только при отсутствии `window.AppBridge`**
+  (v2.9: в оболочках pc/android кэшем управляет контент-апдейтер, SW не нужен).
 - Prefetch топовых игр (chess/seabattle/durak/tetris) через `<link rel=prefetch>`; пропуск при `saveData`.
 - Firebase-комнаты работают ТОЛЬКО в first-party контексте: никаких iframe внутри мессенджер-вью.
 - `window.open` может блокироваться popup-блокером → всегда fallback `location.href`.
 - **Favicon:** во всех играх и хабе `<link rel="icon" … icon-32.png>` (+apple-touch 180); убирает 404 `/favicon.ico`.
 - **Звук:** mp3 в `assets/snd` отсутствуют → эффекты через синтез в приоритете; `SND.preload()` не вызывать (404).
-- **Кнопка «📥 Скачать приложение» в хабе (v3.22+):** модалка с вариантами Windows (прямая загрузка exe),
-  Android (disabled, «скоро»), «Отправить ссылку другу», «Страница релиза».
-  Прямая ссылка ассета стабильна: `…/releases/latest/download/IgrovojCentr-Setup.exe`
-  (artifactName без версии в electron-builder.yaml).
+- **Модалка скачивания хаба (v3.29–3.33), двухэтапная:**
+  1. Экран действий: «⬇️ Скачать приложение» / «📤 Отправить ссылку» / «💾 Скачать ссылку».
+  2. Экран платформ: «🪟 Windows 7 и новее · Для ПК и ноутбуков. (~140Мб)» и
+     «🤖 Android 8 и новее · Лёгкое приложение (~3 МБ) с офлайн-играми».
+  Действия: download = прямая загрузка ассета (в оболочках — `AppBridge.openExternal`);
+  share = `Platform.share` (системный chooser / шеринг мессенджеров);
+  «Скачать ссылку» = копирование ссылки в буфер (`navigator.clipboard` + fallback `execCommand`).
+  Системная «Назад»/Esc на экране платформ возвращает на экран действий (`ov.dataset.screen`).
+- **Стабильные ссылки ассетов:** `WIN_EXE_URL = …/releases/latest/download/IgrovojCentr-Setup.exe`,
+  `APK_URL = …/releases/latest/download/IgrovojCentr.apk` (artifactName без версии в конфиге сборки).
+  **ПРАВИЛО РЕЛИЗА:** каждый релиз содержит ВСЕ ассеты (apk + exe + latest.yml), иначе
+  `latest/download/*` сломается на том, чего нет в свежем релизе.
 - **Умная сортировка списка игр (hub v3.28):** локальная статистика запусков `localStorage['hub_sort_stats']`
   `{key:{n,t}}`; score = `n × 0.5^(дней простоя/30)`; пересортировка DOM при загрузке хаба;
   нулевые — в кураторском порядке; «Скоро» всегда последняя; сброс `?sort=reset`.
@@ -329,7 +342,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 - `assets/icons/` — вывод electron-icon-builder (`win/icon.ico`, `png/*`).
 - `electron-builder.yaml`, `package.json` (version = версия оболочки).
 - **Electron 22.3.27** — последняя линейка с поддержкой Windows 7 SP1/8/8.1 (Chromium 108, Node 16).
-  Electron 23+ требует Windows 10 (см. 7.3). electron-builder 24.x: NSIS per-user,
+  Electron 23+ требует Windows 10 (см. 8.3). electron-builder 24.x: NSIS per-user,
   `artifactName: IgrovojCentr-Setup.exe`, `compression: maximum`, `electronLanguages: [ru, en]`,
   `publish: github`, иконки `assets/icons/win/icon.ico`.
 
@@ -356,7 +369,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 - Прогресс: тосты `Обновление: N/M` (последний тик `d===t` не троттлится); финал
   «✅ Приложения обновлены: N/N файлов» до перезагрузки окна и повторно после (`did-finish-load`).
   Ошибка = тост + системное `Notification` (не пропадает бесследно).
-- Service worker в оболочке НЕ регистрируется (platform.js gated по host github.io).
+- Service worker в оболочке НЕ регистрируется (platform.js gated по host github.io и AppBridge).
 
 ### 6.3 Манифест versions.json и грабля хэшей
 
@@ -384,11 +397,12 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 
 ### 6.5 Релизы оболочки и ссылки скачивания
 
-- Тег `vN.N.N`, title «Игровой центр N.N.N (Windows)»; ассеты: `IgrovojCentr-Setup.exe` + `latest.yml`.
+- Тег `vN.N.N`, title «Игровой центр N.N.N (Windows)»; ассеты: `IgrovojCentr-Setup.exe` + `latest.yml`
+  (+ `IgrovojCentr.apk` с v0.4.0 — см. правило трёх ассетов, раздел 4).
 - `artifactName: IgrovojCentr-Setup.exe` (без версии) → стабильная ссылка хаба
   `…/releases/latest/download/IgrovojCentr-Setup.exe`; шеринг = `…/releases/latest`.
-- Кнопка хаба «📥 Скачать приложение» (v3.22+): модалка Windows (прямая загрузка), Android (disabled),
-  «Отправить ссылку другу», «Страница релиза»; в оболочке exe открывается через `AppBridge.openExternal`.
+- Кнопка хаба «📥 Скачать приложение» (v3.22+, двухэтапная с v3.29): модалка действий и платформ;
+  в оболочке exe открывается через `AppBridge.openExternal`.
 - Подписи нет → SmartScreen предупреждает («Подробнее → Выполнить всё равно»); ожидаемо до сертификата/Store.
 
 ### 6.6 Иконки
@@ -406,7 +420,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 
 - 150 МБ → 143 МБ после `compression: maximum` + `electronLanguages: [ru, en]` (минус 53 локали).
 - **~140 МБ — пол Electron x64** (Chromium+V8+Node ~300 МБ unpacked); игры/хаб в установщике = 0 байт
-  (докaчиваются при первом запуске).
+  (докачиваются при первом запуске).
 - **Грабля ОС:** Electron 31 на Windows 8.1 даёт системное «Невозможно запустить это приложение
   на вашем ПК» (манифест exe требует Win10). С v0.3.0 оболочка на **Electron 22** →
   работает на Windows 7 SP1 / 8 / 8.1 / 10 / 11 одним установщиком.
@@ -414,7 +428,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   веб-контент изолирован (`contextIsolation`, `sandbox:true`), внешних страниц внутри оболочки нет.
 - На очень старых 8.1 без обновлений может понадобиться UCRT (KB2999226).
 - Roadmap «мало»: (A) Tauri v2 на системном WebView2 → 3–10 МБ, контракт `AppBridge` сохраняется,
-  веб-часть не меняется; (B) PWA-установка из браузера → 0 МБ (manifest + существующий sw.js).
+  веб-часть не меняется (но только Win10+); (B) PWA-установка из браузера → 0 МБ (manifest + sw.js).
 
 ### 6.8 UX оболочки
 
@@ -430,13 +444,91 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   `will-navigate`); навигация вне `app://` запрещена.
 - Тосты: IPC `app-toast` → `Platform.toast` в странице (3 с); тосты оболочки через hooks shellUpdater.
 
-### 6.9 Сводка граблей desktop — см. таблицу 7.3.
+---
+
+## 7. Android-оболочка (system WebView) — v0.1.0
+
+### 7.1 Состав и расположение
+
+- Проект **локальный**: `C:\Telegram\gc-android\` (в репо НЕ коммитится, как и gc-desktop).
+- `app/build.gradle` (Groovy; namespace `ru.ip19760118.igrovojcentr`; minSdk 26 = Android 8.0;
+  compile/targetSdk 34; `buildFeatures { buildConfig = true }`; signingConfigs.release из локального keystore).
+- `app/src/main/java/ru/ip19760118/igrovojcentr/`: `MainActivity.java`, `AppBridge.java`,
+  `ContentUpdater.java`, `PrefsStore.java`, `MimeUtils.java`.
+- `app/src/main/AndroidManifest.xml`: INTERNET / ACCESS_NETWORK_STATE / VIBRATE;
+  activity `singleTask` + `configChanges` (без перезагрузки при повороте);
+  intent-filter VIEW `https://ip19760118-code.github.io/games/*` (диплинки комнат и игр).
+- `res/values/themes.xml` = `android:Theme.Material.NoActionBar` (тёмный фон #070B16);
+  `res/values/strings.xml` = «Игровой центр»; иконки `res/mipmap-*/ic_launcher.png`.
+- `keystore/release.keystore` — ключ подписи, **локально + резервная копия на накопителе**
+  (потеря ключа = невозможность обновлять APK поверх).
+- Зависимостей НОЛЬ: только системный WebView → APK ~2–4 МБ.
+- Тулчейн на рабочем ПК: Android Studio (папка программы и JBR), SDK отдельно;
+  `JAVA_HOME=<studio>\jbr`; `local.properties:sdk.dir=<реальный SDK>` (см. грабли 8.4).
+
+### 7.2 Контент и «локальный origin»
+
+- WebView грузит `https://ip19760118-code.github.io/games/index.html?plat=android`
+  (+ query из входящего intent: `?room=…`, `?game=…`).
+- `WebViewClient.shouldInterceptRequest`: запросы к host Pages с путём `/games/…` отдаются
+  из локальных паков (`WebResourceResponse` с MIME по расширению); файла нет локально →
+  прозрачный fallback в сеть (Pages). Origin остаётся Pages-овским → инвайты/`canonicalUrl`
+  игр работают БЕЗ правок, localStorage стабилен.
+- Паки: `context.filesDir/packs/{current,staging,old}` + `installed.json`.
+  `ContentUpdater` = порт десктопного updater v1.3: `versions.json`, селективная закачка,
+  sha256 каждого файла, атомарный swap; синхронизация при КАЖДОМ запуске (bootstrap-оверлей
+  с прогрессом `Обновление: N/M`; тап по оверлею = повтор после ошибки).
+- Источника «local repo» нет: всегда `pages`.
+- SW не регистрируется (platform.js v2.9: гейт по `window.AppBridge`).
+
+### 7.3 Мост AppBridge (platform='android')
+
+- `getPlatform()='android'`; `getProfile()` (имя из SharedPreferences, дефолт «ИгрокNNN»);
+  `getVersions()` (shell=versionName, content=hub из installed.json); `getUpdateWarnings()`;
+  `share(text,url)` → `ACTION_SEND` chooser; `openExternal(url)` → `ACTION_VIEW`;
+  `quit()` → finish; `notify/toast` → `pageToast` (evaluateJavascript `Platform.toast`);
+  `checkUpdates()` → принудительный sync с тостами прогресса.
+- Аппаратная «Назад»: `onBackPressed` → `evaluateJavascript(window.__androidBack…)`;
+  `false` → finish. `platform.js` v2.9 в init/android и onBack назначает `window.__androidBack`.
+- Вибро: `navigator.vibrate` (permission VIBRATE) — ветка fallback в `Platform.haptic`.
+- Шеринг игр: `Platform.share` → сначала `AppBridge.share` (нативный chooser), иначе мессенджер-фолбэки.
+
+### 7.4 Диплинки и жизненный цикл
+
+- Клик по ссылке-приглашению (`…/games/seabattle/?room=CODE`) в Telegram/браузере → chooser
+  предлагает «Игровой центр» → комната открывается внутри приложения (query сохраняется).
+- `launchMode=singleTask` + `configChanges` — один инстанс, повороты без перезагрузки WebView.
+- Обновления самого APK: пока ручные (новая загрузка с Releases и установка поверх);
+  автообновление APK — roadmap (check по GitHub Releases + установка через intent).
+
+### 7.5 Иконка приложения
+
+- Генерация БЕЗ Android Studio: PowerShell-скрипт `gen-icons.ps1` (System.Drawing,
+  HighQualityBicubic) из `games/icon-512.png` → `mipmap-{mdpi,hdpi,xhdpi,xxhdpi,xxxhdpi}/ic_launcher.png`
+  (48/72/96/144/192 px). Запуск: `powershell -ExecutionPolicy Bypass -File gen-icons.ps1`.
+- **Грабли:** см. 8.4 (leftover mipmap-anydpi, Material3-темы шаблона, кэш иконок лаунчера).
+
+### 7.6 Сборка и подпись
+
+- Keystore один раз: `keytool -genkeypair … -keystore keystore\release.keystore -alias igrovoj …`
+  (keytool берём из JBR студии: `<studio>\jbr\bin\keytool.exe`).
+- Сборка: `set JAVA_HOME=<studio>\jbr` → `gradlew.bat assembleRelease` →
+  `app\build\outputs\apk\release\app-release.apk` → переименовать в `IgrovojCentr.apk`.
+- `signingConfigs.release` в app/build.gradle указывает на локальный keystore (пароли только локально).
+
+### 7.7 Релизы
+
+- Релиз GitHub содержит **ТРИ ассета**: `IgrovojCentr.apk` + `IgrovojCentr-Setup.exe` + `latest.yml`
+  (правило раздела 4: ссылки `latest/download/*` живут только в свежем релизе).
+- Hub v3.31+: кнопка 🤖 «Android 8 и новее» активна; действия модалки работают и для APK
+  (download → anchor/openExternal, share → Platform.share, «скачать ссылку» → буфер).
+- Теги: общая нумерация релизов `v0.4.0+`; versionName/versionCode APK растут независимо (`0.1.0` → …).
 
 ---
 
-## 7. Таблица «симптом → причина → лечение»
+## 8. Таблица «симптом → причина → лечение»
 
-### 7.1 Платформы
+### 8.1 Платформы
 
 | Симптом | Причина | Лечение |
 |---|---|---|
@@ -460,7 +552,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | TG/BotFather: «Invalid bot selected» | бот выбран ДО команды | порядок: команда → кнопка бота → текст |
 | Игры грузятся медленно везде | синхронный тег telegram-web-app.js в head | тег удалён массовой правкой; SDK лениво |
 
-### 7.2 Онлайн-комнаты
+### 8.2 Онлайн-комнаты
 
 | Симптом | Причина | Лечение |
 |---|---|---|
@@ -477,7 +569,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | 404 mp3 в консоли | SND.preload/play без файлов | синтез-приоритет, preload не вызывать |
 | Presence висит после закрытия вкладки | нет beforeunload | removePresence() в beforeunload |
 
-### 7.3 Desktop-оболочка и сборка
+### 8.3 Desktop-оболочка и сборка (Windows)
 
 | Симптом | Причина | Лечение |
 |---|---|---|
@@ -491,11 +583,29 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | Ctrl+C/V не работают без меню «Правка» | роли меню удалены | перехват Ctrl+Z/X/C/V/A/Y в before-input-event |
 | Установщик 143 МБ | пол Electron x64 | compression maximum + electronLanguages ru/en; игры вне установщика; roadmap Tauri/PWA |
 | Автообновление не видит релиз | в релизе нет `latest.yml` | прикреплять latest.yml в каждый релиз |
-| **Win 8.1: «Невозможно запустить это приложение на вашем ПК»** | Electron 23+ манифест exe требует Win10 | Electron 22 (оболочка v0.3.0+); один установщик на Win 7 SP1–11 |
-| **Win10: хаб открывается как текст (исходник)** | `registerBufferProtocol` на Electron 22 для standard-схемы отдаёт `text/plain` | `registerFileProtocol` (v0.11): MIME по расширению; страницы-ошибки файлами |
+| Win 8.1: «Невозможно запустить это приложение на вашем ПК» | Electron 23+ манифест exe требует Win10 | Electron 22 (оболочка v0.3.0+); один установщик на Win 7 SP1–11 |
+| Win10: хаб открывается как текст (исходник) | `registerBufferProtocol` на Electron 22 для standard-схемы отдаёт `text/plain` | `registerFileProtocol` (v0.11): MIME по расширению; страницы-ошибки файлами |
 | Updater: `fetch is not defined` | Node 16 (Electron 22) без глобального fetch | https-хелпер `httpGetBuffer` в updater.js v1.3 |
+| На новом ПК нет `gc-desktop` | проект оболочки никогда не коммитился в репо | копия с накопителя или воссоздание файлов; генератор манифеста = `gc-desktop\tools\gen-versions.js` |
 
-### 7.4 Игры (геймплейные грабли 2026-10/11)
+### 8.4 Android-оболочка и сборка APK
+
+| Симптом | Причина | Лечение |
+|---|---|---|
+| `Task 'assembleRelease' not found in root project` | скрипт модуля назван `build.gradle.groovy`/`.kts` не по имени, либо settings не включает `:app` | файл должен быть `app/build.gradle` (Groovy) или `app/build.gradle.kts`; в settings `include(":app")` |
+| `Directory … does not contain a Gradle build` | отсутствуют settings/build в корне | воссоздать `settings.gradle.kts` + корневой `build.gradle.kts` (явная версия AGP `apply false`) |
+| `License for package … not accepted` | свежий SDK без принятых лицензий | `sdkmanager --licenses` (пайп `echo y|`) + `platforms;android-34` `build-tools;35.0.0` |
+| `sdkmanager` не найден; «Using Android SDK: <папка студии>» | `sdk.dir` указывает на папку программы студии (bin/jbr/plugins), а не на SDK | найти реальный SDK (`platforms/`, `build-tools/`) или поставить cmdline-tools в отдельную папку; исправить `local.properties` |
+| `Theme.Material3… not found` | шаблонные themes.xml/values-night тянут Material без зависимости | удалить `values-night`, тема = `android:Theme.Material.NoActionBar` |
+| `layout_constraint… not found` | шаблонный `activity_main.xml` с ConstraintLayout при пустых dependencies | удалить `res/layout` (UI создаётся программно) |
+| `cannot find symbol BuildConfig` | AGP 8+ не генерирует BuildConfig по умолчанию | `buildFeatures { buildConfig = true }` в app/build.gradle |
+| AAPT: `drawable/ic_launcher_background not found` | leftover `mipmap-anydpi*` с adaptive-xml после ручной генерации png | удалить `mipmap-anydpi` и `mipmap-anydpi-v26` |
+| PowerShell: «Отсутствует имя переменной после foreach» | внешний PowerShell раскрыл `$переменные` строки `powershell -Command "…"` до передачи | писать скрипт в `.ps1` и запускать `powershell -ExecutionPolicy Bypass -File …` |
+| `Java compiler version 25 has deprecated support for source/target 8` | новый JDK студии | `compileOptions` VERSION_17 (или подавить warning) |
+| Иконка не меняется после установки новой версии | кэш иконок лаунчера | удалить старую версию / перезагрузить устройство |
+| Старый WebView на устройствах без Google Play | системный WebView не обновляется | детект версии WebView → экран «обновите WebView / откройте в браузере» (roadmap) |
+
+### 8.5 Игры (геймплейные грабли 2026-10/11)
 
 | Симптом | Причина | Лечение |
 |---|---|---|
@@ -511,9 +621,9 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 
 ---
 
-## 8. Чек-листы
+## 9. Чек-листы
 
-### 8.1 Новая игра (офлайн)
+### 9.1 Новая игра (офлайн)
 1. Папка игры + кнопка в хабе (с `data-game` для умной сортировки) + алиасы в `GAME_MAP`.
 2. `Platform.init({bg, back})`; звук/вибро только через `Platform.haptic/share`.
 3. GA через `trackEvent`; платформа подставляется автоматически.
@@ -521,7 +631,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 5. Favicon-линки на `../icon-32.png`; overscroll-behavior:none; описания витрин без чисел.
 6. Head без синхронных внешних SDK-тегов (telegram/gstatic) — только ленивая загрузка.
 
-### 8.2 Новая онлайн-игра (подключение к единой схеме)
+### 9.2 Новая онлайн-игра (подключение к единой схеме)
 1. Структура комнаты по 5.1. 2. Heartbeat 5/15 с, запуск +500 мс после записи места.
 3. `removePresence()` в leaveRoom/beforeunload. 4. Реванш у всех; requestRematch только пишет флаг.
 5. Триггер автостарта по 5.4 (условие status='finished'!). 6. Round-триггер. 7. Лобби в шторке.
@@ -529,25 +639,34 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 10. fieldView. 11. Вход в finished. 12. Rules Firebase под свою схему мест. 13. Префикс логов `[XX]`.
 14. Если движок не ставит status='finished' сам — авто-перевод (грабля Нард). 15. Watchdog автоходов.
 
-### 8.3 Релиз desktop-оболочки
+### 9.3 Релиз desktop-оболочки
 1. Bump `version` в `package.json`. 2. `npm run dist`. 3. Release: tag `vN.N.N`,
-   ассеты `IgrovojCentr-Setup.exe` + `latest.yml`. 4. Publish → hub-кнопка подхватит через
-   `latest/download` автоматически. 5. Проверка автообновления с предыдущей установленной версии.
-6. Проверка на Win 8.1 (или виртуалке): установка и запуск без системной ошибки манифеста.
+   ассеты **три**: `IgrovojCentr-Setup.exe` + `latest.yml` + `IgrovojCentr.apk` (актуальный).
+4. Publish → hub-кнопки подхватят через `latest/download` автоматически.
+5. Проверка автообновления с предыдущей установленной версии (Win10) + установка на Win 8.1.
 
-### 8.4 Деплой контента
+### 9.4 Деплой контента
 1. Коммит контента → 2. `node tools/gen-versions.js` (v1.2, из git-блобов) →
-3. коммит `versions.json` → 4. push одним пакетом. 5. В оболочке: «Проверить обновления игр».
+3. коммит `versions.json` → 4. push одним пакетом. 5. В оболочках: авто-синхронизация при запуске
+   (desktop: «Проверить обновления игр»; android: bootstrap при старте).
 
-### 8.5 Новая платформа (бот) / переезд
+### 9.5 Новая платформа (бот) / переезд
 1. Вебхук на Vercel; ответ ДО/ПОСЛЕ обработки по freeze-модели. 2. Реестр: подписка + секрет + confirmation.
 3. Клавиатура: постоянная кнопка входа; лимиты изучить ДО разработки. 4. Витрина без чисел игр.
 5. `platform.js`: ветки detect/ensureSdk/init/haptic/share/close + мост.
 6. Rename репо → `git remote set-url`; Pages пересобирается; Vercel едет по ID репо; env → Redeploy.
 
+### 9.6 Релиз Android-оболочки
+1. Bump `versionName`/`versionCode` в `app/build.gradle`.
+2. `set JAVA_HOME=<studio>\jbr` → `gradlew.bat assembleRelease` → rename в `IgrovojCentr.apk`.
+3. Release GitHub: три ассета (apk + exe + latest.yml), tag общий `v0.N.N`.
+4. Тест: свежая установка (bootstrap-загрузка паков), обновление поверх старой версии,
+   офлайн-режим (авиарежим), диплинк комнаты, шеринг, иконка (кэш лаунчера!).
+5. Hub: кнопка 🤖 отдаёт `APK_URL` автоматически (latest/download).
+
 ---
 
-## 9. Справочник конфигурации
+## 10. Справочник конфигурации
 
 | Ключ | Значение |
 |---|---|
@@ -559,13 +678,19 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | Env MAX / VK | `MAX_TOKEN`, `MAX_SECRET` / `VK_TOKEN`, `VK_SECRET`, `VK_CONFIRM` |
 | GA | measurement id в `index.html` хаба |
 | EXE (стабильная ссылка) | `…/releases/latest/download/IgrovojCentr-Setup.exe` |
+| APK (стабильная ссылка) | `…/releases/latest/download/IgrovojCentr.apk` |
 | Манифест контента | `…/games/versions.json` |
-| Паки оболочки | `%APPDATA%\igrovoj-centr\packs\current` |
-| Оболочка: runtime | Electron 22.3.27 (Windows 7 SP1–11), electron-builder 24, NSIS per-user |
+| Паки desktop | `%APPDATA%\igrovoj-centr\packs\current` |
+| Паки android | `context.filesDir/packs/current` |
+| Desktop: runtime | Electron 22.3.27 (Win 7 SP1–11), electron-builder 24, NSIS per-user |
+| Android: runtime | system WebView; minSdk 26 (Android 8.0), compile/targetSdk 34, AGP 8.9.1+, Gradle 9.6 |
+| Android: подписи | `gc-android\keystore\release.keystore` (alias igrovoj) + резервная копия |
+| Android: JDK сборки | JBR студии (`JAVA_HOME=<studio>\jbr`); keytool там же |
 | HEARTBEAT_INTERVAL / TTL | 5000 / 15000 мс |
 | Watchdog комнат | тик 5 с, порог неактивности 30 с |
 | MAX_NAV_MODE | `'external'` (продакшен) |
-| Бутстрап контента | таймаут 60 с до окна |
+| Бутстрап контента desktop | таймаут 60 с до окна |
+| Бутстрап контента android | sync при каждом запуске, оверлей с прогрессом, тап = retry |
 | BOT_ADD_GAP (Дурак) | 2000 мс на бота-подкидывателя |
 | Hub smart-sort | полураспад 30 дней, ключ `hub_sort_stats`, сброс `?sort=reset` |
 
@@ -573,7 +698,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 
 ---
 
-## 10. История ключевых решений
+## 11. История ключевых решений
 
 | Версия | Дата | Изменения |
 |---|---|---|
@@ -581,7 +706,8 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | 2.0 | 2026-10-27 | Единая архитектура онлайн-комнат (реванш, heartbeat, лобби в шторке, автостарт, просмотр партии); rules под все схемы; префиксы логов; чек-листы; секреты вынесены |
 | 2.1 | 2026-10-27 | Ретест MAX container: спиннер-зависание, пауза JS → watchdog мёртв; `MAX_NAV_MODE='external'`; таблица версий; грабли chess/nardy/seabattle/durak; 404 mp3/favicon |
 | 2.2 | 2026-10-28 | Официальный ответ поддержки MAX: нет navigate; openLink только внешний; зависание = ожидание LoadingCompleted; рекомендована SPA; SetCanGoBack/BackButtonPressed/SetTitle; док dev.max.ru |
-| 2.3 | 2026-11-01 | Desktop-оболочка финально: Electron 22 (Win 7 SP1–11, фикс «Невозможно запустить…» на 8.1), `registerFileProtocol` вместо buffer (фикс «хаб как текст» на Win10), https-апдейтер без fetch, иконки `assets/icons/`, релизы exe+latest.yml, размер 143 МБ и roadmap Tauri/PWA; игры: Дурак v3.9–3.15 (drag, овальный стол, рассадка по дуге, правила подкидывания, паузы ботов, фикс зависания), Нарды v2.5–2.7 (кнопка броска в офлайне, комбо-ходы и частичный дубль), Морской бой v4.29–4.30 (авто-расстановка, pulse-подсказки, авто-сворачивание панели); hub v3.28 (умная сортировка); platform.js v2.8 (goToHub TG/VK) |
+| 2.3 | 2026-11-01 | Desktop-оболочка финально: Electron 22 (Win 7 SP1–11, фикс «Невозможно запустить…» на 8.1), `registerFileProtocol` вместо buffer (фикс «хаб как текст» на Win10), https-апдейтер без fetch, иконки `assets/icons/`, релизы exe+latest.yml, размер 143 МБ и roadmap Tauri/PWA; игры: Дурак v3.9–3.15, Нарды v2.5–2.7, Морской бой v4.29–4.30; hub v3.28 (умная сортировка); platform.js v2.8 (goToHub TG/VK) |
+| 2.4 | 2026-11-02 | Android-оболочка v0.1.0 полным циклом (раздел 7): WebView + intercept под Pages-origin, ContentUpdater (versions.json/sha256/swap), AppBridge android, диплинки, иконки mipmap через PowerShell, keystore-подпись, gradle-грабли (8.4); hub v3.29–3.33: двухэтапная модалка скачивания (3 действия → 2 платформы), «Скачать ссылку» = буфер обмена, тексты кнопок; platform.js v2.9 (ветка android, SW-гейт по AppBridge); правило трёх ассетов релиза (apk+exe+latest.yml); релиз v0.4.0 |
 
 ---
 
