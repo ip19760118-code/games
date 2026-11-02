@@ -55,6 +55,7 @@
     .dl-opt .txt small { display: block; font-size: 12px; color: #8a94a6; }
     .dl-share { margin-top: 10px; padding: 12px; border-radius: 16px; border: 1px dashed rgba(124, 255, 196, 0.3); background: transparent; color: #a8b4d8; cursor: pointer; font-family: inherit; width: 100%; font-size: 13px; transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease; }
     .dl-share:active { color: #7cffc4; border-color: rgba(124, 255, 196, 0.6); }
+    .dl-note { font-size: 11px; color: #8a94a6; margin-top: 10px; line-height: 1.4; }
     .dl-close { position: absolute; top: 12px; right: 12px; background: rgba(255, 255, 255, 0.08); border: none; color: #eaf0ff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background 0.15s ease; }
     /* v3.27: hover-подсветка кнопок для мыши (ПК/приложение); на тач-устройствах не применяется */
     @media (hover: hover) and (pointer: fine) {
@@ -100,29 +101,47 @@
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.28 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.29 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
-  <div class="dl-overlay" id="dlOverlay">
+  <!-- v3.29: двухэтапная модалка: действие → платформа -->
+  <div class="dl-overlay" id="dlOverlay" data-screen="1">
     <div class="dl-card">
       <button class="dl-close" id="dlClose" aria-label="Закрыть">×</button>
-      <h2>📥 Скачать приложение</h2>
-      <button class="dl-opt" id="dlWin">
-        <span class="emoji">🪟</span>
-        <span class="txt"><b>Windows (ПК)</b><small>Прямое скачивание установщика .exe</small></span>
-      </button>
-      <button class="dl-opt disabled" disabled>
-        <span class="emoji">🤖</span>
-        <span class="txt"><b>Android</b><small>Скоро — в разработке</small></span>
-      </button>
-      <button class="dl-share" id="dlShare">📤 Отправить ссылку на скачивание другу</button>
-      <button class="dl-share" id="dlReleasePage">📄 Страница релиза: описание и история версий</button>
+      <div id="dlScreen1">
+        <h2>📥 Скачать приложение</h2>
+        <button class="dl-opt" id="dlActDownload">
+          <span class="emoji">⬇️</span>
+          <span class="txt"><b>Скачать приложение</b><small>Загрузить установщик на это устройство</small></span>
+        </button>
+        <button class="dl-opt" id="dlActShare">
+          <span class="emoji">📤</span>
+          <span class="txt"><b>Отправить ссылку</b><small>Почта, мессенджеры, SMS — системный выбор</small></span>
+        </button>
+        <button class="dl-opt" id="dlActLink">
+          <span class="emoji">💾</span>
+          <span class="txt"><b>Скачать ссылку</b><small>Сохранить файл‑ссылку (.url) для другого ПК</small></span>
+        </button>
+      </div>
+      <div id="dlScreen2" style="display:none">
+        <button class="dl-share" id="dlBack" style="margin-top:0;margin-bottom:12px">← Назад к действиям</button>
+        <h2 id="dlScreen2Title">Выберите платформу</h2>
+        <button class="dl-opt" id="dlPlatWin">
+          <span class="emoji">🪟</span>
+          <span class="txt"><b>Windows 7 и более</b><small>ПК и ноутбуки: Windows 7 / 8.1 / 10 / 11</small></span>
+        </button>
+        <button class="dl-opt disabled" disabled>
+          <span class="emoji">🤖</span>
+          <span class="txt"><b>Android</b><small>В разработке — список дополнится</small></span>
+        </button>
+        <div class="dl-note">Список платформ будет дополняться по мере выхода приложений.</div>
+      </div>
     </div>
   </div>
 
   <script>
-    const HUB_VER = '3.28';
+    const HUB_VER = '3.29';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
 
@@ -130,7 +149,10 @@
       bg: '#070b16',
       back: function() {
         var ov = document.getElementById('dlOverlay');
-        if (ov && ov.classList.contains('show')) { ov.classList.remove('show'); return; }
+        if (ov && ov.classList.contains('show')) {
+          if (ov.dataset.screen === '2') { document.getElementById('dlBack').click(); return; }
+          ov.classList.remove('show'); return;
+        }
         Platform.close();
       }
     });
@@ -155,7 +177,7 @@
 
     /* ---------- v3.28: умная сортировка списка игр ---------- */
     const SORT_KEY = 'hub_sort_stats';
-    const HALF_LIFE_DAYS = 30;   /* вклад запуска падает вдвое за 30 дней простоя */
+    const HALF_LIFE_DAYS = 30;
 
     function loadSortStats(){ try { return JSON.parse(localStorage.getItem(SORT_KEY)) || {}; } catch(e){ return {}; } }
     function saveSortStats(s){ try { localStorage.setItem(SORT_KEY, JSON.stringify(s)); } catch(e){} }
@@ -182,8 +204,8 @@
         return { el: el, orig: i, score: scoreOf(stats[key]) };
       });
       items.sort(function(a, b){
-        if (b.score !== a.score) return b.score - a.score;  /* частые и свежие выше */
-        return a.orig - b.orig;                              /* равенство = кураторский порядок */
+        if (b.score !== a.score) return b.score - a.score;
+        return a.orig - b.orig;
       });
       items.forEach(function(it){ list.appendChild(it.el); });
     }
@@ -198,7 +220,6 @@
 
     function openGame(url, gameName) {
       trackEvent('hub_game_click', { game_name: gameName });
-      /* v3.28: статистика запусков; ключ = папка игры без ./ и слэшей, дефисы→нижние */
       try {
         const key = String(url).replace(/^\.\//, '').replace(/\/$/, '').replace(/-/g, '_');
         bumpGameStat(key);
@@ -270,16 +291,32 @@
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
+    /* ---------- v3.29: двухэтапная модалка скачивания ---------- */
     (function(){
       const ov = document.getElementById('dlOverlay');
-      const closeBtn = document.getElementById('dlClose');
-      const winBtn = document.getElementById('dlWin');
-      const shareBtn = document.getElementById('dlShare');
-      const releaseBtn = document.getElementById('dlReleasePage');
-      const mainBtn = document.getElementById('downloadBtn');
+      const s1 = document.getElementById('dlScreen1');
+      const s2 = document.getElementById('dlScreen2');
+      const s2Title = document.getElementById('dlScreen2Title');
+      let dlAction = null;
+      const ACTION_TITLES = {
+        download: '⬇️ Скачать приложение',
+        share: '📤 Отправить ссылку',
+        link: '💾 Скачать ссылку'
+      };
+
+      function showScreen(n){
+        s1.style.display = (n === 1) ? '' : 'none';
+        s2.style.display = (n === 2) ? '' : 'none';
+        ov.dataset.screen = String(n);
+      }
+      function openPlatformChoice(action){
+        dlAction = action;
+        s2Title.textContent = ACTION_TITLES[action] + ' — выберите платформу';
+        showScreen(2);
+      }
 
       function startExeDownload(){
-        trackEvent('hub_download_win', {});
+        trackEvent('hub_download_win', { action: dlAction || 'download' });
         try { Platform.haptic('light'); } catch(e){}
         if (Platform.name === 'pc') {
           try { if (window.AppBridge && window.AppBridge.openExternal) { window.AppBridge.openExternal(WIN_EXE_URL); return; } } catch(e){}
@@ -298,35 +335,61 @@
         }
       }
 
-      mainBtn.addEventListener('click', function(){
-        trackEvent('hub_download_open', {});
+      function shareExeLink(){
+        trackEvent('hub_download_share', { action: 'share' });
         try { Platform.haptic('light'); } catch(e){}
-        ov.classList.add('show');
-      });
-      closeBtn.addEventListener('click', function(){ ov.classList.remove('show'); });
-      ov.addEventListener('click', function(ev){ if (ev.target === ov) ov.classList.remove('show'); });
-
-      winBtn.addEventListener('click', startExeDownload);
-
-      shareBtn.addEventListener('click', function(){
-        trackEvent('hub_download_share', {});
-        try { Platform.haptic('light'); } catch(e){}
-        const shareText = '📥 Игровой центр — мини-игры офлайн и онлайн для Windows. Скачай установщик:\n';
+        const shareText = '📥 Игровой центр — мини-игры офлайн и онлайн для Windows (7 и новее). Скачай установщик:\n';
         try {
           Platform.share(WIN_EXE_URL, shareText, {
             title: 'Игровой центр — скачать приложение',
             copiedToast: 'Ссылка на скачивание скопирована'
           });
         } catch(e){}
-      });
+      }
 
-      releaseBtn.addEventListener('click', function(){
-        trackEvent('hub_download_release_page', {});
-        if (Platform.name === 'pc') {
-          try { if (window.AppBridge && window.AppBridge.openExternal) { window.AppBridge.openExternal(RELEASE_URL); return; } } catch(e){}
+      /* v3.29: файл-ссылка (интернет-ярлык .url) — двойной клик на любом ПК начнёт загрузку установщика */
+      function saveUrlFile(){
+        trackEvent('hub_download_link', { action: 'link' });
+        try { Platform.haptic('light'); } catch(e){}
+        try {
+          const body = '[InternetShortcut]\r\nURL=' + WIN_EXE_URL + '\r\nIconIndex=0\r\n';
+          const blob = new Blob([body], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'Igrovoj-Centr-Windows.url';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+          try { Platform.toast('Файл-ссылка сохранён: Igrovoj-Centr-Windows.url'); } catch(e){}
+        } catch(e){
+          try { Platform.toast('Не удалось сохранить файл. Ссылка: ' + WIN_EXE_URL); } catch(e2){}
         }
-        window.open(RELEASE_URL, '_blank');
+      }
+
+      document.getElementById('downloadBtn').addEventListener('click', function(){
+        trackEvent('hub_download_open', {});
+        try { Platform.haptic('light'); } catch(e){}
+        showScreen(1);
+        ov.classList.add('show');
       });
+      document.getElementById('dlClose').addEventListener('click', function(){ ov.classList.remove('show'); });
+      ov.addEventListener('click', function(ev){ if (ev.target === ov) ov.classList.remove('show'); });
+      document.getElementById('dlBack').addEventListener('click', function(){ showScreen(1); });
+
+      document.getElementById('dlActDownload').addEventListener('click', function(){ openPlatformChoice('download'); });
+      document.getElementById('dlActShare').addEventListener('click', function(){ openPlatformChoice('share'); });
+      document.getElementById('dlActLink').addEventListener('click', function(){ openPlatformChoice('link'); });
+
+      document.getElementById('dlPlatWin').addEventListener('click', function(){
+        trackEvent('hub_download_platform', { platform_target: 'windows', action: dlAction || '' });
+        if (dlAction === 'share') { shareExeLink(); ov.classList.remove('show'); return; }
+        if (dlAction === 'link') { saveUrlFile(); ov.classList.remove('show'); return; }
+        startExeDownload();
+        ov.classList.remove('show');
+      });
+      /* Android-кнопка disabled: добавим ветку, когда появится APK */
     })();
 
     (function handleDeepLink() {
