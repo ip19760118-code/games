@@ -28,7 +28,7 @@
     h1 { margin: 0 0 6px; font-size: clamp(24px, 7vw, 32px); color: #7cffc4; }
     .hub-logo { width: 34px; height: 34px; border-radius: 9px; margin-right: 8px; vertical-align: -4px; box-shadow: 0 2px 10px rgba(124, 255, 196, 0.35); }
     .hub-subtitle { margin: 0 0 8px; color: #7cffc4; font-size: clamp(13px, 3.6vw, 15px); font-weight: 700; }
-    .hub-desc { margin: 0 0 16px; color: #a8b4d8; font-size: clamp(12px, 3.4vw, 14px); line-height: 1.45; }
+    .hub-desc { margin: 0 16px; color: #a8b4d8; font-size: clamp(12px, 3.4vw, 14px); line-height: 1.45; }
     .download-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px 16px; margin-bottom: 16px; border-radius: 18px; border: 1px solid rgba(124, 255, 196, 0.5); background: linear-gradient(135deg, rgba(124, 255, 196, 0.14), rgba(51, 214, 255, 0.12)); color: #7cffc4; font-size: clamp(14px, 4vw, 16px); font-weight: 700; cursor: pointer; transition: transform 0.08s ease, background 0.15s ease, box-shadow 0.15s ease; font-family: inherit; }
     .download-btn:active { transform: scale(0.98); background: linear-gradient(135deg, rgba(124, 255, 196, 0.24), rgba(51, 214, 255, 0.22)); }
     .game-btn { width: 100%; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; background: rgba(255, 255, 255, 0.06); color: #eaf0ff; padding: 12px; margin-bottom: 10px; cursor: pointer; text-align: left; transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease; font-family: inherit; font-size: inherit; touch-action: manipulation; min-width: 0; }
@@ -57,7 +57,7 @@
     .dl-share:active { color: #7cffc4; border-color: rgba(124, 255, 196, 0.6); }
     .dl-note { font-size: 11px; color: #8a94a6; margin-top: 10px; line-height: 1.4; }
     .dl-close { position: absolute; top: 12px; right: 12px; background: rgba(255, 255, 255, 0.08); border: none; color: #eaf0ff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background 0.15s ease; }
-    /* v3.27: hover-подсветка кнопок для мыши (ПК/приложение); на тач-устройствах не применяется */
+    /* hover-подсветка кнопок для мыши (ПК/приложение); на тач-устройствах не применяется */
     @media (hover: hover) and (pointer: fine) {
       .game-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(124, 255, 196, 0.45); transform: translateY(-1px); }
       .game-btn.disabled:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.08); transform: none; }
@@ -79,7 +79,6 @@
 
       <p class="hub-desc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. В браузере и мессенджерах игры запускаются без установки: нажми и играй. Для ПК есть приложение Windows: оно устанавливается один раз, хранит игры на устройстве (работают офлайн) и само обновляет контент. Список игр умный: любимые игры поднимаются наверх сами. Новые игры добавляются регулярно.</p>
 
-      <!-- v3.28: контейнер списка игр для умной сортировки; data-game = ключ статистики -->
       <div id="gamesList">
         <button class="game-btn" data-game="trend_catch" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
         <button class="game-btn" data-game="lights_out" id="lightsOutBtn"><span class="game-emoji">💡</span><span class="game-text"><b>Выключи Свет</b><small>Логическая головоломка: выключи всё поле</small></span></button>
@@ -101,11 +100,11 @@
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.29 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.30 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
-  <!-- v3.29: двухэтапная модалка: действие → платформа -->
+  <!-- v3.29+: двухэтапная модалка: действие → платформа -->
   <div class="dl-overlay" id="dlOverlay" data-screen="1">
     <div class="dl-card">
       <button class="dl-close" id="dlClose" aria-label="Закрыть">×</button>
@@ -121,7 +120,7 @@
         </button>
         <button class="dl-opt" id="dlActLink">
           <span class="emoji">💾</span>
-          <span class="txt"><b>Скачать ссылку</b><small>Сохранить файл‑ссылку (.url) для другого ПК</small></span>
+          <span class="txt"><b>Скачать ссылку</b><small>Скопировать ссылку в буфер обмена — вставь куда угодно</small></span>
         </button>
       </div>
       <div id="dlScreen2" style="display:none">
@@ -141,7 +140,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.29';
+    const HUB_VER = '3.30';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
 
@@ -175,7 +174,7 @@
       } catch (e) {}
     })();
 
-    /* ---------- v3.28: умная сортировка списка игр ---------- */
+    /* ---------- умная сортировка списка игр (v3.28) ---------- */
     const SORT_KEY = 'hub_sort_stats';
     const HALF_LIFE_DAYS = 30;
 
@@ -291,7 +290,7 @@
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
-    /* ---------- v3.29: двухэтапная модалка скачивания ---------- */
+    /* ---------- v3.30: двухэтапная модалка; 3-я кнопка = ссылка в буфер обмена ---------- */
     (function(){
       const ov = document.getElementById('dlOverlay');
       const s1 = document.getElementById('dlScreen1');
@@ -347,24 +346,37 @@
         } catch(e){}
       }
 
-      /* v3.29: файл-ссылка (интернет-ярлык .url) — двойной клик на любом ПК начнёт загрузку установщика */
-      function saveUrlFile(){
+      /* v3.30: копирование ссылки в буфер обмена с fallback для старых webview */
+      function fallbackCopy(text){
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          const ok = document.execCommand('copy');
+          ta.remove();
+          try { Platform.toast(ok ? 'Ссылка скопирована в буфер — вставь её куда нужно' : 'Не удалось скопировать. Ссылка: ' + text); } catch(e){}
+        } catch(e){
+          try { Platform.toast('Ссылка: ' + text); } catch(e2){}
+        }
+      }
+      function copyExeLink(){
         trackEvent('hub_download_link', { action: 'link' });
         try { Platform.haptic('light'); } catch(e){}
+        const link = WIN_EXE_URL;
         try {
-          const body = '[InternetShortcut]\r\nURL=' + WIN_EXE_URL + '\r\nIconIndex=0\r\n';
-          const blob = new Blob([body], { type: 'text/plain' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'Igrovoj-Centr-Windows.url';
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
-          try { Platform.toast('Файл-ссылка сохранён: Igrovoj-Centr-Windows.url'); } catch(e){}
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(function(){
+              try { Platform.toast('Ссылка скопирована в буфер — вставь её куда нужно'); } catch(e){}
+            }).catch(function(){ fallbackCopy(link); });
+          } else {
+            fallbackCopy(link);
+          }
         } catch(e){
-          try { Platform.toast('Не удалось сохранить файл. Ссылка: ' + WIN_EXE_URL); } catch(e2){}
+          fallbackCopy(link);
         }
       }
 
@@ -385,11 +397,11 @@
       document.getElementById('dlPlatWin').addEventListener('click', function(){
         trackEvent('hub_download_platform', { platform_target: 'windows', action: dlAction || '' });
         if (dlAction === 'share') { shareExeLink(); ov.classList.remove('show'); return; }
-        if (dlAction === 'link') { saveUrlFile(); ov.classList.remove('show'); return; }
+        if (dlAction === 'link') { copyExeLink(); ov.classList.remove('show'); return; }
         startExeDownload();
         ov.classList.remove('show');
       });
-      /* Android-кнопка disabled: добавим ветку, когда появится APK */
+      /* Android-кнопка disabled: ветку добавим, когда появится APK */
     })();
 
     (function handleDeepLink() {
@@ -405,7 +417,6 @@
       } catch (e) {}
     })();
 
-    /* v3.28: пересортировка списка при каждой загрузке хаба */
     applySmartSort();
   </script>
 </body>
