@@ -8,7 +8,6 @@
 html,body{overscroll-behavior:none;overscroll-behavior-y:none}
 body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:10px;padding-top:calc(10px + env(safe-area-inset-top));padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .wrap{max-width:560px;width:100%;background:var(--panel);border-radius:22px;padding:12px;box-shadow:0 20px 60px var(--shadow);border:1px solid rgba(255,255,255,.08)}
-/* v1.1: шапка в два ряда — логотип+название сверху, кнопки под ними */
 .header{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:10px}
 .title-row{display:flex;align-items:center;justify-content:center;gap:10px}
 .logo{font-size:30px;line-height:1;filter:drop-shadow(0 3px 8px rgba(0,0,0,.45))}
@@ -29,7 +28,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
  transition:transform .16s cubic-bezier(.25,.8,.35,1.1),box-shadow .16s;text-shadow:0 1px 2px rgba(0,0,0,.25);will-change:transform}
 .tile:active{box-shadow:0 3px 8px rgba(0,0,0,.5),inset 0 2px 3px rgba(255,255,255,.35),inset 0 -3px 6px rgba(0,0,0,.3)}
 .tiles.noanim .tile{transition:none}
-/* темы */
 #wrap[data-skin="classic"]{--b-bg:linear-gradient(160deg,#5a3d22,#42290f);--t-bg:linear-gradient(145deg,#f2c67c,#c98a3e);--t-num:#241505;--slot-bg:rgba(0,0,0,.28)}
 #wrap[data-skin="sea"]{--b-bg:linear-gradient(160deg,#12454f,#0b2f38);--t-bg:linear-gradient(145deg,#9fe8d8,#2a9d8f);--t-num:#06222b;--slot-bg:rgba(0,0,0,.32)}
 #wrap[data-skin="neon"]{--b-bg:linear-gradient(160deg,#161b22,#0b0e12);--t-bg:linear-gradient(145deg,#232b36,#151a21);--t-num:#7cffc4;--slot-bg:rgba(124,255,196,.06)}
@@ -69,7 +67,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="boardbox"><div class="board" id="board"><div class="slots" id="slots"></div><div class="tiles" id="tiles"></div></div></div>
 <div class="status" id="statusEl">Нажми «Новая игра»</div>
 <div class="actions"><button class="btn primary" id="newBtn">🔄 Новая игра</button><button class="btn" id="shareBtn">📤 Отправить результат</button></div>
-<div class="ver" id="verTag">v1.1</div>
+<div class="ver" id="verTag">v1.2</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Громкость · <span id="volV">70%</span><input type="range" id="volSlider" min="0" max="100" value="70"></div>
@@ -95,9 +93,8 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div>
 </div></div>
 <script>
-const VER='1.1';
+const VER='1.2';
 const $=id=>document.getElementById(id);
-const CANON_URL='https://ip19760118-code.github.io/games/pyatnashki/';
 const DIFFS={easy:{n:30,label:'Лёгкая'},medium:{n:90,label:'Средняя'},hard:{n:180,label:'Сложная'},expert:{n:320,label:'Эксперт'}};
 let set=Object.assign({vol:.7,diff:'medium',skin:'classic'},JSON.parse(localStorage.pyatnashki_set||'{}'));
 let ST=Object.assign({solves:0,bestTime:0,bestMoves:0,movesTotal:0,timeTotal:0,lastTime:0,lastMoves:0},JSON.parse(localStorage.pyatnashki_stats||'{}'));
@@ -107,7 +104,7 @@ const saveST=()=>localStorage.pyatnashki_stats=JSON.stringify(ST);
 function trackEvent(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
 (function(){try{const k='pyatnashki_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'pyatnashki',source:Platform.name,ver:VER});}}catch(e){}})();
 
-/* ---------- звук (синтез; AudioContext стартует ТОЛЬКО после user gesture) ---------- */
+/* ---------- звук ---------- */
 let AC=null,MASTER=null,unlocked=false;
 function unlockAudio(){
   if(unlocked)return true;
@@ -136,7 +133,6 @@ const sDeny=()=>tn(150,90,.14,'sawtooth',.1);
 /* ---------- состояние ---------- */
 let B=[],tileEls={},moves=0,seconds=0,timerInt=null,started=false,won=false,cellPx=0,gapPx=6;
 const solved=()=>{const a=[];for(let i=1;i<=15;i++)a.push(i);a.push(0);return a;};
-/* Walk-генерация из собранного состояния: решаемость гарантирована построением */
 function shuffleBoard(n){
   B=solved();let lastIdx=-1;
   for(let k=0;k<n;k++){
@@ -234,12 +230,13 @@ function win(){
   setTimeout(()=>$('endOverlay').classList.add('show'),320);
   trackEvent('game_end',{game_name:'pyatnashki',time:t,moves:moves,difficulty:set.diff});
 }
+/* v1.2: вирусный шеринг через Platform.shareGame — диплинк ?game= + бренд-строка */
 function shareResult(){
   unlockAudio();
   const txt=ST.lastTime
-    ?('🧩 Пятнашки: собрано за '+fmt(ST.lastTime)+' за '+ST.lastMoves+' ходов ('+DIFFS[set.diff].label+'). Сможешь лучше?\n')
-    :'🧩 Пятнашки — классика головоломок: собери 1…15 скольжением костяшек.\n';
-  Platform.share(CANON_URL,txt,{title:'Пятнашки — результат',copiedToast:'Результат скопирован — отправь другу!'});
+    ?('🧩 Пятнашки: собрано за '+fmt(ST.lastTime)+' за '+ST.lastMoves+' ходов ('+DIFFS[set.diff].label+'). Сможешь лучше?')
+    :'🧩 Пятнашки — классика головоломок: собери 1…15 скольжением костяшек.';
+  Platform.shareGame('pyatnashki',txt,{title:'Пятнашки — результат',copiedToast:'Результат скопирован — отправь другу!'});
   trackEvent('game_share',{game_name:'pyatnashki'});
 }
 
@@ -260,7 +257,7 @@ function openSettings(){
   $('setOverlay').classList.add('show');
 }
 
-/* ---------- ввод: свайпы и клавиатура ---------- */
+/* ---------- ввод ---------- */
 (function(){
   let sx=0,sy=0,down=false;
   const b=$('board');
@@ -290,7 +287,7 @@ function backHandler(){
   if($('endOverlay').classList.contains('show')){$('endOverlay').classList.remove('show');return;}
   Platform.goToHub();
 }
-Platform.init({bg:'#171310',back:backHandler});
+Platform.init({bg:'#171310',back:backHandler,game:'pyatnashki'});
 $('hubBtn').onclick=()=>Platform.goToHub();
 $('newBtn').onclick=()=>{unlockAudio();newGame();};
 $('shareBtn').onclick=()=>shareResult();
@@ -312,7 +309,6 @@ $('endHub').onclick=()=>Platform.goToHub();
 window.addEventListener('resize',()=>layout());
 window.addEventListener('orientationchange',()=>setTimeout(()=>layout(),120));
 
-/* ---------- старт ---------- */
 $('verTag').textContent='v'+VER;
 applySkin();
 newGame();

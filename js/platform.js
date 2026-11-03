@@ -1,6 +1,9 @@
-/* tg-games: единый слой платформ v2.9 — Telegram / VK / MAX / web / PC(Electron) / Android(WebView).
+/* tg-games: единый слой платформ v3.0 — Telegram / VK / MAX / web / PC(Electron) / Android(WebView).
+   v3.0: вирусный шеринг: Platform.shareGame(key,text,opts) + Platform.gameDeepLink(key);
+         в share() опции opts.game (строка диплинка) и opts.brand (бренд-строка);
+         бренд без числа игр: «Игровой центр — классика и новинки, онлайн и офлайн».
    v2.9: ветка 'android': детект по AppBridge.platform, back через window.__androidBack,
-   share через нативный chooser, close→quit, SW в оболочках (pc/android) не регистрируется.
+         share через нативный chooser, close→quit, SW в оболочках не регистрируется.
    v2.8: goToHub в TG/VK — внутренняя навигация (не close). */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
@@ -9,7 +12,8 @@ var Platform=(function(){
  var MAX_DEEPLINK='https://max.ru/se14729332_bot';
  var MAX_NAV_MODE='external';
  var CANONICAL_ORIGIN='https://ip19760118-code.github.io/games';
- var name='web',user=null,backFn=null,inited=false;
+ var BRAND_LINE='\n🎮 Игровой центр — классика и новинки, онлайн и офлайн';
+ var name='web',user=null,backFn=null,inited=false,gameKey=null;
 
  function qs(k){try{return new URLSearchParams(location.search).get(k)||''}catch(e){return ''}}
  function load(src){return new Promise(function(res){var s=document.createElement('script');s.src=src;s.onload=function(){res(true)};s.onerror=function(){res(false)};document.head.appendChild(s)})}
@@ -26,7 +30,7 @@ var Platform=(function(){
  (function(){
   try{
    if(!('serviceWorker' in navigator))return;
-   if(window.AppBridge)return; /* v2.9: в оболочках (pc/android) кэшем управляет апдейтер, SW не нужен */
+   if(window.AppBridge)return;
    if(location.protocol!=='https:')return;
    if(location.host.indexOf('github.io')<0)return;
    var m=location.pathname.match(/^(.*\/games\/)/);
@@ -83,6 +87,9 @@ var Platform=(function(){
    return location.origin+location.pathname;
   }catch(e){return location.href}
  }
+
+ /* v3.0: канонический диплинк игры через хаб (?game=key) */
+ function gameDeepLink(key){ return CANONICAL_ORIGIN+'/?game='+key; }
 
  function hubBase(){
   try{
@@ -145,7 +152,6 @@ var Platform=(function(){
   toastT=setTimeout(function(){toastEl.style.opacity='0'},ms||2600)}
  function copyText(t){try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t);return true}}catch(e){}return false}
 
- /* v2.9: предупреждения обновлений для оболочек pc/android */
  function showUpdateWarnings(){
   try{
    if((name!=='pc'&&name!=='android')||!window.AppBridge||!AppBridge.getUpdateWarnings)return;
@@ -169,6 +175,7 @@ var Platform=(function(){
  }
 
  function init(o){o=o||{};if(inited)return;inited=true;
+  gameKey=o.game||null;
 
   try{
    document.documentElement.style.overscrollBehavior='none';
@@ -228,8 +235,18 @@ var Platform=(function(){
     else if(o.back)backFn=o.back;
    }catch(e){}})}
 
+ /* v3.0: бренд-надстройки текста шеринга */
+ function withBrand(text,opts){
+  opts=opts||{};
+  var extra='';
+  if(opts.game)extra+='\n👉 Сыграть сейчас: '+gameDeepLink(opts.game);
+  if(opts.game||opts.brand)extra+=BRAND_LINE;
+  return String(text==null?'':text)+extra;
+ }
+
  function share(url,text,opts){
   opts=opts||{};
+  text=withBrand(text,opts);
   function onCopied(){copyText(text+'\n'+url);if(opts.onCopied)opts.onCopied();else platToast(opts.copiedToast||'Ссылка скопирована — отправьте её другу')}
   function messengerShare(){
    if(name==='android'&&window.AppBridge&&window.AppBridge.share){try{window.AppBridge.share(text,url);return true}catch(e){}}
@@ -250,6 +267,13 @@ var Platform=(function(){
     return}catch(e){}}
   if(!messengerShare())onCopied()}
 
+ /* v3.0: шеринг результата игры: url=диплинк, текст+диплинк-строка+бренд */
+ function shareGame(key,text,opts){
+  opts=opts||{};
+  opts.game=key;
+  return share(gameDeepLink(key),text,opts);
+ }
+
  return{
   get name(){return name},
   init:init,
@@ -261,6 +285,8 @@ var Platform=(function(){
   backToMessenger:backToMessenger,
   goToHub:goToHub,
   hubBase:hubBase,
+  gameDeepLink:gameDeepLink,
+  shareGame:shareGame,
   haptic:function(t){
    if(name==='pc')return;
    try{
