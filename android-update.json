@@ -1,5 +1,5 @@
 {
-  "versionName": "0.7.1",
-  "versionCode": 5,
-  "notes": "Офлайн-старт из памяти; versions.json в паках; desktop 0.3.2"
+  "versionName": "0.8.0",
+  "versionCode": 6,
+  "notes": "Динамическое количество игр и версия контента в «О приложении»"
 }
