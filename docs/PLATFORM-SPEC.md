@@ -1,6 +1,6 @@
 # PLATFORM-SPEC — МК «Игровой центр»: кроссплатформенная спецификация и грабли
 
-**Версия документа: 2.4** | Дата: 2026-11-02 | Статус: TG ✅ / MAX ✅ / VK ✅ / web ✅ / PC (Electron, Win 7 SP1–11) ✅ / Android (WebView, 8.0+) ✅
+**Версия документа: 2.5** | Дата: 2026-11-03 | Статус: TG ✅ / MAX ✅ / VK ✅ / web ✅ / PC (Electron, Win 7 SP1–11) ✅ / Android (WebView, 8.0+) ✅
 Репозиторий: `github.com/ip19760118-code/games`
 Pages: `https://ip19760118-code.github.io/games/`
 
@@ -13,7 +13,7 @@ Pages: `https://ip19760118-code.github.io/games/`
 
 | Компонент | Где живёт | Комментарий |
 |---|---|---|
-| Хаб (витрина 16 игр + модалка скачивания + умная сортировка) | GitHub Pages, корень репо `games/` | `index.html` **v3.33** |
+| Хаб (витрина 16 игр + модалка скачивания + умная сортировка + ⚙️ android) | GitHub Pages, корень репо `games/` | `index.html` **v3.34** |
 | Игры | папки `chess/ … trend-catch/`, `tetris/` | мультиплатформенные через `js/platform.js` |
 | Онлайн-комнаты | Firebase RTDB (имя проекта не менять!) | единая схема: раздел 5 |
 | Desktop-оболочка (Windows) | локальный проект `gc-desktop/` (**НЕ в репо**) | Electron **22**, релизы GitHub Releases: раздел 6 |
@@ -33,7 +33,7 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 
 | Компонент | Версия |
 |---|---|
-| hub `index.html` | v3.33 |
+| hub `index.html` | v3.34 |
 | `js/platform.js` | v2.9 |
 | vk-bot `server.js` | v1.13 |
 | max-bot `server.js` | v2.0 |
@@ -46,7 +46,7 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 | Тетрис | v1.2 |
 | Сапёр | v1.6 |
 | Desktop-оболочка | v0.3.1 (Electron 22.3.27) |
-| Android-оболочка | v0.1.0 (system WebView) |
+| Android-оболочка | v0.6.0 (system WebView) |
 
 ---
 
@@ -165,13 +165,16 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 - **Favicon:** во всех играх и хабе `<link rel="icon" … icon-32.png>` (+apple-touch 180); убирает 404 `/favicon.ico`.
 - **Звук:** mp3 в `assets/snd` отсутствуют → эффекты через синтез в приоритете; `SND.preload()` не вызывать (404).
 - **Модалка скачивания хаба (v3.29–3.33), двухэтапная:**
-  1. Экран действий: «⬇️ Скачать приложение» / «📤 Отправить ссылку» / «💾 Скачать ссылку».
+  1. Экран действий: «⬇️ Скачать приложение» / «📤 Отправить ссылку» / «💾 Скачать ссылку» (буфер обмена).
   2. Экран платформ: «🪟 Windows 7 и новее · Для ПК и ноутбуков. (~140Мб)» и
      «🤖 Android 8 и новее · Лёгкое приложение (~3 МБ) с офлайн-играми».
   Действия: download = прямая загрузка ассета (в оболочках — `AppBridge.openExternal`);
   share = `Platform.share` (системный chooser / шеринг мессенджеров);
-  «Скачать ссылку» = копирование ссылки в буфер (`navigator.clipboard` + fallback `execCommand`).
+  «Скачать ссылку» = копирование в буфер (`navigator.clipboard` + fallback `execCommand`).
   Системная «Назад»/Esc на экране платформ возвращает на экран действий (`ov.dataset.screen`).
+- **Шестерёнка настроек (hub v3.34):** кнопка `#hubSetBtn` в правом верхнем углу панели;
+  видна только при `Platform.name==='android' && AppBridge.openSettings` → открывает нативный
+  экран настроек оболочки (7.9). На pc/web/TG/MAX/VK скрыта.
 - **Стабильные ссылки ассетов:** `WIN_EXE_URL = …/releases/latest/download/IgrovojCentr-Setup.exe`,
   `APK_URL = …/releases/latest/download/IgrovojCentr.apk` (artifactName без версии в конфиге сборки).
   **ПРАВИЛО РЕЛИЗА:** каждый релиз содержит ВСЕ ассеты (apk + exe + latest.yml), иначе
@@ -446,7 +449,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 
 ---
 
-## 7. Android-оболочка (system WebView) — v0.1.0
+## 7. Android-оболочка (system WebView) — v0.6.0
 
 ### 7.1 Состав и расположение
 
@@ -454,10 +457,12 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 - `app/build.gradle` (Groovy; namespace `ru.ip19760118.igrovojcentr`; minSdk 26 = Android 8.0;
   compile/targetSdk 34; `buildFeatures { buildConfig = true }`; signingConfigs.release из локального keystore).
 - `app/src/main/java/ru/ip19760118/igrovojcentr/`: `MainActivity.java`, `AppBridge.java`,
-  `ContentUpdater.java`, `PrefsStore.java`, `MimeUtils.java`.
-- `app/src/main/AndroidManifest.xml`: INTERNET / ACCESS_NETWORK_STATE / VIBRATE;
-  activity `singleTask` + `configChanges` (без перезагрузки при повороте);
-  intent-filter VIEW `https://ip19760118-code.github.io/games/*` (диплинки комнат и игр).
+  `ContentUpdater.java`, `AppUpdater.java`, `ApkProvider.java`, `SettingsActivity.java`,
+  `PrefsStore.java`, `MimeUtils.java`.
+- `app/src/main/AndroidManifest.xml`: INTERNET / ACCESS_NETWORK_STATE / VIBRATE /
+  REQUEST_INSTALL_PACKAGES; activity `singleTask` + `configChanges`; SettingsActivity (exported=false);
+  provider `ApkProvider` (authorities `${applicationId}.apk`); intent-filter VIEW
+  `https://ip19760118-code.github.io/games/*` (диплинки комнат и игр).
 - `res/values/themes.xml` = `android:Theme.Material.NoActionBar` (тёмный фон #070B16);
   `res/values/strings.xml` = «Игровой центр»; иконки `res/mipmap-*/ic_launcher.png`.
 - `keystore/release.keystore` — ключ подписи, **локально + резервная копия на накопителе**
@@ -487,7 +492,9 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   `getVersions()` (shell=versionName, content=hub из installed.json); `getUpdateWarnings()`;
   `share(text,url)` → `ACTION_SEND` chooser; `openExternal(url)` → `ACTION_VIEW`;
   `quit()` → finish; `notify/toast` → `pageToast` (evaluateJavascript `Platform.toast`);
-  `checkUpdates()` → принудительный sync с тостами прогресса.
+  `checkUpdates()` → принудительный sync контента с тостами.
+- v0.5.0+: `checkAppUpdate()` → ручная проверка обновления APK (игнорирует троттлинг).
+- v0.6.0+: `openSettings()` → нативный SettingsActivity; `getUpdateMode()` / `setUpdateMode(m)`.
 - Аппаратная «Назад»: `onBackPressed` → `evaluateJavascript(window.__androidBack…)`;
   `false` → finish. `platform.js` v2.9 в init/android и onBack назначает `window.__androidBack`.
 - Вибро: `navigator.vibrate` (permission VIBRATE) — ветка fallback в `Platform.haptic`.
@@ -498,8 +505,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 - Клик по ссылке-приглашению (`…/games/seabattle/?room=CODE`) в Telegram/браузере → chooser
   предлагает «Игровой центр» → комната открывается внутри приложения (query сохраняется).
 - `launchMode=singleTask` + `configChanges` — один инстанс, повороты без перезагрузки WebView.
-- Обновления самого APK: пока ручные (новая загрузка с Releases и установка поверх);
-  автообновление APK — roadmap (check по GitHub Releases + установка через intent).
+- Обновления самого APK: см. 7.8 (авто с v0.5.0).
 
 ### 7.5 Иконка приложения
 
@@ -522,7 +528,53 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   (правило раздела 4: ссылки `latest/download/*` живут только в свежем релизе).
 - Hub v3.31+: кнопка 🤖 «Android 8 и новее» активна; действия модалки работают и для APK
   (download → anchor/openExternal, share → Platform.share, «скачать ссылку» → буфер).
-- Теги: общая нумерация релизов `v0.4.0+`; versionName/versionCode APK растут независимо (`0.1.0` → …).
+- Теги релизов общие для проекта (`v0.N.N`); **versionName APK ведётся отдельно** в build.gradle
+  и сверяется с `android-update.json` (7.8).
+
+### 7.8 Автообновление APK (v0.5.0+)
+
+- **Манифест обновления:** `android-update.json` в корне репо → Pages:
+  `{"versionName":"0.6.0","versionCode":3,"notes":"…"}`. Приложение сравнивает `versionName`
+  с `BuildConfig.VERSION_NAME` (почленный числовой cmp). GitHub API НЕ используется
+  (rate-limits, User-Agent) — только Pages-json + стабильная ссылка ассета.
+- **Ссылка загрузки:** `APK_URL = …/releases/latest/download/IgrovojCentr.apk` →
+  `cacheDir/update/IgrovojCentr.apk`; прогресс — тосты (`pageToast` в MainActivity,
+  `Toast` в SettingsActivity).
+- **Когда проверяем:** при старте после готовности контента, если режим `auto`
+  (PrefsStore.updateMode) и прошло ≥6 ч (pref `apkCheckAt`); вручную — кнопка в настройках (7.9)
+  и `AppBridge.checkAppUpdate()` (троттлинг игнорируется).
+- **Установка:** собственный `ApkProvider` (ContentProvider без androidx; authorities
+  `${applicationId}.apk`; путь `update.apk`) → `Intent.ACTION_VIEW` с `content://…` +
+  MIME `application/vnd.android.package-archive` + `FLAG_GRANT_READ_URI_PERMISSION`.
+  `Uri.fromFile` запрещён с API 24 (FileUriExposedException) — не использовать.
+- **Гейт Android 8+:** permission `REQUEST_INSTALL_PACKAGES`; если
+  `canRequestPackageInstalls()==false` → AlertDialog → `Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES`;
+  флаг `pendingInstall` + повтор в `onResume` после возврата из настроек.
+- **Подтверждение:** нативный AlertDialog «Доступна версия X. Установить сейчас?» (Обновить/Позже).
+- **Правило деплоя android-update.json:** коммит/пуш json — строго ПОСЛЕ Publish релиза
+  (иначе устройства скачают старый ассет под новой версией). Порядок: bump versionName/versionCode →
+  assembleRelease → Release (3 ассета) → push json.
+- **Историческая оговорка:** сборки ≤0.4.x апдейтера не содержат — обновляются вручную один раз
+  (модалка хаба 🤖); цепочка замкнута с 0.5.0.
+
+### 7.9 Экран настроек (SettingsActivity, v0.6.0+)
+
+- **Вход:** шестерёнка ⚙️ в хабе (v3.34+, только android) → `AppBridge.openSettings()`;
+  Activity нативная, UI собран кодом (без XML и зависимостей), тема тёмная (#070B16/#1b2228/#7cffc4).
+- **Секции:**
+  1. *Имя игрока*: EditText + «💾 Сохранить имя» → `PrefsStore.setName` (имя идёт в
+     `AppBridge.getProfile` → `Platform.user()` → онлайн-комнаты; обрезка до 24 символов).
+  2. *Обновление оболочки*: RadioGroup Авто/Вручную → `PrefsStore.updateMode`;
+     «🔄 Проверить обновление оболочки» → AppUpdater.checkAsync(true) + диалог + установка (7.8);
+     «🎮 Обновить игры сейчас» → ContentUpdater.syncAsync с тостами прогресса.
+  3. *Сведения*: оболочка vN.N.N (код N) / контент: hub vN.NN (installed.json) /
+     WebView: Chrome NN (парсинг `WebSettings.getDefaultUserAgent`).
+  4. *Ещё*: «🌐 Игровой центр в браузере» → ACTION_VIEW Pages; «ℹ️ О приложении» →
+     AlertDialog (версия, описание, автор) + neutral «Страница релизов» → releases/latest.
+- **Навигация:** кнопка «← Назад» и системная «Назад» → finish() в хаб.
+- **Хранилище:** единый SharedPreferences-файл `igrovoj`: `name`, `updateMode`, `apkCheckAt`.
+- Режим «Вручную» отключает автопроверку APK при старте (MainActivity.bootstrap читает режим);
+  синхронизация КОНТЕНТА выполняется при каждом запуске независимо от режима.
 
 ---
 
@@ -604,6 +656,11 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | `Java compiler version 25 has deprecated support for source/target 8` | новый JDK студии | `compileOptions` VERSION_17 (или подавить warning) |
 | Иконка не меняется после установки новой версии | кэш иконок лаунчера | удалить старую версию / перезагрузить устройство |
 | Старый WebView на устройствах без Google Play | системный WebView не обновляется | детект версии WebView → экран «обновите WebView / откройте в браузере» (roadmap) |
+| Автообновление предлагает СТАРЫЙ APK | `android-update.json` запушен ДО Publish релиза | json коммитить строго после Publish (порядок 7.8) |
+| Установщик не стартует, ошибок нет | нет `REQUEST_INSTALL_PACKAGES` / `canRequestPackageInstalls()==false` | диалог → `ACTION_MANAGE_UNKNOWN_APP_SOURCES` + `pendingInstall` + повтор в onResume (7.8) |
+| `FileUriExposedException` при установке | `Uri.fromFile` запрещён с API 24 | свой `ApkProvider` + `content://` URI (7.8) |
+| Шестерёнка ⚙️ не появляется в хабе | hub < v3.34 или в оболочке нет `AppBridge.openSettings` | обновить контент (versions.json) И оболочку ≥0.6.0 |
+| Имя из настроек не видно в уже открытой комнате | игры читают `Platform.user()` при инициализации | пересоздать/перезайти в комнату после сохранения имени |
 
 ### 8.5 Игры (геймплейные грабли 2026-10/11)
 
@@ -659,10 +716,13 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 ### 9.6 Релиз Android-оболочки
 1. Bump `versionName`/`versionCode` в `app/build.gradle`.
 2. `set JAVA_HOME=<studio>\jbr` → `gradlew.bat assembleRelease` → rename в `IgrovojCentr.apk`.
-3. Release GitHub: три ассета (apk + exe + latest.yml), tag общий `v0.N.N`.
-4. Тест: свежая установка (bootstrap-загрузка паков), обновление поверх старой версии,
-   офлайн-режим (авиарежим), диплинк комнаты, шеринг, иконка (кэш лаунчера!).
-5. Hub: кнопка 🤖 отдаёт `APK_URL` автоматически (latest/download).
+3. Release GitHub: **три ассета** (apk + exe + latest.yml), tag общий `v0.N.N`.
+4. **ПОСЛЕ Publish:** коммит+пуш `android-update.json` с новой `versionName`/`versionCode` (7.8).
+5. Тест: устройство с предыдущей версией → авто-диалог обновления (режим auto) или
+   ⚙️ → «Проверить обновление оболочки» (режим manual) → загрузка → гейт неизвестных источников →
+   установщик показывает НОВУЮ версию → установка поверх без потери паков и имени.
+6. Свежая установка: bootstrap-загрузка паков, офлайн-режим (авиарежим), диплинк комнаты, шеринг,
+   иконка (кэш лаунчера!), ⚙️ и все секции настроек (7.9).
 
 ---
 
@@ -680,8 +740,12 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | EXE (стабильная ссылка) | `…/releases/latest/download/IgrovojCentr-Setup.exe` |
 | APK (стабильная ссылка) | `…/releases/latest/download/IgrovojCentr.apk` |
 | Манифест контента | `…/games/versions.json` |
+| Манифест автообновления APK | `…/games/android-update.json` (коммит строго ПОСЛЕ Publish релиза) |
 | Паки desktop | `%APPDATA%\igrovoj-centr\packs\current` |
 | Паки android | `context.filesDir/packs/current` |
+| APK android (загрузка обновления) | `context.cacheDir/update/IgrovojCentr.apk` |
+| Pref'ы android | SharedPreferences `igrovoj`: `name`, `updateMode` (auto/manual), `apkCheckAt` |
+| Троттлинг автопроверки APK | 6 часов (ручной вызов игнорирует) |
 | Desktop: runtime | Electron 22.3.27 (Win 7 SP1–11), electron-builder 24, NSIS per-user |
 | Android: runtime | system WebView; minSdk 26 (Android 8.0), compile/targetSdk 34, AGP 8.9.1+, Gradle 9.6 |
 | Android: подписи | `gc-android\keystore\release.keystore` (alias igrovoj) + резервная копия |
@@ -708,6 +772,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | 2.2 | 2026-10-28 | Официальный ответ поддержки MAX: нет navigate; openLink только внешний; зависание = ожидание LoadingCompleted; рекомендована SPA; SetCanGoBack/BackButtonPressed/SetTitle; док dev.max.ru |
 | 2.3 | 2026-11-01 | Desktop-оболочка финально: Electron 22 (Win 7 SP1–11, фикс «Невозможно запустить…» на 8.1), `registerFileProtocol` вместо buffer (фикс «хаб как текст» на Win10), https-апдейтер без fetch, иконки `assets/icons/`, релизы exe+latest.yml, размер 143 МБ и roadmap Tauri/PWA; игры: Дурак v3.9–3.15, Нарды v2.5–2.7, Морской бой v4.29–4.30; hub v3.28 (умная сортировка); platform.js v2.8 (goToHub TG/VK) |
 | 2.4 | 2026-11-02 | Android-оболочка v0.1.0 полным циклом (раздел 7): WebView + intercept под Pages-origin, ContentUpdater (versions.json/sha256/swap), AppBridge android, диплинки, иконки mipmap через PowerShell, keystore-подпись, gradle-грабли (8.4); hub v3.29–3.33: двухэтапная модалка скачивания (3 действия → 2 платформы), «Скачать ссылку» = буфер обмена, тексты кнопок; platform.js v2.9 (ветка android, SW-гейт по AppBridge); правило трёх ассетов релиза (apk+exe+latest.yml); релиз v0.4.0 |
+| 2.5 | 2026-11-03 | Android v0.5.0–0.6.0: автообновление APK (7.8: android-update.json на Pages, ApkProvider без androidx, гейт REQUEST_INSTALL_PACKAGES, троттлинг 6 ч, правило «json после Publish») и нативный экран настроек (7.9: имя игрока, режим авто/ручную, проверки оболочки и контента, сведения о версиях, «О приложении», «Игровой центр в браузере»); hub v3.34: шестерёнка ⚙️ входа в настройки; bridge: openSettings/getUpdateMode/setUpdateMode/checkAppUpdate; релиз v0.6.0 |
 
 ---
 
