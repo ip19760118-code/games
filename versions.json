@@ -1,13 +1,13 @@
 {
- "generatedAt": "2026-11-03T06:35:15.886Z",
+ "generatedAt": "2026-11-03T08:21:16.854Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
-  "version": "3.36",
+  "version": "3.37",
   "files": [
    {
     "path": "index.html",
-    "sha256": "3d7a2cc1939775e6a280306d1eecfd945f40dc82a15b470057ccd0cf477bba7c",
-    "size": 34501
+    "sha256": "a4d63aad76e4a0b87b2c190d705c005c01f3d0b8dbc6815de916effb0ef3cac5",
+    "size": 34026
    },
    {
     "path": "js/platform.js",
@@ -381,6 +381,18 @@
      "path": "trend-catch/index.html",
      "sha256": "2069778329f67624867a36dbab41216f9ac5eb0097139fcb92968e7f2b2560cf",
      "size": 38119
+    }
+   ]
+  },
+  "pyatnashki": {
+   "version": "1.0",
+   "online": false,
+   "addedAt": "2026-11-03",
+   "files": [
+    {
+     "path": "pyatnashki/index.html",
+     "sha256": "9f0ad40c589f00c38ea5001f1f64082fa16f66664e1c39a68b77b819e9f1ea2a",
+     "size": 22995
     }
    ]
   }
