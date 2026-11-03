@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-03T04:47:28.048Z",
+ "generatedAt": "2026-11-03T06:35:15.886Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.36",
@@ -21,18 +21,18 @@
    },
    {
     "path": "icon-512.png",
-    "sha256": "d486b1c9f22b1155375bf210d736de310854275ededc0fac473e67f399917aa7",
-    "size": 259987
+    "sha256": "07c099885616a4e9fe6f781f6e9cfe72990a70bf2c38e6b76d142286f4276c4f",
+    "size": 139071
    },
    {
     "path": "icon-32.png",
-    "sha256": "2d4ea0b1b8eba5300397e6fdb9fd1cf5034190baa585746082b98bbb29299dd8",
-    "size": 2088
+    "sha256": "22cff136480c118cb8ca16d364c864941ebf587d385cfb3e0762fdd85ce79f4f",
+    "size": 1970
    },
    {
     "path": "icon-180.png",
-    "sha256": "be63920cd1285873a9ebbfd20be23c96ea976b82f03f4ff2729d7f2de1c8df71",
-    "size": 39487
+    "sha256": "6ec324851d40fc31a26d89ac713214210c327a9d8cee92f764eb474365004d7c",
+    "size": 31297
    },
    {
     "path": "sw.js",
