@@ -51,6 +51,13 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .stat-row{display:flex;justify-content:space-between;padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
 .stat-row b{color:var(--accent)}
 .note{font-size:11px;opacity:.7;line-height:1.45;margin-top:8px;text-align:left}
+/* v1.3: мини-схема собранного поля в правилах (CSS-сетка в стиле костяшек) */
+.mini-board{display:grid;grid-template-columns:repeat(4,36px);grid-auto-rows:36px;gap:4px;justify-content:center;margin:12px auto 6px}
+.mini-board span{display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px;font-weight:800;color:#241505;
+ background:linear-gradient(145deg,#f2c67c,#c98a3e);
+ box-shadow:0 2px 5px rgba(0,0,0,.45),inset 0 1px 2px rgba(255,255,255,.4),inset 0 -2px 4px rgba(0,0,0,.25)}
+.mini-board span.empty{background:rgba(0,0,0,.28);box-shadow:inset 0 2px 6px rgba(0,0,0,.55)}
+.mini-cap{font-size:11px;opacity:.75;margin-bottom:4px}
 @media (hover:hover) and (pointer:fine){.tile:hover{box-shadow:0 8px 18px rgba(0,0,0,.55),inset 0 2px 3px rgba(255,255,255,.45),inset 0 -4px 8px rgba(0,0,0,.28)}.btn:hover{background:rgba(255,255,255,.14)}.hbtn:hover{background:rgba(255,255,255,.13)}}
 </style></head><body>
 <div class="wrap" id="wrap" data-skin="classic">
@@ -66,14 +73,14 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="topline"><span class="pill" id="timePill">⏱ 00:00</span><span class="pill" id="movesPill">♟ 0</span><span class="pill" id="diffPill">Средняя</span></div>
 <div class="boardbox"><div class="board" id="board"><div class="slots" id="slots"></div><div class="tiles" id="tiles"></div></div></div>
 <div class="status" id="statusEl">Нажми «Новая игра»</div>
-<div class="actions"><button class="btn primary" id="newBtn">🔄 Новая игра</button><button class="btn" id="shareBtn">📤 Отправить результат</button></div>
-<div class="ver" id="verTag">v1.2</div>
+<div class="actions"><button class="btn primary" id="newBtn">🔄 Новая игра</button><button class="btn" id="shareLinkBtn">📤 Отправить ссылку на игру</button></div>
+<div class="ver" id="verTag">v1.3</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Громкость · <span id="volV">70%</span><input type="range" id="volSlider" min="0" max="100" value="70"></div>
 <div class="selrow">Глубина расклада (сложность)<select id="diffSel"><option value="easy">Лёгкая</option><option value="medium">Средняя</option><option value="hard">Сложная</option><option value="expert">Эксперт</option></select></div>
 <div class="selrow">Тема оформления<select id="skinSel"><option value="classic">Классика · дерево</option><option value="sea">Море</option><option value="neon">Неон</option><option value="pastel">Пастель</option></select></div>
-<div class="btns"><button class="btn" id="setShare">📤 Отправить результат</button><button class="btn primary" id="setClose">Готово</button></div>
+<div class="btns"><button class="btn" id="setShare">📤 Отправить ссылку на игру</button><button class="btn primary" id="setClose">Готово</button></div>
 <div class="note">Расклад всегда решаем: перемешивание случайными ходами из собранного состояния. Глубина влияет на длину оптимального решения.</div>
 </div></div>
 <div class="overlay" id="statsOverlay"><div class="cardbox"><h2>📊 Статистика</h2>
@@ -86,14 +93,16 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="btns"><button class="btn" id="stReset">Сбросить</button><button class="btn primary" id="stClose">Закрыть</button></div>
 </div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🎉 Собрано!</h2><div class="sub" id="endSub"></div>
-<div class="btns"><button class="btn primary" id="endNew">🔄 Ещё партию</button><button class="btn" id="endShare">📤 Поделиться</button><button class="btn" id="endStats">📊 Статистика</button><button class="btn" id="endHub">🏠 В меню</button></div>
+<div class="btns"><button class="btn primary" id="endNew">🔄 Ещё партию</button><button class="btn" id="endShare">📤 Отправить результат</button><button class="btn" id="endStats">📊 Статистика</button><button class="btn" id="endHub">🏠 В меню</button></div>
 </div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="sub" style="text-align:left">• Костяшки 1–15 в коробке 4×4, одна клетка пустая.<br>• Тапни костяшку рядом с пустой клеткой — она плавно скользнет на место. Работают свайпы по полю и стрелки клавиатуры.<br>• Цель: собрать числа по порядку слева-направо, сверху-вниз; пустая клетка — в правом нижнем углу.<br>• Расклад генерируется случайными ходами из собранного состояния — гарантированно решаем.<br>• Таймер стартует с первого хода; счётчик ходов считает каждое скольжение.<br>• «📤 Отправить результат» шлёт время и ходы другу через системный шеринг.</div>
+<div class="mini-board" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span class="empty"></span></div>
+<div class="mini-cap">Цель: собрать такой порядок — пустая клетка внизу справа</div>
+<div class="sub" style="text-align:left">• Костяшки 1–15 в коробке 4×4, одна клетка пустая.<br>• Тапни костяшку рядом с пустой клеткой — она плавно скользнет на место. Работают свайпы по полю и стрелки клавиатуры.<br>• Расклад генерируется случайными ходами из собранного состояния — гарантированно решаем.<br>• Таймер стартует с первого хода; счётчик ходов считает каждое скольжение.<br>• После победы появится кнопка «📤 Отправить результат» — время и ходы улетят другу вместе со ссылкой на игру.<br>• До победы делись самой игрой кнопкой «📤 Отправить ссылку на игру».</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div>
 </div></div>
 <script>
-const VER='1.2';
+const VER='1.3';
 const $=id=>document.getElementById(id);
 const DIFFS={easy:{n:30,label:'Лёгкая'},medium:{n:90,label:'Средняя'},hard:{n:180,label:'Сложная'},expert:{n:320,label:'Эксперт'}};
 let set=Object.assign({vol:.7,diff:'medium',skin:'classic'},JSON.parse(localStorage.pyatnashki_set||'{}'));
@@ -230,14 +239,20 @@ function win(){
   setTimeout(()=>$('endOverlay').classList.add('show'),320);
   trackEvent('game_end',{game_name:'pyatnashki',time:t,moves:moves,difficulty:set.diff});
 }
-/* v1.2: вирусный шеринг через Platform.shareGame — диплинк ?game= + бренд-строка */
+/* v1.3: шеринг ссылки на игру (до победы) */
+function shareGameLink(){
+  unlockAudio();
+  Platform.shareGame('pyatnashki','🧩 Пятнашки — классика головоломок: собери 1…15 скольжением костяшек. 4 темы оформления и 4 уровня сложности.',{title:'Пятнашки — играй сейчас',copiedToast:'Ссылка на игру скопирована — отправь другу!'});
+  trackEvent('game_share',{game_name:'pyatnashki',share_type:'link'});
+}
+/* v1.3: шеринг результата (только после победы) */
 function shareResult(){
   unlockAudio();
   const txt=ST.lastTime
     ?('🧩 Пятнашки: собрано за '+fmt(ST.lastTime)+' за '+ST.lastMoves+' ходов ('+DIFFS[set.diff].label+'). Сможешь лучше?')
     :'🧩 Пятнашки — классика головоломок: собери 1…15 скольжением костяшек.';
   Platform.shareGame('pyatnashki',txt,{title:'Пятнашки — результат',copiedToast:'Результат скопирован — отправь другу!'});
-  trackEvent('game_share',{game_name:'pyatnashki'});
+  trackEvent('game_share',{game_name:'pyatnashki',share_type:'result'});
 }
 
 /* ---------- статистика/настройки ---------- */
@@ -290,7 +305,7 @@ function backHandler(){
 Platform.init({bg:'#171310',back:backHandler,game:'pyatnashki'});
 $('hubBtn').onclick=()=>Platform.goToHub();
 $('newBtn').onclick=()=>{unlockAudio();newGame();};
-$('shareBtn').onclick=()=>shareResult();
+$('shareLinkBtn').onclick=()=>shareGameLink();
 $('statsBtn').onclick=()=>{unlockAudio();showStats();};
 $('setBtn').onclick=()=>{unlockAudio();openSettings();};
 $('rulesBtn').onclick=()=>$('rulesOverlay').classList.add('show');
@@ -298,7 +313,7 @@ $('rulesClose').onclick=()=>$('rulesOverlay').classList.remove('show');
 $('stClose').onclick=()=>$('statsOverlay').classList.remove('show');
 $('stReset').onclick=()=>{if(confirm('Сбросить статистику?')){ST={solves:0,bestTime:0,bestMoves:0,movesTotal:0,timeTotal:0,lastTime:0,lastMoves:0};saveST();showStats();}};
 $('setClose').onclick=()=>$('setOverlay').classList.remove('show');
-$('setShare').onclick=()=>{$('setOverlay').classList.remove('show');shareResult();};
+$('setShare').onclick=()=>{$('setOverlay').classList.remove('show');shareGameLink();};
 $('volSlider').oninput=e=>{set.vol=e.target.value/100;$('volV').textContent=e.target.value+'%';saveSet();if(unlocked&&MASTER)MASTER.gain.value=set.vol;};
 $('diffSel').onchange=e=>{set.diff=e.target.value;saveSet();updatePills();setStatus('Сложность: '+DIFFS[set.diff].label+' · новая игра применит её');};
 $('skinSel').onchange=e=>{set.skin=e.target.value;saveSet();applySkin();};
