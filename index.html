@@ -31,7 +31,6 @@
     .hub-desc { margin: 0 0 16px; color: #a8b4d8; font-size: clamp(12px, 3.4vw, 14px); line-height: 1.45; }
     .download-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px 16px; margin-bottom: 16px; border-radius: 18px; border: 1px solid rgba(124, 255, 196, 0.5); background: linear-gradient(135deg, rgba(124, 255, 196, 0.14), rgba(51, 214, 255, 0.12)); color: #7cffc4; font-size: clamp(14px, 4vw, 16px); font-weight: 700; cursor: pointer; transition: transform 0.08s ease, background 0.15s ease, box-shadow 0.15s ease; font-family: inherit; }
     .download-btn:active { transform: scale(0.98); background: linear-gradient(135deg, rgba(124, 255, 196, 0.24), rgba(51, 214, 255, 0.22)); }
-    /* v3.34: шестерёнка настроек оболочки (видна только в android-приложении) */
     .set-btn { position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(255, 255, 255, 0.07); color: #eaf0ff; font-size: 20px; line-height: 1; cursor: pointer; display: none; align-items: center; justify-content: center; padding: 0; font-family: inherit; }
     .game-btn { width: 100%; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; background: rgba(255, 255, 255, 0.06); color: #eaf0ff; padding: 12px; margin-bottom: 10px; cursor: pointer; text-align: left; transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease; font-family: inherit; font-size: inherit; touch-action: manipulation; min-width: 0; }
     .game-btn:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.10); }
@@ -40,6 +39,10 @@
     .game-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
     .game-text b { font-size: clamp(15px, 4.2vw, 17px); color: #ffffff; }
     .game-text small { font-size: clamp(11px, 3.2vw, 13px); color: #a8b4d8; line-height: 1.25; }
+    /* v3.35: бейдж NEW и чип версии игры */
+    .tag-new { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 10px; background: rgba(255, 209, 102, 0.16); border: 1px solid rgba(255, 209, 102, 0.55); color: #ffd166; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; vertical-align: middle; animation: newPulse 1.6s ease-in-out infinite; }
+    @keyframes newPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); } 50% { box-shadow: 0 0 10px 2px rgba(255, 209, 102, 0.35); } }
+    .game-ver { margin-left: auto; align-self: center; font-family: monospace; font-size: 10px; color: #8a94a6; background: rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 2px 6px; flex-shrink: 0; }
     .hub-foot { margin: 12px 0 0; color: #6b7699; font-size: 12px; }
     .hub-ver { margin: 6px 0 0; color: #4d5670; font-size: 10px; font-family: monospace; letter-spacing: 1px; }
     .hub-ver .plat { color: #7cffc4; font-weight: 700; }
@@ -80,7 +83,7 @@
 
       <button class="download-btn" id="downloadBtn">📥 Скачать приложение</button>
 
-      <p class="hub-desc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. В браузере и мессенджерах игры запускаются без установки: нажми и играй. Для ПК есть приложение Windows: оно устанавливается один раз, хранит игры на устройстве (работают офлайн) и само обновляет контент. Для Android — лёгкое приложение с офлайн-играми. Список игр умный: любимые игры поднимаются наверх сами. Новые игры добавляются регулярно.</p>
+      <p class="hub-desc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. В браузере и мессенджерах игры запускаются без установки: нажми и играй. Для ПК есть приложение Windows: оно устанавливается один раз, хранит игры на устройстве (работают офлайн) и само обновляет контент. Для Android — лёгкое приложение с офлайн-играми. Список игр умный: любимые игры поднимаются наверх сами, новинки неделю помечены значком NEW. Новые игры добавляются регулярно.</p>
 
       <div id="gamesList">
         <button class="game-btn" data-game="trend_catch" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
@@ -103,7 +106,7 @@
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.34 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.35 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
@@ -143,7 +146,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.34';
+    const HUB_VER = '3.35';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
@@ -235,6 +238,39 @@
           localStorage.removeItem(SORT_KEY);
         }
       } catch (e) {}
+    })();
+
+    /* ---------- v3.35: версии игр и бейдж NEW (7 дней с даты добавления) ---------- */
+    (function loadGamesMeta(){
+      const NEW_MS = 7 * 24 * 3600 * 1000;
+      function apply(man){
+        const games = (man && man.games) || {};
+        document.querySelectorAll('.game-btn[data-game]').forEach(function(btn){
+          const id = btn.getAttribute('data-game');
+          const m = games[id];
+          if (!m) return;
+          if (m.version) {
+            const v = document.createElement('span');
+            v.className = 'game-ver';
+            v.textContent = 'v' + m.version;
+            btn.appendChild(v);
+          }
+          if (m.addedAt) {
+            const t = new Date(m.addedAt).getTime();
+            const now = Date.now();
+            if (isFinite(t) && now - t >= 0 && now - t <= NEW_MS) {
+              const b = btn.querySelector('.game-text b');
+              if (b) b.insertAdjacentHTML('beforeend', ' <span class="tag-new">NEW</span>');
+            }
+          }
+        });
+      }
+      try {
+        fetch('versions.json?cb=' + Date.now(), { cache: 'no-store' })
+          .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then(apply)
+          .catch(function(){});
+      } catch(e){}
     })();
 
     function openGame(url, gameName) {
