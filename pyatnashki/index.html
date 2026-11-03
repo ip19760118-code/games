@@ -8,9 +8,13 @@
 html,body{overscroll-behavior:none;overscroll-behavior-y:none}
 body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:10px;padding-top:calc(10px + env(safe-area-inset-top));padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .wrap{max-width:560px;width:100%;background:var(--panel);border-radius:22px;padding:12px;box-shadow:0 20px 60px var(--shadow);border:1px solid rgba(255,255,255,.08)}
-.header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
-.title{font-size:19px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:30px;padding:6px 11px;font-size:12px;cursor:pointer;font-family:inherit}
+/* v1.1: шапка в два ряда — логотип+название сверху, кнопки под ними */
+.header{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:10px}
+.title-row{display:flex;align-items:center;justify-content:center;gap:10px}
+.logo{font-size:30px;line-height:1;filter:drop-shadow(0 3px 8px rgba(0,0,0,.45))}
+.title{font-size:22px;font-weight:800;letter-spacing:2px;color:var(--accent);text-shadow:0 2px 6px rgba(0,0,0,.35)}
+.hrow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:30px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
 .hbtn:active{transform:scale(.95)}
 .topline{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
 .pill{font-size:12px;font-weight:700;background:rgba(0,0,0,.3);border:1px solid rgba(230,179,102,.25);color:var(--accent);border-radius:16px;padding:4px 12px;font-family:monospace}
@@ -52,12 +56,20 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 @media (hover:hover) and (pointer:fine){.tile:hover{box-shadow:0 8px 18px rgba(0,0,0,.55),inset 0 2px 3px rgba(255,255,255,.45),inset 0 -4px 8px rgba(0,0,0,.28)}.btn:hover{background:rgba(255,255,255,.14)}.hbtn:hover{background:rgba(255,255,255,.13)}}
 </style></head><body>
 <div class="wrap" id="wrap" data-skin="classic">
-<div class="header"><button class="hbtn" id="hubBtn">← В меню</button><div class="title">🧩 ПЯТНАШКИ</div><div style="display:flex;gap:6px"><button class="hbtn" id="statsBtn">📊</button><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
+<div class="header">
+  <div class="title-row"><span class="logo">🧩</span><span class="title">ПЯТНАШКИ</span></div>
+  <div class="hrow">
+    <button class="hbtn" id="hubBtn">← В меню</button>
+    <button class="hbtn" id="statsBtn">📊 Статистика</button>
+    <button class="hbtn" id="setBtn">⚙️ Настройки</button>
+    <button class="hbtn" id="rulesBtn">📖 Правила</button>
+  </div>
+</div>
 <div class="topline"><span class="pill" id="timePill">⏱ 00:00</span><span class="pill" id="movesPill">♟ 0</span><span class="pill" id="diffPill">Средняя</span></div>
 <div class="boardbox"><div class="board" id="board"><div class="slots" id="slots"></div><div class="tiles" id="tiles"></div></div></div>
 <div class="status" id="statusEl">Нажми «Новая игра»</div>
 <div class="actions"><button class="btn primary" id="newBtn">🔄 Новая игра</button><button class="btn" id="shareBtn">📤 Отправить результат</button></div>
-<div class="ver" id="verTag">v1.0</div>
+<div class="ver" id="verTag">v1.1</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Громкость · <span id="volV">70%</span><input type="range" id="volSlider" min="0" max="100" value="70"></div>
@@ -83,7 +95,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div>
 </div></div>
 <script>
-const VER='1.0';
+const VER='1.1';
 const $=id=>document.getElementById(id);
 const CANON_URL='https://ip19760118-code.github.io/games/pyatnashki/';
 const DIFFS={easy:{n:30,label:'Лёгкая'},medium:{n:90,label:'Средняя'},hard:{n:180,label:'Сложная'},expert:{n:320,label:'Эксперт'}};
@@ -95,7 +107,7 @@ const saveST=()=>localStorage.pyatnashki_stats=JSON.stringify(ST);
 function trackEvent(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
 (function(){try{const k='pyatnashki_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'pyatnashki',source:Platform.name,ver:VER});}}catch(e){}})();
 
-/* ---------- звук (синтез, без mp3; AudioContext стартует ТОЛЬКО после user gesture) ---------- */
+/* ---------- звук (синтез; AudioContext стартует ТОЛЬКО после user gesture) ---------- */
 let AC=null,MASTER=null,unlocked=false;
 function unlockAudio(){
   if(unlocked)return true;
@@ -104,7 +116,6 @@ function unlockAudio(){
     if(AC.state==='suspended')AC.resume();
     if(!MASTER){MASTER=AC.createGain();MASTER.gain.value=set.vol;MASTER.connect(AC.destination);}
     else MASTER.gain.value=set.vol;
-    /* короткий «тихий» тон для реального старта контекста */
     const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;
     o.frequency.setValueAtTime(440,n);g.gain.setValueAtTime(0,n);g.gain.exponentialRampToValueAtTime(.001,n+.02);
     o.connect(g);g.connect(MASTER);o.start(n);o.stop(n+.02);
@@ -125,9 +136,7 @@ const sDeny=()=>tn(150,90,.14,'sawtooth',.1);
 /* ---------- состояние ---------- */
 let B=[],tileEls={},moves=0,seconds=0,timerInt=null,started=false,won=false,cellPx=0,gapPx=6;
 const solved=()=>{const a=[];for(let i=1;i<=15;i++)a.push(i);a.push(0);return a;};
-/* Walk-генерация: начинаем из собранного, делаем N случайных ходов.
-   Любая последовательность валидных ходов даёт решаемый расклад — проверка solvable() не нужна.
-   (Ранее была ошибка: solvable() с перевёрнутой формулой → бесконечная рекурсия.) */
+/* Walk-генерация из собранного состояния: решаемость гарантирована построением */
 function shuffleBoard(n){
   B=solved();let lastIdx=-1;
   for(let k=0;k<n;k++){
@@ -138,7 +147,6 @@ function shuffleBoard(n){
     const pick=(pool.length?pool:opts)[Math.floor(Math.random()*(pool.length?pool.length:opts.length))];
     B[e]=B[pick];B[pick]=0;lastIdx=e;
   }
-  /* защита от случайной сборки (крайне редкий случай при малых N) */
   if(isWin(B)){const e=B.indexOf(0);const vi=e===0?1:e-1;const v=B[vi];B[vi]=0;B[e]=v;}
   return B;
 }
