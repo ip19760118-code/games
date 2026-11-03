@@ -1,10 +1,10 @@
-/* tg-games: единый слой платформ v3.0 — Telegram / VK / MAX / web / PC(Electron) / Android(WebView).
+/* tg-games: единый слой платформ v3.1 — Telegram / VK / MAX / web / PC(Electron) / Android(WebView).
+   v3.1: фикс шеринга на десктоп-web: OS share-sheet (navigator.share) терял текст в таргетах
+         (Telegram забирал только url) → на web с pointer:fine копируем полное сообщение в буфер;
+         мобильный web и оболочки используют прежние пути.
    v3.0: вирусный шеринг: Platform.shareGame(key,text,opts) + Platform.gameDeepLink(key);
-         в share() опции opts.game (строка диплинка) и opts.brand (бренд-строка);
-         бренд без числа игр: «Игровой центр — классика и новинки, онлайн и офлайн».
-   v2.9: ветка 'android': детект по AppBridge.platform, back через window.__androidBack,
-         share через нативный chooser, close→quit, SW в оболочках не регистрируется.
-   v2.8: goToHub в TG/VK — внутренняя навигация (не close). */
+         в share() опции opts.game (строка диплинка) и opts.brand (бренд-строка).
+   v2.9: ветка 'android'; v2.8: goToHub в TG/VK — внутренняя навигация. */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
@@ -88,7 +88,6 @@ var Platform=(function(){
   }catch(e){return location.href}
  }
 
- /* v3.0: канонический диплинк игры через хаб (?game=key) */
  function gameDeepLink(key){ return CANONICAL_ORIGIN+'/?game='+key; }
 
  function hubBase(){
@@ -235,7 +234,6 @@ var Platform=(function(){
     else if(o.back)backFn=o.back;
    }catch(e){}})}
 
- /* v3.0: бренд-надстройки текста шеринга */
  function withBrand(text,opts){
   opts=opts||{};
   var extra='';
@@ -260,14 +258,16 @@ var Platform=(function(){
      if(window.WebApp.shareContent){window.WebApp.shareContent({text:text,link:url});return true}
     }catch(e){}}
    return false}
-  if(navigator.share){
+  /* v3.1: на десктоп-web OS share-sheet теряет текст в таргетах → полное сообщение в буфер */
+  var coarse=false;
+  try{ coarse=!!(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches); }catch(e){}
+  if(navigator.share&&(name!=='web'||coarse)){
    try{navigator.share({title:opts.title||document.title,text:text,url:url})
     .then(function(){if(opts.onShared)opts.onShared('native')})
     .catch(function(err){if(err&&err.name==='AbortError')return;if(!messengerShare())onCopied()});
     return}catch(e){}}
   if(!messengerShare())onCopied()}
 
- /* v3.0: шеринг результата игры: url=диплинк, текст+диплинк-строка+бренд */
  function shareGame(key,text,opts){
   opts=opts||{};
   opts.game=key;

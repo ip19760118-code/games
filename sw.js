@@ -1,52 +1,63 @@
-/* Игровой центр: service worker v1
-   Навигации (HTML игр): сеть первична, кэш как фолбэк (всегда свежее, но офлайн не падает).
-   Статика (js/css/звуки/картинки): stale-while-revalidate — мгновенно из кэша,
-   фоном обновляется. Повторные входы в игры — мгновенные. */
-var CACHE = 'igrovoj-centr-v1';
+/* sw.js — service worker «Игрового центра», кэш v9.
+   v9: принудительная зачистка старых кэшей при активации (лечит залипший platform.js в TG-desktop);
+       skipWaiting + clients.claim — новый SW работает сразу;
+       запросы с cache:'no-store' (versions.json) идут мимо кэша.
+   Навигации: network-first с фолбэком в кэш (офлайн-оболочка web).
+   Статика: cache-first с фоновым освежением. */
+var CACHE = 'igrovoj-centr-v9';
 
-self.addEventListener('install', function (e) {
-  self.skipWaiting();
+self.addEventListener('install', function(e){
+  try{ self.skipWaiting(); }catch(err){}
 });
 
-self.addEventListener('activate', function (e) {
-  e.waitUntil(
-    caches.keys().then(function (keys) {
-      return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); }));
-    }).then(function () { return clients.claim(); })
-  );
+self.addEventListener('activate', function(e){
+  e.waitUntil((async function(){
+    try{
+      var keys = await caches.keys();
+      await Promise.all(keys.filter(function(k){ return k !== CACHE; }).map(function(k){ return caches.delete(k); }));
+    }catch(err){}
+    try{ await self.clients.claim(); }catch(err){}
+  })());
 });
 
-self.addEventListener('fetch', function (e) {
+self.addEventListener('fetch', function(e){
   var req = e.request;
   if (req.method !== 'GET') return;
-  var url = new URL(req.url);
-  if (url.origin !== location.origin) return;   /* чужие CDN (Firebase, gtag) не трогаем */
+  var url;
+  try{ url = new URL(req.url); }catch(err){ return; }
+  if (url.origin !== location.origin) return;
 
-  /* HTML-навигации: сеть первична, при отказе — кэш */
-  if (req.mode === 'navigate') {
-    e.respondWith(
-      fetch(req).then(function (res) {
-        var copy = res.clone();
-        caches.open(CACHE).then(function (c) { c.put(req, copy); });
-        return res;
-      }).catch(function () {
-        return caches.match(req).then(function (m) { return m || caches.match('./index.html'); });
-      })
-    );
+  /* манифест и прочие no-store — всегда сеть */
+  if (req.cache === 'no-store') {
+    e.respondWith(fetch(req));
     return;
   }
 
-  /* Статика: кэш мгновенно + фоновое обновление */
-  e.respondWith(
-    caches.match(req).then(function (cached) {
-      var fresh = fetch(req).then(function (res) {
-        if (res && res.ok) {
-          var copy = res.clone();
-          caches.open(CACHE).then(function (c) { c.put(req, copy); });
-        }
-        return res;
-      }).catch(function () { return cached; });
-      return cached || fresh;
-    })
-  );
+  if (req.mode === 'navigate') {
+    e.respondWith((async function(){
+      try{
+        var net = await fetch(req);
+        var cache = await caches.open(CACHE);
+        cache.put(req, net.clone());
+        return net;
+      }catch(err){
+        var cached = await caches.match(req);
+        if (cached) return cached;
+        var fallback = await caches.match(new Request('./index.html'));
+        if (fallback) return fallback;
+        throw err;
+      }
+    })());
+    return;
+  }
+
+  e.respondWith((async function(){
+    var cache = await caches.open(CACHE);
+    var hit = await cache.match(req);
+    var network = fetch(req).then(function(res){
+      if (res && res.ok) cache.put(req, res.clone());
+      return res;
+    }).catch(function(){ return hit; });
+    return hit || network;
+  })());
 });
