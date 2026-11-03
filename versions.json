@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-03T12:36:22.435Z",
+ "generatedAt": "2026-11-03T12:57:59.574Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.38",
@@ -172,14 +172,14 @@
    ]
   },
   "minesweeper": {
-   "version": "1.6",
+   "version": "1.7",
    "online": false,
    "addedAt": "2026-10-01",
    "files": [
     {
      "path": "minesweeper/index.html",
-     "sha256": "173e23607be4ac38e4ee94db45e52adab0cd73852951f8fc55ae0cd5e5e751c5",
-     "size": 21687
+     "sha256": "1ac716ad6697022dcfe5efc0aedcf2bb2e539445c04d6558f6ef9b54139d5e90",
+     "size": 26232
     }
    ]
   },
