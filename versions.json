@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-03T12:57:59.574Z",
+ "generatedAt": "2026-11-03T13:56:02.642Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.38",
@@ -148,14 +148,14 @@
    ]
   },
   "nardy": {
-   "version": "2.7",
+   "version": "2.8",
    "online": true,
    "addedAt": "2026-10-01",
    "files": [
     {
      "path": "nardy/index.html",
-     "sha256": "a61890961d065d57c6300f94be303fd3f8eadd4d25fcc8bf427424a34ebae337",
-     "size": 58874
+     "sha256": "77a0a2154c8fbf80009702fdd71d9715626bfa5a4f4b998ee3487ee025c04072",
+     "size": 65181
     }
    ]
   },
