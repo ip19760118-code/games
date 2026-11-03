@@ -39,7 +39,6 @@
     .game-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
     .game-text b { font-size: clamp(15px, 4.2vw, 17px); color: #ffffff; }
     .game-text small { font-size: clamp(11px, 3.2vw, 13px); color: #a8b4d8; line-height: 1.25; }
-    /* v3.35: бейдж NEW и чип версии игры */
     .tag-new { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 10px; background: rgba(255, 209, 102, 0.16); border: 1px solid rgba(255, 209, 102, 0.55); color: #ffd166; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; vertical-align: middle; animation: newPulse 1.6s ease-in-out infinite; }
     @keyframes newPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); } 50% { box-shadow: 0 0 10px 2px rgba(255, 209, 102, 0.35); } }
     .game-ver { margin-left: auto; align-self: center; font-family: monospace; font-size: 10px; color: #8a94a6; background: rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 2px 6px; flex-shrink: 0; }
@@ -102,15 +101,15 @@
         <button class="game-btn" data-game="seabattle" id="seabattleBtn"><span class="game-emoji">🚢</span><span class="game-text"><b>Морской бой <span class="tag-online">ONLINE</span></b><small>1 игрок vs ИИ или онлайн‑дуэль по коду комнаты</small></span></button>
         <button class="game-btn" data-game="mahjong" id="mahjongBtn"><span class="game-emoji">🀄</span><span class="game-text"><b>Маджонг</b><small>Пасьянс: 72/120/180 плиток, наборы, подсказки, отмена</small></span></button>
         <button class="game-btn" data-game="tetris" id="tetrisBtn"><span class="game-emoji">🧱</span><span class="game-text"><b>Тетрис</b><small>Классика: 6 уровней, ghost, hold, wall kicks, рекорды</small></span></button>
+        <button class="game-btn" data-game="pyatnashki" id="pyatnashkiBtn"><span class="game-emoji">🧩</span><span class="game-text"><b>Пятнашки</b><small>Классическая головоломка: собери 1…15 скользящими плитками</small></span></button>
         <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.36 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.37 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
-  <!-- двухэтапная модалка: действие → платформа -->
   <div class="dl-overlay" id="dlOverlay" data-screen="1">
     <div class="dl-card">
       <button class="dl-close" id="dlClose" aria-label="Закрыть">×</button>
@@ -146,7 +145,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.36';
+    const HUB_VER = '3.37';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
@@ -166,7 +165,6 @@
 
     try { document.getElementById('platTag').textContent = Platform.name; } catch(e) {}
 
-    /* v3.34: шестерёнка настроек — только в android-оболочке */
     (function(){
       try {
         if (Platform.name === 'android' && window.AppBridge && window.AppBridge.openSettings) {
@@ -198,7 +196,6 @@
       } catch (e) {}
     })();
 
-    /* ---------- умная сортировка списка игр (v3.28) ---------- */
     const SORT_KEY = 'hub_sort_stats';
     const HALF_LIFE_DAYS = 30;
 
@@ -241,7 +238,6 @@
       } catch (e) {}
     })();
 
-    /* ---------- v3.36: версии игр и бейдж NEW; двойной fetch (локально → Pages CORS) ---------- */
     (function loadGamesMeta(){
       const NEW_MS = 7 * 24 * 3600 * 1000;
       function apply(man){
@@ -268,13 +264,11 @@
       }
       function asJson(r){
         if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json(); /* бросит исключение, если пришёл HTML (404-страница оболочек) */
+        return r.json();
       }
       function load(){
-        /* 1) локально: Pages web / паки android / паки desktop (если манифест там есть) */
         return fetch('versions.json?cb=' + Date.now(), { cache: 'no-store' }).then(asJson)
           .catch(function(){
-            /* 2) фолбэк: абсолютный Pages-URL (CORS *) — чинит desktop app:// и офлайн-паки без манифеста */
             return fetch(MANIFEST_REMOTE + '?cb=' + Date.now(), { cache: 'no-store' }).then(asJson);
           });
       }
@@ -332,7 +326,8 @@
       'minesweeper': './minesweeper/', 'mines': './minesweeper/',
       'crystals': './crystals/', 'solitaire': './solitaire/',
       'seabattle': './seabattle/', 'mahjong': './mahjong/',
-      'tetris': './tetris/', 'tetris_classic': './tetris/'
+      'tetris': './tetris/', 'tetris_classic': './tetris/',
+      'pyatnashki': './pyatnashki/', '15': './pyatnashki/', 'fifteen': './pyatnashki/'
     };
 
     document.getElementById('trendCatchBtn').addEventListener('click', () => openGame('./trend-catch/', 'trend_catch'));
@@ -351,10 +346,10 @@
     document.getElementById('seabattleBtn').addEventListener('click', () => openGame('./seabattle/', 'seabattle'));
     document.getElementById('mahjongBtn').addEventListener('click', () => openGame('./mahjong/', 'mahjong'));
     document.getElementById('tetrisBtn').addEventListener('click', () => openGame('./tetris/', 'tetris'));
+    document.getElementById('pyatnashkiBtn').addEventListener('click', () => openGame('./pyatnashki/', 'pyatnashki'));
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
-    /* ---------- двухэтапная модалка скачивания (v3.31: + Android) ---------- */
     (function(){
       const ov = document.getElementById('dlOverlay');
       const s1 = document.getElementById('dlScreen1');
