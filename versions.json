@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-03T04:33:38.489Z",
+ "generatedAt": "2026-11-03T04:39:08.235Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.35",
@@ -162,7 +162,7 @@
   "tetris": {
    "version": "1.2",
    "online": false,
-   "addedAt": "2026-10-01",
+   "addedAt": "2026-10-31",
    "files": [
     {
      "path": "tetris/index.html",
