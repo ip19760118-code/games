@@ -1,13 +1,13 @@
 {
- "generatedAt": "2026-11-02T14:35:02.386Z",
+ "generatedAt": "2026-11-03T04:33:38.489Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
-  "version": "3.34",
+  "version": "3.35",
   "files": [
    {
     "path": "index.html",
-    "sha256": "51ebea185a2a1b4703b982b8ba66de2155a1bb0330327ed222121be0226ed182",
-    "size": 31766
+    "sha256": "383c78df4957613bd3656cac2639ec0723830ea90383199083be1bfe0d1341d8",
+    "size": 33754
    },
    {
     "path": "js/platform.js",
@@ -45,6 +45,7 @@
   "chess": {
    "version": "2.8",
    "online": true,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "chess/index.html",
@@ -56,6 +57,7 @@
   "seabattle": {
    "version": "4.30",
    "online": true,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "seabattle/img/boom.png",
@@ -112,6 +114,7 @@
   "durak": {
    "version": "3.15",
    "online": true,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "durak/index.html",
@@ -123,6 +126,7 @@
   "domino": {
    "version": "2.3",
    "online": true,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "domino/index.html",
@@ -134,6 +138,7 @@
   "shashki": {
    "version": "1.7",
    "online": true,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "shashki/index.html",
@@ -145,6 +150,7 @@
   "nardy": {
    "version": "2.7",
    "online": true,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "nardy/index.html",
@@ -156,6 +162,7 @@
   "tetris": {
    "version": "1.2",
    "online": false,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "tetris/index.html",
@@ -167,6 +174,7 @@
   "minesweeper": {
    "version": "1.6",
    "online": false,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "minesweeper/index.html",
@@ -178,6 +186,7 @@
   "crystals": {
    "version": "4.16",
    "online": false,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "crystals/img/arrow_h.png",
@@ -294,6 +303,7 @@
   "solitaire": {
    "version": "2.2",
    "online": false,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "solitaire/index.html",
@@ -305,6 +315,7 @@
   "mahjong": {
    "version": "2.2",
    "online": false,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "mahjong/index.html",
@@ -316,6 +327,7 @@
   "arkanoid": {
    "version": "0",
    "online": false,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "arkanoid/index.html",
@@ -327,6 +339,7 @@
   "shooter": {
    "version": "1.1",
    "online": false,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "shooter/index.html",
@@ -338,6 +351,7 @@
   "fruit-samurai": {
    "version": "0",
    "online": false,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "fruit-samurai/index.html",
@@ -349,6 +363,7 @@
   "lights-out": {
    "version": "2.1",
    "online": false,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "lights-out/index.html",
@@ -360,6 +375,7 @@
   "trend-catch": {
    "version": "1.1",
    "online": false,
+   "addedAt": "2026-10-01",
    "files": [
     {
      "path": "trend-catch/index.html",
