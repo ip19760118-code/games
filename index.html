@@ -106,7 +106,7 @@
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.35 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.36 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
@@ -146,10 +146,11 @@
   </div>
 
   <script>
-    const HUB_VER = '3.35';
+    const HUB_VER = '3.36';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
+    const MANIFEST_REMOTE = 'https://ip19760118-code.github.io/games/versions.json';
 
     Platform.init({
       bg: '#070b16',
@@ -240,7 +241,7 @@
       } catch (e) {}
     })();
 
-    /* ---------- v3.35: версии игр и бейдж NEW (7 дней с даты добавления) ---------- */
+    /* ---------- v3.36: версии игр и бейдж NEW; двойной fetch (локально → Pages CORS) ---------- */
     (function loadGamesMeta(){
       const NEW_MS = 7 * 24 * 3600 * 1000;
       function apply(man){
@@ -249,13 +250,13 @@
           const id = btn.getAttribute('data-game');
           const m = games[id];
           if (!m) return;
-          if (m.version) {
+          if (m.version && !btn.querySelector('.game-ver')) {
             const v = document.createElement('span');
             v.className = 'game-ver';
             v.textContent = 'v' + m.version;
             btn.appendChild(v);
           }
-          if (m.addedAt) {
+          if (m.addedAt && !btn.querySelector('.tag-new')) {
             const t = new Date(m.addedAt).getTime();
             const now = Date.now();
             if (isFinite(t) && now - t >= 0 && now - t <= NEW_MS) {
@@ -265,12 +266,19 @@
           }
         });
       }
-      try {
-        fetch('versions.json?cb=' + Date.now(), { cache: 'no-store' })
-          .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-          .then(apply)
-          .catch(function(){});
-      } catch(e){}
+      function asJson(r){
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json(); /* бросит исключение, если пришёл HTML (404-страница оболочек) */
+      }
+      function load(){
+        /* 1) локально: Pages web / паки android / паки desktop (если манифест там есть) */
+        return fetch('versions.json?cb=' + Date.now(), { cache: 'no-store' }).then(asJson)
+          .catch(function(){
+            /* 2) фолбэк: абсолютный Pages-URL (CORS *) — чинит desktop app:// и офлайн-паки без манифеста */
+            return fetch(MANIFEST_REMOTE + '?cb=' + Date.now(), { cache: 'no-store' }).then(asJson);
+          });
+      }
+      try { load().then(apply).catch(function(){}); } catch(e){}
     })();
 
     function openGame(url, gameName) {
