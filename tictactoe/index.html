@@ -104,15 +104,15 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
 </style></head><body>
 <div class=wrap id=wrap>
 <div class=hdr><div class=title>❌ <span class=x>КРЕСТИКИ</span> · <span class=o>НОЛИКИ</span></div><div class=hrow><button class=hbtn id=hubBtn>← В меню</button><button class=hbtn id=statsBtn>📊</button><button class=hbtn id=setBtn>⚙️</button><button class=hbtn id=rulesBtn>📖</button></div></div>
-<div class=rbar id=rbar><button class=rbt id=rbtog><span>👥 Комната <span class=code id=rcode>------</span> · <span id=rcnt>0/2</span></span><span class=rbch"><span class=ldot id=rdot></span><b id=rlive>0</b><span class=chev>▾</span></span></button><div class=rbex id=rbex style=display:none><div class=racts id=racts></div><div class=pbar id=pbar></div><div class=lbox id=lbox><div class=ltit>⏳ Ожидание игрока…</div><div class=llist id=llist></div></div></div></div>
+<div class=rbar id=rbar><button class=rbt id=rbtog><span>👥 Комната <span class=code id=rcode>------</span> · <span id=rcnt>0/2</span></span><span class=rbch><span class=ldot id=rdot></span><b id=rlive>0</b><span class=chev>▾</span></span></button><div class=rbex id=rbex style=display:none><div class=racts id=racts></div><div class=pbar id=pbar></div><div class=lbox id=lbox><div class=ltit>⏳ Ожидание игрока…</div><div class=llist id=llist></div></div></div></div>
 <div class=pbar id=opbar></div>
 <div class=bbox id=bbox><div class=board id=board></div><div class=strike id=strike></div></div>
 <div class=status id=stel>Выбери режим</div>
 <div class=acts><button class="btn pri" id=newBtn style=display:none>🔄 Новая партия</button><button class=btn id=menuBtn style=display:none>🏠 Меню</button><button class=btn id=shareBtn>📤 Отправить ссылку на игру</button></div>
-<div class=ver id=vertag>v1.6.3</div>
+<div class=ver id=vertag>v1.6.4</div>
 </div>
 <div class=fvbar id=fvbar><span class=tit>👁 Финал партии</span><button class=btn id=fvc>Закрыть</button></div>
-<div class=ov id=modeov><div class=card><div class=mhdr><button class=hbtn id=mhub>← В меню</button></div><h2>❌⭕ Крестики-нолики <span style=font-size:12px;opacity:.6;font-family:monospace id=vt2>v1.6.3</span></h2><div class=sub>Классика 3×3: три в ряд по горизонтали, вертикали или диагонали</div>
+<div class=ov id=modeov><div class=card><div class=mhdr><button class=hbtn id=mhub>← В меню</button></div><h2>❌⭕ Крестики-нолики <span style=font-size:12px;opacity:.6;font-family:monospace id=vt2>v1.6.4</span></h2><div class=sub>Классика 3×3: три в ряд по горизонтали, вертикали или диагонали</div>
 <div class=seg id=sideseg><b data-s=x class=on>❌ Крестики</b><b data-s=o>⭕ Нолики</b></div>
 <div class=mch>
 <button class=mbtn id=mAi><div class=ic>🤖</div><div><b>Против компьютера</b><small>Сложность в ⚙️ Настройках</small></div></button>
@@ -149,8 +149,9 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
 <div class=btns><button class="btn pri" id=rcl>Понятно</button></div>
 </div></div>
 <script>
-const VER='1.6.3',HI=5000,HT=15000,TT=30000;
+const VER='1.6.4',HI=5000,HT=15000,TT=30000;
 let hbT=null,myRound=0,fvMode=false,lastEnd=null;
+let prevStatus=null,manualOpen=false;
 function backH(){try{
 if(fvMode){closeFv();return;}
 if($('rulesov').classList.contains('show')){$('rulesov').classList.remove('show');return;}
@@ -266,20 +267,20 @@ st.style.transform='rotate('+ang+'deg)';st.style.display='block';}
 function stHB(){stopHB();if(!rRef||!myS)return;const b=()=>{try{rRef.child('presence/'+myS).set({name:myN,uid:myU,at:Date.now()}).catch(e=>console.warn('[TT] hb fail',e.message||e));}catch(e){}};b();hbT=setInterval(b,HI);}
 function stopHB(){if(hbT){clearInterval(hbT);hbT=null;}}
 function rmPr(){if(!rRef||!myS)return;try{rRef.child('presence/'+myS).remove();}catch(e){}}
-function colC(){$('rbex').style.display='none';$('rbar').classList.remove('open');$('lbox').style.display='none';}
-function expC(){$('rbex').style.display='flex';$('rbar').classList.add('open');}
+function colC(){$('rbex').style.display='none';$('rbar').classList.remove('open');$('lbox').style.display='none';manualOpen=false;}
+function expC(){$('rbex').style.display='flex';$('rbar').classList.add('open');manualOpen=true;}
 function showMenu(){$('modeov').classList.add('show');$('jbox').style.display='none';$('jacts').style.display='none';renAll();updPulse();}
 async function cRoom(){
   try{await ensAu();}catch(e){alert('Ошибка авторизации: '+(e&&e.message||e));showMenu();return;}
   if(!fbDb){alert('Не удалось загрузить Firebase');showMenu();return;}
-  myU=gU();myN=gUN();myS='w';rCode=gRC();rRef=fbDb.ref('rooms/'+rCode);myRound=1;
+  myU=gU();myN=gUN();myS='w';rCode=gRC();rRef=fbDb.ref('rooms/'+rCode);myRound=1;prevStatus=null;manualOpen=false;
   try{const st=newSt(set.first);await rRef.set({game:'tictactoe',host:myS,createdAt:Date.now(),round:1,status:'waiting',players:{w:{name:myN,uid:myU}},presence:{},rematch:{},state:st});onM=true;hsM=false;$('rbar').style.display='block';$('rcode').textContent=rCode;$('modeov').classList.remove('show');bBrd();expC();subR();setTimeout(()=>{stHB();},500);trk('room_created',{game_name:'tictactoe'});}
   catch(e){alert('Ошибка создания комнаты: '+(e&&e.message||e));showMenu();}
 }
 async function jRoom(c){
   try{await ensAu();}catch(e){alert('Ошибка авторизации: '+(e&&e.message||e));showMenu();return;}
   if(!fbDb){alert('Не удалось загрузить Firebase');showMenu();return;}
-  myU=gU();myN=gUN();rCode=c.toUpperCase();rRef=fbDb.ref('rooms/'+rCode);
+  myU=gU();myN=gUN();rCode=c.toUpperCase();rRef=fbDb.ref('rooms/'+rCode);prevStatus=null;manualOpen=false;
   try{
     const sn=await rRef.once('value');
     if(!sn.exists()){alert('Комната не найдена.');showMenu();return;}
@@ -299,6 +300,7 @@ async function jRoom(c){
     if(!r.state||!r.state.board||!Array.isArray(r.state.board))await rRef.child('state').set(newSt(set.first));
     onM=true;hsM=false;$('rbar').style.display='block';$('rcode').textContent=rCode;$('modeov').classList.remove('show');bBrd();
     if(r.status==='waiting')expC();else if(r.status==='finished')expC();else colC();
+    prevStatus=r.status;
     subR();
     setTimeout(()=>{stHB();},500);
     trk('room_joined',{game_name:'tictactoe'});
@@ -306,7 +308,6 @@ async function jRoom(c){
 }
 function showLB(){$('lbox').style.display='block';$('rbex').style.display='flex';$('rbar').classList.add('open');const l=$('llist');l.innerHTML='';plL().forEach((p,i)=>{const r=document.createElement('div');r.className='row'+(p.s==='w'?' host':'');r.innerHTML='<span>'+(i+1)+'. '+esc(p.n)+(p.s===myS?' (вы)':'')+(p.s==='w'?' 👑':'')+' — '+(p.m==='x'?'❌':'⭕')+'</span><span>'+(p.c?'🟢':'⚪')+'</span>';l.appendChild(r);});if(plL().length<2){const r=document.createElement('div');r.className='row';r.innerHTML='<span style=opacity:.5>— свободно —</span><span>⚪</span>';l.appendChild(r);}}
 function hideLB(){$('lbox').style.display='none';}
-/* v1.6.3: guard от множественной подписки + защита от race condition (state без board) */
 function subR(){
   if(subActive&&rRef){try{rRef.off('value');}catch(e){}}
   subActive=true;
@@ -317,9 +318,14 @@ function subR(){
       if(isH()){try{rRef.update({state:newSt(set.first)});}catch(e){}}
       rDat.state=newSt(set.first);
     }
-    if(rDat.status==='waiting'){expC();showLB();}
-    else if(rDat.status==='playing'){colC();hideLB();}
-    else if(rDat.status==='finished'){expC();hideLB();}
+    const curStatus=rDat.status;
+    const statusChanged=(curStatus!==prevStatus);
+    if(statusChanged){
+      prevStatus=curStatus;
+      if(curStatus==='waiting'){expC();showLB();}
+      else if(curStatus==='playing'){colC();hideLB();}
+      else if(curStatus==='finished'){expC();hideLB();}
+    }
     const s=rDat.state;
     if(s&&s.result&&rDat.status==='playing'&&isH())rRef.child('status').set('finished').catch(e=>console.warn('[TT] fin fail',e.message));
     if(rDat.status==='finished'){
@@ -341,16 +347,13 @@ function subR(){
   },err=>{console.warn('[TT] listener error:',err);});
   stWD();
 }
-function lvR(){stopHB();rmPr();if(subActive&&rRef){try{rRef.off('value');}catch(e){}}subActive=false;onM=false;if(rRef){rRef=null;}rDat=null;rCode=null;shEnd=null;myRound=0;fvMode=false;lastEnd=null;$('rbar').style.display='none';$('rbar').classList.remove('open');$('rbex').style.display='none';$('fvbar').classList.remove('show');$('endov').classList.remove('show');$('strike').style.display='none';}
+function lvR(){stopHB();rmPr();if(subActive&&rRef){try{rRef.off('value');}catch(e){}}subActive=false;onM=false;if(rRef){rRef=null;}rDat=null;rCode=null;shEnd=null;myRound=0;fvMode=false;lastEnd=null;prevStatus=null;manualOpen=false;$('rbar').style.display='none';$('rbar').classList.remove('open');$('rbex').style.display='none';$('fvbar').classList.remove('show');$('endov').classList.remove('show');$('strike').style.display='none';}
 function isH(){return rDat&&rDat.host===myS;}
 function shInv(){unlAu();const u=invL(rCode);const t='❌⭕ Крестики-нолики онлайн! Комната '+rCode+'. Заходи:\n'+u;Platform.share(u,t,{brand:true,title:'Крестики-нолики — партия '+rCode,copiedToast:'Ссылка-приглашение скопирована'});}
 function shGL(){unlAu();Platform.shareGame('tictactoe','❌⭕ Крестики-нолики — классика 3×3: против компьютера (3 уровня), вдвоём или онлайн с другом.',{title:'Крестики-нолики — играй сейчас',copiedToast:'Ссылка скопирована — отправь другу!'});trk('game_share',{game_name:'tictactoe',share_type:'link'});}
 function shRes(){unlAu();let t;if(lastEnd){const{mode,out,myM,info}=lastEnd;const mt=mode==='ai'?'против компьютера ('+set.aiLvl+')':mode==='hotseat'?'вдвоём на устройстве':'онлайн';if(out==='win')t='❌⭕ Крестики-нолики: победа '+mt+'! Я играл за '+(myM==='x'?'❌':'')+'.'+info;else if(out==='draw')t='❌⭕ Крестики-нолики: ничья '+mt+'. Реванш?';else t='❌⭕ Крестики-нолики: поражение '+mt+'.';}else t='❌⭕ Крестики-нолики — классика 3×3.';Platform.shareGame('tictactoe',t,{title:'Крестики-нолики — результат',copiedToast:'Результат скопирован — отправь другу!'});trk('game_share',{game_name:'tictactoe',share_type:'result'});}
 function updRA(){const b=$('racts');b.innerHTML='';if(!onM){colC();return;}
 const st=rDat&&rDat.status;
-if(st==='waiting'){expC();showLB();}
-else if(st==='finished'){expC();}
-else if(st==='playing'){colC();}
 const w=st==='waiting';const f=st==='finished';const pc=plL().length;
 if(w){const sh=document.createElement('button');sh.className='rbtn';sh.dataset.act='invite';sh.textContent='📤 Пригласить';sh.disabled=pc>=2;sh.onclick=shInv;b.appendChild(sh);const cb=document.createElement('button');cb.className='rbtn';cb.textContent='🔢 Код';cb.onclick=()=>{navigator.clipboard?.writeText(rCode);sSt('Код скопирован');};b.appendChild(cb);if(isH()){const st2=document.createElement('button');st2.className='rbtn accept';st2.dataset.act='start';st2.textContent='▶ Начать';st2.disabled=pc<2;st2.onclick=()=>{if(!rDat||!isH()||pc<2)return;const s2=Object.assign({},rDat.state||newSt(set.first));s2.lastMove={by:myS,name:myN,action:'deal',at:Date.now()};rRef.update({state:s2,status:'playing',rematch:{}}).catch(e=>console.warn('[TT] start fail',e.message));trk('game_start',{game_name:'tictactoe',mode:'online'});};b.appendChild(st2);}}else{const cb=document.createElement('button');cb.className='rbtn';cb.textContent='🔢 Код';cb.onclick=()=>{navigator.clipboard?.writeText(rCode);sSt('Код скопирован');};b.appendChild(cb);if(f){const rb=document.createElement('button');rb.className='rbtn accept';rb.dataset.act='rematch';rb.textContent='🔄 Реванш';rb.onclick=reqRm;b.appendChild(rb);}}const lb=document.createElement('button');lb.className='rbtn danger';lb.textContent='🚪 Выйти';lb.onclick=()=>{if(confirm('Выйти из комнаты?')){lvR();showMenu();}};b.appendChild(lb);}
 function updLB(){if(!onM||!rDat)return;const p=plL();const lv=p.filter(x=>x.c).length;$('rlive').textContent=lv;$('rdot').className='ldot'+(p.length>0&&lv<p.length?' off':'');$('rcnt').textContent=p.length+'/2';}
@@ -362,12 +365,12 @@ function stAI(side){closeFv();onM=false;hsM=false;G=newSt(set.first);ps=side;pTu
 function stHot(){closeFv();onM=false;hsM=true;G=newSt(set.first);ps='x';pTurn=null;lastEnd=null;$('modeov').classList.remove('show');$('endov').classList.remove('show');$('strike').style.display='none';bBrd();renAll();sSt(stTx());trk('game_start',{game_name:'tictactoe',mode:'hotseat'});updPulse();}
 function mAI(){if(onM||hsM||!G||G.result||!G.board)return;if(G.turn===ps)return;if(aiT)clearTimeout(aiT);aiT=setTimeout(()=>{if(!G||G.result||!G.board)return;const ai=G.turn;const i=aiMv(G.board.slice(),ai,set.aiLvl);if(i<0){mAI();return;}G.board[i]=ai;G.hist.push({by:ai,i:i,at:Date.now()});G.lastMove={by:ai,i:i,at:Date.now()};G.turnAt=Date.now();const r=chkL(G.board);if(r){G.result={w:r.w,l:r.l,at:Date.now()};r.w===ps?sW():sL();Platform.haptic(r.w===ps?'success':'error');renAll();showEnd();return;}G.turn=G.turn==='x'?'o':'x';sM();renAll();updPulse();},550);}
 function renPB(){const b=$('pbar');b.innerHTML='';if(!onM&&!hsM){const s=S();if(!s||!s.board)return;const me=ps,op=me==='x'?'o':'x';const mk=(s2,l)=>{const c=document.createElement('span');c.className='chip'+(s.turn===s2&&!s.result?' turn':'');c.innerHTML='<span class=dot></span>'+l+' · '+(s2==='x'?'❌':'⭕');return c;};b.appendChild(mk(me,esc('Вы')));b.appendChild(mk(op,'🤖 ИИ'));return;}if(hsM){const s=S();if(!s||!s.board)return;const mk=(s2,l)=>{const c=document.createElement('span');c.className='chip'+(s.turn===s2&&!s.result?' turn':'');c.innerHTML='<span class=dot></span>'+l+' · '+(s2==='x'?'❌':'⭕');return c;};b.appendChild(mk('x','Игрок 1'));b.appendChild(mk('o','Игрок 2'));return;}const s=S();plL().forEach(p=>{const c=document.createElement('span');c.className='chip'+(s&&s.turn===p.m&&!s.result?' turn':'');c.innerHTML='<span class="dot'+(p.c?'':' off')+'"></span>'+esc(p.n)+(p.s===myS?' (вы)':'')+' · '+(p.m==='x'?'❌':'')+' · '+p.w;b.appendChild(c);});}
-/* v1.6.3: защита renAll от undefined s.board — корень краша 'Cannot read properties of undefined (reading 0)' */
 function renAll(){const s=S();$('opbar').style.display=onM?'none':'flex';if(onM)$('opbar').innerHTML='';
 if(!s||!s.board||!Array.isArray(s.board)){sSt('Выбери режим');$('newBtn').style.display='none';$('menuBtn').style.display='none';cels.forEach(el=>{el.innerHTML='';el.className='cell';});$('strike').style.display='none';updPulse();return;}
 const wl=s.result&&s.result.l;cels.forEach((el,i)=>{const v=s.board[i];el.className='cell'+(v?' tkn':'')+(s.result?' lck':'');el.innerHTML='';if(v){el.innerHTML=symHTML(v);const q=el.querySelector('svg,img');requestAnimationFrame(()=>q&&q.classList.add('show'));}if(wl&&Array.isArray(wl)&&wl.includes(i))el.classList.add('win');if(s.lastMove&&typeof s.lastMove.i==='number'&&s.lastMove.i===i&&!wl)el.classList.add('last');});drawStrike(wl);const mh=$('modeov').classList.contains('show');$('newBtn').style.display=(!onM&&s.result)?'inline-flex':'none';$('menuBtn').style.display=(!s.result&&!mh)?'inline-flex':'none';sSt(stTx());renPB();}
 function stTx(){if(onM&&rDat&&rDat.status==='waiting')return '⏳ Ожидание соперника…';const s=S();if(!s||!s.board)return 'Выбери режим';if(s.result){if(s.result.w==='draw')return '🤝 Ничья!';const w=s.result.w;const sym=w==='x'?'❌':'';if(onM)return w===(myS==='w'?'x':'o')?'🏆 Ты победил ('+sym+')!':'🏁 Победил '+esc(nOf(w==='x'?'w':'b'))+' ('+sym+')';if(hsM)return '🏆 Победил '+(w==='x'?'Игрок ❌':'Игрок ⭕');return w===ps?'🏆 Ты победил ('+sym+')!':'🏁 Победил компьютер ('+sym+')';}if(onM){const my=myS==='w'?'x':'o';return s.turn===my?'⚔️ Твой ход ('+(s.turn==='x'?'❌':'')+')':'⏳ Ходит соперник…';}if(hsM)return '⚔️ Ход игрока '+(s.turn==='x'?'❌':'⭕');if(s.turn!==ps)return '<span class=think>🤔 Компьютер думает…</span>';return '⚔️ Твой ход ('+(ps==='x'?'❌':'⭕')+')';}
-function onC(i){unlAu();const s=S();if(!s||!s.board||s.result||fvMode)return;if(s.board[i]){sDen();return;}if(onM){if(!rDat||rDat.status!=='playing'){sDen();sSt('⏳ Игра ещё не началась',true);return;}const my=myS==='w'?'x':'o';if(s.turn!==my){sDen();sSt('⏳ Сейчас ход соперника',true);return;}const ns=cl(s);ns.board[i]=my;ns.hist=(ns.hist||[]).concat([{by:my,i:i,at:Date.now()}]);ns.lastMove={by:myS,name:myN,i:i,at:Date.now()};ns.turnAt=Date.now();const r=chkL(ns.board);if(r)ns.result={w:r.w,l:r.l,at:Date.now()};else ns.turn=ns.turn==='x'?'o':'x';rRef.update({state:ns});sM();Platform.haptic('light');}else if(hsM){G.board[i]=G.turn;G.hist=(G.hist||[]).concat([{by:G.turn,i:i,at:Date.now()}]);G.lastMove={by:G.turn,i:i,at:Date.now()};G.turnAt=Date.now();const r=chkL(G.board);if(r){G.result={w:r.w,l:r.l,at:Date.now()};sW();Platform.haptic('success');renAll();showEnd();return;}G.turn=G.turn==='x'?'o':'x';sM();Platform.haptic('light');renAll();}else{if(G.turn!==ps)return;G.board[i]=ps;G.hist=(G.hist||[]).concat([{by:ps,i:i,at:Date.now()}]);G.lastMove={by:ps,i:i,at:Date.now()};G.turnAt=Date.now();const r=chkL(G.board);if(r){G.result={w:r.w,l:r.l,at:Date.now()};(r.w===ps?sW():sL());Platform.haptic(r.w===ps?'success':'error');renAll();showEnd();return;}G.turn=G.turn==='x'?'o':'x';sM();Platform.haptic('light');renAll();mAI();}}
+/* v1.6.4: защита onC — try/catch + логирование + проверка Array.isArray(ns.board) */
+function onC(i){unlAu();const s=S();if(!s||!s.board||!Array.isArray(s.board)||s.result||fvMode)return;if(s.board[i]){sDen();return;}if(onM){if(!rDat||rDat.status!=='playing'){sDen();sSt('⏳ Игра ещё не началась',true);return;}const my=myS==='w'?'x':'o';if(s.turn!==my){sDen();sSt('⏳ Сейчас ход соперника',true);return;}const ns=cl(s);ns.board[i]=my;ns.hist=(ns.hist||[]).concat([{by:my,i:i,at:Date.now()}]);ns.lastMove={by:myS,name:myN,i:i,at:Date.now()};ns.turnAt=Date.now();const r=chkL(ns.board);if(r)ns.result={w:r.w,l:r.l,at:Date.now()};else ns.turn=ns.turn==='x'?'o':'x';try{rRef.update({state:ns}).catch(e=>{console.error('[TT] update fail:',e.message||e);sSt('Ошибка обновления: '+(e.message||e),true);});}catch(e){console.error('[TT] update exception:',e);sSt('Ошибка: '+e.message,true);}sM();Platform.haptic('light');}else if(hsM){G.board[i]=G.turn;G.hist=(G.hist||[]).concat([{by:G.turn,i:i,at:Date.now()}]);G.lastMove={by:G.turn,i:i,at:Date.now()};G.turnAt=Date.now();const r=chkL(G.board);if(r){G.result={w:r.w,l:r.l,at:Date.now()};sW();Platform.haptic('success');renAll();showEnd();return;}G.turn=G.turn==='x'?'o':'x';sM();Platform.haptic('light');renAll();}else{if(G.turn!==ps)return;G.board[i]=ps;G.hist=(G.hist||[]).concat([{by:ps,i:i,at:Date.now()}]);G.lastMove={by:ps,i:i,at:Date.now()};G.turnAt=Date.now();const r=chkL(G.board);if(r){G.result={w:r.w,l:r.l,at:Date.now()};(r.w===ps?sW():sL());Platform.haptic(r.w===ps?'success':'error');renAll();showEnd();return;}G.turn=G.turn==='x'?'o':'x';sM();Platform.haptic('light');renAll();mAI();}}
 function showEnd(){const s=S();if(!s||!s.result||!s.board)return;let out='lose',myM=null,mode='ai';if(onM){myM=myS==='w'?'x':'o';mode='online';if(s.result.w==='draw')out='draw';else out=s.result.w===myM?'win':'lose';if(isH()){const sc=(rDat.state&&rDat.state.scores)||{w:0,b:0};if(s.result.w==='x')sc.w=(sc.w||0)+1;else if(s.result.w==='o')sc.b=(sc.b||0)+1;rRef.child('state/scores').set(sc).catch(()=>{});}}else if(hsM){mode='hotseat';myM=null;out=s.result.w==='draw'?'draw':'win';}else{mode='ai';myM=ps;if(s.result.w==='draw')out='draw';else out=s.result.w===myM?'win':'lose';}bumpST(out==='win',out==='draw',mode);lastEnd={mode,out,myM,info:' ❌×'+s.board.filter(c=>c==='x').length+' ⭕×'+s.board.filter(c=>c==='o').length};let t='🏁',sub='';const sym=s.result.w==='x'?'❌':'⭕';if(out==='win')t='🏆 Победа!';else if(out==='draw')t='🤝 Ничья';else t='😢 Поражение';if(onM)sub='Линию собрал '+sym+' · Соперник: '+esc(nOf(s.result.w==='x'?'w':'b'))+' · Счёт: '+(rDat.state?.scores?.w||0)+' : '+(rDat.state?.scores?.b||0);else if(hsM)sub=s.result.w==='draw'?'Поле заполнено, линии нет.':'Линию собрал '+sym+' — победил '+(s.result.w==='x'?'Игрок 1':'Игрок 2')+'!';else sub=s.result.w==='draw'?'Идеальная партия с обеих сторон.':'Линию собрал '+sym+' — '+(out==='win'?'это ты! Молодец.':'компьютер. Реванш?');$('endtit').textContent=t;$('endsub').textContent=sub;out==='win'?sW():(out==='draw'?sD():sL());Platform.haptic(out==='win'?'success':(out==='draw'?'warning':'error'));const b=$('endbtns');b.innerHTML='';if(onM){const rb=document.createElement('button');rb.className='btn pri';rb.dataset.end='rematch';rb.textContent='🔄 Реванш';rb.onclick=reqRm;b.appendChild(rb);const fv=document.createElement('button');fv.className='btn';fv.textContent='👁 Посмотреть поле';fv.onclick=showFv;b.appendChild(fv);const rs=document.createElement('button');rs.className='btn';rs.dataset.end='share';rs.textContent='📤 Отправить результат';rs.onclick=shRes;b.appendChild(rs);const sh=document.createElement('button');sh.className='btn';sh.textContent='📤 Поделиться комнатой';sh.onclick=shInv;b.appendChild(sh);const lv=document.createElement('button');lv.className='btn';lv.textContent='🚪 Выйти';lv.onclick=()=>{lvR();$('endov').classList.remove('show');showMenu();};b.appendChild(lv);}else{const r=document.createElement('button');r.className='btn pri';r.dataset.end='new';r.textContent='🔄 Ещё партию';r.onclick=()=>{closeFv();$('endov').classList.remove('show');if(hsM)stHot();else stAI(ps);};b.appendChild(r);const fv=document.createElement('button');fv.className='btn';fv.textContent='👁 Посмотреть поле';fv.onclick=showFv;b.appendChild(fv);const rs=document.createElement('button');rs.className='btn';rs.dataset.end='share';rs.textContent='📤 Отправить результат';rs.onclick=shRes;b.appendChild(rs);const h=document.createElement('button');h.className='btn';h.textContent='🏠 В меню игры';h.onclick=()=>{closeFv();$('endov').classList.remove('show');G=null;lastEnd=null;hsM=false;$('strike').style.display='none';bBrd();renAll();showMenu();};b.appendChild(h);const h2=document.createElement('button');h2.className='btn';h2.textContent='← В меню игр';h2.onclick=goHub;b.appendChild(h2);}$('endov').classList.add('show');setTimeout(()=>updPulse(),50);trk('game_end',{game_name:'tictactoe',mode:mode,outcome:out});}
 function reqRm(){if(!rRef||!myS)return;expC();rRef.child('rematch/'+myS).set(true).catch(e=>console.warn('[TT] rm fail',e.message));if(rDat&&rDat.status==='playing'&&isH())rRef.child('status').set('finished').catch(e=>console.warn('[TT] force fail',e.message));$('endov').classList.remove('show');sSt('🔄 Ожидание соперника для реванша…');}
 function showFv(){$('endov').classList.remove('show');fvMode=true;$('fvbar').classList.add('show');}
@@ -396,7 +399,8 @@ $('mHost').onclick=async()=>{unlAu();await cRoom();};
 $('mJoin').onclick=()=>{$('jbox').style.display='flex';$('jacts').style.display='flex';$('jinp').value='';};
 $('jcan').onclick=()=>{$('jbox').style.display='none';$('jacts').style.display='none';};
 $('jgo').onclick=async()=>{const c=$('jinp').value.trim().toUpperCase();if(c.length!==6){alert('Код должен быть 6 символов');return;}await jRoom(c);};
-$('rbtog').onclick=()=>{const ex=$('rbex');const op=ex.style.display!=='none';ex.style.display=op?'none':'flex';$('rbar').classList.toggle('open',!op);$('lbox').style.display=op?'none':'block';};
+/* v1.6.4: ручное переключение шторки — устанавливает manualOpen, чтобы subR не закрывал автоматически */
+$('rbtog').onclick=()=>{const ex=$('rbex');const op=ex.style.display!=='none';if(op){colC();}else{expC();$('lbox').style.display='block';}};
 $('fvc').onclick=closeFv;
 window.addEventListener('resize',()=>{const s=S();if(s&&s.result&&s.result.l)drawStrike(s.result.l);});
 window.addEventListener('beforeunload',()=>{stopHB();rmPr();});
