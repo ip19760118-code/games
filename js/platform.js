@@ -1,10 +1,9 @@
-/* tg-games: единый слой платформ v3.1 — Telegram / VK / MAX / web / PC(Electron) / Android(WebView).
-   v3.1: фикс шеринга на десктоп-web: OS share-sheet (navigator.share) терял текст в таргетах
-         (Telegram забирал только url) → на web с pointer:fine копируем полное сообщение в буфер;
-         мобильный web и оболочки используют прежние пути.
-   v3.0: вирусный шеринг: Platform.shareGame(key,text,opts) + Platform.gameDeepLink(key);
-         в share() опции opts.game (строка диплинка) и opts.brand (бренд-строка).
-   v2.9: ветка 'android'; v2.8: goToHub в TG/VK — внутренняя навигация. */
+/* tg-games: единый слой платформ v3.2 — TG / VK / MAX / web / PC / Android.
+   v3.2: Platform.downloadAsset(url, fileName, opts) — каскадное скачивание:
+         1) Android-оболочка → AppBridge.downloadFile (нативный DownloadManager);
+         2) иначе → fetch+blob → navigator.share({files}) если доступен → <a download> → window.open fallback.
+         Работает одинаково в web / TG/VK/MAX WebApp (мобильных и десктопных) / Electron / Android.
+   v3.1: desktop-web шеринг в буфер; v3.0: shareGame/gameDeepLink/бренд-строка. */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
@@ -13,7 +12,7 @@ var Platform=(function(){
  var MAX_NAV_MODE='external';
  var CANONICAL_ORIGIN='https://ip19760118-code.github.io/games';
  var BRAND_LINE='\n🎮 Игровой центр — классика и новинки, онлайн и офлайн';
- var name='web',user=null,backFn=null,inited=false,gameKey=null;
+ var name='web',user=null,backFn=null,inited=false;
 
  function qs(k){try{return new URLSearchParams(location.search).get(k)||''}catch(e){return ''}}
  function load(src){return new Promise(function(res){var s=document.createElement('script');s.src=src;s.onload=function(){res(true)};s.onerror=function(){res(false)};document.head.appendChild(s)})}
@@ -36,15 +35,6 @@ var Platform=(function(){
    var m=location.pathname.match(/^(.*\/games\/)/);
    if(!m)return;
    navigator.serviceWorker.register(m[1]+'sw.js',{scope:m[1]}).catch(function(){});
-  }catch(e){}
- })();
-
- (function(){
-  try{
-   if(name==='max'){
-    sessionStorage.removeItem('max_nav_try');
-    window.addEventListener('pagehide',function(){try{sessionStorage.removeItem('max_nav_try')}catch(e){}});
-   }
   }catch(e){}
  })();
 
@@ -174,8 +164,6 @@ var Platform=(function(){
  }
 
  function init(o){o=o||{};if(inited)return;inited=true;
-  gameKey=o.game||null;
-
   try{
    document.documentElement.style.overscrollBehavior='none';
    document.documentElement.style.overscrollBehaviorY='none';
@@ -258,10 +246,7 @@ var Platform=(function(){
      if(window.WebApp.shareContent){window.WebApp.shareContent({text:text,link:url});return true}
     }catch(e){}}
    return false}
-  /* v3.1: на десктоп-web OS share-sheet теряет текст в таргетах → полное сообщение в буфер */
-  var coarse=false;
-  try{ coarse=!!(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches); }catch(e){}
-  if(navigator.share&&(name!=='web'||coarse)){
+  if(navigator.share){
    try{navigator.share({title:opts.title||document.title,text:text,url:url})
     .then(function(){if(opts.onShared)opts.onShared('native')})
     .catch(function(err){if(err&&err.name==='AbortError')return;if(!messengerShare())onCopied()});
@@ -272,6 +257,71 @@ var Platform=(function(){
   opts=opts||{};
   opts.game=key;
   return share(gameDeepLink(key),text,opts);
+ }
+
+ /* v3.2: универсальное скачивание файла с каскадом по средам.
+    opts: { shareText, shareTitle } — для navigator.share({files}) на мобильных */
+ function downloadAsset(url, fileName, opts){
+  opts=opts||{};
+  var shareText=opts.shareText||('📥 '+fileName);
+  var shareTitle=opts.shareTitle||fileName;
+
+  function saveViaAnchor(blob){
+   try{
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=fileName;
+    a.style.display='none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){
+     try{document.body.removeChild(a);}catch(e){}
+     try{URL.revokeObjectURL(a.href);}catch(e){}
+    },5000);
+    platToast('Загрузка запущена — проверь папку «Загрузки»');
+   }catch(e){ fallback(); }
+  }
+  function fallback(){
+   try{ window.open(url,'_blank','noopener'); }catch(e){ location.href=url; }
+  }
+
+  // 1) Android-оболочка: нативный DownloadManager (без браузера)
+  if(name==='android'&&window.AppBridge&&typeof AppBridge.downloadFile==='function'){
+   try{
+    platToast('Начинаю загрузку '+fileName+'…');
+    AppBridge.downloadFile(url, fileName);
+    return;
+   }catch(e){}
+  }
+
+  // 2) Все остальные среды: fetch+blob, затем попытка шеринга файла или сохранение
+  platToast('Начинаю загрузку '+fileName+'…');
+  fetch(url,{cache:'no-store'})
+   .then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.blob();
+   })
+   .then(function(blob){
+    var file=null;
+    try{ file=new File([blob],fileName,{type:blob.type||'application/octet-stream'}); }catch(e){}
+    // 2a) мобильный шеринг файла (TG/VK/MAX mobile WebApp предложат «Сохранить в файлы»/и т.п.)
+    if(file&&navigator.canShare&&typeof navigator.canShare==='function'){
+     try{
+      if(navigator.canShare({files:[file]})){
+       navigator.share({files:[file],title:shareTitle,text:shareText})
+        .catch(function(){ saveViaAnchor(blob); });
+       return;
+      }
+     }catch(e){}
+    }
+    // 2b) десктоп / Electron / fallback: сохранение через <a download>
+    saveViaAnchor(blob);
+   })
+   .catch(function(err){
+    console.warn('[HUB] downloadAsset failed:',err);
+    platToast('Не удалось скачать через браузер, пробуем напрямую…');
+    fallback();
+   });
  }
 
  return{
@@ -287,6 +337,7 @@ var Platform=(function(){
   hubBase:hubBase,
   gameDeepLink:gameDeepLink,
   shareGame:shareGame,
+  downloadAsset:downloadAsset,
   haptic:function(t){
    if(name==='pc')return;
    try{
