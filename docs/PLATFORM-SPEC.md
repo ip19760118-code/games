@@ -1,6 +1,6 @@
 # PLATFORM-SPEC — МК «Игровой центр»: кроссплатформенная спецификация и грабли
 
-**Версия документа: 2.8** | Дата: 2026-11-04 | Статус: TG ✅ / MAX ✅ / VK ✅ / web ✅ / PC (Electron, Win 7 SP1–11) ✅ / Android (WebView, 8.0+) ✅
+**Версия документа: 2.9** | Дата: 2026-11-04 | Статус: TG ✅ / MAX ✅ / VK ✅ / web ✅ / PC (Electron, Win 7 SP1–11) ✅ / Android (WebView, 8.0+) ✅
 Репозиторий: `github.com/ip19760118-code/games`
 Pages: `https://ip19760118-code.github.io/games/`
 
@@ -13,7 +13,7 @@ Pages: `https://ip19760118-code.github.io/games/`
 
 | Компонент | Где живёт | Комментарий |
 |---|---|---|
-| Хаб (витрина 18 игр + модалка скачивания + умная сортировка + ⚙️ android + чипы версий/NEW) | GitHub Pages, корень репо `games/` | `index.html` **v3.39** |
+| Хаб (витрина 18 игр + модалка скачивания + умная сортировка + ⚙️ android + чипы версий/NEW) | GitHub Pages, корень репо `games/` | `index.html` **v3.43** |
 | Игры | папки `chess/ … trend-catch/`, `tetris/`, `pyatnashki/`, `tictactoe/` | мультиплатформенные через `js/platform.js` |
 | Онлайн-комнаты | Firebase RTDB (имя проекта не менять!) | единая схема: раздел 5 |
 | Desktop-оболочка (Windows) | локальный проект `gc-desktop/` (**НЕ в репо**) | Electron **22**, релизы GitHub Releases: раздел 6 |
@@ -24,8 +24,8 @@ Pages: `https://ip19760118-code.github.io/games/`
 | Кэш web | `sw.js` (service worker, **v9**) | навигации network-first, статика cache-first; в оболочках НЕ регистрируется |
 | Аналитика | GA4 | hub_open / hub_game_click / hub_download_* / game_* / game_share(share_type) |
 
-Единый слой платформ: `js/platform.js` (**v3.1**) → глобальный `Platform`
-(init, haptic, share, **shareGame**, **gameDeepLink**, toast, onBack/fireBack, close, colors, user, name,
+Единый слой платформ: `js/platform.js` (**v3.4**) → глобальный `Platform`
+(init, haptic, share, **shareGame**, **gameDeepLink**, **downloadAsset**, toast, onBack/fireBack, close, colors, user, name,
 maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 Детект: `?plat=` → `AppBridge.platform` ('pc'|'android') → глобалки TG/VK/MAX → 'web'.
 
@@ -33,8 +33,8 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 
 | Компонент | Версия |
 |---|---|
-| hub `index.html` | v3.39 |
-| `js/platform.js` | v3.1 |
+| hub `index.html` | v3.43 |
+| `js/platform.js` | v3.4 |
 | `sw.js` | v9 |
 | `tools/gen-versions.js` (gc-desktop) | v1.4 |
 | vk-bot `server.js` | v1.13 |
@@ -49,8 +49,8 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 | Сапёр | v1.7 |
 | Пятнашки | v1.3 |
 | Крестики-нолики | v1.5 |
-| Desktop-оболочка | v0.3.3 (Electron 22.3.27) |
-| Android-оболочка | v0.8.0 (system WebView) |
+| Desktop-оболочка | v0.3.7 (Electron 22.3.27) |
+| Android-оболочка | v0.9.0 (system WebView) |
 
 ---
 
@@ -228,6 +228,34 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
   Ключ нормализуется из пути папки (`./trend-catch/` → `trend_catch`), работает и для диплинков.
 - Описания витрин без чисел игр (лимиты платформ).
 
+### 4.1 Каскадное скачивание ассетов (platform.js v3.4)
+
+`Platform.downloadAsset(url, fileName, opts)` — единая точка входа для скачивания бинарных файлов
+(установщики, ассеты) из любой среды. Каскад по средам:
+
+| Среда | Механизм | Фолбэк |
+|---|---|---|
+| **Android-оболочка** | `AppBridge.downloadFile` → нативный `DownloadManager` | браузер |
+| **ПК-оболочка 0.3.4+** | `AppBridge.downloadFile` (IPC `bridge:download-file`) → `node:https` с редиректами в `app.getPath('downloads')` + `shell.showItemInFolder` | `AppBridge.openExternal` |
+| **ПК-оболочка старая (<0.3.4)** | — | `AppBridge.openExternal` (системный браузер) |
+| **TG/VK/MAX WebApp** | **БЕЗ попытки fetch** (CORS-блок → ложные «загрузка не удалась») | — |
+| — mobile WebApp | `navigator.share({files:[File]})` (системный chooser «Сохранить/Отправить») | `window.open(url)` во внешний браузер |
+| — desktop WebApp | сразу честный переход в системный браузер (`Telegram.WebApp.openLink` / `VKWebAppOpenExternalLink` / `WebApp.openLink`) | — |
+| **TG/VK/MAX во внешнем браузере** | `location.href = url` (GitHub `Content-Disposition: attachment` → загрузка стартует) | `window.open` |
+| **Web-браузер desktop** | `fetch` → `blob` → `<a download>` (blob-URL same-origin — обход Chrome-игнора атрибута download на кросс-оригин редиректе GitHub) | `window.open` |
+
+**Ключевое решение (v3.4):** для мессенджер-сред **не пытаться качать из WebApp** —
+это принципиально невозможно (CORS + sandbox) и всегда даёт ложные тосты «загрузка не удалась».
+Вместо этого сразу переход в **внешний системный браузер устройства** с честным тостом
+«Открываем браузер для загрузки…».
+
+**Оболочный механизм (ПК v0.3.4+):** IPC `bridge:download-file` → main-процесс через
+`node:https` ходит по редиректам GitHub CDN (`latest/download/*` → `objects.githubusercontent.com`, до 5 редиректов),
+стримит в файл `app.getPath('downloads')/fileName`, по завершении `shell.showItemInFolder(dest)` + тост.
+Браузер не открывается вообще.
+
+**Опции `opts`:** `{ shareText, shareTitle }` — для `navigator.share({files})` на мобильных.
+
 ---
 
 ## 5. Единая архитектура онлайн-комнат
@@ -381,28 +409,28 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 
 ---
 
-## 6. Desktop-оболочка (Windows, Electron 22) — v0.3.3
+## 6. Desktop-оболочка (Windows, Electron 22) — v0.3.7
 
 ### 6.1 Состав и расположение
 
 - Проект **локальный**: `C:\Telegram\gc-desktop\` (в репо НЕ коммитится).
-- `src/main/`: `main.js` (окно, протокол, меню, IPC), `config.js` (JSON в userData),
+- `src/main/`: `main.js` (окно, протокол, меню, IPC, скачивание), `config.js` (JSON в userData),
   `updater.js` (контент, **v1.4.2**), `shell-updater.js` (оболочка, electron-updater).
 - `src/preload/preload.js` → `window.AppBridge` (platform='pc'): share/openExternal/notify/
   getProfile/getVersions/quit/onBack/onToast/getUpdateWarnings/getShellInfo/setProfile/
   setUpdateMode/setContentSource/openPath/checkUpdates/getShellUpdateStatus/shellUpdateCheck/
-  shellUpdateInstall/onShellUpdateState.
+  shellUpdateInstall/onShellUpdateState/**downloadFile**.
 - `src/renderer/settings.html` — экран настроек (`app://shell/settings.html`).
-- `tools/gen-versions.js` (**v1.4**: +игра `tictactoe` в массиве GAMES; v1.3: `addedAt` и реестр
+- `tools/gen-versions.js` (v1.4: +игра `tictactoe` в массиве GAMES; v1.3: `addedAt` и реестр
   `games-added.json`) — генератор манифеста `versions.json` **в корень репо**.
 - `assets/icons/` — вывод electron-icon-builder (`win/icon.ico`, `png/*`).
-- `electron-builder.yaml`, `package.json` (version = версия оболочки).
+- `electron-builder.yaml`, `package.json` (version = версия оболочки; **см. правило package.json в 6.2**).
 - **Electron 22.3.27** — последняя линейка с поддержкой Windows 7 SP1/8/8.1 (Chromium 108, Node 16).
   Electron 23+ требует Windows 10 (см. 8.3). electron-builder 24.x: NSIS per-user,
   `artifactName: IgrovojCentr-Setup.exe`, `compression: maximum`, `electronLanguages: [ru, en]`,
   `publish: github`, иконки `assets/icons/win/icon.ico`.
 
-### 6.2 Контент: паки, протокол app://, контракт updater.js
+### 6.2 Контент: паки, протокол app://, контракт updater.js и package.json
 
 - `registerSchemesAsPrivileged([{scheme:'app',privileges:{standard,secure,supportFetchAPI,corsEnabled,stream}}])`
   ДО ready → стабильный origin → localStorage (uid Firebase, статистика) переживает обновления.
@@ -425,6 +453,22 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   Любая замена имени класса/сигнатур/экспорта = TypeError в `whenReady` ДО создания окна:
   процессы висят в диспетчере, окна нет, автообновление не стартует (кейс v1.4.1, фикс v1.4.2).
   Менять можно только внутренности методов.
+- **🔒 API-КОНТРАКТ `shell-updater.js` (НЕ НАРУШАТЬ):** main.js зовёт
+  `shellUpdater.init({mode, toast, onState})` (а **не** `init(app, config, hooks)`);
+  методы `check(silent)`, `menuAction()`, `getStatus()`. Любое отклонение = краш автообновления.
+- **🔒 API-КОНТРАКТ `config.js` (НЕ НАРУШАТЬ):** main.js зовёт
+  `const { makeConfig, DEFAULT_ROOT } = require('./config')` (а не объект с `get/set`);
+  `config = makeConfig(app)` → `config.get()` / `config.set(k,v)` / `config.save()`.
+  **`packsRoot` = текущая папка контента** (в pages-режиме = `userData/packs/current`,
+  в local-режиме = `DEFAULT_ROOT`); не путать с `updater.currentDir` (staging/current внутри updater).
+  Несовпадение = страница-ошибка 404 «Файл не найден» при живых паках.
+- **🔒 ПРАВИЛО `package.json` (кейс v0.3.6→0.3.7):** runtime-зависимости (`electron-updater` и любые,
+  которые `require`-ятся в main.js) держать **ТОЛЬКО** в секции `dependencies`.
+  `devDependencies` (electron, electron-builder) electron-builder **НЕ пакует** в `app.asar`.
+  Потеря зависимости = краш main-процесса на первом же `require` в runtime (кейс 2026-11-04:
+  `electron-updater` был только в devDeps → `Cannot find module 'electron-updater'` при запуске).
+  **Контроль сборки:** `npx @electron/asar list release/win-unpacked/resources/app.asar | findstr <pkg>`
+  должна показывать `node_modules/<pkg>/…`. Если вывод пустой — релиз НЕ публиковать.
 - Источники: `local` (dev: паки = рабочая копия репо) | `pages` (боевой: GitHub Pages).
   В установленном exe дефолт `pages`, если локального репо нет.
 - Бутстрап: `pages` + (`auto` ИЛИ нет валидного контента) → синхронизация ДО окна (таймаут 60 с).
@@ -440,6 +484,9 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   «✅ Приложения обновлены: N/N файлов» до перезагрузки окна и повторно после (`did-finish-load`).
   Ошибка = тост + системное `Notification` (не пропадает бесследно).
 - Service worker в оболочке НЕ регистрируется (platform.js gated по host github.io и AppBridge).
+- **Нативное скачивание установщиков (main.js v0.3.6+):** IPC `bridge:download-file` через
+  `node:https` с редиректами (GitHub CDN, до 5 hop) → `app.getPath('downloads')/fileName` →
+  `shell.showItemInFolder(dest)` + тост. Браузер не открывается. См. раздел 4.1.
 
 ### 6.3 Манифест versions.json, грабля хэшей, 🔒 ПРАВИЛО HUB_VER и 🔒 ПРАВИЛО GAMES
 
@@ -555,9 +602,35 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   `will-navigate`); навигация вне `app://` запрещена.
 - Тосты: IPC `app-toast` → `Platform.toast` в странице (3 с); тосты оболочки через hooks shellUpdater.
 
+### 6.9 🔒 Контракт полей настроек и запрет реконструкции main.js вслепую
+
+`settings.html` ожидает от `shell:get-info` **точные имена полей** (несовпадение = «vundefined»,
+«Chrome undefined», «(нет index.html!)» при живых паках):
+
+| Поле в `shell:get-info` | Где читается в `settings.html` |
+|---|---|
+| `profileName` | `i.profileName` → input |
+| `updateMode` | `i.updateMode` → select |
+| `contentSource` | `i.contentSource` → select + infoBox |
+| `packsRoot` | `i.packsRoot` → infoBox |
+| `packsValid` | `i.packsValid` → span «(нет index.html!)» |
+| `userData` | `i.userData` → infoBox |
+| `shellVersion` | `i.shellVersion` → infoBox |
+| `chrome` | `i.chrome` → infoBox |
+| `contentVersion` | `i.contentVersion` → infoBox |
+
+**🔒 ПРАВИЛО (кейс 2026-11-04, v0.3.5):** файлы `main.js`, `preload.js`, `config.js`,
+`shell-updater.js` desktop-оболочки (и их android-аналоги) **ЗАПРЕЩЕНО** реконструировать вслепую,
+без оригинала рабочего кода. Любая правка — только **инкрементальные добавки** к проверенным
+файлам (например, новый IPC-канал `bridge:download-file` поверх существующей структуры).
+Причина: имена IPC-каналов, экспорты модулей, семантика полей ответов, сигнатуры функций —
+всё это не описано в платформенной спецификации в полном объёме и невоспроизводимо «из головы».
+Контракт между main↔preload↔settings — трёхсторонний и хрупкий: правка одного файла без знания
+других = крах main-процесса (процессы висят, окно не создаётся) или неработающие настройки.
+
 ---
 
-## 7. Android-оболочка (system WebView) — v0.8.0
+## 7. Android-оболочка (system WebView) — v0.9.0
 
 ### 7.1 Состав и расположение
 
@@ -607,8 +680,10 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 - `getPlatform()='android'`; `getProfile()` (имя из SharedPreferences, дефолт «ИгрокNNN»);
   `getVersions()` (shell=versionName, content=hub из installed.json); `getUpdateWarnings()`;
   `share(text,url)` → `ACTION_SEND` chooser; `openExternal(url)` → `ACTION_VIEW`;
-  `quit()` → finish; `notify/toast` → `pageToast` (evaluateJavascript `Platform.toast`);
-  `checkUpdates()` → принудительный sync контента с тостами.
+  **`downloadFile(url, fileName)`** (v0.9.0) → `DownloadManager.enqueue` в `DIRECTORY_DOWNLOADS`
+  с `VISIBILITY_VISIBLE_NOTIFY_COMPLETED` (системное уведомление загрузки) и фолбэком в
+  `ACTION_VIEW` браузера; `quit()` → finish; `notify/toast` → `pageToast`
+  (evaluateJavascript `Platform.toast`); `checkUpdates()` → принудительный sync контента с тостами.
 - v0.5.0+: `checkAppUpdate()` → ручная проверка обновления APK (игнорирует троттлинг).
 - v0.6.0+: `openSettings()` → нативный SettingsActivity; `getUpdateMode()` / `setUpdateMode(m)`.
 - Аппаратная «Назад»: `onBackPressed` → `evaluateJavascript(window.__androidBack…)`;
@@ -651,7 +726,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 ### 7.8 Автообновление APK (v0.5.0+)
 
 - **Манифест обновления:** `android-update.json` в корне репо → Pages:
-  `{"versionName":"0.8.0","versionCode":6,"notes":"…"}`. Приложение сравнивает `versionName`
+  `{"versionName":"0.9.0","versionCode":7,"notes":"…"}`. Приложение сравнивает `versionName`
   с `BuildConfig.VERSION_NAME` (почленный числовой cmp). GitHub API НЕ используется
   (rate-limits, User-Agent) — только Pages-json + стабильная ссылка ассета.
 - **Ссылка загрузки:** `APK_URL = …/releases/latest/download/IgrovojCentr.apk` →
@@ -749,9 +824,11 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 |---|---|---|
 | Чёрное окно + бледный «404: /index.html» | packsRoot указывает на пустую/битую папку | самовосстановление packsRoot + страница-ошибка (v0.5; с v0.11 — статические error.html/404.html) |
 | Окно не создаётся, 2–3 процесса «Игровой центр» висят в диспетчере | нарушен API-контракт updater.js (имя класса/экспорт/сигнатуры), main.js падает в whenReady до окна; автообновление не стартует | контракт v1.3 неприкосновенен (6.2); сломанную сборку лечим ручной установкой нового exe (кейс v1.4.1→v1.4.2) |
+| **После установки: диалог «A JavaScript error occurred in the main process», `Cannot find module 'electron-updater'`** | **runtime-зависимость `electron-updater` оказалась только в `devDependencies` — electron-builder НЕ пакует devDeps в `app.asar`, и при запуске main-процесс крашится на первом `require('electron-updater')` в shell-updater.js** | **🔒 правило package.json (6.2): runtime-зависимости держать ТОЛЬКО в `dependencies`; контроль сборки: `npx @electron/asar list release/win-unpacked/resources/app.asar \| findstr electron-updater` — если вывод пустой, релиз НЕ публиковать; кейс 2026-11-04 v0.3.6→v0.3.7** |
+| **Оболочка открывается, но Настройки показывают «vundefined», «Chrome undefined», «(нет index.html!)» при живых паках** | **имена полей ответа IPC `shell:get-info` не совпадают с именами, которые читает `settings.html`** (`shellVersion/chrome/contentVersion/packsValid` vs `version`); **ИЛИ** семантика `packsRoot` в конфиге ≠ «текущая папка контента» (путаница `packs/current` vs `userData/packs/current`) | **🔒 контракт полей (6.9): перед правкой main.js — открыть `settings.html` и проверить, какие поля она читает из `AppBridge.getShellInfo()`; сверить с `config.js` — `packsRoot` должен всегда указывать на валидную папку контента; кейс 2026-11-04 v0.3.5→v0.3.6** |
 | **Оболочки не получают новый platform.js/sw.js/иконки при живом обновлении игр** | **hub-файлы изменены без bump HUB_VER: селективный sync сравнивает версии, не хэши** | **🔒 правило HUB_VER (6.3): bump `HUB_VER` в том же коммите; кейс 2026-11-03 v3.37→v3.38** |
 | **Кнопка игры в хабе есть, на ПК клик = «Файл не найден», чипа/NEW нет нигде; Android и мессенджеры работают** | **id новой игры не добавлен в массив GAMES генератора: манифест без секции игры → паки не скачивают (у desktop-протокола нет сетевого fallback), хаб без метаданных; Android живёт за счёт fallback перехватчика, web/мессенджеры — напрямую с Pages** | **🔒 правило GAMES (6.3): добавить id в GAMES (gen-versions v1.4), реген ПОСЛЕ коммита игры, коммит versions.json+games-added.json, push, синхронизация оболочек; кейс tictactoe 2026-11-04** |
-| «Оболочка актуальна», хотя релиз свежий | `latest.yml.version` равен установленной: version в package.json не bump-нули перед сборкой | bump → dist → `type release\latest.yml | findstr version` → сверить → релиз (6.4) |
+| «Оболочка актуальна», хотя релиз свежий | `latest.yml.version` равен установленной: version в package.json не bump-нули перед сборкой | bump → dist → `type release\latest.yml \| findstr version` → сверить → релиз (6.4) |
 | Кнопка шеринга в игре молчит (TypeError: shareGame is not a function) в оболочках | в паках старый platform.js (см. правило HUB_VER) | bump HUB_VER + regen + push + синхронизация оболочек |
 | Шеринг с ПК-web уходит «голой ссылкой» без текста | navigator.share → OS share-sheet: таргет (Telegram) берёт только url | platform.js v3.1: web + pointer:fine → полное сообщение в буфер + тост |
 | Иконка exe/ярлыка «вернулась к атому Electron» | `signAndEditExecutable: false` отключает rcedit (встраивание иконки) | флаг убрать; winCodeSign чинить распаковкой кэша; кэш иконок Windows: `ie4uinit.exe -show` / перезапуск explorer (6.6) |
@@ -779,7 +856,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | **«О приложении» показывает устаревшее число игр / версию** | **числа зашиты в текст SettingsActivity** | **v1.1: состав и количество игр — `installedGamesCount()` из installed.json (ContentUpdater v1.4), версия контента — installed hub; никаких хардкодов (7.9)** |
 | `Task 'assembleRelease' not found in root project` | скрипт модуля назван `build.gradle.groovy`/`.kts` не по имени, либо settings не включает `:app` | файл должен быть `app/build.gradle` (Groovy) или `app/build.gradle.kts`; в settings `include(":app")` |
 | `Directory … does not contain a Gradle build` | отсутствуют settings/build в корне | воссоздать `settings.gradle.kts` + корневой `build.gradle.kts` (явная версия AGP `apply false`) |
-| `License for package … not accepted` | свежий SDK без принятых лицензий | `sdkmanager --licenses` (пайп `echo y|`) + `platforms;android-34` `build-tools;35.0.0` |
+| `License for package … not accepted` | свежий SDK без принятых лицензий | `sdkmanager --licenses` (пайп `echo y\|`) + `platforms;android-34` `build-tools;35.0.0` |
 | `sdkmanager` не найден; «Using Android SDK: <папка студии>» | `sdk.dir` указывает на папку программы студии (bin/jbr/plugins), а не на SDK | найти реальный SDK (`platforms/`, `build-tools/`) или поставить cmdline-tools в отдельную папку; исправить `local.properties` |
 | `Theme.Material3… not found` | шаблонные themes.xml/values-night тянут Material без зависимости | удалить `values-night`, тема = `android:Theme.Material.NoActionBar` |
 | `layout_constraint… not found` | шаблонный `activity_main.xml` с ConstraintLayout при пустых dependencies | удалить `res/layout` (UI создаётся программно) |
@@ -819,6 +896,17 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | Крестики: картинки не грузятся (ERR_FILE_NOT_FOUND), «имена правильные» | (а) кириллические `х.png`/`о.png` вместо латинских — визуально идентичны; (б) двойное расширение `o.png.png` при скрытых расширениях проводника; (в) тест автономной копией HTML вне папки игры — относительный `img/` указывает в пустоту | ASCII-имена (правило раздела 4); `dir /b` за реальными именами; галка «Расширения имён файлов»; тестировать только настоящий `index.html`; onerror-лог пробы `[TT] img NOT FOUND: <url>` (v1.5) |
 | Крестики: просмотр партии сбрасывал подсветку и полосу | `renFv()` перерисовывал клетки без win-классов | просмотр = финал без отмотки: перерисовка убрана, ◀/▶ удалены (v1.5) |
 
+### 8.6 Скачивание ассетов (хаб → устройства)
+
+| Симптом | Причина | Лечение |
+|---|---|---|
+| **Модалка «Скачать приложение»: тост «Начинаю загрузку…» → ничего не происходит, потом «Проверьте загрузки браузера», но там пусто** | **Chrome/Firefox на кросс-оригин редиректе с GitHub (`latest/download/*` → `objects.githubusercontent.com`) игнорирует атрибут `download` у `<a>` и делает навигацию вместо скачивания; файл «исчезает»** | **fetch+blob: `fetch(url)` → `r.blob()` → `<a href=URL.createObjectURL(blob) download>` (blob-URL same-origin, download срабатывает гарантированно); hub v3.40 (2026-11-04)** |
+| **ПК-оболочка: «Скачать приложение» открывает системный браузер вместо прямого скачивания** | **`<a download>` в Electron 22 (Chromium 108) на `app://`-origin тоже игнорируется; нет нативного `downloadFile` в AppBridge** | **IPC `bridge:download-file`: main-процесс через `node:https` с редиректами качает в `app.getPath('downloads')/fileName`, `shell.showItemInFolder(dest)` + тост; preload.js v0.5, main.js v0.3.6+** |
+| **TG/VK/MAX: тост «Начинаю загрузку…» → «Загрузка не удалась» → открытие внутреннего браузера мессенджера, который зависает на «Скачивание…»** | **`fetch` на внешний домен в WebApp-контексте мессенджеров блокируется CORS (архитектурное ограничение платформ, обойти невозможно); внутренний браузер VK зависает на редиректах GitHub — это баг VK** | **🔒 правило мессенджеров (platform.js v3.4): НЕ пытаться fetch, сразу переход в ВНЕШНИЙ системный браузер (`Telegram.WebApp.openLink` / `VKWebAppOpenExternalLink` / `WebApp.openLink`) с честным тостом «Открываем браузер для загрузки…»; на мобильных — сначала `navigator.share({files:[File]})` с системным chooser «Сохранить/Отправить» (2026-11-04)** |
+| **VK desktop WebApp зависает на «Скачивание…»** | **встроенный браузер VK плохо обрабатывает редиректы GitHub (баг VK, не наш)** | **`VKWebAppOpenExternalLink` уводит сразу в системный браузер — обход бага (platform.js v3.4)** |
+| **MAX desktop WebApp: скачивание стартует во внешнем браузере** | **официальный ответ поддержки MAX (2026-10-28): `WebApp.openLink` открывает ТОЛЬКО внешний браузер — архитектурное требование** | **принимаем как есть: `WebApp.openLink(url)` — переход в браузер, там загрузка стартует (platform.js v3.4)** |
+| **Android-оболочка: скачивание открывает браузер** | **`AppBridge.downloadFile` отсутствовал в AppBridge (v<0.9.0), фолбэк в `openExternal`** | **v0.9.0: нативный `DownloadManager.enqueue` → системное уведомление загрузки, файл в `Downloads/`, браузер не открывается** |
+
 ---
 
 ## 9. Чек-листы
@@ -854,12 +942,17 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 
 ### 9.3 Релиз desktop-оболочки
 1. Bump `version` в `package.json` (**без этого автообновление считает релиз «актуальным»!**).
-2. `npm run dist`; проверить `type release\latest.yml | findstr version` = новой версии.
-3. Проверить иконку exe в проводнике ДО загрузки ассета (rcedit не сломан, 6.6).
-4. Release: tag `vN.N.N`, ассеты **три**: `IgrovojCentr-Setup.exe` + `latest.yml` + `IgrovojCentr.apk`.
-5. Publish → hub-кнопки подхватят через `latest/download` автоматически.
-6. Проверка автообновления с предыдущей установленной версии (Win10) + установка на Win 8.1.
-7. Сломанную сборку (если main.js падал) автообновление не лечит — таким машинам ручная установка.
+2. **Проверить секцию `dependencies`: все модули, которые `require`-ятся в runtime
+   (`electron-updater` и т.п.), должны быть в `dependencies`, а НЕ в `devDependencies`**
+   (🔒 правило 6.2 — кейс v0.3.6: `electron-updater` потерялся в deps → краш main).
+3. `npm install` → `npm run dist`; проверить `type release\latest.yml | findstr version` = новой версии.
+4. **Контроль упаковки:** `npx @electron/asar list release/win-unpacked/resources/app.asar | findstr electron-updater` —
+   должны быть строки `node_modules/electron-updater/…`; пустой вывод = релиз НЕ публиковать.
+5. Проверить иконку exe в проводнике ДО загрузки ассета (rcedit не сломан, 6.6).
+6. Release: tag `vN.N.N`, ассеты **три**: `IgrovojCentr-Setup.exe` + `latest.yml` + `IgrovojCentr.apk`.
+7. Publish → hub-кнопки подхватят через `latest/download` автоматически.
+8. Проверка автообновления с предыдущей установленной версии (Win10) + установка на Win 8.1.
+9. Сломанную сборку (если main.js падал) автообновление не лечит — таким машинам ручная установка.
 
 ### 9.4 Деплой контента
 1. Коммит контента. **Если коммит трогает `js/platform.js`, `sw.js`, `js/snd.js`, `icon-*.png` —
@@ -888,6 +981,21 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
    установщик показывает НОВУЮ версию → установка поверх без потери паков и имени.
 6. Свежая установка: bootstrap-загрузка паков; **авиарежим → старт из памяти (v1.3)**;
    диплинк комнаты, шеринг, иконка (кэш лаунчера!), ⚙️ и все секции настроек (7.9, без хардкодов чисел).
+
+### 9.7 Добавление скачивания ассетов через `Platform.downloadAsset`
+1. В `platform.js` (≥v3.4) вызов `Platform.downloadAsset(url, fileName, {shareText, shareTitle})`.
+2. В оболочках: `AppBridge.downloadFile(url, fileName)` должен быть в preload + main (IPC).
+   - **ПК:** IPC `bridge:download-file` через `node:https` с редиректами → `app.getPath('downloads')/fileName` → `shell.showItemInFolder(dest)` + тост (main.js ≥v0.3.6).
+   - **Android:** `@JavascriptInterface downloadFile` → `DownloadManager.enqueue` в `DIRECTORY_DOWNLOADS` + `VISIBILITY_VISIBLE_NOTIFY_COMPLETED` + фолбэк в `ACTION_VIEW` браузера (AppBridge.java ≥v0.9.0).
+3. **В мессенджерах (TG/VK/MAX) — НЕ пытаться fetch из WebApp** (CORS-блок = ложные «загрузка не удалась»);
+   сразу переход во внешний браузер:
+   - TG: `Telegram.WebApp.openLink(url)`;
+   - VK: `vkBridge.send('VKWebAppOpenExternalLink', {link: url})` с фолбэком `window.open`;
+   - MAX: `window.WebApp.openLink(url)`;
+   - MAX во внешнем браузере: `location.href = url` (загрузка стартует сразу).
+4. Обычный web-браузер (desktop): `fetch` → `blob` → `<a href=URL.createObjectURL(blob) download>` — обход Chrome-игнора атрибута download на кросс-оригин редиректе GitHub (hub v3.40).
+5. Мобильный web (pointer:coarse): попытка `navigator.share({files:[new File([blob],fileName)]})` — системный chooser «Сохранить/Отправить»; фолбэк `window.open`.
+6. Тосты честные: «Начинаю загрузку…» в момент старта, «Загрузка запущена…» только после успешной попытки; при fallback в браузер — «Открываем браузер для загрузки…».
 
 ---
 
@@ -919,6 +1027,9 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | Троттлинг автопроверки APK | 6 часов (ручной вызов игнорирует) |
 | Desktop: runtime | Electron 22.3.27 (Win 7 SP1–11), electron-builder 24, NSIS per-user |
 | Desktop: контракт updater | 6.2 — НЕ НАРУШАТЬ (имя класса/экспорт/сигнатуры) |
+| Desktop: контракт shell-updater | 6.2 — НЕ НАРУШАТЬ (init({mode,toast,onState}) / check / menuAction / getStatus) |
+| Desktop: контракт config | 6.2 — `makeConfig(app)` + `DEFAULT_ROOT`; `packsRoot` = текущая папка контента |
+| Desktop: package.json | 6.2 — runtime-зависимости (`electron-updater`) только в `dependencies`, НЕ в `devDependencies` |
 | Android: runtime | system WebView; minSdk 26 (Android 8.0), compile/targetSdk 34, AGP 8.9.1+, Gradle 9.6 |
 | Android: подписи | `gc-android\keystore\release.keystore` (alias igrovoj) + резервная копия |
 | Android: JDK сборки | JBR студии (`JAVA_HOME=<studio>\jbr`); keytool там же |
@@ -948,6 +1059,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | 2.6 | 2026-11-03 | Hub v3.35–3.36 (чипы версий + NEW 7 суток, двойной fetch манифеста); versions.json в паках обеих оболочек; android офлайн-старт v1.3; грабля API-контракта updater.js (v1.4.1→v1.4.2); грабли релизов/иконок (latest.yml, signAndEditExecutable, winCodeSign, npx); процедура замены логотипа; hub v3.36, desktop v0.3.3, android v0.7.1; релизы v0.7.1/v0.7.2 |
 | 2.7 | 2026-11-03 | **🔒 Правило HUB_VER** (6.3): правка hub-файлов без bump версии не доезжает до оболочек — кейс platform.js v3.0/v3.1 + sw.js v9 при HUB_VER 3.37; **вирусный шеринг** platform.js v3.0–3.1 (shareGame/gameDeepLink/бренд-строка без чисел; desktop-web → буфер вместо OS share-sheet); **sw.js v9** (purge старых кэшей, no-store мимо кэша); **Пятнашки v1.0–1.3** (walk-генерация решаемых раскладов, 3D-костяшки, темы, настройки, статистика, шапка в два ряда, паттерн «ссылка до победы / результат после», схема-цель в правилах); Android v0.8.0: динамическое «О приложении» (installedGamesCount, ContentUpdater v1.4, SettingsActivity v1.1); hub v3.38; версии: platform.js v3.1, sw v9, Пятнашки v1.3 |
 | 2.8 | 2026-11-04 | **Крестики-нолики v1.0–1.5** полным циклом: 7-я онлайн-игра (players w/b = ❌/⭕, watchdog авто-передачи), ИИ-минимакс 3 уровней + hot-seat, 5 тем, картинки-символы 512×512 с SVG-фолбэком и ASCII-правилом имён, полоса-перечёркивание линии, финал без отмотки с сохранением подсветки; **её грабли** (SVG без кавычек, ключи результата {winner,line} vs {w,l}, реноймы turn/sM, ч/б символы, невидимые option, кнопка поверх заголовка, кириллица/двойные расширения в именах файлов, тест копией вне папки); **Сапёр v1.7** и **Нарды v2.8** мигрированы на вирусный шеринг + pulse + авто-шторку (паттерн закрепён в разделе 4); **🔒 правило GAMES** (6.3): кейс tictactoe — игра в хабе и на Pages, но не в манифесте → ПК «Файл не найден», без чипа/NEW; gen-versions v1.4; hub v3.39 (кнопка+алиасы tictactoe/xo/крестики, prefetch); 18 игр |
+| 2.9 | 2026-11-04 | **Раздел 4.1 «Каскадное скачивание ассетов»**: `Platform.downloadAsset` (platform.js v3.4) с каскадом по средам — Android `DownloadManager` / ПК IPC `bridge:download-file` (node:https с редиректами) / web fetch+blob+`<a download>` / мессенджеры сразу во внешний системный браузер (без fetch — CORS-блок = ложные «загрузка не удалась»); **🔒 запрет реконструкции** `main.js`/`preload.js`/`config.js`/`shell-updater.js` вслепую (6.9) — только инкрементальные добавки к рабочим оригиналам; **🔒 контракт полей** `shell:get-info` (6.9): имена полей должны совпадать 1:1 с тем, что читает `settings.html`; **🔒 правило package.json** (6.2): runtime-зависимости только в `dependencies` + контроль `asar list` после сборки (кейс 2026-11-04 v0.3.6→v0.3.7 — `electron-updater` был только в devDeps → краш main-процесса); **таблица 8.6** «Скачивание ассетов» с кейсами Chrome-игнора download-атрибута, VK-зависания и обхода через `VKWebAppOpenExternalLink`; **чек-лист 9.7** «Добавление скачивания ассетов через Platform.downloadAsset»; **обновления чек-листов 9.3** (desktop-релиз: проверка dependencies в package.json + `asar list`) и 9.4 (деплой); hub v3.43, platform.js v3.4, desktop v0.3.7, android v0.9.0; 18 игр |
 
 ---
 
