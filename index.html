@@ -102,11 +102,12 @@
         <button class="game-btn" data-game="mahjong" id="mahjongBtn"><span class="game-emoji">🀄</span><span class="game-text"><b>Маджонг</b><small>Пасьянс: 72/120/180 плиток, наборы, подсказки, отмена</small></span></button>
         <button class="game-btn" data-game="tetris" id="tetrisBtn"><span class="game-emoji">🧱</span><span class="game-text"><b>Тетрис</b><small>Классика: 6 уровней, ghost, hold, wall kicks, рекорды</small></span></button>
         <button class="game-btn" data-game="pyatnashki" id="pyatnashkiBtn"><span class="game-emoji">🧩</span><span class="game-text"><b>Пятнашки</b><small>Классическая головоломка: собери 1…15 скользящими плитками</small></span></button>
+        <button class="game-btn" data-game="tictactoe" id="tictactoeBtn"><span class="game-emoji">❌</span><span class="game-text"><b>Крестики-нолики <span class="tag-online">ONLINE</span></b><small>3D-символы, ИИ 3 уровней, hot-seat, онлайн по коду</small></span></button>
         <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.38 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.39 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
@@ -145,7 +146,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.38';
+    const HUB_VER = '3.39';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
@@ -307,7 +308,7 @@
       try {
         if (navigator.connection && navigator.connection.saveData) return;
         setTimeout(function(){
-          ['chess','seabattle','durak','tetris'].forEach(function(g){
+          ['chess','seabattle','durak','tetris','tictactoe'].forEach(function(g){
             var l = document.createElement('link');
             l.rel = 'prefetch';
             l.href = './' + g + '/';
@@ -327,7 +328,8 @@
       'crystals': './crystals/', 'solitaire': './solitaire/',
       'seabattle': './seabattle/', 'mahjong': './mahjong/',
       'tetris': './tetris/', 'tetris_classic': './tetris/',
-      'pyatnashki': './pyatnashki/', '15': './pyatnashki/', 'fifteen': './pyatnashki/'
+      'pyatnashki': './pyatnashki/', '15': './pyatnashki/', 'fifteen': './pyatnashki/',
+      'tictactoe': './tictactoe/', 'xo': './tictactoe/', 'крестики': './tictactoe/', 'крестикинолики': './tictactoe/'
     };
 
     document.getElementById('trendCatchBtn').addEventListener('click', () => openGame('./trend-catch/', 'trend_catch'));
@@ -347,6 +349,7 @@
     document.getElementById('mahjongBtn').addEventListener('click', () => openGame('./mahjong/', 'mahjong'));
     document.getElementById('tetrisBtn').addEventListener('click', () => openGame('./tetris/', 'tetris'));
     document.getElementById('pyatnashkiBtn').addEventListener('click', () => openGame('./pyatnashki/', 'pyatnashki'));
+    document.getElementById('tictactoeBtn').addEventListener('click', () => openGame('./tictactoe/', 'tictactoe'));
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
