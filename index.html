@@ -80,9 +80,9 @@
       <h1><img class="hub-logo" src="./icon-512.png" alt="">Игровой центр</h1>
       <p class="hub-subtitle">Мини-игры в Telegram, VK и MAX</p>
 
-      <button class="download-btn" id="downloadBtn">📥 Скачать приложение</button>
+      <button class="download-btn" id="downloadBtn">📥 Приложение для ПК и Android</button>
 
-      <p class="hub-desc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. В браузере и мессенджерах игры запускаются без установки: нажми и играй. Для ПК есть приложение Windows: оно устанавливается один раз, хранит игры на устройстве (работают офлайн) и само обновляет контент. Для Android — лёгкое приложение с офлайн-играми. Список игр умный: любимые игры поднимаются наверх сами, новинки неделю помечены значком NEW. Новые игры добавляются регулярно.</p>
+      <p class="hub-desc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. В браузере и мессенджерах игры запускаются без установки: нажми и играй. Для ПК есть приложение Windows: оно устанавливается один раз, хранит игры на устройстве (работают офлайн) и само обновляет контент. Для Android — лёгкое приложение с офлайн-играми. Ссылки на установщики — в кнопке выше: скопируй или отправь другу, открой в браузере и скачай. Список игр умный: любимые игры поднимаются наверх сами, новинки неделю помечены значком NEW. Новые игры добавляются регулярно.</p>
 
       <div id="gamesList">
         <button class="game-btn" data-game="trend_catch" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
@@ -107,19 +107,16 @@
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.43 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.44 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
+  <!-- v3.44: модалка только со ссылками: отправить / скопировать; скачивания нет -->
   <div class="dl-overlay" id="dlOverlay" data-screen="1">
     <div class="dl-card">
       <button class="dl-close" id="dlClose" aria-label="Закрыть">×</button>
       <div id="dlScreen1">
-        <h2>📥 Скачать приложение</h2>
-        <button class="dl-opt" id="dlActDownload">
-          <span class="emoji">⬇️</span>
-          <span class="txt"><b>Скачать приложение</b><small>Загрузить установщик на это устройство</small></span>
-        </button>
+        <h2>📤 Ссылки на приложение</h2>
         <button class="dl-opt" id="dlActShare">
           <span class="emoji">📤</span>
           <span class="txt"><b>Отправить ссылку</b><small>Почта, мессенджеры, SMS — системный выбор</small></span>
@@ -134,19 +131,19 @@
         <h2 id="dlScreen2Title">Выберите платформу</h2>
         <button class="dl-opt" id="dlPlatWin">
           <span class="emoji">🪟</span>
-          <span class="txt"><b>Windows 7 и новее</b><small>Для ПК и ноутбуков. (~140Мб)</small></span>
+          <span class="txt"><b>Windows 7 и новее</b><small>Ссылка на установщик для ПК и ноутбуков</small></span>
         </button>
         <button class="dl-opt" id="dlPlatAndroid">
           <span class="emoji">🤖</span>
-          <span class="txt"><b>Android 8 и новее</b><small>Лёгкое приложение (~3 МБ) с офлайн-играми</small></span>
+          <span class="txt"><b>Android 8 и новее</b><small>Ссылка на APK лёгкого приложения</small></span>
         </button>
-        <div class="dl-note">Список платформ будет дополняться по мере выхода приложений.</div>
+        <div class="dl-note">Получатель открывает ссылку в браузере и скачивает установщик. Список платформ будет дополняться по мере выхода приложений.</div>
       </div>
     </div>
   </div>
 
   <script>
-    const HUB_VER = '3.43';
+    const HUB_VER = '3.44';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
@@ -353,6 +350,7 @@
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
+    /* ---------- v3.44: модалка ссылок на приложение (без скачивания) ---------- */
     (function(){
       const ov = document.getElementById('dlOverlay');
       const s1 = document.getElementById('dlScreen1');
@@ -360,7 +358,6 @@
       const s2Title = document.getElementById('dlScreen2Title');
       let dlAction = null;
       const ACTION_TITLES = {
-        download: '⬇️ Скачать приложение',
         share: '📤 Отправить ссылку',
         link: '💾 Скачать ссылку'
       };
@@ -376,28 +373,6 @@
         showScreen(2);
       }
 
-      // v3.41: единая точка входа — Platform.downloadAsset (platform.js v3.2)
-      function startExeDownload(){
-        trackEvent('hub_download_win', { action: dlAction || 'download' });
-        try { Platform.haptic('light'); } catch(e){}
-        Platform.downloadAsset(WIN_EXE_URL, 'IgrovojCentr-Setup.exe', {
-          shareText: '📥 Игровой центр — мини-игры офлайн и онлайн для Windows (7 и новее).',
-          shareTitle: 'Игровой центр — Windows'
-        });
-      }
-
-      function shareExeLink(){
-        trackEvent('hub_download_share', { action: 'share' });
-        try { Platform.haptic('light'); } catch(e){}
-        const shareText = '📥 Игровой центр — мини-игры офлайн и онлайн для Windows (7 и новее). Скачай установщик:\n';
-        try {
-          Platform.share(WIN_EXE_URL, shareText, {
-            title: 'Игровой центр — скачать приложение',
-            copiedToast: 'Ссылка на скачивание скопирована'
-          });
-        } catch(e){}
-      }
-
       function fallbackCopy(text){
         try {
           const ta = document.createElement('textarea');
@@ -409,7 +384,7 @@
           ta.select();
           const ok = document.execCommand('copy');
           ta.remove();
-          try { Platform.toast(ok ? 'Ссылка скопирована в буфер — вставь её куда нужно' : 'Не удалось скопировать. Ссылка: ' + text); } catch(e){}
+          try { Platform.toast(ok ? 'Ссылка скопирована — вставь её в браузер и скачай приложение' : 'Не удалось скопировать. Ссылка: ' + text); } catch(e){}
         } catch(e){
           try { Platform.toast('Ссылка: ' + text); } catch(e2){}
         }
@@ -420,7 +395,7 @@
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(link).then(function(){
-              try { Platform.toast('Ссылка скопирована в буфер — вставь её куда нужно'); } catch(e){}
+              try { Platform.toast('Ссылка скопирована — вставь её в браузер и скачай приложение'); } catch(e){}
             }).catch(function(){ fallbackCopy(link); });
           } else {
             fallbackCopy(link);
@@ -430,24 +405,17 @@
         }
       }
 
-      function startApkDownload(){
-        trackEvent('hub_download_apk', { action: dlAction || 'download' });
+      /* v3.44: отправка оформлена как шеринг ссылок в играх: Platform.share + инструкция перед ссылкой + бренд */
+      function shareAppLink(url, platformLabel){
+        trackEvent('hub_download_share', { action: 'share', target: platformLabel });
         try { Platform.haptic('light'); } catch(e){}
-        Platform.downloadAsset(APK_URL, 'IgrovojCentr.apk', {
-          shareText: '📥 Игровой центр для Android (8+): офлайн-игры и онлайн-партии.',
-          shareTitle: 'Игровой центр — Android APK'
-        });
-      }
-      function shareApkLink(){
-        trackEvent('hub_download_share', { action: 'share', target: 'android' });
-        try { Platform.haptic('light'); } catch(e){}
-        const shareText = '📥 Игровой центр для Android (8+): офлайн-игры и онлайн-партии. Скачай APK:\n';
+        const text = 'Скопируй ссылку в браузер и скачай приложение для ' + platformLabel + ':\n🎮 Игровой центр — классика и новинки, онлайн и офлайн';
         try {
-          Platform.share(APK_URL, shareText, {
-            title: 'Игровой центр — Android APK',
-            copiedToast: 'Ссылка на APK скопирована'
+          Platform.share(url, text, {
+            title: 'Игровой центр — скачать приложение',
+            copiedToast: 'Ссылка скопирована — отправь другу!'
           });
-        } catch(e){}
+        } catch(e){ fallbackCopy(text + '\n' + url); }
       }
 
       document.getElementById('downloadBtn').addEventListener('click', function(){
@@ -460,23 +428,20 @@
       ov.addEventListener('click', function(ev){ if (ev.target === ov) ov.classList.remove('show'); });
       document.getElementById('dlBack').addEventListener('click', function(){ showScreen(1); });
 
-      document.getElementById('dlActDownload').addEventListener('click', function(){ openPlatformChoice('download'); });
       document.getElementById('dlActShare').addEventListener('click', function(){ openPlatformChoice('share'); });
       document.getElementById('dlActLink').addEventListener('click', function(){ openPlatformChoice('link'); });
 
       document.getElementById('dlPlatWin').addEventListener('click', function(){
         trackEvent('hub_download_platform', { platform_target: 'windows', action: dlAction || '' });
-        if (dlAction === 'share') { shareExeLink(); ov.classList.remove('show'); return; }
-        if (dlAction === 'link') { copyLink(WIN_EXE_URL); ov.classList.remove('show'); return; }
-        startExeDownload();
+        if (dlAction === 'share') { shareAppLink(WIN_EXE_URL, 'Windows (7 и новее)'); ov.classList.remove('show'); return; }
+        copyLink(WIN_EXE_URL);
         ov.classList.remove('show');
       });
 
       document.getElementById('dlPlatAndroid').addEventListener('click', function(){
         trackEvent('hub_download_platform', { platform_target: 'android', action: dlAction || '' });
-        if (dlAction === 'share') { shareApkLink(); ov.classList.remove('show'); return; }
-        if (dlAction === 'link') { copyLink(APK_URL); ov.classList.remove('show'); return; }
-        startApkDownload();
+        if (dlAction === 'share') { shareAppLink(APK_URL, 'Android (8 и новее)'); ov.classList.remove('show'); return; }
+        copyLink(APK_URL);
         ov.classList.remove('show');
       });
     })();
