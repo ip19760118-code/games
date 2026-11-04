@@ -109,10 +109,10 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
 <div class=bbox id=bbox><div class=board id=board></div><div class=strike id=strike></div></div>
 <div class=status id=stel>Выбери режим</div>
 <div class=acts><button class="btn pri" id=newBtn style=display:none>🔄 Новая партия</button><button class=btn id=menuBtn style=display:none>🏠 Меню</button><button class=btn id=shareBtn>📤 Отправить ссылку на игру</button></div>
-<div class=ver id=vertag>v1.6.1</div>
+<div class=ver id=vertag>v1.6.2</div>
 </div>
 <div class=fvbar id=fvbar><span class=tit>👁 Финал партии</span><button class=btn id=fvc>Закрыть</button></div>
-<div class=ov id=modeov><div class=card><div class=mhdr><button class=hbtn id=mhub>← В меню</button></div><h2>❌⭕ Крестики-нолики <span style=font-size:12px;opacity:.6;font-family:monospace id=vt2>v1.6.1</span></h2><div class=sub>Классика 3×3: три в ряд по горизонтали, вертикали или диагонали</div>
+<div class=ov id=modeov><div class=card><div class=mhdr><button class=hbtn id=mhub>← В меню</button></div><h2>❌⭕ Крестики-нолики <span style=font-size:12px;opacity:.6;font-family:monospace id=vt2>v1.6.2</span></h2><div class=sub>Классика 3×3: три в ряд по горизонтали, вертикали или диагонали</div>
 <div class=seg id=sideseg><b data-s=x class=on>❌ Крестики</b><b data-s=o>⭕ Нолики</b></div>
 <div class=mch>
 <button class=mbtn id=mAi><div class=ic>🤖</div><div><b>Против компьютера</b><small>Сложность в ⚙️ Настройках</small></div></button>
@@ -149,7 +149,7 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
 <div class=btns><button class="btn pri" id=rcl>Понятно</button></div>
 </div></div>
 <script>
-const VER='1.6.1',HI=5000,HT=15000,TT=30000;
+const VER='1.6.2',HI=5000,HT=15000,TT=30000;
 let hbT=null,myRound=0,fvMode=false,lastEnd=null;
 function backH(){try{
 if(fvMode){closeFv();return;}
@@ -186,7 +186,6 @@ const sM=()=>tn(700,420,.06,'triangle',.15);
 const sW=()=>[523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>tn(f,f,.16,'triangle',.16),i*100));
 const sL=()=>[400,350,300,250].forEach((f,i)=>setTimeout(()=>tn(f,f,.18,'sawtooth',.1),i*120));
 const sD=()=>[500,500,400].forEach((f,i)=>setTimeout(()=>tn(f,f,.14,'triangle',.12),i*140));
-const sC=()=>tn(800,600,.05,'sine',.1);
 const sDen=()=>tn(150,90,.14,'sawtooth',.12);
 const $=id=>document.getElementById(id);
 let set=Object.assign({aiLvl:'medium',first:'x',vol:.7,skin:'classic'},JSON.parse(localStorage.tt_set||'{}'));
@@ -203,8 +202,6 @@ const r=chkL(b);if(r){if(r.w===ai)return 10-d;if(r.w==='draw')return 0;return d-
 const op=turn==='x'?'o':'x';let best=turn===ai?-Infinity:Infinity;
 for(let i=0;i<9;i++){if(b[i])continue;b[i]=turn;const s=mm(b,op,ai,d+1);b[i]=null;if(turn===ai){if(s>best)best=s;}else{if(s<best)best=s;}}
 return best;}
-/* v1.6: hard-AI — разнообразие первого хода: случайный выбор среди 5 оптимальных клеток (углы + центр);
-   tiebreak среди равных по минимаксу ходов */
 function aiMv(b,ai,lvl){
 const emp=[];for(let i=0;i<9;i++)if(!b[i])emp.push(i);
 if(!emp.length)return -1;
@@ -234,8 +231,6 @@ function S(){if(!onM)return G;if(!rDat||!rDat.state)return null;return rDat.stat
 function meS(){return onM?myS:(hsM?S()?.turn:ps);}
 function nOf(s){if(onM){const p=(rDat&&rDat.players)||{};const pp=p[s];return pp?pp.name:(s==='w'?'Крестики':'Нолики');}if(hsM)return s==='x'?'Игрок ❌':'Игрок ⭕';return s===ps?'Вы':'Компьютер';}
 function isPF(p){return !!(p&&p.at&&(Date.now()-p.at)<HT);}
-/* v1.6: plL возвращает ВСЕХ players, presence только для online-dot;
-   раньше фильтр isPF прятал только-что-подключившегося гостя → pc=1, «Начать» disabled */
 function plL(){if(!onM||!rDat)return[];const sc=((rDat.state&&rDat.state.scores)||{});const pr=rDat.presence||{};return['w','b'].filter(s=>(rDat.players||{})[s]).map(s=>({s,m:s==='w'?'x':'o',n:nOf(s),c:isPF(pr[s]),w:sc[s]||0}));}
 function aSides(){if(!rDat)return[];const p=rDat.presence||{};return['w','b'].filter(s=>(rDat.players||{})[s]&&isPF(p[s]));}
 function isGA(){if(onM)return rDat&&rDat.status==='playing';return G&&!G.result;}
@@ -272,7 +267,6 @@ function stopHB(){if(hbT){clearInterval(hbT);hbT=null;}}
 function rmPr(){if(!rRef||!myS)return;try{rRef.child('presence/'+myS).remove();}catch(e){}}
 function colC(){$('rbex').style.display='none';$('rbar').classList.remove('open');$('lbox').style.display='none';}
 function expC(){$('rbex').style.display='flex';$('rbar').classList.add('open');}
-/* v1.6.1: helper — показать главное меню (защита от «пустого поля» при ошибках deeplink/создания) */
 function showMenu(){$('modeov').classList.add('show');$('jbox').style.display='none';$('jacts').style.display='none';renAll();updPulse();}
 async function cRoom(){
   try{await ensAu();}catch(e){alert('Ошибка авторизации: '+(e&&e.message||e));showMenu();return;}
@@ -316,7 +310,6 @@ function isH(){return rDat&&rDat.host===myS;}
 function shInv(){unlAu();const u=invL(rCode);const t='❌⭕ Крестики-нолики онлайн! Комната '+rCode+'. Заходи:\n'+u;Platform.share(u,t,{brand:true,title:'Крестики-нолики — партия '+rCode,copiedToast:'Ссылка-приглашение скопирована'});}
 function shGL(){unlAu();Platform.shareGame('tictactoe','❌⭕ Крестики-нолики — классика 3×3: против компьютера (3 уровня), вдвоём или онлайн с другом.',{title:'Крестики-нолики — играй сейчас',copiedToast:'Ссылка скопирована — отправь другу!'});trk('game_share',{game_name:'tictactoe',share_type:'link'});}
 function shRes(){unlAu();let t;if(lastEnd){const{mode,out,myM,info}=lastEnd;const mt=mode==='ai'?'против компьютера ('+set.aiLvl+')':mode==='hotseat'?'вдвоём на устройстве':'онлайн';if(out==='win')t='❌⭕ Крестики-нолики: победа '+mt+'! Я играл за '+(myM==='x'?'❌':'')+'.'+info;else if(out==='draw')t='❌⭕ Крестики-нолики: ничья '+mt+'. Реванш?';else t='❌⭕ Крестики-нолики: поражение '+mt+'.';}else t='❌⭕ Крестики-нолики — классика 3×3.';Platform.shareGame('tictactoe',t,{title:'Крестики-нолики — результат',copiedToast:'Результат скопирован — отправь другу!'});trk('game_share',{game_name:'tictactoe',share_type:'result'});}
-/* v1.6: updRA явно открывает/закрывает шторку по статусу + pulse-кнопки для ожидания/реванша */
 function updRA(){const b=$('racts');b.innerHTML='';if(!onM){colC();return;}
 const st=rDat&&rDat.status;
 if(st==='waiting'){expC();showLB();}
@@ -329,7 +322,6 @@ function updPulse(){const clr=()=>{['mAi','mHost','mHot','mJoin'].forEach(id=>{c
 let wd=null;
 function stWD(){if(wd)clearInterval(wd);wd=setInterval(()=>{if(!onM||!rDat||rDat.status!=='playing'||!isH())return;const s=S();if(!s||s.result)return;const sd=s.turn==='x'?'w':'b';if(rDat.presence&&rDat.presence[sd]&&isPF(rDat.presence[sd]))return;if(Date.now()-(s.turnAt||0)<TT)return;const ns=cl(s);ns.turn=ns.turn==='x'?'o':'x';ns.turnAt=Date.now();ns.lastMove={name:nOf(sd),action:'авто-передача (нет связи)',at:Date.now()};rRef.update({state:ns});},5000);}
 function cl(o){return JSON.parse(JSON.stringify(o));}
-/* v1.6: closeFv в начале каждой новой партии, чтобы убрать «👁 Финал партии» */
 function stAI(side){closeFv();onM=false;hsM=false;G=newSt(set.first);ps=side;pTurn=null;lastEnd=null;$('modeov').classList.remove('show');$('endov').classList.remove('show');$('strike').style.display='none';bBrd();renAll();sSt(stTx());trk('game_start',{game_name:'tictactoe',mode:'ai',side});updPulse();mAI();}
 function stHot(){closeFv();onM=false;hsM=true;G=newSt(set.first);ps='x';pTurn=null;lastEnd=null;$('modeov').classList.remove('show');$('endov').classList.remove('show');$('strike').style.display='none';bBrd();renAll();sSt(stTx());trk('game_start',{game_name:'tictactoe',mode:'hotseat'});updPulse();}
 function mAI(){if(onM||hsM||!G||G.result)return;if(G.turn===ps)return;if(aiT)clearTimeout(aiT);aiT=setTimeout(()=>{if(!G||G.result)return;const ai=G.turn;const i=aiMv(G.board.slice(),ai,set.aiLvl);if(i<0){mAI();return;}G.board[i]=ai;G.hist.push({by:ai,i:i,at:Date.now()});G.lastMove={by:ai,i:i,at:Date.now()};G.turnAt=Date.now();const r=chkL(G.board);if(r){G.result={w:r.w,l:r.l,at:Date.now()};r.w===ps?sW():sL();Platform.haptic(r.w===ps?'success':'error');renAll();showEnd();return;}G.turn=G.turn==='x'?'o':'x';sM();renAll();updPulse();},550);}
@@ -365,13 +357,10 @@ $('mHost').onclick=async()=>{unlAu();await cRoom();};
 $('mJoin').onclick=()=>{$('jbox').style.display='flex';$('jacts').style.display='flex';$('jinp').value='';};
 $('jcan').onclick=()=>{$('jbox').style.display='none';$('jacts').style.display='none';};
 $('jgo').onclick=async()=>{const c=$('jinp').value.trim().toUpperCase();if(c.length!==6){alert('Код должен быть 6 символов');return;}await jRoom(c);};
-$('rbtog').onclick=()=>{const ex=$('rbex');const op=ex.style.display!=='none';ex.style.display=op?'none':'flex';$('rbar').classList.toggle('open',!op);$('lbox').style.display=op?'none':'block';sC();};
+$('rbtog').onclick=()=>{const ex=$('rbex');const op=ex.style.display!=='none';ex.style.display=op?'none':'flex';$('rbar').classList.toggle('open',!op);$('lbox').style.display=op?'none':'block';};
 $('fvc').onclick=closeFv;
 window.addEventListener('resize',()=>{const s=S();if(s&&s.result&&s.result.l)drawStrike(s.result.l);});
 window.addEventListener('beforeunload',()=>{stopHB();rmPr();});
-/* v1.6.1: защита инициализации — при любой ошибке в jRoom/cRoom показывается modeov (главное меню),
-   поэтому поле никогда не остаётся «пустым без выбора режима». Если deeplink невалидный,
-   пользователь видит меню и может выбрать режим руками. */
 (function init(){
   $('vertag').textContent='v'+VER;
   $('vt2').textContent='v'+VER;
@@ -391,5 +380,9 @@ window.addEventListener('beforeunload',()=>{stopHB();rmPr();});
     showMenu();
   }
 })();
+/* v1.6.2: единственная функция sC — suspend AudioContext при переключении экрана.
+   Раньше здесь же была мёртвая const sC=()=>tn(...) (звук клика, нигде не вызывалась),
+   что давало SyntaxError 'Identifier sC has already been declared' в strict-mode контексте
+   (WebView/Chrome последних версий) и весь скрипт не выполнялся — отсюда «пустое поле без меню». */
 function sC(){try{if(AC&&AC.state==='running')AC.suspend();}catch(e){}}
 </script></body></html>
