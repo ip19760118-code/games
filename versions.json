@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-04T06:30:42.983Z",
+ "generatedAt": "2026-11-04T06:55:23.358Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.39",
@@ -393,6 +393,28 @@
      "path": "pyatnashki/index.html",
      "sha256": "3edddfe735c490d5de3b9f2178c183f3538b0a2814bfc5f94cad059f661e5df3",
      "size": 24357
+    }
+   ]
+  },
+  "tictactoe": {
+   "version": "1.5",
+   "online": true,
+   "addedAt": "2026-11-04",
+   "files": [
+    {
+     "path": "tictactoe/img/o.png",
+     "sha256": "7c3d8ac1e2cf7e0654866cec59ff9323c23df2a5af43410a48f5bfaec377b339",
+     "size": 179207
+    },
+    {
+     "path": "tictactoe/img/x.png",
+     "sha256": "8ae4f9be4040248f78814a643d6670eec40e04c78cf35d13b382fdbbf414769f",
+     "size": 205477
+    },
+    {
+     "path": "tictactoe/index.html",
+     "sha256": "6d6fa22d1b8f7853d21b1c403ee4b707400364a486c261d34a869bcfcc2495ad",
+     "size": 52431
     }
    ]
   }
