@@ -1,8 +1,8 @@
-/* tg-games: единый слой платформ v3.2 — TG / VK / MAX / web / PC / Android.
-   v3.2: Platform.downloadAsset(url, fileName, opts) — каскадное скачивание:
-         1) Android-оболочка → AppBridge.downloadFile (нативный DownloadManager);
-         2) иначе → fetch+blob → navigator.share({files}) если доступен → <a download> → window.open fallback.
-         Работает одинаково в web / TG/VK/MAX WebApp (мобильных и десктопных) / Electron / Android.
+/* tg-games: единый слой платформ v3.3 — TG / VK / MAX / web / PC / Android.
+   v3.3: downloadAsset: ПК-оболочка → AppBridge.downloadFile (нативно, без браузера);
+         TG/VK/MAX WebApp → БЕЗ попытки fetch (она падала по CORS и давала ложный тост
+         «загрузка не удалась»): mobile пробуем navigator.share({files}), desktop — сразу
+         честный переход в браузер; web-браузер → fetch+blob+<a download>; Android → DownloadManager.
    v3.1: desktop-web шеринг в буфер; v3.0: shareGame/gameDeepLink/бренд-строка. */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
@@ -246,7 +246,9 @@ var Platform=(function(){
      if(window.WebApp.shareContent){window.WebApp.shareContent({text:text,link:url});return true}
     }catch(e){}}
    return false}
-  if(navigator.share){
+  var coarse=false;
+  try{ coarse=!!(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches); }catch(e){}
+  if(navigator.share&&(name!=='web'||coarse)){
    try{navigator.share({title:opts.title||document.title,text:text,url:url})
     .then(function(){if(opts.onShared)opts.onShared('native')})
     .catch(function(err){if(err&&err.name==='AbortError')return;if(!messengerShare())onCopied()});
@@ -259,13 +261,12 @@ var Platform=(function(){
   return share(gameDeepLink(key),text,opts);
  }
 
- /* v3.2: универсальное скачивание файла с каскадом по средам.
-    opts: { shareText, shareTitle } — для navigator.share({files}) на мобильных */
- function downloadAsset(url, fileName, opts){
+ /* v3.3: каскадное скачивание ассетов по средам */
+ function downloadAsset(url,fileName,opts){
   opts=opts||{};
   var shareText=opts.shareText||('📥 '+fileName);
   var shareTitle=opts.shareTitle||fileName;
-
+  var isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent||'');
   function saveViaAnchor(blob){
    try{
     var a=document.createElement('a');
@@ -279,49 +280,61 @@ var Platform=(function(){
      try{URL.revokeObjectURL(a.href);}catch(e){}
     },5000);
     platToast('Загрузка запущена — проверь папку «Загрузки»');
-   }catch(e){ fallback(); }
+   }catch(e){openBrowser();}
   }
-  function fallback(){
+  function openBrowser(){
+   platToast('Открываем в браузере для скачивания…');
    try{ window.open(url,'_blank','noopener'); }catch(e){ location.href=url; }
   }
-
-  // 1) Android-оболочка: нативный DownloadManager (без браузера)
-  if(name==='android'&&window.AppBridge&&typeof AppBridge.downloadFile==='function'){
+  function tryShareFile(blob){
    try{
-    platToast('Начинаю загрузку '+fileName+'…');
-    AppBridge.downloadFile(url, fileName);
-    return;
-   }catch(e){}
-  }
-
-  // 2) Все остальные среды: fetch+blob, затем попытка шеринга файла или сохранение
-  platToast('Начинаю загрузку '+fileName+'…');
-  fetch(url,{cache:'no-store'})
-   .then(function(r){
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    return r.blob();
-   })
-   .then(function(blob){
-    var file=null;
-    try{ file=new File([blob],fileName,{type:blob.type||'application/octet-stream'}); }catch(e){}
-    // 2a) мобильный шеринг файла (TG/VK/MAX mobile WebApp предложат «Сохранить в файлы»/и т.п.)
-    if(file&&navigator.canShare&&typeof navigator.canShare==='function'){
-     try{
-      if(navigator.canShare({files:[file]})){
-       navigator.share({files:[file],title:shareTitle,text:shareText})
-        .catch(function(){ saveViaAnchor(blob); });
-       return;
-      }
-     }catch(e){}
+    var file=new File([blob],fileName,{type:blob.type||'application/octet-stream'});
+    if(navigator.canShare&&typeof navigator.canShare==='function'&&navigator.canShare({files:[file]})){
+     navigator.share({files:[file],title:shareTitle,text:shareText}).catch(function(){});
+     return true;
     }
-    // 2b) десктоп / Electron / fallback: сохранение через <a download>
-    saveViaAnchor(blob);
-   })
-   .catch(function(err){
-    console.warn('[HUB] downloadAsset failed:',err);
-    platToast('Не удалось скачать через браузер, пробуем напрямую…');
-    fallback();
-   });
+   }catch(e){}
+   return false;
+  }
+  function fetchBlob(onOk){
+   platToast('Начинаю загрузку '+fileName+'…');
+   fetch(url,{cache:'no-store'})
+    .then(function(r){ if(!r.ok)throw new Error('HTTP '+r.status); return r.blob(); })
+    .then(onOk)
+    .catch(function(err){
+     console.warn('[Platform] fetch failed:',err);
+     openBrowser();
+    });
+  }
+  /* 1) Android: нативный DownloadManager */
+  if(name==='android'&&window.AppBridge&&typeof AppBridge.downloadFile==='function'){
+   platToast('Начинаю загрузку '+fileName+'…');
+   try{ AppBridge.downloadFile(url,fileName); }catch(e){ openBrowser(); }
+   return;
+  }
+  /* 2) ПК-оболочка 0.3.4+: нативно через main-процесс */
+  if(name==='pc'&&window.AppBridge&&typeof AppBridge.downloadFile==='function'){
+   platToast('Начинаю загрузку '+fileName+'…');
+   try{
+    AppBridge.downloadFile(url,fileName).catch(function(err){
+     console.warn('[PC] downloadFile failed:',err);
+     try{ AppBridge.openExternal(url); }catch(e){ openBrowser(); }
+    });
+   }catch(e){ openBrowser(); }
+   return;
+  }
+  /* 3) TG/VK/MAX WebApp: fetch по CORS падает — не пытаемся, уходим честно */
+  if(name==='tg'||name==='vk'||name==='max'){
+   if(isMobile){ fetchBlob(function(blob){ if(!tryShareFile(blob)) openBrowser(); }); }
+   else{ openBrowser(); }
+   return;
+  }
+  /* 4) Обычный web-браузер: fetch+blob */
+  if(name==='web'&&!window.AppBridge){
+   fetchBlob(function(blob){ if(!tryShareFile(blob)) saveViaAnchor(blob); });
+   return;
+  }
+  openBrowser();
  }
 
  return{
