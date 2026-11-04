@@ -1,18 +1,18 @@
 {
- "generatedAt": "2026-11-04T11:30:32.550Z",
+ "generatedAt": "2026-11-04T12:17:12.481Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
-  "version": "3.42",
+  "version": "3.43",
   "files": [
    {
     "path": "index.html",
-    "sha256": "694d6ee9932ab9486af05dacce5ba4e2b74e03dfae4e6599dce38905cace6692",
+    "sha256": "b0b009c6daa8cd91fdec6e55321fb9fb093bdeef83e0346993982326bb8864a8",
     "size": 33976
    },
    {
     "path": "js/platform.js",
-    "sha256": "7336493b70575cdd27f99beef05ecb2d56c8bbcc2eecc4be3584e1e00fda9393",
-    "size": 18784
+    "sha256": "e719fa473727834fb33b6296b7450f5ea4c90fa1a9943c916a58685c30a0b582",
+    "size": 19874
    },
    {
     "path": "js/snd.js",
