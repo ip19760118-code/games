@@ -107,7 +107,7 @@
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.39 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.40 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
@@ -146,7 +146,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.39';
+    const HUB_VER = '3.40';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
@@ -376,24 +376,48 @@
         showScreen(2);
       }
 
+      // v3.40: fetch->blob скачивание. Chrome игнорирует атрибут download у <a>
+      // при кросс-оригин редиректе с GitHub. Blob-URL same-origin — download срабатывает.
+      function fetchBlobDownload(url, fileName){
+        try { Platform.toast('Начинаю загрузку…'); } catch(e){}
+        fetch(url, { cache: 'no-store' })
+          .then(function(r){
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.blob();
+          })
+          .then(function(blob){
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = fileName;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function(){
+              try { document.body.removeChild(a); } catch(e){}
+              URL.revokeObjectURL(a.href);
+            }, 5000);
+            try { Platform.toast('Загрузка запущена — проверь папку «Загрузки»'); } catch(e){}
+          })
+          .catch(function(err){
+            console.warn('[HUB] blob download failed, fallback:', err);
+            var a = document.createElement('a');
+            a.href = url;
+            a.rel = 'noopener';
+            a.setAttribute('download', fileName);
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            try { Platform.toast('Загрузка запущена — проверь папку «Загрузки»'); } catch(e){}
+          });
+      }
+
       function startExeDownload(){
         trackEvent('hub_download_win', { action: dlAction || 'download' });
         try { Platform.haptic('light'); } catch(e){}
         if (Platform.name === 'pc') {
           try { if (window.AppBridge && window.AppBridge.openExternal) { window.AppBridge.openExternal(WIN_EXE_URL); return; } } catch(e){}
         }
-        try {
-          const a = document.createElement('a');
-          a.href = WIN_EXE_URL;
-          a.rel = 'noopener';
-          a.setAttribute('download', '');
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          try { Platform.toast('Загрузка установщика началась — проверь загрузки браузера'); } catch(e){}
-        } catch(e){
-          location.href = WIN_EXE_URL;
-        }
+        fetchBlobDownload(WIN_EXE_URL, 'IgrovojCentr-Setup.exe');
       }
 
       function shareExeLink(){
@@ -446,18 +470,7 @@
         if (Platform.name === 'android') {
           try { if (window.AppBridge && window.AppBridge.openExternal) { window.AppBridge.openExternal(APK_URL); return; } } catch(e){}
         }
-        try {
-          const a = document.createElement('a');
-          a.href = APK_URL;
-          a.rel = 'noopener';
-          a.setAttribute('download', '');
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          try { Platform.toast('Загрузка APK началась — проверь загрузки'); } catch(e){}
-        } catch(e){
-          location.href = APK_URL;
-        }
+        fetchBlobDownload(APK_URL, 'IgrovojCentr.apk');
       }
       function shareApkLink(){
         trackEvent('hub_download_share', { action: 'share', target: 'android' });
