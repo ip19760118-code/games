@@ -1,9 +1,10 @@
-/* tg-games: единый слой платформ v3.3 — TG / VK / MAX / web / PC / Android.
-   v3.3: downloadAsset: ПК-оболочка → AppBridge.downloadFile (нативно, без браузера);
-         TG/VK/MAX WebApp → БЕЗ попытки fetch (она падала по CORS и давала ложный тост
-         «загрузка не удалась»): mobile пробуем navigator.share({files}), desktop — сразу
-         честный переход в браузер; web-браузер → fetch+blob+<a download>; Android → DownloadManager.
-   v3.1: desktop-web шеринг в буфер; v3.0: shareGame/gameDeepLink/бренд-строка. */
+/* tg-games: единый слой платформ v3.4 — TG / VK / MAX / web / PC / Android.
+   v3.4: downloadAsset в мессенджерах НЕ пытается fetch (CORS-блок → ложные «загрузка не удалась»):
+         TG → WebApp.openLink, VK → VKWebAppOpenExternalLink (фолбэки window.open/location.href),
+         MAX → WebApp.openLink; MAX-внешний-браузер → location.href (загрузка стартует сразу).
+         Внешний браузер устройства открывает GitHub-ссылку → Content-Disposition: attachment →
+         файл уходит в «Загрузки» без внутренних браузеров мессенджеров.
+   v3.3: ПК → AppBridge.downloadFile нативно; Android → DownloadManager; web → fetch+blob. */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
@@ -261,12 +262,31 @@ var Platform=(function(){
   return share(gameDeepLink(key),text,opts);
  }
 
- /* v3.3: каскадное скачивание ассетов по средам */
+ /* v3.4: каскад скачивания: оболочки — нативно; мессенджеры — ВНЕШНИЙ браузер устройства */
  function downloadAsset(url,fileName,opts){
   opts=opts||{};
   var shareText=opts.shareText||('📥 '+fileName);
   var shareTitle=opts.shareTitle||fileName;
-  var isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent||'');
+  function openBrowser(){
+   platToast('Открываем браузер для загрузки…');
+   try{ window.open(url,'_blank','noopener'); }catch(e){ try{ location.href=url; }catch(e2){} }
+  }
+  function externalBrowser(){
+   platToast('Открываем внешний браузер для загрузки…');
+   if(name==='tg'&&window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openLink){
+    try{ Telegram.WebApp.openLink(url); return; }catch(e){}
+   }
+   if(name==='vk'&&window.vkBridge){
+    try{
+     vkBridge.send('VKWebAppOpenExternalLink',{link:url}).catch(function(){ openBrowser(); });
+     return;
+    }catch(e){}
+   }
+   if(name==='max'&&window.WebApp&&maxClientReal()&&window.WebApp.openLink){
+    try{ window.WebApp.openLink(url); return; }catch(e){}
+   }
+   openBrowser();
+  }
   function saveViaAnchor(blob){
    try{
     var a=document.createElement('a');
@@ -280,11 +300,7 @@ var Platform=(function(){
      try{URL.revokeObjectURL(a.href);}catch(e){}
     },5000);
     platToast('Загрузка запущена — проверь папку «Загрузки»');
-   }catch(e){openBrowser();}
-  }
-  function openBrowser(){
-   platToast('Открываем в браузере для скачивания…');
-   try{ window.open(url,'_blank','noopener'); }catch(e){ location.href=url; }
+   }catch(e){ openBrowser(); }
   }
   function tryShareFile(blob){
    try{
@@ -306,30 +322,39 @@ var Platform=(function(){
      openBrowser();
     });
   }
-  /* 1) Android: нативный DownloadManager */
+  /* 1) Android-оболочка: DownloadManager */
   if(name==='android'&&window.AppBridge&&typeof AppBridge.downloadFile==='function'){
    platToast('Начинаю загрузку '+fileName+'…');
    try{ AppBridge.downloadFile(url,fileName); }catch(e){ openBrowser(); }
    return;
   }
-  /* 2) ПК-оболочка 0.3.4+: нативно через main-процесс */
-  if(name==='pc'&&window.AppBridge&&typeof AppBridge.downloadFile==='function'){
-   platToast('Начинаю загрузку '+fileName+'…');
-   try{
-    AppBridge.downloadFile(url,fileName).catch(function(err){
-     console.warn('[PC] downloadFile failed:',err);
-     try{ AppBridge.openExternal(url); }catch(e){ openBrowser(); }
-    });
-   }catch(e){ openBrowser(); }
+  /* 2) ПК-оболочка: нативно (0.3.4+), иначе системный браузер */
+  if(name==='pc'){
+   if(window.AppBridge&&typeof AppBridge.downloadFile==='function'){
+    platToast('Начинаю загрузку '+fileName+'…');
+    try{
+     AppBridge.downloadFile(url,fileName).catch(function(err){
+      console.warn('[PC] downloadFile failed:',err);
+      try{ AppBridge.openExternal(url); }catch(e){ openBrowser(); }
+     });
+    }catch(e){ openBrowser(); }
+   }else{
+    platToast('Открываем браузер для загрузки…');
+    try{ AppBridge.openExternal(url); }catch(e){ openBrowser(); }
+   }
    return;
   }
-  /* 3) TG/VK/MAX WebApp: fetch по CORS падает — не пытаемся, уходим честно */
+  /* 3) Мессенджеры: только ВНЕШНИЙ браузер устройства, без fetch */
   if(name==='tg'||name==='vk'||name==='max'){
-   if(isMobile){ fetchBlob(function(blob){ if(!tryShareFile(blob)) openBrowser(); }); }
-   else{ openBrowser(); }
+   if(isMaxExternal()){
+    platToast('Загрузка началась в браузере…');
+    try{ location.href=url; }catch(e){ openBrowser(); }
+   }else{
+    externalBrowser();
+   }
    return;
   }
-  /* 4) Обычный web-браузер: fetch+blob */
+  /* 4) Обычный web-браузер: fetch+blob, фолбэк навигация */
   if(name==='web'&&!window.AppBridge){
    fetchBlob(function(blob){ if(!tryShareFile(blob)) saveViaAnchor(blob); });
    return;
