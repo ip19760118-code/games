@@ -107,11 +107,10 @@
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.45 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.46 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
-  <!-- v3.44: модалка только со ссылками: отправить / скопировать; скачивания нет -->
   <div class="dl-overlay" id="dlOverlay" data-screen="1">
     <div class="dl-card">
       <button class="dl-close" id="dlClose" aria-label="Закрыть">×</button>
@@ -143,7 +142,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.45';
+    const HUB_VER = '3.46';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
@@ -350,7 +349,6 @@
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
-    /* ---------- v3.44: модалка ссылок на приложение (без скачивания) ---------- */
     (function(){
       const ov = document.getElementById('dlOverlay');
       const s1 = document.getElementById('dlScreen1');
@@ -405,7 +403,6 @@
         }
       }
 
-      /* v3.44: отправка оформлена как шеринг ссылок в играх: Platform.share + инструкция перед ссылкой + бренд */
       function shareAppLink(url, platformLabel){
         trackEvent('hub_download_share', { action: 'share', target: platformLabel });
         try { Platform.haptic('light'); } catch(e){}
