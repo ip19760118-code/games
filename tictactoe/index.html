@@ -69,24 +69,21 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
 .cell img.sym.show{opacity:1;transform:scale(1)}
 .strike{position:absolute;height:12px;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--accent2));box-shadow:0 0 16px var(--winB),0 2px 5px rgba(0,0,0,.45);z-index:6;pointer-events:none;display:none;transform-origin:center;animation:sIn .35s ease}
 @keyframes sIn{from{opacity:0}to{opacity:1}}
-@keyframes cp{0%,100%{box-shadow:inset 0 2px 4px rgba(0,0,0,.18)}50%{box-shadow:inset 0 0 0 3px var(--pulse),inset 0 2px 4px rgba(0,0,0,.18)}}
-.cell.cm{animation:cp 1.4s ease-in-out infinite;cursor:pointer}
 .status{text-align:center;font-size:14px;font-weight:600;margin:8px 0;min-height:20px;color:var(--accent)}
 .status.warn{color:#ff8f8f}
 .actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}
 .btn{background:var(--btnBg);border:1px solid var(--border);color:var(--text);padding:9px 18px;border-radius:30px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
 .btn:active{transform:scale(.96)}.btn:disabled{opacity:.35;cursor:not-allowed}
 .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--priTx);border:none}
+/* v1.7.2: pulse только для .rbtn в шторке и кнопок endOverlay */
 @keyframes btnPulse{0%,100%{box-shadow:0 0 0 0 var(--winB),0 2px 6px rgba(0,0,0,.2)}50%{box-shadow:0 0 0 9px transparent,0 4px 18px var(--winB)}}
 .pulse{animation:btnPulse 1.4s ease-in-out infinite}
-.mode-btn.pulse{box-shadow:0 0 0 0 var(--winB),0 0 14px var(--pulse)}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
 .overlay.show{display:flex}
 .cardbox{background:var(--panel);border:1px solid var(--border);border-radius:24px;padding:22px;max-width:420px;width:100%;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.5);max-height:88vh;overflow-y:auto;color:var(--text)}
 .cardbox h2{font-size:22px;margin-bottom:8px}
 .cardbox .sub{opacity:.85;margin-bottom:14px;font-size:14px;line-height:1.5}
 .cardbox .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
-/* v1.7.1: кнопка "В меню" в отдельном flex-ряду над заголовком — не перекрывается названием */
 .mhdr{display:flex;justify-content:flex-start;margin-bottom:6px}
 .stat-row{display:flex;justify-content:space-between;padding:6px 2px;border-bottom:1px solid var(--border);font-size:14px}
 .stat-row b{color:var(--accent)}
@@ -150,7 +147,7 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
   <button class="btn" id="menuBtn" style="display:none">🏠 Меню</button>
   <button class="btn" id="shareLinkBtn">📤 Отправить ссылку на игру</button>
 </div>
-<div class="ver" id="verTag">v1.7.1</div>
+<div class="ver" id="verTag">v1.7.2</div>
 </div>
 
 <div class="fieldViewBar" id="fieldViewBar">
@@ -158,11 +155,10 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
   <button class="btn" id="closeFieldView">Закрыть</button>
 </div>
 
-<!-- v1.7.1: mhdr — кнопка "В меню" в отдельном ряду над заголовком, не перекрывается -->
 <div class="overlay" id="modeOverlay">
   <div class="cardbox">
     <div class="mhdr"><button class="hbtn" id="modeHubBtn">← В меню игр</button></div>
-    <h2>❌⭕ Крестики-нолики <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v1.7.1</span></h2>
+    <h2>❌⭕ Крестики-нолики <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v1.7.2</span></h2>
     <div class="sub">Классика 3×3: три в ряд по горизонтали, вертикали или диагонали</div>
     <div class="seg" id="sideSeg"><b data-s="x" class="on">❌ Крестики</b><b data-s="o">⭕ Нолики</b></div>
     <div class="mode-choice">
@@ -260,16 +256,13 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
 </div>
 
 <script>
-const VER='1.7.1', HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000, TURN_TIMEOUT=30000;
+const VER='1.7.2', HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000, TURN_TIMEOUT=30000;
 const LN=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
 let heartbeatTimer=null, myRound=0, fieldViewMode=false;
 let lastEndInfo=null;
-
-/* v1.7.1: prevStatus — для отслеживания момента смены status (шторка меняется только при смене) */
 let prevRoomStatus=null;
 
-/* ---------- Настройки и статистика ---------- */
 let set=Object.assign({aiLvl:'medium',first:'x',vol:.7,skin:'classic'},JSON.parse(localStorage.tt_set||'{}'));
 const saveSet=()=>localStorage.tt_set=JSON.stringify(set);
 let ST=Object.assign({t:0,w:0,l:0,d:0,st:0,best:0,ai:0,on:0,hot:0},JSON.parse(localStorage.tt_stats||'{}'));
@@ -495,7 +488,6 @@ function statusText(){
   return'⚔️ Твой ход ('+(playerSide==='x'?'❌':'⭕')+')';
 }
 
-/* ---------- Шторка: открытие/закрытие ---------- */
 function collapseCurtain(){$('rbExtra').style.display='none';$('roomBar').classList.remove('open');hideLobbyInBar();}
 function expandCurtain(){$('rbExtra').style.display='flex';$('roomBar').classList.add('open');}
 function showLobbyInBar(){
@@ -530,32 +522,40 @@ function stopHeartbeat(){if(heartbeatTimer){clearInterval(heartbeatTimer);heartb
 function removePresence(){if(!roomRef||!mySide)return;try{roomRef.child('presence/'+mySide).remove();}catch(e){}}
 
 async function createRoom(){
-  await ensureAuth();if(!fbDb){alert('Не удалось загрузить Firebase — проверь сеть.');return;}
+  console.log('[TT] createRoom: enter');
+  await ensureAuth();
+  if(!fbDb){console.error('[TT] createRoom: no fbDb');alert('Не удалось загрузить Firebase — проверь сеть.');return;}
   myUid=getUid();myName=getUserName();mySide='w';roomCode=genRoomCode();
+  console.log('[TT] createRoom: side='+mySide+', code='+roomCode+', uid='+myUid);
   roomRef=fbDb.ref('rooms/'+roomCode);myRound=1;
   try{
     const st=newState(set.first);
+    console.log('[TT] createRoom: writing initial state. turn='+st.turn);
     await roomRef.set({
       game:'tictactoe',host:mySide,createdAt:Date.now(),round:1,status:'waiting',
       players:{w:{name:myName,uid:myUid}},presence:{},rematch:{},state:st
     });
+    console.log('[TT] createRoom: set() OK');
     onlineMode=true;hotseatMode=false;prevRoomStatus='waiting';
     $('roomBar').style.display='block';$('roomCode').textContent=roomCode;
     $('modeOverlay').classList.remove('show');buildBoard();expandCurtain();
     setTimeout(()=>{startHeartbeat();subscribeRoom();},500);
     trackEvent('room_created',{game_name:'tictactoe'});
-  }catch(e){alert('Ошибка: '+e.message);}
+  }catch(e){console.error('[TT] createRoom FAIL:',e);alert('Ошибка: '+e.message);}
 }
 async function joinRoom(code){
-  await ensureAuth();if(!fbDb){alert('Не удалось загрузить Firebase — проверь сеть.');return;}
+  console.log('[TT] joinRoom: code='+code);
+  await ensureAuth();
+  if(!fbDb){console.error('[TT] joinRoom: no fbDb');alert('Не удалось загрузить Firebase — проверь сеть.');return;}
   myUid=getUid();myName=getUserName();roomCode=code.toUpperCase();
   roomRef=fbDb.ref('rooms/'+roomCode);
   try{
     const snap=await roomRef.once('value');
-    if(!snap.exists()){alert('Комната не найдена.');$('modeOverlay').classList.add('show');return;}
+    if(!snap.exists()){console.error('[TT] joinRoom: not found');alert('Комната не найдена.');$('modeOverlay').classList.add('show');return;}
     const r=snap.val();
-    if(r.game!=='tictactoe'){alert('Другая игра.');$('modeOverlay').classList.add('show');return;}
-    if(r.status!=='waiting'&&r.status!=='finished'&&r.status!=='playing'){alert('Игра уже идёт.');$('modeOverlay').classList.add('show');return;}
+    console.log('[TT] joinRoom: snapshot=',JSON.stringify({game:r.game,status:r.status,players:Object.keys(r.players||{}),turn:r.state&&r.state.turn}));
+    if(r.game!=='tictactoe'){console.error('[TT] joinRoom: wrong game',r.game);alert('Другая игра.');$('modeOverlay').classList.add('show');return;}
+    if(r.status!=='waiting'&&r.status!=='finished'&&r.status!=='playing'){console.error('[TT] joinRoom: bad status',r.status);alert('Игра уже идёт.');$('modeOverlay').classList.add('show');return;}
     let side=null;
     if(r.players){
       if(r.players.w&&r.players.w.uid===myUid)side='w';
@@ -568,8 +568,13 @@ async function joinRoom(code){
       else{alert('Комната заполнена.');$('modeOverlay').classList.add('show');return;}
     }
     mySide=side;myRound=r.round||1;
+    console.log('[TT] joinRoom: taking side='+side);
     await roomRef.child('players/'+mySide).set({name:myName,uid:myUid});
-    if(!r.state||!r.state.board||!Array.isArray(r.state.board))await roomRef.child('state').set(newState(set.first));
+    console.log('[TT] joinRoom: player record written');
+    if(!r.state||!r.state.board||!Array.isArray(r.state.board)){
+      console.warn('[TT] joinRoom: bad state, rewriting');
+      await roomRef.child('state').set(newState(set.first));
+    }
     onlineMode=true;hotseatMode=false;
     prevRoomStatus=r.status;
     $('roomBar').style.display='block';$('roomCode').textContent=roomCode;
@@ -577,40 +582,42 @@ async function joinRoom(code){
     if(r.status==='waiting')expandCurtain();else if(r.status==='finished')expandCurtain();else collapseCurtain();
     setTimeout(()=>{startHeartbeat();subscribeRoom();},500);
     trackEvent('room_joined',{game_name:'tictactoe'});
-  }catch(e){alert('Ошибка: '+e.message);}
+  }catch(e){console.error('[TT] joinRoom FAIL:',e);alert('Ошибка: '+e.message);}
 }
 
-/* v1.7.1: subscribeRoom — шторка меняется ТОЛЬКО при смене status (prevRoomStatus guard) */
 function subscribeRoom(){
+  console.log('[TT] subscribeRoom: attaching listener');
   roomRef.on('value',snap=>{
     roomData=snap.val();
-    if(!roomData){leaveRoom();return;}
+    if(!roomData){console.warn('[TT] subR: null snapshot, leaving');leaveRoom();return;}
+    console.log('[TT] subR snapshot: status='+roomData.status+', players='+JSON.stringify(Object.keys(roomData.players||{}))+', turn='+(roomData.state&&roomData.state.turn)+', result='+(roomData.state&&roomData.state.result?JSON.stringify(roomData.state.result):'-'));
     if(!roomData.state||!roomData.state.board||!Array.isArray(roomData.state.board)){
       if(isHost()){try{roomRef.update({state:newState(set.first)});}catch(e){}}
       roomData.state=roomData.state||newState(set.first);
     }
     roomData.state=normState(roomData.state);
 
-    /* v1.7.1: управление шторкой — только при смене status, не на каждом тике */
     const curStatus=roomData.status;
     if(curStatus!==prevRoomStatus){
+      console.log('[TT] subR: status CHANGED '+prevRoomStatus+' -> '+curStatus);
       prevRoomStatus=curStatus;
       if(curStatus==='waiting'){expandCurtain();showLobbyInBar();}
       else if(curStatus==='playing'){collapseCurtain();hideLobbyInBar();}
       else if(curStatus==='finished'){expandCurtain();hideLobbyInBar();}
     }else{
-      /* status не менялся — только обновляем lobby если открыта */
       if(curStatus==='waiting')showLobbyInBar();
     }
 
     const s=roomData.state;
     if(s&&s.result&&roomData.status==='playing'&&isHost()){
+      console.log('[TT] subR: forcing status=finished (result detected)');
       roomRef.child('status').set('finished').catch(e=>console.warn('[TT] fin fail:',e.message));
     }
     if(roomData.status==='finished'){
       const rm=roomData.rematch||{};const a=activeSides();
       const all=a.length>=2&&a.every(x=>rm[x]);
       if(all&&isHost()){
+        console.log('[TT] subR: starting rematch round');
         const np={};for(const x of a)np[x]=roomData.players[x];
         const st=newState(set.first);
         st.scores=(roomData.state&&roomData.state.scores)||{w:0,b:0};
@@ -621,15 +628,16 @@ function subscribeRoom(){
       }
     }
     const rr=roomData.round||1;
-    if(rr!==myRound){myRound=rr;shownEndAt=null;$('endOverlay').classList.remove('show');fieldViewMode=false;$('fieldViewBar').classList.remove('show');}
+    if(rr!==myRound){console.log('[TT] subR: round change '+myRound+' -> '+rr);myRound=rr;shownEndAt=null;$('endOverlay').classList.remove('show');fieldViewMode=false;$('fieldViewBar').classList.remove('show');}
 
     updateLiveBadge();updateRoomActions();renderAll();updatePulse();
     if(s.result&&s.result.at!==shownEndAt){shownEndAt=s.result.at;showEnd();}
-  });
+  },err=>{console.error('[TT] subR listener ERROR:',err);});
   startWatchdog();
 }
 
 function leaveRoom(){
+  console.log('[TT] leaveRoom');
   stopHeartbeat();removePresence();
   if(roomRef){roomRef.off();roomRef=null;}
   onlineMode=false;roomData=null;roomCode=null;shownEndAt=null;myRound=0;
@@ -679,14 +687,17 @@ function updateRoomActions(){
       const st=document.createElement('button');st.className='rbtn accept';st.dataset.act='start';st.textContent='▶ Начать';
       st.disabled=pc<2;
       st.onclick=()=>{
-        if(!roomData||!isHost()||pc<2)return;
+        console.log('[TT] ▶ Начать clicked: isHost='+isHost()+', pc='+pc+', prevStatus='+roomData.status);
+        if(!roomData||!isHost()||pc<2){console.warn('[TT] start guard failed');return;}
         const s2=Object.assign({},roomData.state||newState(set.first));
         s2.lastMove={by:mySide,name:myName,action:'deal',at:Date.now()};
-        /* v1.7.1: ОПТИМИСТИЧНЫЙ update — локальный status='playing' ставим СРАЗУ,
-           иначе host кликает клетку до прихода listener'а и onCell блокирует ход */
+        /* v1.7.2: оптимистичный update с подробным логом */
         roomData.status='playing';
         roomData.state=normState(s2);
-        roomRef.update({state:s2,status:'playing',rematch:{}}).catch(e=>console.warn('[TT] start fail:',e.message));
+        console.log('[TT] ▶ optimistic: status='+roomData.status+', turn='+roomData.state.turn+', mySide='+mySide+', mySym='+meSym());
+        roomRef.update({state:s2,status:'playing',rematch:{}})
+          .then(()=>console.log('[TT] ▶ FB update OK'))
+          .catch(e=>console.error('[TT] ▶ FB update FAIL:',e.message||e,e));
         trackEvent('game_start',{game_name:'tictactoe',mode:'online'});
         renderAll();
       };
@@ -712,46 +723,27 @@ function updateLiveBadge(){
   $('roomCount').textContent=pl.length+'/2';
 }
 
+/* v1.7.2: pulse ТОЛЬКО для .rbtn в шторке и кнопок endOverlay.
+   Клетки и кнопки mode-overlay НЕ пульсируют. */
 function updatePulse(){
   const clearAll=()=>{
-    ['modeAi','modeHost','modeHot','modeJoin'].forEach(id=>{const e=$(id);if(e)e.classList.remove('pulse');});
     document.querySelectorAll('.rbtn').forEach(b=>b.classList.remove('pulse'));
     document.querySelectorAll('#endBtns .btn').forEach(b=>b.classList.remove('pulse'));
-    cellEls.forEach(c=>c.classList.remove('cm'));
-    $('newBtn').classList.remove('pulse');
   };
   clearAll();
-  if($('modeOverlay').classList.contains('show')){
-    $('modeHost').classList.add('pulse');
-    $('modeAi').classList.add('pulse');
+  if(!onlineMode||!roomData)return;
+  if(roomData.status==='waiting'){
+    const iv=document.querySelector('.rbtn[data-act="invite"]');
+    const st=document.querySelector('.rbtn[data-act="start"]');
+    if(iv&&!iv.disabled)iv.classList.add('pulse');
+    if(st&&!st.disabled)st.classList.add('pulse');
     return;
   }
-  if(onlineMode&&roomData){
-    if(roomData.status==='waiting'){
-      const iv=document.querySelector('.rbtn[data-act="invite"]');
-      const st=document.querySelector('.rbtn[data-act="start"]');
-      if(iv&&!iv.disabled)iv.classList.add('pulse');
-      if(st&&!st.disabled)st.classList.add('pulse');
-      return;
-    }
-    if(roomData.status==='finished'){
-      const rb=document.querySelector('.rbtn[data-act="rematch"]');
-      if(rb)rb.classList.add('pulse');
-      const er=document.querySelector('#endBtns .btn[data-end="rematch"]');
-      if(er)er.classList.add('pulse');
-      return;
-    }
-    if(roomData.status==='playing'){
-      const s=S();
-      if(s&&!s.result&&s.turn===meSym()){
-        cellEls.forEach((el,i)=>{if(!s.board[i])el.classList.add('cm');});
-      }
-    }
-  }else if(G&&!G.result){
-    const my=hotseatMode?G.turn:playerSide;
-    if(G.turn===my){
-      cellEls.forEach((el,i)=>{if(!G.board[i])el.classList.add('cm');});
-    }
+  if(roomData.status==='finished'){
+    const rb=document.querySelector('.rbtn[data-act="rematch"]');
+    if(rb)rb.classList.add('pulse');
+    const er=document.querySelector('#endBtns .btn[data-end="rematch"]');
+    if(er)er.classList.add('pulse');
   }
 }
 
@@ -867,28 +859,57 @@ function renderAll(){
   updatePulse();
 }
 
-/* v1.7.1: onCell — убран ранний return при status!=='playing',
-   вместо него используется isGameActive() + оптимистичный update из кнопки "Начать" */
+/* v1.7.2: onCell с детальным логированием каждой проверки —
+   теперь по логам видно, на каком этапе блокируется ход */
 function onCell(i){
   unlockAudio();
+  console.log('[TT] onCell(i='+i+'): online='+onlineMode+', hotseat='+hotseatMode+', fieldViewMode='+fieldViewMode);
   const s=S();
-  if(!s||!s.board||!Array.isArray(s.board)||s.result||fieldViewMode)return;
-  if(s.board[i]){sDeny();return;}
+  if(!s||!s.board||!Array.isArray(s.board)){
+    console.warn('[TT] onCell BLOCK: no valid state, s=',s);
+    sDeny();return;
+  }
+  if(s.result){
+    console.warn('[TT] onCell BLOCK: game already finished, result=',s.result);
+    sDeny();return;
+  }
+  if(fieldViewMode){
+    console.warn('[TT] onCell BLOCK: fieldViewMode=true');
+    sDeny();return;
+  }
+  if(s.board[i]){
+    console.warn('[TT] onCell BLOCK: cell '+i+' already occupied by '+s.board[i]);
+    sDeny();return;
+  }
 
   if(onlineMode){
-    /* v1.7.1: мягкая проверка — если status ещё не playing, но локально уже обновлено оптимистично, ходим */
-    if(!roomData){sDeny();setStatus('⏳ Игра ещё не началась',true);return;}
-    if(!isGameActive()){sDeny();setStatus('⏳ Игра ещё не началась',true);return;}
+    console.log('[TT] onCell online: roomData.status='+(roomData&&roomData.status)+', isGameActive='+isGameActive()+', s.turn='+s.turn+', mySym='+meSym()+', mySide='+mySide);
+    if(!roomData){
+      console.error('[TT] onCell BLOCK: no roomData');
+      sDeny();setStatus('⏳ Игра ещё не началась',true);return;
+    }
+    if(!isGameActive()){
+      console.error('[TT] onCell BLOCK: isGameActive=false (status='+roomData.status+')');
+      sDeny();setStatus('⏳ Игра ещё не началась',true);return;
+    }
     const my=meSym();
-    if(s.turn!==my){sDeny();setStatus('⏳ Сейчас ход соперника',true);return;}
+    if(s.turn!==my){
+      console.warn('[TT] onCell BLOCK: not my turn, s.turn='+s.turn+', my='+my);
+      sDeny();setStatus('⏳ Сейчас ход соперника',true);return;
+    }
+    console.log('[TT] onCell: PASSING all guards, preparing update. my='+my);
     const ns=JSON.parse(JSON.stringify(s));
     ns.board[i]=my;ns.hist=(ns.hist||[]).concat([{by:my,i:i,at:Date.now()}]);
     ns.lastMove={by:mySide,name:myName,i:i,at:Date.now()};ns.turnAt=Date.now();
     const r=checkLine(ns.board);
-    if(r)ns.result={w:r.w,l:r.l,at:Date.now()};else ns.turn=ns.turn==='x'?'o':'x';
+    if(r){ns.result={w:r.w,l:r.l,at:Date.now()};console.log('[TT] onCell: WIN detected, winner='+r.w);}
+    else{ns.turn=ns.turn==='x'?'o':'x';console.log('[TT] onCell: no win, switching turn to '+ns.turn);}
+    console.log('[TT] onCell: sending FB update. new board=',JSON.stringify(ns.board),'turn='+ns.turn);
     try{
-      roomRef.update({state:ns}).catch(e=>{console.error('[TT] update fail:',e.message);setStatus('Ошибка: '+e.message,true);});
-    }catch(e){console.error('[TT] update exc:',e);setStatus('Ошибка: '+e.message,true);}
+      roomRef.update({state:ns})
+        .then(()=>console.log('[TT] onCell FB update OK'))
+        .catch(e=>{console.error('[TT] onCell FB update FAIL:',e.message||e,e);setStatus('Ошибка: '+e.message,true);});
+    }catch(e){console.error('[TT] onCell FB update EXCEPTION:',e);setStatus('Ошибка: '+e.message,true);}
     sMove();Platform.haptic('light');
   }else if(hotseatMode){
     G.board[i]=G.turn;G.hist=(G.hist||[]).concat([{by:G.turn,i:i,at:Date.now()}]);
@@ -897,7 +918,7 @@ function onCell(i){
     if(r){G.result={w:r.w,l:r.l,at:Date.now()};sWin();Platform.haptic('success');renderAll();showEnd();return;}
     G.turn=G.turn==='x'?'o':'x';sMove();Platform.haptic('light');renderAll();
   }else{
-    if(G.turn!==playerSide)return;
+    if(G.turn!==playerSide){console.warn('[TT] onCell AI mode: not my turn');return;}
     G.board[i]=playerSide;G.hist=(G.hist||[]).concat([{by:playerSide,i:i,at:Date.now()}]);
     G.lastMove={by:playerSide,i:i,at:Date.now()};G.turnAt=Date.now();
     const r=checkLine(G.board);
@@ -1006,8 +1027,6 @@ $('modeHost').onclick=async()=>{unlockAudio();await createRoom();};
 $('modeJoin').onclick=()=>{$('joinBox').style.display='flex';$('joinActions').style.display='flex';$('joinInput').value='';};
 $('joinCancel').onclick=()=>{$('joinBox').style.display='none';$('joinActions').style.display='none';};
 $('joinGo').onclick=async()=>{const c=$('joinInput').value.trim().toUpperCase();if(c.length!==6){alert('Код должен быть 6 символов');return;}await joinRoom(c);};
-/* v1.7.1: ручное переключение шторки — не трогаем prevRoomStatus,
-   тогда heartbeat-тик с тем же status не перезапишет наше состояние */
 $('rbToggle').onclick=()=>{const ex=$('rbExtra');const open=ex.style.display!=='none';
   if(open){collapseCurtain();}else{expandCurtain();showLobbyInBar();}
   sClick();};
@@ -1016,6 +1035,7 @@ window.addEventListener('resize',()=>{const s=S();if(s&&s.result&&s.result.l)dra
 window.addEventListener('beforeunload',()=>{stopHeartbeat();removePresence();});
 
 (function init(){
+  console.log('[TT] init: ver='+VER+', plat='+Platform.name+', url='+location.href);
   $('verTag').textContent='v'+VER;
   $('verTag2').textContent='v'+VER;
   applySkin();
@@ -1024,6 +1044,7 @@ window.addEventListener('beforeunload',()=>{stopHeartbeat();removePresence();});
   try{
     const u=new URL(location.href);
     const r=u.searchParams.get('room');
+    console.log('[TT] init: room param='+(r||'-'));
     if(r&&r.length===6)joinRoom(r);
     else $('modeOverlay').classList.add('show');
   }catch(e){console.warn('[TT] init fail:',e);$('modeOverlay').classList.add('show');}
