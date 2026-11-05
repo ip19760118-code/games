@@ -75,7 +75,6 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
 .btn{background:var(--btnBg);border:1px solid var(--border);color:var(--text);padding:9px 18px;border-radius:30px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
 .btn:active{transform:scale(.96)}.btn:disabled{opacity:.35;cursor:not-allowed}
 .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--priTx);border:none}
-/* v1.7.2: pulse только для .rbtn в шторке и кнопок endOverlay */
 @keyframes btnPulse{0%,100%{box-shadow:0 0 0 0 var(--winB),0 2px 6px rgba(0,0,0,.2)}50%{box-shadow:0 0 0 9px transparent,0 4px 18px var(--winB)}}
 .pulse{animation:btnPulse 1.4s ease-in-out infinite}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
@@ -147,7 +146,7 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
   <button class="btn" id="menuBtn" style="display:none">🏠 Меню</button>
   <button class="btn" id="shareLinkBtn">📤 Отправить ссылку на игру</button>
 </div>
-<div class="ver" id="verTag">v1.7.2</div>
+<div class="ver" id="verTag">v1.7.3</div>
 </div>
 
 <div class="fieldViewBar" id="fieldViewBar">
@@ -158,7 +157,7 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
 <div class="overlay" id="modeOverlay">
   <div class="cardbox">
     <div class="mhdr"><button class="hbtn" id="modeHubBtn">← В меню игр</button></div>
-    <h2>❌⭕ Крестики-нолики <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v1.7.2</span></h2>
+    <h2>❌⭕ Крестики-нолики <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v1.7.3</span></h2>
     <div class="sub">Классика 3×3: три в ряд по горизонтали, вертикали или диагонали</div>
     <div class="seg" id="sideSeg"><b data-s="x" class="on">❌ Крестики</b><b data-s="o">⭕ Нолики</b></div>
     <div class="mode-choice">
@@ -256,7 +255,7 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
 </div>
 
 <script>
-const VER='1.7.2', HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000, TURN_TIMEOUT=30000;
+const VER='1.7.3', HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000, TURN_TIMEOUT=30000;
 const LN=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
 let heartbeatTimer=null, myRound=0, fieldViewMode=false;
@@ -407,6 +406,9 @@ function aiMove(b,ai,lvl){
 let onlineMode=false,hotseatMode=false,roomCode=null,myUid=null,mySide=null,myName=null;
 let roomRef=null,roomData=null,shownEndAt=null,G=null,aiTimer=null;
 let playerSide='x',cellEls=[];
+
+/* v1.7.3: pendingMove — lock против двойного клика */
+let pendingMove=false;
 
 function getUid(){return(fbAuth&&fbAuth.currentUser)?fbAuth.currentUser.uid:null;}
 function getUserName(){
@@ -585,12 +587,29 @@ async function joinRoom(code){
   }catch(e){console.error('[TT] joinRoom FAIL:',e);alert('Ошибка: '+e.message);}
 }
 
+/* v1.7.3: prevSnapshotSig — чтобы логировать snapshot только при РЕАЛЬНЫХ изменениях
+   (а не на каждый heartbeat, который перезаписывает тот же state) */
+let prevSnapshotSig=null;
+
 function subscribeRoom(){
   console.log('[TT] subscribeRoom: attaching listener');
   roomRef.on('value',snap=>{
     roomData=snap.val();
     if(!roomData){console.warn('[TT] subR: null snapshot, leaving');leaveRoom();return;}
-    console.log('[TT] subR snapshot: status='+roomData.status+', players='+JSON.stringify(Object.keys(roomData.players||{}))+', turn='+(roomData.state&&roomData.state.turn)+', result='+(roomData.state&&roomData.state.result?JSON.stringify(roomData.state.result):'-'));
+
+    /* v1.7.3: компактный лог — только при смене сигнатуры snapshot'а */
+    const sig=JSON.stringify({
+      status:roomData.status,
+      players:Object.keys(roomData.players||{}).sort(),
+      turn:roomData.state&&roomData.state.turn,
+      result:roomData.state&&roomData.state.result?1:0,
+      board:roomData.state&&roomData.state.board?roomData.state.board.join(''):''
+    });
+    if(sig!==prevSnapshotSig){
+      console.log('[TT] subR snapshot: status='+roomData.status+', players='+JSON.stringify(Object.keys(roomData.players||{}))+', turn='+(roomData.state&&roomData.state.turn)+', board='+(roomData.state&&roomData.state.board?roomData.state.board.map(v=>v||'_').join(''):'-'));
+      prevSnapshotSig=sig;
+    }
+
     if(!roomData.state||!roomData.state.board||!Array.isArray(roomData.state.board)){
       if(isHost()){try{roomRef.update({state:newState(set.first)});}catch(e){}}
       roomData.state=roomData.state||newState(set.first);
@@ -641,7 +660,7 @@ function leaveRoom(){
   stopHeartbeat();removePresence();
   if(roomRef){roomRef.off();roomRef=null;}
   onlineMode=false;roomData=null;roomCode=null;shownEndAt=null;myRound=0;
-  fieldViewMode=false;lastEndInfo=null;prevRoomStatus=null;
+  fieldViewMode=false;lastEndInfo=null;prevRoomStatus=null;prevSnapshotSig=null;pendingMove=false;
   $('roomBar').style.display='none';$('roomBar').classList.remove('open');
   $('rbExtra').style.display='none';$('fieldViewBar').classList.remove('show');
   $('endOverlay').classList.remove('show');
@@ -691,10 +710,10 @@ function updateRoomActions(){
         if(!roomData||!isHost()||pc<2){console.warn('[TT] start guard failed');return;}
         const s2=Object.assign({},roomData.state||newState(set.first));
         s2.lastMove={by:mySide,name:myName,action:'deal',at:Date.now()};
-        /* v1.7.2: оптимистичный update с подробным логом */
+        /* v1.7.3: оптимистичный update (как и раньше) */
         roomData.status='playing';
         roomData.state=normState(s2);
-        console.log('[TT] ▶ optimistic: status='+roomData.status+', turn='+roomData.state.turn+', mySide='+mySide+', mySym='+meSym());
+        console.log('[TT] ▶ optimistic: status='+roomData.status+', turn='+roomData.state.turn);
         roomRef.update({state:s2,status:'playing',rematch:{}})
           .then(()=>console.log('[TT] ▶ FB update OK'))
           .catch(e=>console.error('[TT] ▶ FB update FAIL:',e.message||e,e));
@@ -723,8 +742,6 @@ function updateLiveBadge(){
   $('roomCount').textContent=pl.length+'/2';
 }
 
-/* v1.7.2: pulse ТОЛЬКО для .rbtn в шторке и кнопок endOverlay.
-   Клетки и кнопки mode-overlay НЕ пульсируют. */
 function updatePulse(){
   const clearAll=()=>{
     document.querySelectorAll('.rbtn').forEach(b=>b.classList.remove('pulse'));
@@ -859,57 +876,69 @@ function renderAll(){
   updatePulse();
 }
 
-/* v1.7.2: onCell с детальным логированием каждой проверки —
-   теперь по логам видно, на каком этапе блокируется ход */
+/* v1.7.3: onCell с ОПТИМИСТИЧНЫМ update + pendingMove lock */
 function onCell(i){
   unlockAudio();
-  console.log('[TT] onCell(i='+i+'): online='+onlineMode+', hotseat='+hotseatMode+', fieldViewMode='+fieldViewMode);
+  console.log('[TT] onCell(i='+i+'): online='+onlineMode+', hotseat='+hotseatMode+', pending='+pendingMove);
   const s=S();
   if(!s||!s.board||!Array.isArray(s.board)){
-    console.warn('[TT] onCell BLOCK: no valid state, s=',s);
+    console.warn('[TT] onCell BLOCK: no valid state');
     sDeny();return;
   }
   if(s.result){
-    console.warn('[TT] onCell BLOCK: game already finished, result=',s.result);
+    console.warn('[TT] onCell BLOCK: game finished');
     sDeny();return;
   }
   if(fieldViewMode){
-    console.warn('[TT] onCell BLOCK: fieldViewMode=true');
+    console.warn('[TT] onCell BLOCK: fieldViewMode');
     sDeny();return;
   }
   if(s.board[i]){
-    console.warn('[TT] onCell BLOCK: cell '+i+' already occupied by '+s.board[i]);
+    console.warn('[TT] onCell BLOCK: cell occupied');
     sDeny();return;
   }
 
   if(onlineMode){
-    console.log('[TT] onCell online: roomData.status='+(roomData&&roomData.status)+', isGameActive='+isGameActive()+', s.turn='+s.turn+', mySym='+meSym()+', mySide='+mySide);
-    if(!roomData){
-      console.error('[TT] onCell BLOCK: no roomData');
-      sDeny();setStatus('⏳ Игра ещё не началась',true);return;
+    if(pendingMove){
+      console.warn('[TT] onCell BLOCK: pendingMove=true (double-click)');
+      sDeny();return;
     }
-    if(!isGameActive()){
-      console.error('[TT] onCell BLOCK: isGameActive=false (status='+roomData.status+')');
+    if(!roomData||!isGameActive()){
+      console.error('[TT] onCell BLOCK: not active');
       sDeny();setStatus('⏳ Игра ещё не началась',true);return;
     }
     const my=meSym();
     if(s.turn!==my){
-      console.warn('[TT] onCell BLOCK: not my turn, s.turn='+s.turn+', my='+my);
+      console.warn('[TT] onCell BLOCK: not my turn');
       sDeny();setStatus('⏳ Сейчас ход соперника',true);return;
     }
-    console.log('[TT] onCell: PASSING all guards, preparing update. my='+my);
+    console.log('[TT] onCell: PASSING guards, my='+my);
+
     const ns=JSON.parse(JSON.stringify(s));
     ns.board[i]=my;ns.hist=(ns.hist||[]).concat([{by:my,i:i,at:Date.now()}]);
     ns.lastMove={by:mySide,name:myName,i:i,at:Date.now()};ns.turnAt=Date.now();
     const r=checkLine(ns.board);
-    if(r){ns.result={w:r.w,l:r.l,at:Date.now()};console.log('[TT] onCell: WIN detected, winner='+r.w);}
-    else{ns.turn=ns.turn==='x'?'o':'x';console.log('[TT] onCell: no win, switching turn to '+ns.turn);}
-    console.log('[TT] onCell: sending FB update. new board=',JSON.stringify(ns.board),'turn='+ns.turn);
-    try{
-      roomRef.update({state:ns})
-        .then(()=>console.log('[TT] onCell FB update OK'))
-        .catch(e=>{console.error('[TT] onCell FB update FAIL:',e.message||e,e);setStatus('Ошибка: '+e.message,true);});
-    }catch(e){console.error('[TT] onCell FB update EXCEPTION:',e);setStatus('Ошибка: '+e.message,true);}
+    if(r){ns.result={w:r.w,l:r.l,at:Date.now()};console.log('[TT] onCell: WIN detected '+r.w);}
+    else{ns.turn=ns.turn==='x'?'o':'x';console.log('[TT] onCell: switching turn to '+ns.turn);}
+
+    /* v1.7.3: ОПТИМИСТИЧНЫЙ update — локально обновляем ДО FB write.
+       Это блокирует повторные клики и сразу показывает символ на поле. */
+    roomData.state=normState(JSON.parse(JSON.stringify(ns)));
+    pendingMove=true;
+    renderAll();
+    console.log('[TT] onCell: optimistic local update done, sending to FB');
+
+    roomRef.update({state:ns})
+      .then(()=>{
+        console.log('[TT] onCell FB update OK');
+        pendingMove=false;
+      })
+      .catch(e=>{
+        console.error('[TT] onCell FB update FAIL:',e.message||e,e);
+        pendingMove=false;
+        setStatus('Ошибка сети: '+e.message,true);
+      });
+
     sMove();Platform.haptic('light');
   }else if(hotseatMode){
     G.board[i]=G.turn;G.hist=(G.hist||[]).concat([{by:G.turn,i:i,at:Date.now()}]);
