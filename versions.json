@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-05T13:53:41.274Z",
+ "generatedAt": "2026-11-05T14:06:17.853Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.47",
@@ -156,6 +156,28 @@
      "path": "nardy/index.html",
      "sha256": "77a0a2154c8fbf80009702fdd71d9715626bfa5a4f4b998ee3487ee025c04072",
      "size": 65181
+    }
+   ]
+  },
+  "tictactoe": {
+   "version": "1.7.9",
+   "online": true,
+   "addedAt": "2026-11-04",
+   "files": [
+    {
+     "path": "tictactoe/img/o.png",
+     "sha256": "7c3d8ac1e2cf7e0654866cec59ff9323c23df2a5af43410a48f5bfaec377b339",
+     "size": 179207
+    },
+    {
+     "path": "tictactoe/img/x.png",
+     "sha256": "8ae4f9be4040248f78814a643d6670eec40e04c78cf35d13b382fdbbf414769f",
+     "size": 205477
+    },
+    {
+     "path": "tictactoe/index.html",
+     "sha256": "dd19e4fc468802d9f5c49504f8a1d2fa0b8a1f19f724e3485ae523b1fcd1342f",
+     "size": 58707
     }
    ]
   },
@@ -396,25 +418,20 @@
     }
    ]
   },
-  "tictactoe": {
-   "version": "1.7.9",
-   "online": true,
-   "addedAt": "2026-11-04",
+  "findpair": {
+   "version": "1.5",
+   "online": false,
+   "addedAt": "2026-11-05",
    "files": [
     {
-     "path": "tictactoe/img/o.png",
-     "sha256": "7c3d8ac1e2cf7e0654866cec59ff9323c23df2a5af43410a48f5bfaec377b339",
-     "size": 179207
+     "path": "findpair/img/start.png",
+     "sha256": "57bf12e6650cd8a468c71204b727db9d8492bd6e595cd2d8307fe82508f84bbe",
+     "size": 204101
     },
     {
-     "path": "tictactoe/img/x.png",
-     "sha256": "8ae4f9be4040248f78814a643d6670eec40e04c78cf35d13b382fdbbf414769f",
-     "size": 205477
-    },
-    {
-     "path": "tictactoe/index.html",
-     "sha256": "dd19e4fc468802d9f5c49504f8a1d2fa0b8a1f19f724e3485ae523b1fcd1342f",
-     "size": 58707
+     "path": "findpair/index.html",
+     "sha256": "6b4581cc2dae50307748607b1beafad96f5f81967317badee23811fdaaeb295e",
+     "size": 25970
     }
    ]
   }
