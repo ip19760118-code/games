@@ -28,7 +28,7 @@
     h1 { margin: 0 0 6px; font-size: clamp(24px, 7vw, 32px); color: #7cffc4; }
     .hub-logo { width: 34px; height: 34px; border-radius: 9px; margin-right: 8px; vertical-align: -4px; box-shadow: 0 2px 10px rgba(124, 255, 196, 0.35); }
     .hub-subtitle { margin: 0 0 8px; color: #7cffc4; font-size: clamp(13px, 3.6vw, 15px); font-weight: 700; }
-    .hub-desc { margin: 0 0 16px; color: #a8b4d8; font-size: clamp(12px, 3.4vw, 14px); line-height: 1.45; }
+    .hub-desc { margin: 0 16px; color: #a8b4d8; font-size: clamp(12px, 3.4vw, 14px); line-height: 1.45; }
     .download-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px 16px; margin-bottom: 16px; border-radius: 18px; border: 1px solid rgba(124, 255, 196, 0.5); background: linear-gradient(135deg, rgba(124, 255, 196, 0.14), rgba(51, 214, 255, 0.12)); color: #7cffc4; font-size: clamp(14px, 4vw, 16px); font-weight: 700; cursor: pointer; transition: transform 0.08s ease, background 0.15s ease, box-shadow 0.15s ease; font-family: inherit; }
     .download-btn:active { transform: scale(0.98); background: linear-gradient(135deg, rgba(124, 255, 196, 0.24), rgba(51, 214, 255, 0.22)); }
     .set-btn { position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(255, 255, 255, 0.07); color: #eaf0ff; font-size: 20px; line-height: 1; cursor: pointer; display: none; align-items: center; justify-content: center; padding: 0; font-family: inherit; }
@@ -103,11 +103,12 @@
         <button class="game-btn" data-game="tetris" id="tetrisBtn"><span class="game-emoji">🧱</span><span class="game-text"><b>Тетрис</b><small>Классика, 6 уровней</small></span></button>
         <button class="game-btn" data-game="pyatnashki" id="pyatnashkiBtn"><span class="game-emoji">🧩</span><span class="game-text"><b>Пятнашки</b><small>Классическая головоломка</small></span></button>
         <button class="game-btn" data-game="tictactoe" id="tictactoeBtn"><span class="game-emoji">❌</span><span class="game-text"><b>Крестики-нолики <span class="tag-online">ONLINE</span></b><small>Игра с ИИ или с другом онлайн</small></span></button>
+        <button class="game-btn" data-game="findpair" id="findpairBtn"><span class="game-emoji">🎴</span><span class="game-text"><b>Найди пару</b><small>Тренировка памяти: запомни картинки и собери все пары</small></span></button>
         <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.46 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.47 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
@@ -142,7 +143,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.46';
+    const HUB_VER = '3.47';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
@@ -304,7 +305,7 @@
       try {
         if (navigator.connection && navigator.connection.saveData) return;
         setTimeout(function(){
-          ['chess','seabattle','durak','tetris','tictactoe'].forEach(function(g){
+          ['chess','seabattle','durak','tetris','tictactoe','findpair'].forEach(function(g){
             var l = document.createElement('link');
             l.rel = 'prefetch';
             l.href = './' + g + '/';
@@ -325,7 +326,8 @@
       'seabattle': './seabattle/', 'mahjong': './mahjong/',
       'tetris': './tetris/', 'tetris_classic': './tetris/',
       'pyatnashki': './pyatnashki/', '15': './pyatnashki/', 'fifteen': './pyatnashki/',
-      'tictactoe': './tictactoe/', 'xo': './tictactoe/', 'крестики': './tictactoe/', 'крестикинолики': './tictactoe/'
+      'tictactoe': './tictactoe/', 'xo': './tictactoe/', 'крестики': './tictactoe/', 'крестикинолики': './tictactoe/',
+      'findpair': './findpair/', 'pairs': './findpair/', 'pair': './findpair/', 'найди пару': './findpair/', 'память': './findpair/', 'мемори': './findpair/'
     };
 
     document.getElementById('trendCatchBtn').addEventListener('click', () => openGame('./trend-catch/', 'trend_catch'));
@@ -346,6 +348,7 @@
     document.getElementById('tetrisBtn').addEventListener('click', () => openGame('./tetris/', 'tetris'));
     document.getElementById('pyatnashkiBtn').addEventListener('click', () => openGame('./pyatnashki/', 'pyatnashki'));
     document.getElementById('tictactoeBtn').addEventListener('click', () => openGame('./tictactoe/', 'tictactoe'));
+    document.getElementById('findpairBtn').addEventListener('click', () => openGame('./findpair/', 'findpair'));
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
