@@ -159,9 +159,9 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <button class="btn primary" id="finishBtn" style="display:none">🏁 Завершить</button>
 <button class="btn" id="menuBtn" style="display:none">🏠 В меню игр</button>
 </div>
-<div class="ver" id="verTag">v3.16</div>
+<div class="ver" id="verTag">v3.17</div>
 </div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v3.16</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>2–4 игрока, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока, старт вручную</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v3.17</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>2–4 игрока, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока, старт вручную</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="lobbyOverlay"><div class="cardbox"><h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2><div class="sub">Ожидание игроков (2–4). Хост запускает партию кнопкой «▶ Начать».</div><div class="lobby-list" id="lobbyList"></div><div class="btns"><button class="btn" id="lobbyInvite">📤 Пригласить</button><button class="btn primary" id="lobbyStart">▶ Начать</button><button class="btn" id="lobbyLeave">🚪 Выйти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="setOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">⚙️ Настройки</h2>
@@ -170,17 +170,17 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div>
 <div class="note">Лёгкие боты ошибаются и бьют наугад, средние играют аккуратно, сложные берегут козыри и грамотно подкидывают.</div>
 <label class="switch-label"><input type="checkbox" id="transferChk"> Переводной дурак</label>
-<div class="note">Пока ни одна карта не покрыта, отбивающийся может положить ОДНУ карту того же ранга, что и атака, и перевести всю стопку на следующего игрока. Если таких карт несколько — игра предложит выбрать, какой именно переводить; вторая останется в руке (её можно подкинуть позже).</div>
+<div class="note">Пока ни одна карта не покрыта, отбивающийся может положить ОДНУ карту того же ранга, что и атака, и перевести всю стопку на следующего игрока.</div>
 <label class="switch-label"><input type="checkbox" id="allAddChk"> Крайние игроки могут подкидывать</label>
 <div class="note"><b>Правила подкидывания:</b> включено — подкидывать могут только крайние к отбивающемуся соседи; выключено — подкидывания нет вовсе, карты кидает только атакующий.</div>
 <div class="selrow">Пауза на подкидывание перед закрытием раунда (офлайн)
 <select id="pauseSel"><option value="0">Без паузы</option><option value="2">2 секунды</option><option value="3" selected>3 секунды</option><option value="5">5 секунд</option></select>
 </div>
-<div class="note"><b>Управление:</b> одиночный тап по карте = выделить (подсветка); второй тап по выделенной карте = сыграть. Двойной тап сразу играет карту. В защите если несколько целей — они подсвечиваются зелёным, выбирай тапом. Перетаскивание работает как раньше.</div>
+<div class="note"><b>Управление:</b> одиночный тап по карте = выделить; второй тап по выделенной = сыграть. Двойной тап играет карту сразу. В защите при нескольких целях они подсвечиваются — выбирай тапом. Перетаскивание работает как раньше.</div>
 <div class="btns"><button class="btn primary" id="setClose">Готово</button></div></div></div>
-<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила</h2><div class="sub">• Козырь — масть последней карты колоды; первый ход — у младшего козыря.<br>• Атакующий кладёт карту, отбивающийся бьёт её старшей той же масти или козырем.<br>• <b>Управление:</b> одиночный тап по карте руки = выделить (в защите подсветятся все цели, которые она может покрыть). Второй тап по выделенной карте — сыграть её. Двойной тап играет карту сразу. Перетаскивание работает как раньше.<br>• Подкидывать можно тапом или перетаскиванием карты на стол.<br>• «Бито» — всё отбито, карты в сброс.<br>• «Взять» — отбивающийся забирает стол и пропускает ход.<br>• Переводной: пока ни одна карта не покрыта, отбивающийся кладёт карту того же ранга и переводит атаку на следующего.<br>• После раунда все добирают из колоды до 6.<br>• Проигравший — последний с картами («дурак»); победитель в финальном раунде «прилепляет» ему шестёрки на лоб/погоны (традиция).</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
+<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила</h2><div class="sub">• Козырь — масть последней карты колоды; первый ход — у младшего козыря.<br>• Атакующий кладёт карту, отбивающийся бьёт её старшей той же масти или козырем.<br>• <b>Управление:</b> одиночный тап по карте руки = выделить; второй тап = сыграть. Двойной тап играет сразу.<br>• Подкидывать можно тапом или перетаскиванием карты на стол.<br>• «Бито» — всё отбито, карты в сброс.<br>• «Взять» — отбивающийся забирает стол и пропускает ход.<br>• Переводной: пока ни одна карта не покрыта, отбивающийся кладёт карту того же ранга и переводит атаку на следующего.<br>• Проигравший — последний с картами; победитель «прилепляет» ему шестёрки на лоб/погоны.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='3.16';
+const VER='3.17';
 const HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000;
 let heartbeatTimer=null, myRound=0;
 
@@ -194,10 +194,7 @@ function backHandler(){
   goToHub();
 }
 
-Platform.init({
-  bg: '#0d1b2a',
-  back: backHandler
-});
+Platform.init({bg:'#0d1b2a',back:backHandler});
 
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
@@ -213,17 +210,13 @@ function ensureFirebase(){
     .then(function(ok){if(!ok)throw new Error('fb-db');
       firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});
       fbDb=firebase.database();fbAuth=firebase.auth();res(true);})
-    .catch(function(e){console.warn('Firebase lazy load failed:',e);fbLoading=null;res(false);});
+    .catch(function(e){fbLoading=null;res(false);});
   });
   return fbLoading;
 }
-async function ensureAuth(){ await ensureFirebase(); if(!fbAuth)return;
- if(fbAuth.currentUser)return;
- try{await fbAuth.signInAnonymously();}catch(e){console.warn('signInAnonymously failed',e);}
-}
+async function ensureAuth(){ await ensureFirebase(); if(!fbAuth)return; if(fbAuth.currentUser)return; try{await fbAuth.signInAnonymously();}catch(e){} }
 
 function goToHub(){Platform.haptic('light');location.href='../?plat='+Platform.name;}
-
 function showMode(){const m=document.getElementById('modeOverlay');if(m){m.classList.add('show');m.style.display='flex';}}
 function hideMode(){const m=document.getElementById('modeOverlay');if(m){m.classList.remove('show');m.style.display='none';}}
 
@@ -420,7 +413,7 @@ function normState(s){return repairState(prep(s));}
 let onlineMode=false,roomCode=null,myUid=null,mySeat=null,myName=null,roomRef=null,roomData=null,shownEndAt=null;
 let G=null,botCount=2,botTimer=null,prevTurnMe=null,prevLastAt=0,repairTick=null;
 let closeHoldUntil=0,holdKey='',selCard=null,selTransfer=false;
-let dragCard=null,dragGhost=null,dragMoved=false,downX=0,downY=0,dragJustEndedAt=0;
+let dragCard=null,dragGhost=null,dragMoved=false,downX=0,downY=0,downAt=0;
 const BOT_ADD_GAP=2000;
 let botLastAddAt={},botAddOppAt={},botEpisode=0;
 function getUid(){return (fbAuth&&fbAuth.currentUser)?fbAuth.currentUser.uid:(lsGet('durak_uid_fallback','')||'');}
@@ -464,8 +457,7 @@ function startHeartbeat(){
   if(!roomRef||!mySeat)return;
   const beat=()=>{
     try{
-      roomRef.child('presence/'+mySeat).set({uid:myUid,name:myName,at:Date.now()})
-        .catch(()=>{});
+      roomRef.child('presence/'+mySeat).set({uid:myUid,name:myName,at:Date.now()}).catch(()=>{});
     }catch(e){}
   };
   beat();
@@ -510,7 +502,7 @@ async function joinRoom(code){
   let side=null;
   for(const k of SEAT_KEYS){if(m[k]&&m[k].uid===myUid){side=k;break;}}
   if(!side){
-   if(r.status!=='waiting'){alert('Игра уже идёт, твоего места нет. Дождись окончания партии или попроси хоста создать новую комнату.');return;}
+   if(r.status!=='waiting'){alert('Игра уже идёт.');return;}
    for(const k of SEAT_KEYS){
     if(!m[k]){const ok=await claimSeat(k);if(ok){side=k;break;}}
    }
@@ -550,22 +542,11 @@ function subscribeRoom(){
     if(allAgreed && isHost()){
       const newSeats={};
       for(const k of activeSeats)newSeats[k]=roomData.seats[k];
-      roomRef.update({
-        status:'waiting',
-        state:null,
-        round:(roomData.round||1)+1,
-        rematch:{},
-        seats:newSeats,
-        flags:{drawOffer:null,drawAccept:false,surrender:null}
-      }).catch(()=>{});
+      roomRef.update({status:'waiting',state:null,round:(roomData.round||1)+1,rematch:{},seats:newSeats,flags:{drawOffer:null,drawAccept:false,surrender:null}}).catch(()=>{});
     }
   }
   const rr=roomData.round||1;
-  if(rr!==myRound){
-    myRound=rr;
-    shownEndAt=null;
-    endOverlay.classList.remove('show');
-  }
+  if(rr!==myRound){myRound=rr;shownEndAt=null;endOverlay.classList.remove('show');}
   const lm=s&&s.lastMove;
   if(lm&&lm.at&&lm.at!==prevLastAt){prevLastAt=lm.at;
    if(lm.by&&lm.by!==mySeat){const a=lm.action||'';
@@ -591,13 +572,7 @@ function showLobby(){lobbyOverlay.classList.add('show');$('lobbyCode').textConte
  for(let i=playersList().length;i<MAX_PLAYERS;i++){const r=document.createElement('div');r.className='row';r.innerHTML='<span style="opacity:.5">— место свободно —</span><span>⚪</span>';list.appendChild(r);}
  $('lobbyStart').style.display=isHost()?'inline-flex':'none';
  $('lobbyStart').disabled=playersList().length<2;}
-
-function shareInvite(){
-  const url=inviteLink(roomCode);
-  const text='🃏 Дурак онлайн! Комната '+roomCode+'\n'+url;
-  Platform.share(url,text);
-}
-
+function shareInvite(){const url=inviteLink(roomCode);const text='🃏 Дурак онлайн! Комната '+roomCode+'\n'+url;Platform.share(url,text);}
 function updateRoomActions(){const box=$('roomActions');[...box.children].forEach(c=>{if(!c.dataset.prompt)c.remove();});if(!onlineMode||!roomRef)return;
  const sh=document.createElement('button');sh.className='rbtn';sh.textContent='📤 Пригласить';sh.onclick=shareInvite;box.appendChild(sh);
  const cb=document.createElement('button');cb.className='rbtn';cb.textContent='🔢 Код';cb.onclick=function(){try{navigator.clipboard.writeText(roomCode);}catch(e){}updateMessage('Код '+roomCode+' скопирован');};box.appendChild(cb);
@@ -608,7 +583,7 @@ function updateRoomActions(){const box=$('roomActions');[...box.children].forEac
   const db2=document.createElement('button');db2.className='rbtn';db2.textContent='🤝 Ничья';db2.onclick=async function(){if(confirm('Предложить ничью?'))await roomRef.child('flags/drawOffer').set(mySeat);};box.appendChild(db2);
   const sb=document.createElement('button');sb.className='rbtn danger';sb.textContent='🏳 Сдаться';sb.onclick=async function(){if(confirm('Сдаться?'))await roomRef.child('flags/surrender').set(mySeat);};box.appendChild(sb);
  }
- const lb=document.createElement('button');lb.className='rbtn danger';lb.textContent='🚪 Выйти';lb.onclick=function(){if(confirm('Выйти из комнаты? Партия прервётся.')){leaveRoom();showMode();}};box.appendChild(lb);}
+ const lb=document.createElement('button');lb.className='rbtn danger';lb.textContent='🚪 Выйти';lb.onclick=function(){if(confirm('Выйти из комнаты?')){leaveRoom();showMode();}};box.appendChild(lb);}
 function updateLiveBadge(){if(!onlineMode||!roomData)return;const pl=playersList();const live=pl.filter(p=>p.connected).length;$('rbLive').textContent=live;$('rbDot').className='live-dot'+(pl.length>0&&live<pl.length?' some-off':'');}
 function requestRematch(){
   if(!roomRef||!mySeat)return;
@@ -621,14 +596,7 @@ function requestRematch(){
   if(othersAgreed && activeSeats.length>=2 && isHost()){
     const newSeats={};
     for(const k of activeSeats)newSeats[k]=roomData.seats[k];
-    roomRef.update({
-      status:'waiting',
-      state:null,
-      round:(roomData.round||1)+1,
-      rematch:{},
-      seats:newSeats,
-      flags:{drawOffer:null,drawAccept:false,surrender:null}
-    }).catch(()=>{});
+    roomRef.update({status:'waiting',state:null,round:(roomData.round||1)+1,rematch:{},seats:newSeats,flags:{drawOffer:null,drawAccept:false,surrender:null}}).catch(()=>{});
   }
 }
 let watchdog=null;
@@ -873,7 +841,7 @@ function statusText(){
  const s=S();if(!s)return onlineMode?'Ожидание старта...':'Выбери режим';
  if(s.result)return s.result.loser?('🤡 Дурак: '+esc(nameOf(s.result.loser))):'🤝 Ничья';
  const me=meUid();
- if(onlineMode&&!mySeat)return'👀 Вы наблюдатель: место не найдено';
+ if(onlineMode&&!mySeat)return'👀 Вы наблюдатель';
  if((s.hands[me]||[]).length===0&&me!==s.attacker&&me!==s.defender){
   if(onlineMode||(s.deck&&s.deck.length===0))return'👀 Нет карт — наблюдаете за партией';
   return'⏳ У тебя нет карт — сейчас доберёшь из колоды';
@@ -881,8 +849,8 @@ function statusText(){
  const iCan=canPodkid(s,me);
  if(s.phase==='attack'){
   if(me===s.defender){
-   if(selCard){const ti=beatTargets(s,selCard);if(ti.length>1)return '👆 Тапни по подсвеченной карте стола, чтобы покрыть';return '👆 Тапни ещё раз по своей карте, чтобы сыграть';}
-   return transferInfo(s,me)?'🛡 Тап по карте — выделить; двойной тап — сыграть':'🛡 Тап по карте — выделить; двойной тап — сыграть';
+   if(selCard){const ti=beatTargets(s,selCard);if(ti.length>1)return '👆 Тапни по подсвеченной карте стола';return '👆 Тапни ещё раз, чтобы сыграть';}
+   return transferInfo(s,me)?'🛡 Тап/двойной тап — сыграть или перевести':'🛡 Тап/двойной тап по карте — сыграть';
   }
   return '🛡 '+esc(nameOf(s.defender))+' отбивается'+(iCan?' (можно подкинуть)':'');
  }
@@ -890,7 +858,7 @@ function statusText(){
   if(me===s.attacker)return '📥 Подкинь и заверши';
   return '📥 '+esc(nameOf(s.defender))+' берёт'+(iCan?' (можно подкинуть)':'');
  }
- if(!s.table.length)return me===s.attacker?'⚔️ Твой ход: тап по карте — выделить, ещё раз — сыграть':'⚔️ Ходит '+esc(nameOf(s.attacker));
+ if(!s.table.length)return me===s.attacker?'⚔️ Твой ход: тап/двойной тап':'⚔️ Ходит '+esc(nameOf(s.attacker));
  if(me===s.attacker)return '⚔️ Подкинь или скажи «Бито»';
  return '⚔️ Ходит '+esc(nameOf(s.attacker))+(iCan?' (можно подкинуть)':'');
 }
@@ -1057,10 +1025,11 @@ function renderAll(){
  if(s&&s.result&&!endOverlay.classList.contains('show')&&shownEndAt!==s.result.at)showEnd();
 }
 function podkidDenyMessage(s){
- return s.allAddEnabled?'❌ Подкидывать могут только крайние к отбивающемуся':'❌ Подкидывание выключено: карты кидает только атакующий';
+ return s.allAddEnabled?'❌ Подкидывать могут только крайние':'❌ Подкидывание выключено';
 }
 function onTableClick(ti){
  const s=S();if(!s||s.result)return;const me=meUid();
+ console.log('[DU] onTableClick ti='+ti+' selCard='+selCard+' phase='+s.phase);
  if(!(s.phase==='attack'&&me===s.defender)||!selCard)return;
  const c=selCard;
  if(s.table[ti].d||!cbeats(c,s.table[ti].a,s.trump)){updateMessage('❌ Сюда положить нельзя',true);sDeny();return;}
@@ -1068,12 +1037,17 @@ function onTableClick(ti){
  applyMove(st=>actBeat(st,me,c,ti),'отбой '+c,sBeat);
 }
 const DRAG_THRESHOLD=6;
+/* v3.17: тапы определяются через pointerup (не click, который на мобильных
+   часто не срабатывает из-за задержки после pointerup).
+   downAt + moved определяют: был ли это тап или drag.
+   lastTapCard/lastTapAt + tapTimer определяют single vs double. */
+let lastTapCard=null, lastTapAt=0, tapTimer=null;
 function onCardDown(e,c){
   const s=S();if(!s||s.result)return;
   const me=meUid();
   if((s.hands[me]||[]).indexOf(c)<0)return;
-  if(Date.now()-dragJustEndedAt<80)return;
-  dragCard=c;dragMoved=false;downX=e.clientX;downY=e.clientY;
+  console.log('[DU] pointerdown card='+c+' phase='+s.phase+' me='+me);
+  dragCard=c;dragMoved=false;downX=e.clientX;downY=e.clientY;downAt=Date.now();
   window.addEventListener('pointermove',onDragMove);
   window.addEventListener('pointerup',onDragUp,{once:true});
   window.addEventListener('pointercancel',onDragCancel,{once:true});
@@ -1086,6 +1060,7 @@ function onDragMove(e){
     dragMoved=true;
     selCard=null;
     selTransfer=false;
+    if(tapTimer){clearTimeout(tapTimer);tapTimer=null;}
     dragGhost=cardEl(dragCard,false,false,false,false);
     dragGhost.classList.add('dragghost');
     document.body.appendChild(dragGhost);
@@ -1114,11 +1089,34 @@ function onDragUp(e){
   window.removeEventListener('pointermove',onDragMove);
   const c=dragCard;
   const moved=dragMoved;
+  const elapsed=Date.now()-(downAt||0);
   dragCard=null;
   document.querySelectorAll('.pair.drop-ok').forEach(el=>el.classList.remove('drop-ok'));
   if(dragGhost){dragGhost.remove();dragGhost=null;}
-  dragJustEndedAt=Date.now();
+  console.log('[DU] pointerup card='+c+' moved='+moved+' elapsed='+elapsed);
+  // ТАП: не было движения и прошло < 400 мс
+  if(!moved && elapsed<400 && c){
+    const now=Date.now();
+    if(lastTapCard===c && now-lastTapAt<300){
+      // Двойной тап
+      if(tapTimer){clearTimeout(tapTimer);tapTimer=null;}
+      lastTapCard=null;lastTapAt=0;
+      console.log('[DU] DOUBLE-TAP card='+c);
+      onHandDblClick(c);
+    }else{
+      // Возможно одиночный — ждём 250 мс
+      lastTapCard=c;lastTapAt=now;
+      if(tapTimer)clearTimeout(tapTimer);
+      tapTimer=setTimeout(()=>{
+        tapTimer=null;
+        console.log('[DU] SINGLE-TAP card='+c);
+        onHandClick(c);
+      },250);
+    }
+    return;
+  }
   if(!moved)return;
+  // DRAG-логика
   const el=document.elementFromPoint(e.clientX,e.clientY);
   const s=S();if(!s||s.result)return;
   const me=meUid();
@@ -1133,10 +1131,10 @@ function onDragUp(e){
         applyMove(st=>actBeat(st,me,c,ti),'отбой '+c,sBeat);
         return;
       }
-      updateMessage('❌ Эта карта не бьёт выбранную цель',true);sDeny();
+      updateMessage('❌ Эта карта не бьёт цель',true);sDeny();
       return;
     }
-    updateMessage('🛡 Перетащи карту на атакованную карту стола',true);sDeny();
+    updateMessage('🛡 Перетащи карту на цель',true);sDeny();
     return;
   }
   if(selTransfer){
@@ -1157,7 +1155,7 @@ function onDragUp(e){
   }
   const ok=!s.table.length?(me===s.attacker&&s.phase==='add'):(['add','attack','taking'].includes(s.phase)&&canAddCard(s,me,c,false));
   if(!ok){
-    updateMessage('❌ Сейчас нельзя подкинуть: у отбивающегося не хватит рук',true);sDeny();
+    updateMessage('❌ Сейчас нельзя подкинуть',true);sDeny();
     return;
   }
   if(!pair&&!onFelt){
@@ -1165,25 +1163,15 @@ function onDragUp(e){
   }
   applyMove(st=>actAdd(st,me,c),'подкинул '+c,sPlay);
 }
-/* v3.16: единый bindCardEvents — различает одиночный и двойной тап.
-   1-й тап = выделить карту (selCard); 2-й тап по выделенной = сыграть.
-   Двойной тап (dblclick) играет карту сразу. */
-let lastTapAt=0, lastTapCard=null, tapTimer=null;
 function bindCardEvents(el,c){
+  // v3.17: только pointerdown — тапы обрабатываются в onDragUp
   el.addEventListener('pointerdown',e=>onCardDown(e,c));
-  el.addEventListener('click',e=>{
-    e.preventDefault();
-    if(dragMoved)return;
-    if(Date.now()-dragJustEndedAt<80)return;
-    const now=Date.now();
-    if(tapTimer){clearTimeout(tapTimer);tapTimer=null;onHandDblClick(c);return;}
-    tapTimer=setTimeout(()=>{tapTimer=null;onHandClick(c);},220);
-  });
 }
 function onHandClick(c){
   ensureAudio();
   const s=S();if(!s||s.result)return;
   const me=meUid();
+  console.log('[DU] onHandClick card='+c+' phase='+s.phase+' me='+me+' selCard='+selCard);
   if(onlineMode&&!mySeat){updateMessage('👀 Вы наблюдатель',true);sDeny();return;}
   if((s.hands[me]||[]).length===0){updateMessage('👀 Нет карт',true);sDeny();return;}
   if(selTransfer){
@@ -1191,23 +1179,24 @@ function onHandClick(c){
     if(info&&info.options.indexOf(c)>=0){selTransfer=false;applyMove(st=>actTransfer(st,me,c),'перевод',sTrans);return;}
     selTransfer=false;renderAll();updateMessage('⇄ Перевод отменён');return;
   }
-  // В защите: одиночный тап = выделить карту и подсветить цели
   if(s.phase==='attack'&&me===s.defender){
     const targets=beatTargets(s,c);
     if(!targets.length){updateMessage('❌ Эта карта не бьёт ни одну неотбитую',true);sDeny();return;}
-    if(selCard===c){selCard=null;renderAll();updateMessage('🎯 Прицел снят');return;}
+    if(selCard===c){
+      // Повторный тап по уже выделенной = играть (если цель одна)
+      if(targets.length===1){selCard=null;applyMove(st=>actBeat(st,me,c,targets[0]),'отбой '+c,sBeat);return;}
+      selCard=null;renderAll();updateMessage('🎯 Прицел снят');return;
+    }
     selCard=c;renderAll();
-    if(targets.length===1)updateMessage('👆 Тапни ещё раз по своей карте или по карте стола, чтобы покрыть');
-    else updateMessage('👆 '+targets.length+' возможных цели подсвечены — тапни по карте стола');
+    if(targets.length===1)updateMessage('👆 Тапни ещё раз, чтобы покрыть');
+    else updateMessage('👆 '+targets.length+' целей подсвечены — выбери тапом по карте стола');
     return;
   }
-  // В атаке/подкидывании: одиночный тап = выделить карту, ждать 2-й тап
   if(me!==s.defender){
     if(!canPodkid(s,me)){updateMessage(podkidDenyMessage(s),true);sDeny();return;}
     const ok=!s.table.length?(me===s.attacker&&s.phase==='add'):(['add','attack','taking'].includes(s.phase)&&canAddCard(s,me,c,false));
     if(!ok){updateMessage('❌ Сейчас нельзя подкинуть',true);sDeny();return;}
     if(selCard===c){
-      // 2-й тап по уже выделенной = играть
       selCard=null;
       applyMove(st=>actAdd(st,me,c),'подкинул '+c,sPlay);
       return;
@@ -1222,13 +1211,13 @@ function onHandDblClick(c){
   ensureAudio();
   const s=S();if(!s||s.result)return;
   const me=meUid();
+  console.log('[DU] onHandDblClick card='+c+' phase='+s.phase+' me='+me);
   if(onlineMode&&!mySeat){updateMessage('👀 Вы наблюдатель',true);sDeny();return;}
   if((s.hands[me]||[]).length===0){updateMessage('👀 Нет карт',true);sDeny();return;}
   if(selTransfer){
     const info=transferInfo(s,me);
     if(info&&info.options.indexOf(c)>=0){selTransfer=false;applyMove(st=>actTransfer(st,me,c),'перевод',sTrans);return;}
   }
-  // Двойной тап в защите
   if(s.phase==='attack'&&me===s.defender){
     const targets=beatTargets(s,c);
     if(!targets.length){updateMessage('❌ Эта карта не бьёт ни одну неотбитую',true);sDeny();return;}
@@ -1237,12 +1226,10 @@ function onHandDblClick(c){
       applyMove(st=>actBeat(st,me,c,targets[0]),'отбой '+c,sBeat);
       return;
     }
-    // Несколько целей — оставить выделение, ждём тапа по цели
     selCard=c;renderAll();
-    updateMessage('👆 '+targets.length+' возможных цели — выбери тапом по карте стола');
+    updateMessage('👆 '+targets.length+' целей — выбери тапом по карте стола');
     return;
   }
-  // Двойной тап в атаке/подкидывании = сразу играть
   if(me!==s.defender){
     if(!canPodkid(s,me)){updateMessage(podkidDenyMessage(s),true);sDeny();return;}
     const ok=!s.table.length?(me===s.attacker&&s.phase==='add'):(['add','attack','taking'].includes(s.phase)&&canAddCard(s,me,c,false));
@@ -1253,7 +1240,6 @@ function onHandDblClick(c){
   }
   updateMessage('⏳ Сейчас не твоё действие',true);sDeny();
 }
-/* v3.16: шестёрки в конце игры — традиция «прилепить на лоб/погоны» */
 function countSixesInHand(hand){return (hand||[]).filter(c=>rankOf(c)==='6').length;}
 function sixMessage(sixes,isMe){
  if(sixes<=0)return '';
@@ -1274,7 +1260,6 @@ function showEnd(){
  if(iLose){title='🤡 Вы дурак';sub='Карты остались у вас на руках';sLose();Platform.haptic('error');}
  else if(draw){title='🤝 Ничья';sub='Карты кончились у всех';sDraw();}
  else{title='🏆 Вы победили!';sub='Дурак: '+esc(nameOf(s.result.loser));sWin();Platform.haptic('success');}
- // v3.16: шестёрки на лоб/погоны
  if(!draw && s.result.loser){
   const loserHand=(s.hands[s.result.loser]||[]);
   const sixes=countSixesInHand(loserHand);
@@ -1332,14 +1317,14 @@ function attachUI(){
       const st=S();
       if(st&&!st.result){
         roomRef.child('state/transferEnabled').set(!!set.transfer).catch(()=>{});
-        updateMessage('⇄ Переводной '+(set.transfer?'включён':'выключен')+' для текущей партии у всех');
+        updateMessage('⇄ Переводной '+(set.transfer?'включён':'выключен')+' у всех');
       }
     }
   }else if(G&&!G.result){
     G.transferEnabled=!!set.transfer;
     selTransfer=false;
     renderAll();
-    updateMessage('⇄ Переводной '+(set.transfer?'включён':'выключен')+' с этого момента');
+    updateMessage('⇄ Переводной '+(set.transfer?'включён':'выключен'));
   }
  };
  $('allAddChk').onchange=function(e){
@@ -1350,13 +1335,13 @@ function attachUI(){
       const st=S();
       if(st&&!st.result){
         roomRef.child('state/allAddEnabled').set(!!set.allAdd).catch(()=>{});
-        updateMessage('👥 Подкидывание крайними '+(set.allAdd?'включено':'выключено')+' для текущей партии у всех');
+        updateMessage('👥 Подкидывание крайними '+(set.allAdd?'включено':'выключено')+' у всех');
       }
     }
   }else if(G&&!G.result){
     G.allAddEnabled=!!set.allAdd;
     renderAll();
-    updateMessage('👥 Подкидывание крайними '+(set.allAdd?'включено':'выключено')+' с этого момента');
+    updateMessage('👥 Подкидывание крайними '+(set.allAdd?'включено':'выключено'));
   }
  };
  $('pauseSel').onchange=function(e){set.throwPause=+e.target.value;saveSet();trackEvent('settings_change',{game_name:'durak',setting:'throw_pause',value:set.throwPause});};
@@ -1372,9 +1357,9 @@ function attachUI(){
  $('transferBtn').onclick=function(){sClickUi();const s=S();if(!s||s.result)return;const me=meUid();const info=transferInfo(s,me);if(!info)return;
   if(info.options.length===1){selTransfer=false;applyMove(st=>actTransfer(st,me,info.options[0]),'перевод',sTrans);return;}
   selTransfer=!selTransfer;selCard=null;renderAll();
-  updateMessage(selTransfer?'⇄ Выбери карту (тап или drag на стол)':'🛡 Отбейся или возьми');};
+  updateMessage(selTransfer?'⇄ Выбери карту':'🛡 Отбейся или возьми');};
  $('finishBtn').onclick=function(){sClickUi();const me=meUid();applyMove(st=>actFinishTake(st,me),'завершил взятие',sTake);};
- $('menuBtn').onclick=function(){if(confirm('Выйти в меню игр? Партия будет прервана.')){sClickUi();if(onlineMode)leaveRoom();goToHub();}};
+ $('menuBtn').onclick=function(){if(confirm('Выйти в меню игр?')){sClickUi();if(onlineMode)leaveRoom();goToHub();}};
 }
 try{attachUI();}catch(e){window.__ERR2='ui: '+e.message;}
 try{
