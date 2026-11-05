@@ -86,7 +86,8 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
 .cardbox h2{font-size:22px;margin-bottom:8px}
 .cardbox .sub{opacity:.85;margin-bottom:14px;font-size:14px;line-height:1.5}
 .cardbox .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
-.hubbtn{position:absolute;top:12px;left:12px}
+/* v1.7.1: кнопка "В меню" в отдельном flex-ряду над заголовком — не перекрывается названием */
+.mhdr{display:flex;justify-content:flex-start;margin-bottom:6px}
 .stat-row{display:flex;justify-content:space-between;padding:6px 2px;border-bottom:1px solid var(--border);font-size:14px}
 .stat-row b{color:var(--accent)}
 .mode-choice{display:flex;flex-direction:column;gap:10px;margin:10px 0}
@@ -149,7 +150,7 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
   <button class="btn" id="menuBtn" style="display:none">🏠 Меню</button>
   <button class="btn" id="shareLinkBtn">📤 Отправить ссылку на игру</button>
 </div>
-<div class="ver" id="verTag">v1.7</div>
+<div class="ver" id="verTag">v1.7.1</div>
 </div>
 
 <div class="fieldViewBar" id="fieldViewBar">
@@ -157,10 +158,11 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
   <button class="btn" id="closeFieldView">Закрыть</button>
 </div>
 
+<!-- v1.7.1: mhdr — кнопка "В меню" в отдельном ряду над заголовком, не перекрывается -->
 <div class="overlay" id="modeOverlay">
   <div class="cardbox">
-    <button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button>
-    <h2>❌⭕ Крестики-нолики <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v1.7</span></h2>
+    <div class="mhdr"><button class="hbtn" id="modeHubBtn">← В меню игр</button></div>
+    <h2>❌⭕ Крестики-нолики <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v1.7.1</span></h2>
     <div class="sub">Классика 3×3: три в ряд по горизонтали, вертикали или диагонали</div>
     <div class="seg" id="sideSeg"><b data-s="x" class="on">❌ Крестики</b><b data-s="o">⭕ Нолики</b></div>
     <div class="mode-choice">
@@ -258,11 +260,14 @@ body{min-height:100vh;background:radial-gradient(ellipse at center,var(--bg2),va
 </div>
 
 <script>
-const VER='1.7', HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000, TURN_TIMEOUT=30000;
+const VER='1.7.1', HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000, TURN_TIMEOUT=30000;
 const LN=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
 let heartbeatTimer=null, myRound=0, fieldViewMode=false;
 let lastEndInfo=null;
+
+/* v1.7.1: prevStatus — для отслеживания момента смены status (шторка меняется только при смене) */
+let prevRoomStatus=null;
 
 /* ---------- Настройки и статистика ---------- */
 let set=Object.assign({aiLvl:'medium',first:'x',vol:.7,skin:'classic'},JSON.parse(localStorage.tt_set||'{}'));
@@ -284,20 +289,19 @@ function showST(){
   $('stAi').textContent=ST.ai;$('stOn').textContent=ST.on;$('stHot').textContent=ST.hot;
 }
 
-/* ---------- Back handler ---------- */
 function backHandler(){
   try{
     if(fieldViewMode){closeFieldView();return;}
-    if(rulesOverlay.classList.contains('show')){rulesOverlay.classList.remove('show');return;}
-    if(statsOverlay.classList.contains('show')){statsOverlay.classList.remove('show');return;}
-    if(setOverlay.classList.contains('show')){setOverlay.classList.remove('show');return;}
-    if(endOverlay.classList.contains('show')){
-      endOverlay.classList.remove('show');
+    if($('rulesOverlay').classList.contains('show')){$('rulesOverlay').classList.remove('show');return;}
+    if($('statsOverlay').classList.contains('show')){$('statsOverlay').classList.remove('show');return;}
+    if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}
+    if($('endOverlay').classList.contains('show')){
+      $('endOverlay').classList.remove('show');
       if(onlineMode)return;
-      modeOverlay.classList.add('show');
+      $('modeOverlay').classList.add('show');
       return;
     }
-    if(modeOverlay.classList.contains('show')){modeOverlay.classList.remove('show');goToHub();return;}
+    if($('modeOverlay').classList.contains('show')){$('modeOverlay').classList.remove('show');goToHub();return;}
   }catch(e){}
   goToHub();
 }
@@ -307,7 +311,6 @@ function goToHub(){Platform.haptic('light');Platform.goToHub();}
 function trackEvent(n,p){p=p||{};p.platform=Platform.name;try{typeof gtag==='function'&&gtag('event',n,p);}catch(e){}}
 (function(){try{const k='tt_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'tictactoe',source:Platform.name,ver:VER});}}catch(e){}})();
 
-/* ---------- Firebase (ленивая загрузка по шаблону Нард) ---------- */
 let fbDb=null,fbAuth=null,fbLoading=null;
 function ensureFirebase(){
   if(fbDb)return Promise.resolve(true);
@@ -326,7 +329,6 @@ function ensureFirebase(){
 }
 async function ensureAuth(){await ensureFirebase();if(!fbAuth)return;if(fbAuth.currentUser)return;try{await fbAuth.signInAnonymously();}catch(e){console.warn('[TT] signIn failed:',e);}}
 
-/* ---------- Звук ---------- */
 let AC=null,MA=null,unlocked=false;
 function unlockAudio(){
   if(unlocked)return true;
@@ -350,7 +352,6 @@ const sDeny=()=>tone(150,90,.14,'sawtooth',.12);
 
 const $=id=>document.getElementById(id);
 
-/* ---------- Картинки-символы (проба) ---------- */
 let useImg=false;
 (function(){const a=new Image(),b=new Image(),n={ok:0};
 const done=()=>{n.ok++;if(n.ok===2)useImg=true;};
@@ -359,7 +360,6 @@ a.onerror=function(){console.warn('[TT] img NOT FOUND: '+a.src);};
 b.onerror=function(){console.warn('[TT] img NOT FOUND: '+b.src);};
 a.src='img/x.png';b.src='img/o.png';})();
 
-/* ---------- Игровой движок ---------- */
 function newState(f){return{board:Array(9).fill(null),turn:f||'x',result:null,turnAt:Date.now(),lastMove:null,hist:[],first:f||'x',scores:{w:0,b:0}};}
 function normState(s){
   s=(s&&typeof s==='object')?s:{};
@@ -377,6 +377,7 @@ function normState(s){
   return s;
 }
 function checkLine(b){
+  if(!b||!Array.isArray(b))return null;
   for(const l of LN){const[a,c,d]=l;if(b[a]&&b[a]===b[c]&&b[c]===b[d])return{w:b[a],l};}
   if(b.every(x=>x))return{w:'draw',l:null};
   return null;
@@ -410,7 +411,6 @@ function aiMove(b,ai,lvl){
   return scores[0].i;
 }
 
-/* ---------- Игровое состояние ---------- */
 let onlineMode=false,hotseatMode=false,roomCode=null,myUid=null,mySide=null,myName=null;
 let roomRef=null,roomData=null,shownEndAt=null,G=null,aiTimer=null;
 let playerSide='x',cellEls=[];
@@ -452,7 +452,6 @@ function isGameActive(){
 }
 function isHost(){return roomData&&roomData.host===mySide;}
 
-/* ---------- Поле ---------- */
 function buildBoard(){
   const b=$('board');b.innerHTML='';cellEls=[];
   for(let i=0;i<9;i++){
@@ -475,7 +474,6 @@ function svgO(){return '<svg class="o" viewBox="0 0 100 100"><g fill="none">'
 +'<path d="M 27 36 A 31 31 0 0 1 60 21" stroke="#ffffff" stroke-width="5" opacity="0.45" stroke-linecap="round"/>'
 +'</g></svg>';}
 function symHTML(v){if(useImg)return '<img class="sym" src="img/'+v+'.png" alt="">';return v==='x'?svgX():svgO();}
-
 function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function setStatus(t,w){const e=$('statusEl');e.innerHTML=t;e.classList.toggle('warn',!!w);}
 function statusText(){
@@ -497,7 +495,7 @@ function statusText(){
   return'⚔️ Твой ход ('+(playerSide==='x'?'❌':'⭕')+')';
 }
 
-/* ---------- Шторка ---------- */
+/* ---------- Шторка: открытие/закрытие ---------- */
 function collapseCurtain(){$('rbExtra').style.display='none';$('roomBar').classList.remove('open');hideLobbyInBar();}
 function expandCurtain(){$('rbExtra').style.display='flex';$('roomBar').classList.add('open');}
 function showLobbyInBar(){
@@ -519,7 +517,6 @@ function showLobbyInBar(){
 }
 function hideLobbyInBar(){const box=$('lobbyBox');if(box)box.style.display='none';}
 
-/* ---------- Heartbeat ---------- */
 function startHeartbeat(){
   stopHeartbeat();
   if(!roomRef||!mySide)return;
@@ -532,7 +529,6 @@ function startHeartbeat(){
 function stopHeartbeat(){if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}}
 function removePresence(){if(!roomRef||!mySide)return;try{roomRef.child('presence/'+mySide).remove();}catch(e){}}
 
-/* ---------- Создание/вход в комнату ---------- */
 async function createRoom(){
   await ensureAuth();if(!fbDb){alert('Не удалось загрузить Firebase — проверь сеть.');return;}
   myUid=getUid();myName=getUserName();mySide='w';roomCode=genRoomCode();
@@ -543,9 +539,9 @@ async function createRoom(){
       game:'tictactoe',host:mySide,createdAt:Date.now(),round:1,status:'waiting',
       players:{w:{name:myName,uid:myUid}},presence:{},rematch:{},state:st
     });
-    onlineMode=true;hotseatMode=false;
+    onlineMode=true;hotseatMode=false;prevRoomStatus='waiting';
     $('roomBar').style.display='block';$('roomCode').textContent=roomCode;
-    modeOverlay.classList.remove('show');buildBoard();expandCurtain();
+    $('modeOverlay').classList.remove('show');buildBoard();expandCurtain();
     setTimeout(()=>{startHeartbeat();subscribeRoom();},500);
     trackEvent('room_created',{game_name:'tictactoe'});
   }catch(e){alert('Ошибка: '+e.message);}
@@ -556,34 +552,35 @@ async function joinRoom(code){
   roomRef=fbDb.ref('rooms/'+roomCode);
   try{
     const snap=await roomRef.once('value');
-    if(!snap.exists()){alert('Комната не найдена.');modeOverlay.classList.add('show');return;}
+    if(!snap.exists()){alert('Комната не найдена.');$('modeOverlay').classList.add('show');return;}
     const r=snap.val();
-    if(r.game!=='tictactoe'){alert('Другая игра.');modeOverlay.classList.add('show');return;}
-    if(r.status!=='waiting'&&r.status!=='finished'&&r.status!=='playing'){alert('Игра уже идёт.');modeOverlay.classList.add('show');return;}
+    if(r.game!=='tictactoe'){alert('Другая игра.');$('modeOverlay').classList.add('show');return;}
+    if(r.status!=='waiting'&&r.status!=='finished'&&r.status!=='playing'){alert('Игра уже идёт.');$('modeOverlay').classList.add('show');return;}
     let side=null;
     if(r.players){
       if(r.players.w&&r.players.w.uid===myUid)side='w';
       else if(r.players.b&&r.players.b.uid===myUid)side='b';
     }
     if(!side){
-      if(r.status==='playing'){alert('Игра уже началась.');modeOverlay.classList.add('show');return;}
+      if(r.status==='playing'){alert('Игра уже началась.');$('modeOverlay').classList.add('show');return;}
       if(!r.players||!r.players.b)side='b';
       else if(!r.players.w)side='w';
-      else{alert('Комната заполнена.');modeOverlay.classList.add('show');return;}
+      else{alert('Комната заполнена.');$('modeOverlay').classList.add('show');return;}
     }
     mySide=side;myRound=r.round||1;
     await roomRef.child('players/'+mySide).set({name:myName,uid:myUid});
     if(!r.state||!r.state.board||!Array.isArray(r.state.board))await roomRef.child('state').set(newState(set.first));
     onlineMode=true;hotseatMode=false;
+    prevRoomStatus=r.status;
     $('roomBar').style.display='block';$('roomCode').textContent=roomCode;
-    modeOverlay.classList.remove('show');buildBoard();
+    $('modeOverlay').classList.remove('show');buildBoard();
     if(r.status==='waiting')expandCurtain();else if(r.status==='finished')expandCurtain();else collapseCurtain();
     setTimeout(()=>{startHeartbeat();subscribeRoom();},500);
     trackEvent('room_joined',{game_name:'tictactoe'});
   }catch(e){alert('Ошибка: '+e.message);}
 }
 
-/* ---------- Подписка на комнату ---------- */
+/* v1.7.1: subscribeRoom — шторка меняется ТОЛЬКО при смене status (prevRoomStatus guard) */
 function subscribeRoom(){
   roomRef.on('value',snap=>{
     roomData=snap.val();
@@ -594,9 +591,17 @@ function subscribeRoom(){
     }
     roomData.state=normState(roomData.state);
 
-    if(roomData.status==='waiting')showLobbyInBar();else hideLobbyInBar();
-    if(roomData.status==='playing')collapseCurtain();
-    else if(roomData.status==='finished')expandCurtain();
+    /* v1.7.1: управление шторкой — только при смене status, не на каждом тике */
+    const curStatus=roomData.status;
+    if(curStatus!==prevRoomStatus){
+      prevRoomStatus=curStatus;
+      if(curStatus==='waiting'){expandCurtain();showLobbyInBar();}
+      else if(curStatus==='playing'){collapseCurtain();hideLobbyInBar();}
+      else if(curStatus==='finished'){expandCurtain();hideLobbyInBar();}
+    }else{
+      /* status не менялся — только обновляем lobby если открыта */
+      if(curStatus==='waiting')showLobbyInBar();
+    }
 
     const s=roomData.state;
     if(s&&s.result&&roomData.status==='playing'&&isHost()){
@@ -616,7 +621,7 @@ function subscribeRoom(){
       }
     }
     const rr=roomData.round||1;
-    if(rr!==myRound){myRound=rr;shownEndAt=null;endOverlay.classList.remove('show');fieldViewMode=false;$('fieldViewBar').classList.remove('show');}
+    if(rr!==myRound){myRound=rr;shownEndAt=null;$('endOverlay').classList.remove('show');fieldViewMode=false;$('fieldViewBar').classList.remove('show');}
 
     updateLiveBadge();updateRoomActions();renderAll();updatePulse();
     if(s.result&&s.result.at!==shownEndAt){shownEndAt=s.result.at;showEnd();}
@@ -624,17 +629,16 @@ function subscribeRoom(){
   startWatchdog();
 }
 
-/* ---------- Выход ---------- */
 function leaveRoom(){
   stopHeartbeat();removePresence();
   if(roomRef){roomRef.off();roomRef=null;}
-  onlineMode=false;roomData=null;roomCode=null;shownEndAt=null;myRound=0;fieldViewMode=false;lastEndInfo=null;
+  onlineMode=false;roomData=null;roomCode=null;shownEndAt=null;myRound=0;
+  fieldViewMode=false;lastEndInfo=null;prevRoomStatus=null;
   $('roomBar').style.display='none';$('roomBar').classList.remove('open');
   $('rbExtra').style.display='none';$('fieldViewBar').classList.remove('show');
-  endOverlay.classList.remove('show');
+  $('endOverlay').classList.remove('show');
 }
 
-/* ---------- Шеринг ---------- */
 function shareInvite(){
   unlockAudio();
   const url=inviteLink(roomCode);
@@ -660,7 +664,6 @@ function shareResult(){
   trackEvent('game_share',{game_name:'tictactoe',share_type:'result'});
 }
 
-/* ---------- UI комнаты ---------- */
 function updateRoomActions(){
   const box=$('roomActions');box.innerHTML='';
   if(!onlineMode)return;
@@ -679,8 +682,13 @@ function updateRoomActions(){
         if(!roomData||!isHost()||pc<2)return;
         const s2=Object.assign({},roomData.state||newState(set.first));
         s2.lastMove={by:mySide,name:myName,action:'deal',at:Date.now()};
+        /* v1.7.1: ОПТИМИСТИЧНЫЙ update — локальный status='playing' ставим СРАЗУ,
+           иначе host кликает клетку до прихода listener'а и onCell блокирует ход */
+        roomData.status='playing';
+        roomData.state=normState(s2);
         roomRef.update({state:s2,status:'playing',rematch:{}}).catch(e=>console.warn('[TT] start fail:',e.message));
         trackEvent('game_start',{game_name:'tictactoe',mode:'online'});
+        renderAll();
       };
       box.appendChild(st);
     }
@@ -693,7 +701,7 @@ function updateRoomActions(){
     }
   }
   const lb=document.createElement('button');lb.className='rbtn danger';lb.textContent='🚪 Выйти';
-  lb.onclick=()=>{if(confirm('Выйти из комнаты?')){leaveRoom();modeOverlay.classList.add('show');}};
+  lb.onclick=()=>{if(confirm('Выйти из комнаты?')){leaveRoom();$('modeOverlay').classList.add('show');}};
   box.appendChild(lb);
 }
 function updateLiveBadge(){
@@ -704,7 +712,6 @@ function updateLiveBadge(){
   $('roomCount').textContent=pl.length+'/2';
 }
 
-/* ---------- Pulse-подсказки ---------- */
 function updatePulse(){
   const clearAll=()=>{
     ['modeAi','modeHost','modeHot','modeJoin'].forEach(id=>{const e=$(id);if(e)e.classList.remove('pulse');});
@@ -714,7 +721,7 @@ function updatePulse(){
     $('newBtn').classList.remove('pulse');
   };
   clearAll();
-  if(modeOverlay.classList.contains('show')){
+  if($('modeOverlay').classList.contains('show')){
     $('modeHost').classList.add('pulse');
     $('modeAi').classList.add('pulse');
     return;
@@ -748,7 +755,6 @@ function updatePulse(){
   }
 }
 
-/* ---------- Watchdog авто-передачи ---------- */
 let watchdog=null;
 function startWatchdog(){
   if(watchdog)clearInterval(watchdog);
@@ -765,12 +771,11 @@ function startWatchdog(){
   },5000);
 }
 
-/* ---------- Оффлайн-старт ---------- */
 function startOffline(side,hot){
   onlineMode=false;hotseatMode=!!hot;
   G=newState(set.first);playerSide=side;
   lastEndInfo=null;
-  modeOverlay.classList.remove('show');endOverlay.classList.remove('show');
+  $('modeOverlay').classList.remove('show');$('endOverlay').classList.remove('show');
   $('strike').style.display='none';
   buildBoard();renderAll();setStatus(statusText());
   trackEvent('game_start',{game_name:'tictactoe',mode:hot?'hotseat':'ai',side});
@@ -791,7 +796,6 @@ function maybeAi(){
   },550);
 }
 
-/* ---------- Отрисовка ---------- */
 function drawStrike(wl){
   const st=$('strike');
   if(!wl||!Array.isArray(wl)||!cellEls.length||!cellEls[wl[0]]||!cellEls[wl[2]]){st.style.display='none';return;}
@@ -854,7 +858,7 @@ function renderAll(){
     if(s.lastMove&&typeof s.lastMove.i==='number'&&s.lastMove.i===i&&!wl)el.classList.add('last');
   });
   drawStrike(wl);
-  const menuHidden=modeOverlay.classList.contains('show');
+  const menuHidden=$('modeOverlay').classList.contains('show');
   $('newBtn').style.display=(!onlineMode&&s.result)?'inline-flex':'none';
   $('menuBtn').style.display=(!s.result&&!menuHidden)?'inline-flex':'none';
   setStatus(statusText());
@@ -863,7 +867,8 @@ function renderAll(){
   updatePulse();
 }
 
-/* ---------- Клик по клетке ---------- */
+/* v1.7.1: onCell — убран ранний return при status!=='playing',
+   вместо него используется isGameActive() + оптимистичный update из кнопки "Начать" */
 function onCell(i){
   unlockAudio();
   const s=S();
@@ -871,7 +876,9 @@ function onCell(i){
   if(s.board[i]){sDeny();return;}
 
   if(onlineMode){
-    if(!roomData||roomData.status!=='playing'){sDeny();setStatus('⏳ Игра ещё не началась',true);return;}
+    /* v1.7.1: мягкая проверка — если status ещё не playing, но локально уже обновлено оптимистично, ходим */
+    if(!roomData){sDeny();setStatus('⏳ Игра ещё не началась',true);return;}
+    if(!isGameActive()){sDeny();setStatus('⏳ Игра ещё не началась',true);return;}
     const my=meSym();
     if(s.turn!==my){sDeny();setStatus('⏳ Сейчас ход соперника',true);return;}
     const ns=JSON.parse(JSON.stringify(s));
@@ -899,7 +906,6 @@ function onCell(i){
   }
 }
 
-/* ---------- Финал ---------- */
 function showEnd(){
   const s=S();if(!s||!s.result||!s.board)return;
   let out='lose',mySym=null,mode='ai';
@@ -934,20 +940,20 @@ function showEnd(){
     const rs=document.createElement('button');rs.className='btn';rs.dataset.end='share';rs.textContent='📤 Отправить результат';rs.onclick=shareResult;b.appendChild(rs);
     const sh=document.createElement('button');sh.className='btn';sh.textContent='📤 Поделиться комнатой';sh.onclick=shareInvite;b.appendChild(sh);
     const lv=document.createElement('button');lv.className='btn';lv.textContent='🚪 Выйти';
-    lv.onclick=()=>{leaveRoom();endOverlay.classList.remove('show');modeOverlay.classList.add('show');};
+    lv.onclick=()=>{leaveRoom();$('endOverlay').classList.remove('show');$('modeOverlay').classList.add('show');};
     b.appendChild(lv);
   }else{
     const r=document.createElement('button');r.className='btn primary';r.dataset.end='new';r.textContent='🔄 Ещё партию';
-    r.onclick=()=>{endOverlay.classList.remove('show');if(hotseatMode)startOffline('x',true);else startOffline(playerSide,false);};
+    r.onclick=()=>{$('endOverlay').classList.remove('show');if(hotseatMode)startOffline('x',true);else startOffline(playerSide,false);};
     b.appendChild(r);
     const fv=document.createElement('button');fv.className='btn';fv.textContent='👁 Посмотреть поле';fv.onclick=showFieldView;b.appendChild(fv);
     const rs=document.createElement('button');rs.className='btn';rs.dataset.end='share';rs.textContent='📤 Отправить результат';rs.onclick=shareResult;b.appendChild(rs);
     const h=document.createElement('button');h.className='btn';h.textContent='🏠 В меню игры';
-    h.onclick=()=>{endOverlay.classList.remove('show');G=null;lastEndInfo=null;hotseatMode=false;$('strike').style.display='none';buildBoard();renderAll();modeOverlay.classList.add('show');};
+    h.onclick=()=>{$('endOverlay').classList.remove('show');G=null;lastEndInfo=null;hotseatMode=false;$('strike').style.display='none';buildBoard();renderAll();$('modeOverlay').classList.add('show');};
     b.appendChild(h);
     const h2=document.createElement('button');h2.className='btn';h2.textContent='← В меню игр';h2.onclick=goToHub;b.appendChild(h2);
   }
-  endOverlay.classList.add('show');
+  $('endOverlay').classList.add('show');
   setTimeout(()=>updatePulse(),50);
   trackEvent('game_end',{game_name:'tictactoe',mode:mode,outcome:out});
 }
@@ -956,16 +962,14 @@ function requestRematch(){
   expandCurtain();
   roomRef.child('rematch/'+mySide).set(true).catch(e=>console.warn('[TT] rm fail:',e.message));
   if(roomData&&roomData.status==='playing'&&isHost())roomRef.child('status').set('finished').catch(e=>console.warn('[TT] force fail:',e.message));
-  endOverlay.classList.remove('show');
+  $('endOverlay').classList.remove('show');
   setStatus('🔄 Ожидание соперника для реванша…');
 }
-function showFieldView(){endOverlay.classList.remove('show');fieldViewMode=true;$('fieldViewBar').classList.add('show');}
-function closeFieldView(){fieldViewMode=false;$('fieldViewBar').classList.remove('show');const s=S();if(s&&s.result)endOverlay.classList.add('show');}
+function showFieldView(){$('endOverlay').classList.remove('show');fieldViewMode=true;$('fieldViewBar').classList.add('show');}
+function closeFieldView(){fieldViewMode=false;$('fieldViewBar').classList.remove('show');const s=S();if(s&&s.result)$('endOverlay').classList.add('show');}
 
-/* ---------- Скины ---------- */
 function applySkin(){document.documentElement.dataset.skin=set.skin;}
 
-/* ---------- Обработчики ---------- */
 $('hubBtn').onclick=()=>{if(onlineMode)leaveRoom();goToHub();};
 $('modeHubBtn').onclick=goToHub;
 $('rulesBtn').onclick=()=>$('rulesOverlay').classList.add('show');
@@ -990,7 +994,7 @@ $('menuBtn').onclick=()=>{
   if(!confirm('Прервать партию и вернуться в меню?'))return;
   sClick();if(onlineMode)leaveRoom();
   G=null;lastEndInfo=null;hotseatMode=false;
-  $('strike').style.display='none';buildBoard();renderAll();modeOverlay.classList.add('show');
+  $('strike').style.display='none';buildBoard();renderAll();$('modeOverlay').classList.add('show');
 };
 document.querySelectorAll('#sideSeg b').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#sideSeg b').forEach(x=>x.classList.remove('on'));
@@ -1002,7 +1006,11 @@ $('modeHost').onclick=async()=>{unlockAudio();await createRoom();};
 $('modeJoin').onclick=()=>{$('joinBox').style.display='flex';$('joinActions').style.display='flex';$('joinInput').value='';};
 $('joinCancel').onclick=()=>{$('joinBox').style.display='none';$('joinActions').style.display='none';};
 $('joinGo').onclick=async()=>{const c=$('joinInput').value.trim().toUpperCase();if(c.length!==6){alert('Код должен быть 6 символов');return;}await joinRoom(c);};
-$('rbToggle').onclick=()=>{const ex=$('rbExtra');const open=ex.style.display!=='none';ex.style.display=open?'none':'flex';$('roomBar').classList.toggle('open',!open);sClick();};
+/* v1.7.1: ручное переключение шторки — не трогаем prevRoomStatus,
+   тогда heartbeat-тик с тем же status не перезапишет наше состояние */
+$('rbToggle').onclick=()=>{const ex=$('rbExtra');const open=ex.style.display!=='none';
+  if(open){collapseCurtain();}else{expandCurtain();showLobbyInBar();}
+  sClick();};
 $('closeFieldView').onclick=closeFieldView;
 window.addEventListener('resize',()=>{const s=S();if(s&&s.result&&s.result.l)drawStrike(s.result.l);});
 window.addEventListener('beforeunload',()=>{stopHeartbeat();removePresence();});
@@ -1017,8 +1025,8 @@ window.addEventListener('beforeunload',()=>{stopHeartbeat();removePresence();});
     const u=new URL(location.href);
     const r=u.searchParams.get('room');
     if(r&&r.length===6)joinRoom(r);
-    else modeOverlay.classList.add('show');
-  }catch(e){console.warn('[TT] init fail:',e);modeOverlay.classList.add('show');}
+    else $('modeOverlay').classList.add('show');
+  }catch(e){console.warn('[TT] init fail:',e);$('modeOverlay').classList.add('show');}
   renderAll();updatePulse();
 })();
 </script>
