@@ -1,6 +1,6 @@
 # PLATFORM-SPEC — МК «Игровой центр»: кроссплатформенная спецификация и грабли
 
-**Версия документа: 2.9** | Дата: 2026-11-04 | Статус: TG ✅ / MAX ✅ / VK ✅ / web ✅ / PC (Electron, Win 7 SP1–11) ✅ / Android (WebView, 8.0+) ✅
+**Версия документа: 2.10** | Дата: 2026-11-05 | Статус: TG ✅ / MAX ✅ / VK ✅ / web ✅ / PC (Electron, Win 7 SP1–11) ✅ / Android (WebView, 8.0+) ✅
 Репозиторий: `github.com/ip19760118-code/games`
 Pages: `https://ip19760118-code.github.io/games/`
 
@@ -13,7 +13,7 @@ Pages: `https://ip19760118-code.github.io/games/`
 
 | Компонент | Где живёт | Комментарий |
 |---|---|---|
-| Хаб (витрина 18 игр + модалка скачивания + умная сортировка + ⚙️ android + чипы версий/NEW) | GitHub Pages, корень репо `games/` | `index.html` **v3.43** |
+| Хаб (витрина 18 игр + модалка ссылок на установщики + умная сортировка + ⚙️ android + чипы версий/NEW) | GitHub Pages, корень репо `games/` | `index.html` **v3.44** |
 | Игры | папки `chess/ … trend-catch/`, `tetris/`, `pyatnashki/`, `tictactoe/` | мультиплатформенные через `js/platform.js` |
 | Онлайн-комнаты | Firebase RTDB (имя проекта не менять!) | единая схема: раздел 5 |
 | Desktop-оболочка (Windows) | локальный проект `gc-desktop/` (**НЕ в репо**) | Electron **22**, релизы GitHub Releases: раздел 6 |
@@ -33,7 +33,7 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 
 | Компонент | Версия |
 |---|---|
-| hub `index.html` | v3.43 |
+| hub `index.html` | v3.44 |
 | `js/platform.js` | v3.4 |
 | `sw.js` | v9 |
 | `tools/gen-versions.js` (gc-desktop) | v1.4 |
@@ -41,14 +41,14 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 | max-bot `server.js` | v2.0 |
 | Морской бой | v4.30 |
 | Шахматы | v2.8 |
-| Дурак | v3.15 |
+| Дурак | v3.20 |
 | Домино | v2.3 |
 | Шашки | v1.7 |
 | Нарды | v2.8 |
 | Тетрис | v1.2 |
 | Сапёр | v1.7 |
 | Пятнашки | v1.3 |
-| Крестики-нолики | v1.5 |
+| Крестики-нолики | v1.7.9 |
 | Desktop-оболочка | v0.3.7 (Electron 22.3.27) |
 | Android-оболочка | v0.9.0 (system WebView) |
 
@@ -127,7 +127,7 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 - Точка: `POST /vk`. Типы: `confirmation`, `message_new`, `message_event`. Секрет сверять с полем `secret`.
 - Отвечать `ok` быстро (<3 c), всю работу ДО ответа.
 - Русские имена событий в UI: «Входящее сообщение» = message_new,
-  **«Действие с сообщением» = message_event** (нажатия callback-кнопок!).
+  **«Действие с сообщении» = message_event** (нажатия callback-кнопок!).
 
 ### 3.2 Клавиатуры (главный источник 911)
 - **912** «This is a chat bot feature» → Управление → «Настройки для бота» → «Возможности ботов: Включены».
@@ -164,21 +164,20 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
   удаляет ВСЕ старые кэши (`skipWaiting` + `clients.claim`) — лечение «залипшего» platform.js в TG-desktop.
   Регистрация из `platform.js` по маске `^(.*\/games\/)` только на github.io
   **и только при отсутствии `window.AppBridge`** (в оболочках кэшем управляет апдейтер).
-- Prefetch топовых игр (chess/seabattle/durak/tetris/**tictactoe**) через `<link rel=prefetch>`; пропуск при `saveData`.
+- Prefetch топовых игр (chess/seabattle/durak/tetris/tictactoe) через `<link rel=prefetch>`; пропуск при `saveData`.
 - Firebase-комнаты работают ТОЛЬКО в first-party контексте: никаких iframe внутри мессенджер-вью.
 - `window.open` может блокироваться popup-блокером → всегда fallback `location.href`.
 - **Favicon:** во всех играх и хабе `<link rel="icon" … icon-32.png>` (+apple-touch 180); убирает 404 `/favicon.ico`.
 - **Звук:** mp3 в `assets/snd` отсутствуют → эффекты через синтез в приоритете; `SND.preload()` не вызывать (404).
   AudioContext создаётся/разблокируется ТОЛЬКО после user gesture (autoplay-policy); эталон-функция `unlockAudio()`
   (однократный silent-осциллятор + resume; повторные вызовы дешёвые).
-- **Модалка скачивания хаба (v3.29–3.33), двухэтапная:**
-  1. Экран действий: «⬇️ Скачать приложение» / «📤 Отправить ссылку» / «💾 Скачать ссылку» (буфер обмена).
-  2. Экран платформ: «🪟 Windows 7 и новее · Для ПК и ноутбуков. (~140Мб)» и
-     «🤖 Android 8 и новее · Лёгкое приложение (~3 МБ) с офлайн-играми».
-  Действия: download = прямая загрузка ассета (в оболочках — `AppBridge.openExternal`);
-  share = `Platform.share` (системный chooser / шеринг мессенджеров);
-  «Скачать ссылку» = копирование в буфер (`navigator.clipboard` + fallback `execCommand`).
-  Системная «Назад»/Esc на экране платформ возвращает на экран действий (`ov.dataset.screen`).
+- **Модалка хаба «📥 Приложение для ПК и Android» (v3.29–3.33 двухэтапная, v3.44 — без закачки):**
+  экран действий содержит ТОЛЬКО «📤 Отправить ссылку» и «💾 Скачать ссылку» (буфер обмена);
+  экран платформ: Windows / Android → обе кнопки работают со **ссылкой на установщик**
+  (`WIN_EXE_URL` / `APK_URL`), прямая загрузка бинарников из хаба УБРАНА (v3.44):
+  WebView/мессенджеры не могут надёжно скачать 140 МБ (CORS, attachment-навигация, зависания VK) —
+  получатель открывает ссылку в своём браузере и скачивает там. Системная «Назад»/Esc
+  на экране платформ возвращает на экран действий (`ov.dataset.screen`).
 - **Шестерёнка настроек (hub v3.34):** кнопка `#hubSetBtn` в правом верхнем углу панели;
   видна только при `Platform.name==='android' && AppBridge.openSettings` → открывает нативный
   экран настроек оболочки (7.9). На pc/web/TG/MAX/VK скрыта.
@@ -196,23 +195,29 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
     авто-добавки: строка «👉 Сыграть сейчас: <диплинк>» (opts.game) и бренд-строка
     «🎮 Игровой центр — классика и новинки, онлайн и офлайн» (opts.game ИЛИ opts.brand).
     **Бренд без чисел** — никаких «16/17 игр» в текстах (числа устаревают).
-  - Обычный `Platform.share(url,text,opts)` без опций НЕ меняется: модалка хаба и инвайты комнат
+  - Обычный `Platform.share(url,text,opts)` без опций НЕ меняется: инвайты комнат
     остаются как были (инвайтам добавляем `{brand:true}` при миграции).
   - **v3.1 фикс десктоп-web:** `navigator.share` (OS share-sheet) на Windows отдаёт таргетам
     (Telegram) только url, текст терялся → при `name==='web'` и pointer:fine шеринг идёт
     в буфер обмена полным сообщением + тост; мобильный web (pointer:coarse) и оболочки — прежние пути.
-- **UX-паттерн шеринга в играх (эталон с Пятнашек v1.3; мигрированы Сапёр v1.7, Нарды v2.8, Крестики v1.0):**
-  - главный экран: кнопка **«📤 Отправить ссылку на игру»** (анонс + диплинк);
-  - **«📤 Отправить результат»** (время/ходы/счёт/линия) — в финальном оверлее после окончания
-    (в Крестиках v1.4+ — при любом исходе, не только победа: поражение и ничья тоже вирусны);
+- **UX-паттерн шеринга в играх (эталон Пятнашки v1.3; мигрированы ВСЕ игры, включая Дурак v3.20):**
+  - главный экран: кнопка **«📤 Отправить ссылку на игру»** (анонс + диплинк, `shareGameLink`);
+  - финальный оверлей: **«📤 Отправить результат»** (`shareResult`: исход + имя дурака/соперника +
+    традиции типа шестёрок + диплинк + бренд); появляется при любом исходе, не только победа;
   - GA `game_share` с `share_type:'link'|'result'` — метрика виральности K = hub_deeplink / игроки.
-- **UX-паттерн pulse-подсказок и авто-шторки (Морской бой v4.29–4.30 → Нарды v2.8 → Крестики v1.0):**
-  - `@keyframes btnPulse` / `cellPulse`: подсвечивается контроль, который стоит нажать СЕЙЧАС
-    (📤 Пригласить → ▶ Начать → бросок/ход → 🔄 Реванш; в Крестиках — пустые клетки в твой ход);
-    подсказка снимается сразу после действия;
-  - шторка комнаты (room-bar): **автораскрытие** при `status='waiting'` и `'finished'`,
-    **автосворачивание** при `'playing'`, раскрытие по клику «Реванш» (видно согласие соперника);
-  - цель: снять вопросы «что нажать дальше» и «где лобби» без единой строки текста-инструкции.
+- **UX-паттерн pulse-подсказок (v2.7 → уточнение v2.10):** `@keyframes btnPulse` подсвечивает
+  ТОЛЬКО кнопки шторки комнаты (`.rbtn`: 📤 Пригласить → ▶ Начать → 🔄 Реванш) и кнопки финального
+  оверлея endOverlay. **Клетки/карты игрового поля и кнопки выбора режима НЕ пульсируют**
+  (требование пользователя: подсветка поля и модалки отвлекает; tictactoe v1.7.7, durak v3.17).
+  Подсказка снимается сразу после действия; реализация через `classList.toggle` (не remove+add —
+  иначе анимация перезапускается на каждом тике listener'а).
+- **UX-паттерн авто-шторки (Морской бой v4.30 → Нарды v2.8 → Крестики v1.7):**
+  шторка комнаты (room-bar): автораскрытие при `status='waiting'` и `'finished'`,
+  автосворачивание при `'playing'`, раскрытие по клику «Реванш»;
+  **управление ТОЛЬКО по смене статуса** (prevRoomStatus-guard, см. 5.14), не на каждый snapshot.
+- **Заголовки оверлеев (v2.10):** кнопка «← В меню игр» в модалках — в отдельном flex-ряду
+  `.mhdr` НАД заголовком; `position:absolute` (hubbtn) ЗАПРЕЩЁН — наезжает на длинный заголовок
+  на узких экранах (tictactoe v1.4/v1.7, durak v3.20).
 - **Картинки-ассеты игр (эталон Крестики v1.5):** папка `<game>/img/`, PNG **512×512**, прозрачный фон,
   **имена файлов ТОЛЬКО ASCII** (кириллические `х.png`/`о.png` визуально неотличимы от `x.png`/`o.png` —
   грабля 8.5). Проба при старте: `new Image()` на оба файла → флаг `useImg`;
@@ -228,33 +233,45 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
   Ключ нормализуется из пути папки (`./trend-catch/` → `trend_catch`), работает и для диплинков.
 - Описания витрин без чисел игр (лимиты платформ).
 
-### 4.1 Каскадное скачивание ассетов (platform.js v3.4)
+### 4.1 Каскадное скачивание ассетов (platform.js v3.4, hub v3.44)
 
-`Platform.downloadAsset(url, fileName, opts)` — единая точка входа для скачивания бинарных файлов
-(установщики, ассеты) из любой среды. Каскад по средам:
+`Platform.downloadAsset(url, fileName, opts)` — единая точка входа для бинарников из оболочек и web:
 
 | Среда | Механизм | Фолбэк |
 |---|---|---|
-| **Android-оболочка** | `AppBridge.downloadFile` → нативный `DownloadManager` | браузер |
-| **ПК-оболочка 0.3.4+** | `AppBridge.downloadFile` (IPC `bridge:download-file`) → `node:https` с редиректами в `app.getPath('downloads')` + `shell.showItemInFolder` | `AppBridge.openExternal` |
-| **ПК-оболочка старая (<0.3.4)** | — | `AppBridge.openExternal` (системный браузер) |
-| **TG/VK/MAX WebApp** | **БЕЗ попытки fetch** (CORS-блок → ложные «загрузка не удалась») | — |
-| — mobile WebApp | `navigator.share({files:[File]})` (системный chooser «Сохранить/Отправить») | `window.open(url)` во внешний браузер |
-| — desktop WebApp | сразу честный переход в системный браузер (`Telegram.WebApp.openLink` / `VKWebAppOpenExternalLink` / `WebApp.openLink`) | — |
-| **TG/VK/MAX во внешнем браузере** | `location.href = url` (GitHub `Content-Disposition: attachment` → загрузка стартует) | `window.open` |
-| **Web-браузер desktop** | `fetch` → `blob` → `<a download>` (blob-URL same-origin — обход Chrome-игнора атрибута download на кросс-оригин редиректе GitHub) | `window.open` |
+| Android-оболочка ≥0.9.0 | `AppBridge.downloadFile` → системный `DownloadManager` (уведомление, `Downloads/`) | `ACTION_VIEW` браузер |
+| ПК-оболочка ≥0.3.6 | IPC `bridge:download-file` → `node:https` с редиректами (до 5) → `app.getPath('downloads')` + `shell.showItemInFolder` | `AppBridge.openExternal` |
+| Web-браузер desktop | `fetch` → `blob` → `<a download>` (blob same-origin обходит Chrome-игнор download-атрибута на кросс-оригин редиректе GitHub) | `window.open` |
+| TG/VK/MAX WebApp | **без fetch** (CORS-блок): сразу ВНЕШНИЙ браузер (`WebApp.openLink` / `VKWebAppOpenExternalLink` / `Telegram.WebApp.openLink`), mobile сначала пробует `navigator.share({files})` | `location.href` |
+| MAX во внешнем браузере | `location.href = url` (GitHub отдаёт `Content-Disposition: attachment` → загрузка стартует сама) | — |
 
-**Ключевое решение (v3.4):** для мессенджер-сред **не пытаться качать из WebApp** —
-это принципиально невозможно (CORS + sandbox) и всегда даёт ложные тосты «загрузка не удалась».
-Вместо этого сразу переход в **внешний системный браузер устройства** с честным тостом
-«Открываем браузер для загрузки…».
+**Hub v3.44:** прямая закачка установщиков из хаба УБРАНА полностью (см. раздел 4, модалка):
+любые WebView/мессенджеры не гарантируют загрузку 140 МБ (CORS, attachment-навигация,
+зависание встроенного браузера VK на редиректах) — хаб только отдаёт/шарит ссылку,
+скачивание происходит в браузере получателя. Тосты честные: «Открываем браузер для загрузки…».
 
-**Оболочный механизм (ПК v0.3.4+):** IPC `bridge:download-file` → main-процесс через
-`node:https` ходит по редиректам GitHub CDN (`latest/download/*` → `objects.githubusercontent.com`, до 5 редиректов),
-стримит в файл `app.getPath('downloads')/fileName`, по завершении `shell.showItemInFolder(dest)` + тост.
-Браузер не открывается вообще.
+### 4.2 Стиль кода и формат поставки (правило 2026-11-05)
 
-**Опции `opts`:** `{ shareText, shareTitle }` — для `navigator.share({files})` на мобильных.
+- **Компактный код:** без лишних переносов и пробелов; плотные однострочники там, где не теряется
+  читаемость; CSS/JS уплотнены вручную. Полные файлы поставляются компактными.
+- **Формат поставки:** код даётся **ПОЛНОСТЬЮ, одним блоком-контейнером** — пользователь заменяет
+  старый файл целиком. **Исключение:** правки на 1–5 строк — даются точечно таблицей
+  «Найти → Заменить», пользователь применяет сам (явно помечать «точечная правка»).
+- **Синтаксический контроль после компактификации:** потерянная скобка/запятая = SyntaxError =
+  смерть ВСЕГО `<script>` = «пустое поле без меню и без видимых ошибок» (кейсы: durak v3.19
+  `try` без закрывающей скобки в joinRoom; tictactoe v1.6.2 дубль `const sC`+`function sC`;
+  tictactoe v1.7.4 опечатка `goHub` вместо `goToHub` в присваивании обработчика).
+  Обязательно до поставки: `node --check` извлечённого JS ИЛИ открытие в браузере с консолью;
+  в играх держать boot-guard (`window.__BOOT_OK` + fallback-оверлей с текстом ошибки, паттерн durak).
+- **Идентификаторы:** запрещены дубли имён `const/let/var` и `function` в одном scope;
+  запрещены реноймы с висячими ссылками при минификации (`sMv`/`sM`, черновик `turn`);
+  обработчики, присваиваемые при выполнении (`el.onclick=fn`), должны ссылаться на существующие функции.
+- **Диагностические логи:** временные маркеры `[XX]` (пример: `[TT] pointerup moved=… elapsed=…`,
+  `[DU] SINGLE-TAP card=…`) вводятся ТОЛЬКО на время охоты за багом; после фикса лишние логи
+  убираются, остаются `warn/error` на реальных отказах (требование пользователя).
+- **Логи пользователя:** при жалобе «не работает» первым делом запрашивать консоль с фильтром `[XX]`;
+  цепочка маркеров (pointerdown → pointerup → SINGLE/DOUBLE-TAP → onHandClick → FB OK/FAIL)
+  показывает точный этап обрыва.
 
 ---
 
@@ -276,7 +293,7 @@ rooms/{code}/
 ├── rematch: {key: true}                    // флаги согласия на реванш
 ├── flags: {drawOffer, drawAccept, surrender, winner}
 ├── scores: {key: number}                   // суммарные победы
-└── state: {...}                            // игровое состояние
+└── state: {...}                            // игровое состояние (см. 5.12 про null/массивы!)
 ```
 
 ### 5.2 Жизненный цикл партии
@@ -339,7 +356,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 |---|---|
 | waiting | 📤 Пригласить (disabled при полном), 🔢 Код, ▶ Начать (хост, disabled при <2), 🚪 Выйти |
 | playing | 🔢 Код, 🤝 Ничья, 🏳 Сдаться, 🚪 Выйти |
-| finished | 🔢 Код,  Реванш,  Выйти |
+| finished | 🔢 Код, 🔄 Реванш, 🚪 Выйти |
 
 ### 5.8 Просмотр партии после окончания
 
@@ -347,12 +364,11 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 - Плавающая панель `fieldViewBar`; `fieldViewMode=true` блокирует все ходы;
   закрытие кнопкой/BackHandler возвращает endOverlay.
 - **Упрощение для игр без длинной истории (Крестики v1.5):** просмотр = финальная позиция БЕЗ
-  пошаговой отмотки (кнопки ◀/▶ и `renFv` удалены намеренно): «👁 Посмотреть поле» просто убирает
-  endOverlay, поле остаётся с win-подсветкой клеток и полосой-перечёркиванием; «Закрыть» возвращает карточку.
-- **Полоса-перечёркивание собранной линии (Крестики v1.5, паттерн для будущих линий):**
-  absolute-div `.strike` в обёртке поля (не внутри board, чтобы не сносился `innerHTML=''`);
-  длина/угол = по rect первой и последней клеток линии (+выступы ~0.3 клетки), пересчёт на resize/повороте;
-  градиент accent→accent2 + свечение; при ничьей/новой партии скрывается.
+  пошаговой отмотки: «👁 Посмотреть поле» просто убирает endOverlay, поле остаётся с win-подсветкой
+  и полосой-перечёркиванием; «Закрыть» возвращает карточку.
+- **Полоса-перечёркивание собранной линии (Крестики v1.5):** absolute-div `.strike` в обёртке поля
+  (не внутри board, чтобы не сносился `innerHTML=''`); длина/угол = по rect первой и последней клеток
+  линии (+выступы ~0.3 клетки), пересчёт на resize/повороте; при ничьей/новой партии скрывается.
 
 ### 5.9 Схемы состава и правила Firebase
 
@@ -399,13 +415,77 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 
 Ключевые строки: `startHeartbeat …`, `presence write failed …`, `propose rematch …`,
 `rematch check: rm=… active=… allAgreed=…`, `all agreed -> start new game immediately`,
-`result detected, setting status=finished`, `round change N -> M`, `[TT] img NOT FOUND: <url>` (проба картинок).
+`result detected, setting status=finished`, `round change N -> M`.
+Диагностические (временные, см. 4.2): `pointerdown/pointerup moved=… elapsed=…`,
+`SINGLE-TAP/DOUBLE-TAP`, `onCell: go/PASSING/BLOCK`, `FB update OK/FAIL`.
 
 ### 5.11 Watchdog автоходов
 
 Хост каждые 5 c: если актёр без fresh presence и `turnAt` старше 30 с → автоход по правилам игры
-(взятие/пропуск/бито/ролл/бросок костей; **Крестики: простая передача хода** сменой `turn`
-и `lastMove.action='авто-передача (нет связи)'`).
+(взятие/пропуск/бито/ролл/бросок костей/передача хода) с `lastMove.action='автоход (нет связи)'`.
+
+### 5.12 Firebase RTDB: массивы, null и merge-удаления (Крестики v1.7.6–1.7.7)
+
+- **`null` в массиве = удаление:** запись `board:[null,…,'x']` хранится как разреженный объект
+  `{4:'x'}`; при чтении возвращается ОБЪЕКТ, а не массив → `Array.isArray` false → наивный
+  normState сбрасывал доску в пустую («символы исчезают», `board=_________` в логах).
+- **`update({state})`_merge-ит:** null-значения в payload УДАЛЯЮТ пути; параллельные update двух
+  клиентов стирают ходы друг друга («поставил крестик — поле очистилось»).
+- **Правила:**
+  1. В массивах состояния хранить плейсхолдеры `''` или `0` вместо `null` (board из `''/'x'/'o'`).
+  2. Игровое состояние писать **атомарно** `roomRef.child('state').set(ns)`, НЕ `update({state:ns})`.
+  3. `normState()` при чтении конвертирует ОБЕ формы (массив и разреженный объект с числовыми/строчными
+     ключами) в полный массив длины N.
+  4. **Запрещены оптимистичные локальные мутации state/board** до ack/snapshot: двойной клик успевает
+     прочитать старое состояние и отправить дубль-ход; вместо этого — `pendingMove`-lock
+     (снимается в `.then/.catch` и при смене статуса/раунда).
+
+### 5.13 Гигиена listener'ов подписки
+
+- `roomRef.off('value')` ПЕРЕД повторным `on('value')` (reconnect, повторный вход, hot-reload):
+  без этого накапливаются параллельные слушатели, обновления дублируются и конфликтуют (tictactoe v1.6.3).
+- Callback listener'а не должен бросать исключений: любой throw внутри `on('value')` =
+  `FIREBASE WARNING: Exception was thrown by user callback` + сломанный рендер на каждом тике;
+  все чтения полей защищать (`s.board`, `s.result.l`, `s.lastMove.i`, `Array.isArray`).
+- Сигнатурные логи snapshot'а (status|players|turn|result|board) писать ТОЛЬКО при смене сигнатуры —
+  иначе спам на каждый heartbeat (tictactoe v1.7.8).
+
+### 5.14 Шторка room-bar: управление только по смене статуса
+
+- Авто open/close шторки и lobby-бокса — ТОЛЬКО в момент изменения `roomData.status`
+  (guard `prevRoomStatus`), НЕ на каждый snapshot/heartbeat.
+- Ручное состояние шторки (открыл/закрыл сам) живёт до: смены статуса, смены раунда, `leaveRoom()`.
+- Без guard'а шторка «сама закрывается через ~5 c» после ручного открытия (heartbeat-тик, tictactoe v1.7.1).
+- Lobby-бокс внутри раскрытой шторки показывается только при `status==='waiting'`.
+
+### 5.15 Тапы в мобильных WebView: pointerup вместо click (tictactoe v1.7.7, durak v3.17)
+
+- `click` после `pointerup` в WebView приходит с задержкой/нестабильно; защита от drag
+  (`if(now-dragJustEndedAt<80)return`) блокировала ВСЕ клики → «тапы не работают, drag работает».
+- **Паттерн:** тап = `pointerup` с `moved=false` (порог перемещения 6px) и `elapsed<400ms`.
+  Single/double различаются таймером: второй тап по тому же элементу в течение 300ms = double
+  (немедленно сыграть карту/ход), иначе single через 250ms (выделить/прицелиться).
+  Drag (`moved=true`) обрабатывается в том же `pointerup` отдельно.
+- Одиночный тап по карте/клетке = выделить (в защите подсвечиваются ВСЕ возможные цели,
+  класс `.dst` с пульсом); второй тап по выделенной = сыграть; тап по подсвеченной цели на столе = покрыть её.
+
+### 5.16 Имена игроков из оболочек (tictactoe v1.7.9, durak v3.16)
+
+- `AppBridge.getProfile()` возвращает РАЗНЫЕ форматы: Electron preload → `Promise<{name}>`;
+  Android `@JavascriptInterface` → JSON-СТРОКА `'{"name":…}'` (`.then` у строки = TypeError → «Гость»).
+- **`getUserNameAsync()`:** если результат имеет `.then` — await; если строка — `JSON.parse`;
+  далее `Platform.user()` (мессенджеры, пропуск «Гость»); далее стабильный `localStorage`-фолбэк
+  (`<game>_name`, «ИгрокNNN»); `slice(0,24)`.
+- Имя пишется в `players/seats` и `presence` при входе; heartbeat продолжает нести актуальное имя.
+
+### 5.17 Финальные «традиции» и метрики атак (Дурак v3.18)
+
+- Традиции типа «шестёрка на лоб» считаются **ПО АТАКЕ**, не по руке проигравшего:
+  `state.lastSixesOnMe[defender]` — инкремент на каждую шестёрку в атаке/подкидывании,
+  сброс в 0 при назначении нового защитника в `resolveRound` (новый раунд).
+- Финал: 1 шестёрка = «на лоб», 2 = «на погоны», 3+ = «на лоб и погоны»;
+  проигравшему — «Вам прилипили…», победителю — «Вы прилипили сопернику…»; при ничьей — без бейджа.
+- Бейдж `.six-badge` в endOverlay + отдельный звук `sSix()`.
 
 ---
 
@@ -430,7 +510,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   `artifactName: IgrovojCentr-Setup.exe`, `compression: maximum`, `electronLanguages: [ru, en]`,
   `publish: github`, иконки `assets/icons/win/icon.ico`.
 
-### 6.2 Контент: паки, протокол app://, контракт updater.js и package.json
+### 6.2 Контент: паки, протокол app://, контракты модулей и package.json
 
 - `registerSchemesAsPrivileged([{scheme:'app',privileges:{standard,secure,supportFetchAPI,corsEnabled,stream}}])`
   ДО ready → стабильный origin → localStorage (uid Firebase, статистика) переживает обновления.
@@ -454,21 +534,21 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   процессы висят в диспетчере, окна нет, автообновление не стартует (кейс v1.4.1, фикс v1.4.2).
   Менять можно только внутренности методов.
 - **🔒 API-КОНТРАКТ `shell-updater.js` (НЕ НАРУШАТЬ):** main.js зовёт
-  `shellUpdater.init({mode, toast, onState})` (а **не** `init(app, config, hooks)`);
-  методы `check(silent)`, `menuAction()`, `getStatus()`. Любое отклонение = краш автообновления.
+  `shellUpdater.init({mode, toast, onState})` (а НЕ `init(app, config, hooks)`);
+  методы `check(silent)`, `menuAction()`, `getStatus()`. Любое отклонение = молчащее автообновление.
 - **🔒 API-КОНТРАКТ `config.js` (НЕ НАРУШАТЬ):** main.js зовёт
-  `const { makeConfig, DEFAULT_ROOT } = require('./config')` (а не объект с `get/set`);
+  `const { makeConfig, DEFAULT_ROOT } = require('./config')` (НЕ объект с `get/set` напрямую);
   `config = makeConfig(app)` → `config.get()` / `config.set(k,v)` / `config.save()`.
-  **`packsRoot` = текущая папка контента** (в pages-режиме = `userData/packs/current`,
-  в local-режиме = `DEFAULT_ROOT`); не путать с `updater.currentDir` (staging/current внутри updater).
-  Несовпадение = страница-ошибка 404 «Файл не найден» при живых паках.
-- **🔒 ПРАВИЛО `package.json` (кейс v0.3.6→0.3.7):** runtime-зависимости (`electron-updater` и любые,
+  **`packsRoot` = текущая папка контента** (pages: `userData/packs/current`; local: `DEFAULT_ROOT`);
+  не путать с внутренним `updater.currentDir`. Несовпадение семантик = страница 404 при живых паках
+  (кейс реконструкции main.js v0.3.5, см. 6.9).
+- **🔒 ПРАВИЛО `package.json` (кейс v0.3.6→v0.3.7):** runtime-зависимости (`electron-updater` и любые,
   которые `require`-ятся в main.js) держать **ТОЛЬКО** в секции `dependencies`.
   `devDependencies` (electron, electron-builder) electron-builder **НЕ пакует** в `app.asar`.
-  Потеря зависимости = краш main-процесса на первом же `require` в runtime (кейс 2026-11-04:
-  `electron-updater` был только в devDeps → `Cannot find module 'electron-updater'` при запуске).
-  **Контроль сборки:** `npx @electron/asar list release/win-unpacked/resources/app.asar | findstr <pkg>`
-  должна показывать `node_modules/<pkg>/…`. Если вывод пустой — релиз НЕ публиковать.
+  Потеря зависимости = краш main-процесса на первом же `require` в runtime
+  (`Cannot find module 'electron-updater'`, диалог «A JavaScript error occurred in the main process»).
+  **Контроль сборки:** `npx @electron/asar list release/win-unpacked/resources/app.asar | findstr electron-updater`
+  — должны быть строки `node_modules/electron-updater/…`; пустой вывод = релиз НЕ публиковать.
 - Источники: `local` (dev: паки = рабочая копия репо) | `pages` (боевой: GitHub Pages).
   В установленном exe дефолт `pages`, если локального репо нет.
 - Бутстрап: `pages` + (`auto` ИЛИ нет валидного контента) → синхронизация ДО окна (таймаут 60 с).
@@ -485,8 +565,9 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   Ошибка = тост + системное `Notification` (не пропадает бесследно).
 - Service worker в оболочке НЕ регистрируется (platform.js gated по host github.io и AppBridge).
 - **Нативное скачивание установщиков (main.js v0.3.6+):** IPC `bridge:download-file` через
-  `node:https` с редиректами (GitHub CDN, до 5 hop) → `app.getPath('downloads')/fileName` →
-  `shell.showItemInFolder(dest)` + тост. Браузер не открывается. См. раздел 4.1.
+  `node:https` с редиректами (до 5 hop, `Accept-Encoding: identity`, таймаут 120 с) →
+  `app.getPath('downloads')/fileName` → `shell.showItemInFolder(dest)` + тост. Браузер не открывается.
+  preload: `downloadFile:(url,fileName)=>ipcRenderer.invoke('bridge:download-file',{url,fileName})`.
 
 ### 6.3 Манифест versions.json, грабля хэшей, 🔒 ПРАВИЛО HUB_VER и 🔒 ПРАВИЛО GAMES
 
@@ -530,7 +611,8 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 - Обновления дельтовые (differential downloader) — обычно единицы МБ.
 - v0.1.0 обновиться сама не может (кода апдейтера не было) — только ручная переустановка.
 - **Сломанная сборка не самолечится:** если main.js падает до инициализации shell-updater
-  (кейс контракта updater.js), автообновление не стартует — лечим ручной установкой нового exe.
+  (кейс контракта updater.js, кейс package.json v0.3.6), автообновление не стартует —
+  таким машинам ручная установка нового exe.
 - **Грабля Node 16 (Electron 22):** глобального `fetch` в main-процессе нет →
   `updater.js` качает через `node:https`-хелпер `httpGetBuffer` (редиректы до 5,
   `Accept-Encoding: identity`, таймаут 30 с, 1 ретрай на файл).
@@ -541,8 +623,8 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   `latest.yml` + `IgrovojCentr.apk` (актуальный или перезалитый без изменений — правило раздела 4).
 - `artifactName: IgrovojCentr-Setup.exe` (без версии) → стабильная ссылка хаба
   `…/releases/latest/download/IgrovojCentr-Setup.exe`; шеринг = `…/releases/latest`.
-- Кнопка хаба «📥 Скачать приложение» (v3.22+, двухэтапная с v3.29): модалка действий и платформ;
-  в оболочке exe открывается через `AppBridge.openExternal`.
+- Кнопка хаба «📥 Приложение для ПК и Android» (v3.44): модалка действий (отправить/скопировать ссылку)
+  и платформ; прямая закачка из хаба убрана (4.1).
 - Подписи нет → SmartScreen предупреждает («Подробнее → Выполнить всё равно»); ожидаемо до сертификата/Store.
 
 ### 6.6 Иконки и процедура замены логотипа
@@ -595,9 +677,9 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   (`wc.undo/cut/copy/paste/selectAll/redo`) — копирование кода комнаты/имени не ломается.
 - Esc = системная «Назад» для страниц `app://` → backHandler игры → оверлеи → хаб;
   на хабе back → `AppBridge.quit()` (выход из приложения).
-- Настройки: имя игрока (видно в онлайн-комнатах через `Platform.user()`), источник контента,
-  режим обновлений, живой статус автообновления оболочки, сведения (пути/версии), кнопки
-  «Проверить обновления игр/оболочки», «Установить обновление», «Папка контента».
+- Настройки: имя игрока (видно в онлайн-комнатах через `Platform.user()`/`getUserNameAsync`),
+  источник контента, режим обновлений, живой статус автообновления оболочки, сведения (пути/версии),
+  кнопки «Проверить обновления игр/оболочки», «Установить обновление», «Папка контента».
 - Внешние ссылки (`http(s)`) всегда уходят в системный браузер (`setWindowOpenHandler` +
   `will-navigate`); навигация вне `app://` запрещена.
 - Тосты: IPC `app-toast` → `Platform.toast` в странице (3 с); тосты оболочки через hooks shellUpdater.
@@ -623,10 +705,12 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 `shell-updater.js` desktop-оболочки (и их android-аналоги) **ЗАПРЕЩЕНО** реконструировать вслепую,
 без оригинала рабочего кода. Любая правка — только **инкрементальные добавки** к проверенным
 файлам (например, новый IPC-канал `bridge:download-file` поверх существующей структуры).
-Причина: имена IPC-каналов, экспорты модулей, семантика полей ответов, сигнатуры функций —
-всё это не описано в платформенной спецификации в полном объёме и невоспроизводимо «из головы».
-Контракт между main↔preload↔settings — трёхсторонний и хрупкий: правка одного файла без знания
-других = крах main-процесса (процессы висят, окно не создаётся) или неработающие настройки.
+Причина: имена IPC-каналов (`bridge:*`/`shell:*`), экспорты модулей (`makeConfig`), семантика полей
+(`packsRoot` = текущая папка контента), сигнатуры hooks (`init({mode,toast,onState})`) —
+всё это невоспроизводимо «из головы»; контракт main↔preload↔settings↔updater четырёхсторонний.
+Реконструкция v0.3.5 по памяти дала: другие имена IPC (settings «vundefined»), чужую семантику
+packsRoot (404 при живых паках), неверный вызов shell-updater. Лечение кейса = возврат оригиналов
++ инкремент (v0.3.6).
 
 ---
 
@@ -677,9 +761,9 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 
 ### 7.3 Мост AppBridge (platform='android')
 
-- `getPlatform()='android'`; `getProfile()` (имя из SharedPreferences, дефолт «ИгрокNNN»);
-  `getVersions()` (shell=versionName, content=hub из installed.json); `getUpdateWarnings()`;
-  `share(text,url)` → `ACTION_SEND` chooser; `openExternal(url)` → `ACTION_VIEW`;
+- `getPlatform()='android'`; `getProfile()` (имя из SharedPreferences, дефолт «ИгрокNNN»;
+  **возвращает JSON-СТРОКУ** — см. 5.16); `getVersions()` (shell=versionName, content=hub из installed.json);
+  `getUpdateWarnings()`; `share(text,url)` → `ACTION_SEND` chooser; `openExternal(url)` → `ACTION_VIEW`;
   **`downloadFile(url, fileName)`** (v0.9.0) → `DownloadManager.enqueue` в `DIRECTORY_DOWNLOADS`
   с `VISIBILITY_VISIBLE_NOTIFY_COMPLETED` (системное уведомление загрузки) и фолбэком в
   `ACTION_VIEW` браузера; `quit()` → finish; `notify/toast` → `pageToast`
@@ -719,7 +803,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 - Релиз GitHub содержит **ТРИ ассета**: `IgrovojCentr.apk` + `IgrovojCentr-Setup.exe` + `latest.yml`
   (правило раздела 4: ссылки `latest/download/*` живут только в свежем релизе).
 - Hub v3.31+: кнопка 🤖 «Android 8 и новее» активна; действия модалки работают и для APK
-  (download → anchor/openExternal, share → Platform.share, «скачать ссылку» → буфер).
+  (share → Platform.share, «скачать ссылку» → буфер; прямая закачка убрана в v3.44).
 - Теги релизов общие для проекта (`v0.N.N`); **versionName APK ведётся отдельно** в build.gradle
   и сверяется с `android-update.json` (7.8).
 
@@ -734,7 +818,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   `Toast` в SettingsActivity).
 - **Когда проверяем:** при старте после готовности контента, если режим `auto`
   (PrefsStore.updateMode) и прошло ≥6 ч (pref `apkCheckAt`); вручную — кнопка в настройках (7.9)
-  и `AppBridge.checkAppUpdate()` (троттлинг игнорируется).
+  и `AppBridge.checkAppUpdate()` (троттлинг игнорирует).
 - **Установка:** собственный `ApkProvider` (ContentProvider без androidx; authorities
   `${applicationId}.apk`; путь `update.apk`) → `Intent.ACTION_VIEW` с `content://…` +
   MIME `application/vnd.android.package-archive` + `FLAG_GRANT_READ_URI_PERMISSION`.
@@ -755,7 +839,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   Activity нативная, UI собран кодом (без XML и зависимостей), тема тёмная (#070B16/#1b2228/#7cffc4).
 - **Секции:**
   1. *Имя игрока*: EditText + «💾 Сохранить имя» → `PrefsStore.setName` (имя идёт в
-     `AppBridge.getProfile` → `Platform.user()` → онлайн-комнаты; обрезка до 24 символов).
+     `AppBridge.getProfile` → `getUserNameAsync()` (5.16) → онлайн-комнаты; обрезка до 24 символов).
   2. *Обновление оболочки*: RadioGroup Авто/Вручную → `PrefsStore.updateMode`;
      «🔄 Проверить обновление оболочки» → AppUpdater.checkAsync(true) + диалог + установка (7.8);
      «🎮 Обновить игры сейчас» → ContentUpdater.syncAsync с тостами прогресса.
@@ -795,6 +879,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | VK: письма-дубли ~15 мин | ретраи message_event | дедуп по event_id |
 | VK: пропала нижняя клавиатура | сообщение без keyboard | keyboard в каждом send |
 | VK: Rate limit reached | лимит попыток модерации | одна попытка в сутки |
+| VK: встроенный браузер зависает на «Скачивание…» | редиректы GitHub CDN в WebView VK | не скачивать из VK: только ссылки (hub v3.44, 4.1) |
 | TG: платформа tg в VK/MAX | хардкод TG SDK в hub | ленивая загрузка SDK |
 | TG: «В меню игр» закрывает бота | goToHub вызывал WebApp.close | platform.js v2.8: внутренняя навигация на хаб |
 | TG/BotFather: «Invalid bot selected» | бот выбран ДО команды | порядок: команда → кнопка бота → текст |
@@ -817,6 +902,13 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | Ушедший игрок висит в составе | seats не чистятся | перезапись players=active при автостарте |
 | 404 mp3 в консоли | SND.preload/play без файлов | синтез-приоритет, preload не вызывать |
 | Presence висит после закрытия вкладки | нет beforeunload | removePresence() в beforeunload |
+| **Ходы исчезают / доска очищается после записи** | **null в массиве Firebase = удаление; `update({state})` merge-ит и null-ами стирает чужие пути (5.12)** | **плейсхолдеры `''`/`0` вместо null; атомарный `child('state').set(ns)`; normState object→array (tictactoe v1.7.6+)** |
+| Двойной клик ставит два хода / откат хода | оптимистичная локальная мутация state до ack | pendingMove-lock до ack/snapshot; без оптимизма (5.12) |
+| Шторка закрывается сама через ~5 c после ручного открытия | авто-collapse на каждый snapshot/heartbeat | prevRoomStatus-guard: только по смене статуса (5.14) |
+| Обновления применяются дважды/конфликтуют | повторный `on('value')` без `off` | `roomRef.off('value')` перед подпиской (5.13) |
+| `FIREBASE WARNING: Exception was thrown by user callback` | throw внутри on('value') (чтение undefined-поля) | guard'ы всех полей в callback (5.13) |
+| Тапы по клеткам/картам не работают, drag работает | click после pointerup в WebView + защита drag блокирует click | тапы через pointerup moved/elapsed + single/double таймеры (5.15) |
+| В комнате имя «Гость»/«ИгрокNNN» вместо профиля оболочки | getProfile: JSON-строка (Android) vs Promise (Electron) | getUserNameAsync с обоими форматами (5.16) |
 
 ### 8.3 Desktop-оболочка и сборка (Windows)
 
@@ -824,8 +916,8 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 |---|---|---|
 | Чёрное окно + бледный «404: /index.html» | packsRoot указывает на пустую/битую папку | самовосстановление packsRoot + страница-ошибка (v0.5; с v0.11 — статические error.html/404.html) |
 | Окно не создаётся, 2–3 процесса «Игровой центр» висят в диспетчере | нарушен API-контракт updater.js (имя класса/экспорт/сигнатуры), main.js падает в whenReady до окна; автообновление не стартует | контракт v1.3 неприкосновенен (6.2); сломанную сборку лечим ручной установкой нового exe (кейс v1.4.1→v1.4.2) |
-| **После установки: диалог «A JavaScript error occurred in the main process», `Cannot find module 'electron-updater'`** | **runtime-зависимость `electron-updater` оказалась только в `devDependencies` — electron-builder НЕ пакует devDeps в `app.asar`, и при запуске main-процесс крашится на первом `require('electron-updater')` в shell-updater.js** | **🔒 правило package.json (6.2): runtime-зависимости держать ТОЛЬКО в `dependencies`; контроль сборки: `npx @electron/asar list release/win-unpacked/resources/app.asar \| findstr electron-updater` — если вывод пустой, релиз НЕ публиковать; кейс 2026-11-04 v0.3.6→v0.3.7** |
-| **Оболочка открывается, но Настройки показывают «vundefined», «Chrome undefined», «(нет index.html!)» при живых паках** | **имена полей ответа IPC `shell:get-info` не совпадают с именами, которые читает `settings.html`** (`shellVersion/chrome/contentVersion/packsValid` vs `version`); **ИЛИ** семантика `packsRoot` в конфиге ≠ «текущая папка контента» (путаница `packs/current` vs `userData/packs/current`) | **🔒 контракт полей (6.9): перед правкой main.js — открыть `settings.html` и проверить, какие поля она читает из `AppBridge.getShellInfo()`; сверить с `config.js` — `packsRoot` должен всегда указывать на валидную папку контента; кейс 2026-11-04 v0.3.5→v0.3.6** |
+| **После установки: диалог «A JavaScript error occurred in the main process», `Cannot find module 'electron-updater'`** | **runtime-зависимость только в `devDependencies` — electron-builder не пакует devDeps в asar** | **🔒 правило package.json (6.2): runtime-зависимости только в `dependencies`; контроль `asar list … \| findstr electron-updater`; кейс 2026-11-04 v0.3.6→v0.3.7** |
+| **Оболочка открывается, но Настройки показывают «vundefined», «Chrome undefined», «(нет index.html!)» при живых паках; контент 404** | **реконструкция main.js вслепую: другие имена IPC (`get-shell-info` vs `shell:get-info`), чужая семантика `packsRoot`, неверный вызов `shellUpdater.init(app,config,…)`** | **🔒 запрет реконструкции (6.9): только инкремент к родным файлам; контракт полей settings.html; кейс 2026-11-04 v0.3.5→v0.3.6** |
 | **Оболочки не получают новый platform.js/sw.js/иконки при живом обновлении игр** | **hub-файлы изменены без bump HUB_VER: селективный sync сравнивает версии, не хэши** | **🔒 правило HUB_VER (6.3): bump `HUB_VER` в том же коммите; кейс 2026-11-03 v3.37→v3.38** |
 | **Кнопка игры в хабе есть, на ПК клик = «Файл не найден», чипа/NEW нет нигде; Android и мессенджеры работают** | **id новой игры не добавлен в массив GAMES генератора: манифест без секции игры → паки не скачивают (у desktop-протокола нет сетевого fallback), хаб без метаданных; Android живёт за счёт fallback перехватчика, web/мессенджеры — напрямую с Pages** | **🔒 правило GAMES (6.3): добавить id в GAMES (gen-versions v1.4), реген ПОСЛЕ коммита игры, коммит versions.json+games-added.json, push, синхронизация оболочек; кейс tictactoe 2026-11-04** |
 | «Оболочка актуальна», хотя релиз свежий | `latest.yml.version` равен установленной: version в package.json не bump-нули перед сборкой | bump → dist → `type release\latest.yml \| findstr version` → сверить → релиз (6.4) |
@@ -870,7 +962,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | Установщик не стартует, ошибок нет | нет `REQUEST_INSTALL_PACKAGES` / `canRequestPackageInstalls()==false` | диалог → `ACTION_MANAGE_UNKNOWN_APP_SOURCES` + `pendingInstall` + повтор в onResume (7.8) |
 | `FileUriExposedException` при install-intent | `Uri.fromFile` запрещён с API 24 | свой `ApkProvider` + `content://` URI (7.8) |
 | Шестерёнка ⚙️ не появляется в хабе | hub < v3.34 или в оболочке нет `AppBridge.openSettings` | обновить контент (versions.json) И оболочку ≥0.6.0 |
-| Имя из настроек не видно в уже открытой комнате | игры читают `Platform.user()` при инициализации | пересоздать/перезайти в комнату после сохранения имени |
+| Имя из настроек не видно в уже открытой комнате | игры читают `Platform.user()`/getProfile при инициализации | пересоздать/перезайти в комнату после сохранения имени |
 
 ### 8.5 Игры (геймплейные и игровые грабли 2026-10/11)
 
@@ -879,6 +971,8 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | Дурак: «Ход компьютера» и вечное зависание, логов нет | v3.14: пауза 2 c применялась к первой атаке бота + штампы сбрасывались каждым тиком repairTick | v3.15: пауза только для подкидывания (бот ≠ атакующий); штампы по эпизодам раунда |
 | Дурак: галка «переводной» снята, а перевод работает | правило фиксировалось при раздаче партии | v3.12: переключатель действует сразу на текущую партию; онлайн меняет только хост (`state/transferEnabled`) |
 | Дурак: боты подкидывают всё сразу, игроку нет места | нет дозирования | v3.14: `BOT_ADD_GAP=2000` — 2 c от первой возможности и не чаще 1 карты в 2 c на бота |
+| Дурак: «шестёрка на лоб» при трёх шестёрках атаки | шестёрки считались по руке проигравшего, а не по атаке | `state.lastSixesOnMe` по атакам на защитника (5.17, durak v3.18) |
+| Дурак/Крестики: тапы не работают, drag работает | click в WebView + drag-защита блокирует click | тапы через pointerup + single/double таймеры (5.15, durak v3.17, tictactoe v1.7.7) |
 | Нарды: статус «Нажми Бросить кости», кнопки нет | `isGameActive()` возвращала false вне онлайна | v2.5: офлайн-ветка `G && !G.result` |
 | Нарды: после частичного дубля суммы не работают на других фишках | allDests генерировал комбо только для длин 2 и 4 | v2.7: комбо для любого числа оставшихся костей (2..N) на любую фишку |
 | Морской бой: «В бой!» disabled пока не сбросишь/расставишь | newGame: флот расставлен, но `qi=0` | v4.29: `qi=queue.length`; онлайн `resetPlacing()` авто-расставляет флот |
@@ -886,26 +980,27 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | Морской бой: панель инструментов мешает в бою | ручное сворачивание | v4.30: авто-сворачивание при старте боя, авто-разворачивание при реванше; ручное переключение всегда доступно |
 | Пятнашки: stack overflow при перемешивании | защитная проверка решаемости с перевёрнутой формулой уходила в рекурсию | v1.0-fix: проверка убрана — walk-генерация из собранного состояния гарантирует решаемость по построению |
 | Пятнашки: шапка наезжала на кнопки на узких экранах | один flex-ряд «кнопка+title+кнопки» | v1.1: два ряда — логотип+название сверху, кнопки ниже (flex-wrap) |
-| Хаб: популярные игры внизу списка | статический порядок | v3.28: умная сортировка по частоте запусков (score с полураспадом 30 дней, `?sort=reset`) |
+| Крестики/Дурак: кнопка «← В меню» модалки поверх заголовка | `position:absolute` hubbtn над длинным h2 | flex-ряд `.mhdr` над заголовком (4, tictactoe v1.4/v1.7, durak v3.20) |
 | Крестики: «полоска» вместо крестика | SVG-атрибуты БЕЗ кавычек: HTML-парсер в SVG-контексте терял вторую диагональ | все атрибуты SVG в кавычках (v1.3) |
-| Крестики: любой исход = «Поражение», линия не подсвечена | результат писали ключами `{winner,line}`, читали `{w,l}` (ключи chkL) → `undefined` | единые ключи `{w,l,at}` во всех 4 точках записи (v1.4) |
-| Крестики: ReferenceError `turn` / `sM` | минификация-реноймы: черновая переменная `turn` в aiMove; функция объявлена `sMv`, вызывалась `sM` | черновик удалён; определение `sM` (v1.1/v1.2) |
+| Крестики: любой исход = «Поражение», линия не подсвечена | результат писали ключами `{winner,line}`, читали `{w,l}` (ключи chkL) → `undefined` | единые ключи `{w,l,at}` во всех точках записи (v1.4) |
+| Крестики: ReferenceError `turn` / `sM` / `goHub` | минификация-реноймы с висячими ссылками; опечатка имени в присваивании обработчика, выполняющемся сразу → смерть всего script | уникальные имена; проверка существования функции до присваивания; синтаксический контроль (4.2) |
+| Крестики: дубль `const sC` + `function sC` → SyntaxError, пустое поле | V8 strict-mode: повторное объявление идентификатора в scope | запрет дублей const/let/var и function (4.2, v1.6.2) |
 | Крестики: символы чёрно-белые | потеряно `color:var(--x)/var(--o)` — `currentColor` стал текстовым | явные `style="stroke:var(--x)"` + тень `var(--x2)`/`var(--o2)` + блик (v1.3) |
-| Настройки: надписи в select невидимы | `<option>` не наследует color: системный чёрный на тёмном фоне | `.selrow option{background:var(--bg2);color:var(--text)}` (v1.3) |
-| Модалка: кнопка «← В меню» поверх заголовка | `position:absolute` над длинным названием | отдельная строка `.mhdr` над заголовком (v1.4) |
-| Крестики: картинки не грузятся (ERR_FILE_NOT_FOUND), «имена правильные» | (а) кириллические `х.png`/`о.png` вместо латинских — визуально идентичны; (б) двойное расширение `o.png.png` при скрытых расширениях проводника; (в) тест автономной копией HTML вне папки игры — относительный `img/` указывает в пустоту | ASCII-имена (правило раздела 4); `dir /b` за реальными именами; галка «Расширения имён файлов»; тестировать только настоящий `index.html`; onerror-лог пробы `[TT] img NOT FOUND: <url>` (v1.5) |
+| Крестики: картинки не грузятся (ERR_FILE_NOT_FOUND), «имена правильные» | (а) кириллические `х.png`/`о.png` вместо латинских — визуально идентичны; (б) двойное расширение `o.png.png` при скрытых расширениях проводника; (в) тест автономной копией HTML вне папки игры — относительный `img/` указывает в пустоту | ASCII-имена (правило раздела 4); `dir /b` за реальными именами; галка «Расширения имён файлов»; тестировать только настоящий `index.html` (v1.5) |
 | Крестики: просмотр партии сбрасывал подсветку и полосу | `renFv()` перерисовывал клетки без win-классов | просмотр = финал без отмотки: перерисовка убрана, ◀/▶ удалены (v1.5) |
+| Крестики: поле мигает каждые ~5 c | heartbeat-snapshot → полный rebuild innerHTML клеток/чипов/кнопок + перезапуск pulse-анимаций | diff-рендер: клетка перерисовывается только при смене значения (`dataset.v`); чипы/кнопки — по сигнатуре; pulse через `classList.toggle` (v1.7.8) |
+| Настройки: надписи в select невидимы | `<option>` не наследует color: системный чёрный на тёмном фоне | `.selrow option{background:var(--bg2);color:var(--text)}` (v1.3) |
+| Хаб: популярные игры внизу списка | статический порядок | v3.28: умная сортировка по частоте запусков (score с полураспадом 30 дней, `?sort=reset`) |
+| Любая игра: «пустое поле без меню», в консоли SyntaxError/ReferenceError | смерть всего `<script>`: потерянная скобка при компактификации, дубль идентификатора, опечатка имени | синтаксический контроль до поставки; boot-guard `window.__BOOT_OK` + fallback-оверлей с текстом ошибки (4.2) |
 
 ### 8.6 Скачивание ассетов (хаб → устройства)
 
 | Симптом | Причина | Лечение |
 |---|---|---|
-| **Модалка «Скачать приложение»: тост «Начинаю загрузку…» → ничего не происходит, потом «Проверьте загрузки браузера», но там пусто** | **Chrome/Firefox на кросс-оригин редиректе с GitHub (`latest/download/*` → `objects.githubusercontent.com`) игнорирует атрибут `download` у `<a>` и делает навигацию вместо скачивания; файл «исчезает»** | **fetch+blob: `fetch(url)` → `r.blob()` → `<a href=URL.createObjectURL(blob) download>` (blob-URL same-origin, download срабатывает гарантированно); hub v3.40 (2026-11-04)** |
-| **ПК-оболочка: «Скачать приложение» открывает системный браузер вместо прямого скачивания** | **`<a download>` в Electron 22 (Chromium 108) на `app://`-origin тоже игнорируется; нет нативного `downloadFile` в AppBridge** | **IPC `bridge:download-file`: main-процесс через `node:https` с редиректами качает в `app.getPath('downloads')/fileName`, `shell.showItemInFolder(dest)` + тост; preload.js v0.5, main.js v0.3.6+** |
-| **TG/VK/MAX: тост «Начинаю загрузку…» → «Загрузка не удалась» → открытие внутреннего браузера мессенджера, который зависает на «Скачивание…»** | **`fetch` на внешний домен в WebApp-контексте мессенджеров блокируется CORS (архитектурное ограничение платформ, обойти невозможно); внутренний браузер VK зависает на редиректах GitHub — это баг VK** | **🔒 правило мессенджеров (platform.js v3.4): НЕ пытаться fetch, сразу переход в ВНЕШНИЙ системный браузер (`Telegram.WebApp.openLink` / `VKWebAppOpenExternalLink` / `WebApp.openLink`) с честным тостом «Открываем браузер для загрузки…»; на мобильных — сначала `navigator.share({files:[File]})` с системным chooser «Сохранить/Отправить» (2026-11-04)** |
-| **VK desktop WebApp зависает на «Скачивание…»** | **встроенный браузер VK плохо обрабатывает редиректы GitHub (баг VK, не наш)** | **`VKWebAppOpenExternalLink` уводит сразу в системный браузер — обход бага (platform.js v3.4)** |
-| **MAX desktop WebApp: скачивание стартует во внешнем браузере** | **официальный ответ поддержки MAX (2026-10-28): `WebApp.openLink` открывает ТОЛЬКО внешний браузер — архитектурное требование** | **принимаем как есть: `WebApp.openLink(url)` — переход в браузер, там загрузка стартует (platform.js v3.4)** |
-| **Android-оболочка: скачивание открывает браузер** | **`AppBridge.downloadFile` отсутствовал в AppBridge (v<0.9.0), фолбэк в `openExternal`** | **v0.9.0: нативный `DownloadManager.enqueue` → системное уведомление загрузки, файл в `Downloads/`, браузер не открывается** |
+| **Модалка «Скачать приложение»: тост есть, загрузок нет** | **Chrome/Firefox на кросс-оригин редиректе GitHub игнорирует атрибут `download` у `<a>` и делает навигацию** | **fetch+blob+`<a download>` (blob same-origin); hub v3.40** |
+| **ПК-оболочка: скачивание открывает браузер** | **`<a download>` в Electron 22 на `app://`-origin тоже игнорируется** | **IPC `bridge:download-file` (node:https → Downloads + showItemInFolder); main.js v0.3.6+** |
+| **TG/VK/MAX: «Загрузка не удалась» → внутренний браузер мессенджера зависает** | **fetch на внешний домен в WebApp блокируется CORS; внутренний браузер VK зависает на редиректах GitHub** | **🔒 правило мессенджеров (platform.js v3.4): НЕ пытаться fetch, сразу ВНЕШНИЙ системный браузер (`openLink`/`VKWebAppOpenExternalLink`); mobile сначала `navigator.share({files})`; hub v3.44 вообще убрал прямую закачку из хаба — только ссылки** |
+| **Android-оболочка: скачивание открывает браузер** | **`AppBridge.downloadFile` отсутствовал (<0.9.0), фолбэк в `openExternal`** | **v0.9.0: нативный `DownloadManager.enqueue` → уведомление + `Downloads/`, браузер не открывается** |
 
 ---
 
@@ -919,26 +1014,34 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 3. `Platform.init({bg, back, game:'<key>'})`; звук/вибро только через `Platform.haptic/share`;
    AudioContext разблокируется по user gesture (`unlockAudio()`).
 4. Шеринг по паттерну 4-го раздела: на главном экране «📤 Отправить ссылку на игру»
-   (`Platform.shareGame`), «📤 Отправить результат» в финальном оверлее; GA `share_type`.
-5. Pulse-подсказки и (для онлайн) авто-шторка по паттерну раздела 4.
-6. GA через `trackEvent`; платформа подставляется автоматически.
-7. BackHandler: оверлеи (правила→настройки→статистика→финал) → hub.
-8. Favicon-линки на `../icon-32.png`; overscroll-behavior:none; описания витрин без чисел.
-9. Head без синхронных внешних SDK-тегов (telegram/gstatic) — только ленивая загрузка.
-10. Картинки-ассеты (если есть): `<game>/img/*.png` 512×512 прозрачные, **имена ASCII**,
+   (`shareGameLink` → `Platform.shareGame`), «📤 Отправить результат» в финальном оверлее
+   (`shareResult`); GA `share_type`.
+5. Pulse-подсказки ТОЛЬКО на кнопках шторки и endOverlay (4); авто-шторка по смене статуса (5.14).
+6. Оверлеи: кнопка «← В меню игр» в ряду `.mhdr` над заголовком (4).
+7. GA через `trackEvent`; платформа подставляется автоматически.
+8. BackHandler: оверлеи (правила→настройки→статистика→финал) → hub.
+9. Favicon-линки на `../icon-32.png`; overscroll-behavior:none; описания витрин без чисел.
+10. Head без синхронных внешних SDK-тегов (telegram/gstatic) — только ленивая загрузка.
+11. Картинки-ассеты (если есть): `<game>/img/*.png` 512×512 прозрачные, **имена ASCII**,
     проба с SVG-фолбэком (раздел 4).
-11. Первая генерация манифеста проставит `addedAt` = сегодня → NEW 7 дней (6.3).
-12. Bump `VER` игры при каждой правке её файлов (игры сравниваются по своей версии; HUB_VER не нужен).
+12. Тапы: pointerup-паттерн single/double + drag (5.15); diff-рендер без мигания (8.5).
+13. Первая генерация манифеста проставит `addedAt` = сегодня → NEW 7 дней (6.3).
+14. Bump `VER` игры при каждой правке её файлов (игры сравниваются по своей версии; HUB_VER не нужен).
+15. Код компактный; поставка полным файлом в одном контейнере; синтаксический контроль (4.2).
 
 ### 9.2 Новая онлайн-игра (подключение к единой схеме)
 1. Структура комнаты по 5.1. 2. Heartbeat 5/15 с, запуск +500 мс после записи места.
 3. `removePresence()` в leaveRoom/beforeunload. 4. Реванш у всех; requestRematch только пишет флаг.
-5. Триггер автостарта по 5.4 (условие status='finished'!). 6. Round-триггер. 7. Лобби в шторке + авто-шторка.
-8. `isGameActive()` + блокировка ходов (учитывать офлайн-ветку! грабля Нард v2.5). 9. Умные кнопки шторки.
+5. Триггер автостарта по 5.4 (условие status='finished'!). 6. Round-триггер. 7. Лобби в шторке + авто-шторка по 5.14.
+8. `isGameActive()` + блокировка ходов (учитывать офлайн-ветку! грабля Нард v2.5). 9. Умные кнопки шторки (5.7).
 10. fieldView (для простых игр допустим финал без отмотки, 5.8). 11. Вход в finished.
 12. Rules Firebase под свою схему мест. 13. Префикс логов `[XX]`.
-14. Если движок не ставит status='finished' сам — авто-перевод (грабля Нард). 15. Watchdog автоходов.
+14. Если движок не ставит status='finished' сам — авто-перевод (грабля Нард). 15. Watchdog автоходов (5.11).
 16. Инвайты: `Platform.share(roomUrl, text, {brand:true})`.
+17. Массивы состояния без null (плейсхолдеры), запись state атомарно `set()`, normState object→array (5.12).
+18. `roomRef.off('value')` перед повторной подпиской; guard'ы полей в callback (5.13).
+19. pendingMove-lock вместо оптимистичных мутаций state (5.12).
+20. Имена игроков через `getUserNameAsync()` (5.16).
 
 ### 9.3 Релиз desktop-оболочки
 1. Bump `version` в `package.json` (**без этого автообновление считает релиз «актуальным»!**).
@@ -986,16 +1089,22 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 1. В `platform.js` (≥v3.4) вызов `Platform.downloadAsset(url, fileName, {shareText, shareTitle})`.
 2. В оболочках: `AppBridge.downloadFile(url, fileName)` должен быть в preload + main (IPC).
    - **ПК:** IPC `bridge:download-file` через `node:https` с редиректами → `app.getPath('downloads')/fileName` → `shell.showItemInFolder(dest)` + тост (main.js ≥v0.3.6).
-   - **Android:** `@JavascriptInterface downloadFile` → `DownloadManager.enqueue` в `DIRECTORY_DOWNLOADS` + `VISIBILITY_VISIBLE_NOTIFY_COMPLETED` + фолбэк в `ACTION_VIEW` браузера (AppBridge.java ≥v0.9.0).
+   - **Android:** `@JavascriptInterface downloadFile` → `DownloadManager.enqueue` в `DIRECTORY_DOWNLOADS` + `VISIBILITY_VISIBLE_NOTIFY_COMPLETED` + фолбэк `ACTION_VIEW` (AppBridge.java ≥v0.9.0).
 3. **В мессенджерах (TG/VK/MAX) — НЕ пытаться fetch из WebApp** (CORS-блок = ложные «загрузка не удалась»);
-   сразу переход во внешний браузер:
-   - TG: `Telegram.WebApp.openLink(url)`;
-   - VK: `vkBridge.send('VKWebAppOpenExternalLink', {link: url})` с фолбэком `window.open`;
-   - MAX: `window.WebApp.openLink(url)`;
-   - MAX во внешнем браузере: `location.href = url` (загрузка стартует сразу).
-4. Обычный web-браузер (desktop): `fetch` → `blob` → `<a href=URL.createObjectURL(blob) download>` — обход Chrome-игнора атрибута download на кросс-оригин редиректе GitHub (hub v3.40).
-5. Мобильный web (pointer:coarse): попытка `navigator.share({files:[new File([blob],fileName)]})` — системный chooser «Сохранить/Отправить»; фолбэк `window.open`.
+   сразу переход во внешний браузер: TG `Telegram.WebApp.openLink(url)`; VK `vkBridge.send('VKWebAppOpenExternalLink',{link:url})` с фолбэком `window.open`; MAX `window.WebApp.openLink(url)`; MAX во внешнем браузере `location.href=url`.
+4. Обычный web-браузер (desktop): `fetch` → `blob` → `<a href=URL.createObjectURL(blob) download>`.
+5. Мобильный web (pointer:coarse): попытка `navigator.share({files:[new File([blob],fileName)]})` — системный chooser; фолбэк `window.open`.
 6. Тосты честные: «Начинаю загрузку…» в момент старта, «Загрузка запущена…» только после успешной попытки; при fallback в браузер — «Открываем браузер для загрузки…».
+7. **Hub (v3.44):** прямая закачка бинарников из хаба НЕ используется вовсе — модалка только отправляет/копирует ссылки на установщики (4.1).
+
+### 9.8 Поставка фикса кода (рабочий процесс 2026-11-05)
+1. Диагноз по логам пользователя (фильтр `[XX]`; цепочка маркеров показывает этап обрыва, 4.2/5.10).
+2. Фикс публикуется **полным файлом в одном блоке-контейнере** (пользователь заменяет целиком);
+   компактный стиль без лишних переносов/пробелов (4.2).
+3. Точечные правки (1–5 строк) — только как исключение, таблицей «Найти → Заменить» с пометкой.
+4. Bump `VER` игры (+ метки в футере/модалках); синтаксический контроль после компактификации (4.2).
+5. Деплой: коммит игры → `gen-versions.js` → коммит `versions.json` → push (9.4).
+6. После подтверждения пользователем — фиксация грабли в раздел 8 спеки следующей версией.
 
 ---
 
@@ -1023,11 +1132,12 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | APK android (загрузка обновления) | `context.cacheDir/update/IgrovojCentr.apk` |
 | Pref'ы android | SharedPreferences `igrovoj`: `name`, `updateMode` (auto/manual), `apkCheckAt` |
 | Ключи Пятнашек | localStorage `pyatnashki_set` {vol,diff,skin}, `pyatnashki_stats` |
-| Ключи Крестиков | localStorage `tt_set` {aiLvl,first,vol,skin}, `tt_stats`; картинки `tictactoe/img/{x,o}.png` (512×512, ASCII!) |
+| Ключи Крестиков | localStorage `tt_set` {aiLvl,first,vol,skin}, `tt_stats`, `tt_name`; картинки `tictactoe/img/{x,o}.png` (512×512, ASCII!) |
+| Ключи Дурака | localStorage `durak_set` {diff,transfer,allAdd,throwPause}, `durak_name`, `durak_uid_fallback`; поле состояния `lastSixesOnMe` (5.17) |
 | Троттлинг автопроверки APK | 6 часов (ручной вызов игнорирует) |
 | Desktop: runtime | Electron 22.3.27 (Win 7 SP1–11), electron-builder 24, NSIS per-user |
 | Desktop: контракт updater | 6.2 — НЕ НАРУШАТЬ (имя класса/экспорт/сигнатуры) |
-| Desktop: контракт shell-updater | 6.2 — НЕ НАРУШАТЬ (init({mode,toast,onState}) / check / menuAction / getStatus) |
+| Desktop: контракт shell-updater | 6.2 — НЕ НАРУШАТЬ (`init({mode,toast,onState})` / `check(silent)` / `menuAction()` / `getStatus()`) |
 | Desktop: контракт config | 6.2 — `makeConfig(app)` + `DEFAULT_ROOT`; `packsRoot` = текущая папка контента |
 | Desktop: package.json | 6.2 — runtime-зависимости (`electron-updater`) только в `dependencies`, НЕ в `devDependencies` |
 | Android: runtime | system WebView; minSdk 26 (Android 8.0), compile/targetSdk 34, AGP 8.9.1+, Gradle 9.6 |
@@ -1039,7 +1149,9 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | Бутстрап контента desktop | таймаут 60 с до окна |
 | Бутстрап контента android | sync при каждом запуске; офлайн + валидные паки → старт из памяти (v1.3) |
 | BOT_ADD_GAP (Дурак) | 2000 мс на бота-подкидывателя |
+| Тапы: пороги | drag 6px; тап elapsed<400ms; double-tap окно 300ms; single-tap задержка 250ms (5.15) |
 | Hub smart-sort | полураспад 30 дней, ключ `hub_sort_stats`, сброс `?sort=reset` |
+| Формат поставки кода | полный файл одним контейнером, компактно; точечные правки — исключение (4.2) |
 
 > 🔒 Значения секретов — только Vercel Environment Variables и локальные `.env`.
 
@@ -1057,9 +1169,10 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | 2.4 | 2026-11-02 | Android-оболочка v0.1.0 полным циклом (раздел 7): WebView + intercept под Pages-origin, ContentUpdater, AppBridge android, диплинки, иконки mipmap, keystore-подпись, gradle-грабли; hub v3.29–3.33 (двухэтапная модалка, буфер обмена); platform.js v2.9; правило трёх ассетов; релиз v0.4.0 |
 | 2.5 | 2026-11-03 | Android v0.5.0–0.6.0: автообновление APK (android-update.json, ApkProvider, гейт REQUEST_INSTALL_PACKAGES, троттлинг 6 ч) и нативный экран настроек; hub v3.34 (⚙️); bridge openSettings/getUpdateMode/setUpdateMode/checkAppUpdate; релиз v0.6.0 |
 | 2.6 | 2026-11-03 | Hub v3.35–3.36 (чипы версий + NEW 7 суток, двойной fetch манифеста); versions.json в паках обеих оболочек; android офлайн-старт v1.3; грабля API-контракта updater.js (v1.4.1→v1.4.2); грабли релизов/иконок (latest.yml, signAndEditExecutable, winCodeSign, npx); процедура замены логотипа; hub v3.36, desktop v0.3.3, android v0.7.1; релизы v0.7.1/v0.7.2 |
-| 2.7 | 2026-11-03 | **🔒 Правило HUB_VER** (6.3): правка hub-файлов без bump версии не доезжает до оболочек — кейс platform.js v3.0/v3.1 + sw.js v9 при HUB_VER 3.37; **вирусный шеринг** platform.js v3.0–3.1 (shareGame/gameDeepLink/бренд-строка без чисел; desktop-web → буфер вместо OS share-sheet); **sw.js v9** (purge старых кэшей, no-store мимо кэша); **Пятнашки v1.0–1.3** (walk-генерация решаемых раскладов, 3D-костяшки, темы, настройки, статистика, шапка в два ряда, паттерн «ссылка до победы / результат после», схема-цель в правилах); Android v0.8.0: динамическое «О приложении» (installedGamesCount, ContentUpdater v1.4, SettingsActivity v1.1); hub v3.38; версии: platform.js v3.1, sw v9, Пятнашки v1.3 |
-| 2.8 | 2026-11-04 | **Крестики-нолики v1.0–1.5** полным циклом: 7-я онлайн-игра (players w/b = ❌/⭕, watchdog авто-передачи), ИИ-минимакс 3 уровней + hot-seat, 5 тем, картинки-символы 512×512 с SVG-фолбэком и ASCII-правилом имён, полоса-перечёркивание линии, финал без отмотки с сохранением подсветки; **её грабли** (SVG без кавычек, ключи результата {winner,line} vs {w,l}, реноймы turn/sM, ч/б символы, невидимые option, кнопка поверх заголовка, кириллица/двойные расширения в именах файлов, тест копией вне папки); **Сапёр v1.7** и **Нарды v2.8** мигрированы на вирусный шеринг + pulse + авто-шторку (паттерн закрепён в разделе 4); **🔒 правило GAMES** (6.3): кейс tictactoe — игра в хабе и на Pages, но не в манифесте → ПК «Файл не найден», без чипа/NEW; gen-versions v1.4; hub v3.39 (кнопка+алиасы tictactoe/xo/крестики, prefetch); 18 игр |
-| 2.9 | 2026-11-04 | **Раздел 4.1 «Каскадное скачивание ассетов»**: `Platform.downloadAsset` (platform.js v3.4) с каскадом по средам — Android `DownloadManager` / ПК IPC `bridge:download-file` (node:https с редиректами) / web fetch+blob+`<a download>` / мессенджеры сразу во внешний системный браузер (без fetch — CORS-блок = ложные «загрузка не удалась»); **🔒 запрет реконструкции** `main.js`/`preload.js`/`config.js`/`shell-updater.js` вслепую (6.9) — только инкрементальные добавки к рабочим оригиналам; **🔒 контракт полей** `shell:get-info` (6.9): имена полей должны совпадать 1:1 с тем, что читает `settings.html`; **🔒 правило package.json** (6.2): runtime-зависимости только в `dependencies` + контроль `asar list` после сборки (кейс 2026-11-04 v0.3.6→v0.3.7 — `electron-updater` был только в devDeps → краш main-процесса); **таблица 8.6** «Скачивание ассетов» с кейсами Chrome-игнора download-атрибута, VK-зависания и обхода через `VKWebAppOpenExternalLink`; **чек-лист 9.7** «Добавление скачивания ассетов через Platform.downloadAsset»; **обновления чек-листов 9.3** (desktop-релиз: проверка dependencies в package.json + `asar list`) и 9.4 (деплой); hub v3.43, platform.js v3.4, desktop v0.3.7, android v0.9.0; 18 игр |
+| 2.7 | 2026-11-03 | **🔒 Правило HUB_VER** (6.3); **вирусный шеринг** platform.js v3.0–3.1 (shareGame/gameDeepLink/бренд-строка без чисел; desktop-web → буфер вместо OS share-sheet); **sw.js v9** (purge старых кэшей, no-store мимо кэша); **Пятнашки v1.0–1.3** (walk-генерация решаемых раскладов, 3D-костяшки, темы, настройки, статистика, шапка в два ряда, паттерн «ссылка до победы / результат после»); Android v0.8.0: динамическое «О приложении»; hub v3.38 |
+| 2.8 | 2026-11-04 | **Крестики-нолики v1.0–1.5** полным циклом: 7-я онлайн-игра, ИИ-минимакс 3 уровней + hot-seat, 5 тем, картинки-символы 512×512 с SVG-фолбэком и ASCII-правилом имён, полоса-перечёркивание, финал без отмотки; её грабли (SVG без кавычек, ключи результата, реноймы, ч/б символы, невидимые option, кнопка поверх заголовка, кириллица/двойные расширения в именах файлов); **Сапёр v1.7** и **Нарды v2.8** мигрированы на вирусный шеринг + pulse + авто-шторку; **🔒 правило GAMES** (6.3): кейс tictactoe; gen-versions v1.4; hub v3.39; 18 игр |
+| 2.9 | 2026-11-04 | **Раздел 4.1 «Каскадное скачивание ассетов»**: `Platform.downloadAsset` (platform.js v3.4) с каскадом по средам — Android DownloadManager / ПК IPC `bridge:download-file` / web fetch+blob / мессенджеры сразу во внешний браузер; **🔒 запрет реконструкции** main.js/preload.js/config.js/shell-updater.js вслепую (6.9) + контракт полей `shell:get-info`; **🔒 правило package.json** (6.2): runtime-зависимости только в `dependencies` + контроль `asar list` (кейс v0.3.6→v0.3.7); таблица 8.6; чек-лист 9.7; desktop v0.3.7, android v0.9.0 |
+| 2.10 | 2026-11-05 | **🔒 Стиль кода и формат поставки** (4.2): компактный код без лишних переносов/пробелов; полные файлы одним контейнером, точечные правки — исключение; синтаксический контроль после компактификации (SyntaxError убивает весь `<script>`: durak v3.19, tictactoe v1.6.2/1.7.4); временные диагностические логи `[XX]` с последующей чисткой; **hub v3.44**: прямая закачка бинарников из хаба убрана — модалка только отправляет/копирует ссылки (4.1, 8.6); **Firebase RTDB: массивы/null/merge** (5.12) — плейсхолдеры `''`/`0`, атомарный `child('state').set()`, normState object→array, запрет оптимистичных мутаций + pendingMove-lock; **гигиена listener'ов** (5.13); **шторка только по смене статуса** (5.14); **тапы через pointerup + single/double таймеры** (5.15); **имена из оболочек: getProfile строка vs Promise** (5.16); **шестёрки по атаке `lastSixesOnMe`** (5.17); **pulse только шторка+endOverlay**, **`.mhdr`-заголовки оверлеев**, **diff-рендер без мигания**; Крестики v1.6–1.7.9 и Дурак v3.16–3.20 полным циклом; чек-лист 9.8 «Поставка фикса кода» |
 
 ---
 
