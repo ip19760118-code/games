@@ -110,15 +110,42 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="board" id="board"></div>
 <div class="status" id="statusEl">Выбери режим</div>
 <div class="actions"><button class="btn primary" id="rollBtn" style="display:none">🎲 Бросить кости</button><button class="btn" id="menuBtn" style="display:none">🏠 Меню нарды</button><button class="btn" id="newBtn" style="display:none">🔄 Новая игра</button><button class="btn" id="shareLinkBtn">📤 Отправить ссылку на игру</button></div>
-<div class="ver" id="verTag">v2.9</div>
+<div class="ver" id="verTag">v2.10</div>
 </div>
 <div class="fieldViewBar" id="fieldViewBar"><span class="title">👁 Просмотр партии</span><button class="btn" id="closeFieldView">Закрыть</button></div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🎲 Нарды <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.9</span></h2><div class="sub">Классические длинные · против часовой</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🎲 Нарды <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.10</span></h2><div class="sub">Классические длинные · против часовой</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="statsOverlay"><div class="cardbox"><h2>📊 Статистика</h2><div class="stat-row"><span>Партий сыграно</span><b id="stT">0</b></div><div class="stat-row"><span>Побед</span><b id="stW">0</b></div><div class="stat-row"><span>Поражений</span><b id="stL">0</b></div><div class="stat-row"><span>Процент побед</span><b id="stPct">—</b></div><div class="stat-row"><span>Серия побед сейчас</span><b id="stSt">0</b></div><div class="stat-row"><span>Рекордная серия</span><b id="stBest">0</b></div><div class="stat-row"><span>Всего снято шашек</span><b id="stBorne">0</b></div><div class="btns"><button class="btn" id="stReset">Сбросить</button><button class="btn primary" id="stClose">Закрыть</button></div></div></div>
-<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (длинные)</h2><div class="sub">• Твоя голова — нижний левый угол, твой дом — верхняя левая четверть; голова соперника — верхний правый угол, его дом — нижняя правая четверть.<br>• Движение против часовой: низ слева→направо, затем верх справа→налево; каждый проходит полный круг и возвращает шашки в свой дом.<br>• Бить нельзя: занятая точка блокирует соперника.<br>• С головы — одна шашка за ход (в первом броске 3-3, 4-4, 6-6 — две).<br>• Нельзя строить шесть точек подряд, если впереди блока нет шашки соперника. <b>Исключение:</b> если все фишки противника уже в его доме — блок разрешён.<br>• Сброс с дома: точное значение костью; если нет точного — можно перебросить большей костью с самой дальней фишки, но только если нет фишки с точным расстоянием для этой кости.<br>• <b>Комбо-ход:</b> одной шашкой можно пройти сумму костей (например, 2+3=5) или при дубле 2a/3a/4a — если все промежуточные клетки свободны. Зелёная точка = обычный ход, золотой бейдж с цифрой = комбо-ход.<br>• <b>Частичный дубль:</b> после использования части костей дубля (например, одной 3 из 3-3-3-3), оставшиеся кости продолжают суммироваться на любую фишку (3, 6, 9).<br>• В свой ход нажми «🎲 Бросить кости» (кнопка пульсирует — подсказка); зелёная рамка показывает шашки, которые могут ходить; конец хода автоматический.<br>• «🏠 Меню нарды» прерывает партию и возвращает к выбору режима.<br>• Победил — кто первым снял все 15.<br>• После партии жми «🔄 Реванш» — когда оба согласятся, новая партия начнётся автоматически.<br>• После окончания игры (победа или поражение) доступна кнопка «📤 Отправить результат».<br>• Онлайн защищён анонимной авторизацией Firebase.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
+<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (длинные нарды)</h2><div class="sub">
+<b>Цель игры:</b> Выигрывает тот, кто первым снимет все свои шашки с доски.<br><br>
+
+<b>Правила хода:</b><br>
+• После броска кубиков игрок обязан сделать ход в соответствии с выпавшими числами.<br>
+• <b>Направление движения:</b> Шашки всегда перемещаются против часовой стрелки.<br>
+• <b>Количество ходов:</b> На каждом ходу игрок передвигает две свои шашки на число лунок, равное очкам на каждом кубике. Вместо ходов двумя шашками можно сделать два хода одной шашкой.<br>
+• <b>Дубль:</b> Если выпал дубль, бросок удваивается — игрок должен сделать четыре движения шашками.<br>
+• <b>Запрет на ход на занятый пункт:</b> Нельзя ставить свою шашку на пункт, занятый хотя бы одной шашкой противника.<br>
+• <b>Правило полного хода:</b> Если есть два возможных хода (один с использованием одной кости, другой — двух), игрок обязан выбрать ход, который использует обе кости.<br>
+• <b>Обязательное использование очков:</b> Если есть хотя бы один допустимый ход, игрок обязан использовать все выпавшие очки, даже в ущерб себе. Если ход на выпавшее число невозможен, эти очки «сгорают».<br>
+• <b>Ход считается завершённым:</b> После передачи кубиков сопернику (автоматически в игре).<br><br>
+
+<b>Особые ситуации:</b><br>
+• <b>Первый ход с «головы»:</b> За один ход с «головы» можно взять только одну шашку. Исключение — первый бросок, если выпал дубль 6-6, 4-4 или 3-3. В этом случае можно снять две шашки.<br>
+• <b>Блокирование («мост»):</b> Нельзя строить непрерывный ряд из шести своих шашек (заграждение), если перед этим рядом нет хотя бы одной шашки противника. Запрещено «закрывать» противника, пока хотя бы одна его шашка не вошла в «дом».<br>
+• <b>Вывод шашек («выбрасывание»):</b> Начинается после того, как все шашки пришли в «дом». Игрок может снять с доски шашку, номер пункта которой соответствует выпавшему на кубике числу. Если шашки на таком пункте нет, нужно передвигать шашки с более старших позиций, а если и таких нет — с более младших.<br><br>
+
+<b>Игровые механики:</b><br>
+• <b>Комбо-ход:</b> одной шашкой можно пройти сумму костей (например, 2+3=5) или при дубле 2a/3a/4a — если все промежуточные клетки свободны. Зелёная точка = обычный ход, золотой бейдж с цифрой = комбо-ход.<br>
+• <b>Частичный дубль:</b> после использования части костей дубля (например, одной 3 из 3-3-3-3), оставшиеся кости продолжают суммироваться на любую фишку (3, 6, 9).<br>
+• В свой ход нажми «🎲 Бросить кости» (кнопка пульсирует — подсказка); зелёная рамка показывает шашки, которые могут ходить; конец хода автоматический.<br>
+• «🏠 Меню нарды» прерывает партию и возвращает к выбору режима.<br>
+• После партии жми «🔄 Реванш» — когда оба согласятся, новая партия начнётся автоматически.<br>
+• После окончания игры (победа или поражение) доступна кнопка «📤 Отправить результат».<br>
+• Онлайн защищён анонимной авторизацией Firebase.<br>
+• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.
+</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='2.9',FLIGHT_DUR=340;
+const VER='2.10',FLIGHT_DUR=340;
 const HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000;
 let heartbeatTimer=null, myRound=0, fieldViewMode=false;
 let lastEndInfo=null;
@@ -213,10 +240,6 @@ function normState(s){
 const own=(s,side)=>side==='w'?s.W:s.B,opp=(s,side)=>side==='w'?s.B:s.W;
 function allInHome(s,side){const o=own(s,side);for(let i=0;i<24;i++){if(i>=HOME[side][0]&&i<=HOME[side][1])continue;if(o[i]>0)return false;}return true;}
 function headLimit(s,side){return (s.first[side]&&s.rolled[0]===s.rolled[1]&&(s.rolled[0]===3||s.rolled[0]===4||s.rolled[0]===6))?2:1;}
-
-/* v2.9: legalTarget — исправлен переброс: если есть фишка с точным расстоянием для данной кости,
-   переброс запрещён. Это соответствует правилу: "снимать только той костью, которая соответствует
-   расстоянию; переброс только если нет точного совпадения". */
 function legalTarget(s,side,idx,v){
   const o=own(s,side),p=pOf(side,idx),q=p+v;
   if(idx===HEAD[side]&&s.headUsed>=headLimit(s,side))return null;
@@ -227,15 +250,11 @@ function legalTarget(s,side,idx,v){
   }
   if(!allInHome(s,side))return null;
   if(q===24)return 'off';
-  /* Переброс (q>24): 1) фишка должна быть самой дальней (нет фишек с pp>p),
-     2) нет фишки с точным расстоянием v (т.е. с p = 24-v) */
   for(let pp=p+1;pp<24;pp++)if(o[idxOf(side,pp)]>0)return null;
   const exactP=24-v;
   if(exactP>=0&&exactP<24&&o[idxOf(side,exactP)]>0)return null;
   return 'off';
 }
-
-/* v2.9: primeViolation — если все фишки противника в их доме, блок из 6 пунктов разрешён */
 function primeViolation(s,side){
   const o=own(s,side),op=opp(s,side);
   const oppSide=side==='w'?'b':'w';
@@ -520,7 +539,7 @@ function showLobbyInBar(){
   const list=$('lobbyList');list.innerHTML='';
   playersList().forEach((p,i)=>{
     const r=document.createElement('div');r.className='row'+(p.side==='w'?' host':'');
-    r.innerHTML='<span>'+(i+1)+'. '+esc(p.name)+(p.side===mySide?' (вы)':'')+(p.side===w?' 👑':'')+'</span><span>'+(p.connected?'🟢':'⚪')+'</span>';
+    r.innerHTML='<span>'+(i+1)+'. '+esc(p.name)+(p.side===mySide?' (вы)':'')+(p.side==='w'?' 👑':'')+'</span><span>'+(p.connected?'🟢':'⚪')+'</span>';
     list.appendChild(r);
   });
   if(playersList().length<2){
