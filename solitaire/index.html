@@ -1,5 +1,4 @@
 <!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/><title>Косынка</title>
-<!-- Единый слой платформ (TG / VK / MAX / web) -->
 <script src="../js/platform.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
@@ -55,10 +54,15 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .note{font-size:12px;opacity:.7;line-height:1.45;margin-top:8px;text-align:left}
 .toast{position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(30,150,90,.95);color:#fff;font-weight:800;font-size:13px;padding:9px 18px;border-radius:30px;z-index:600;pointer-events:none;opacity:0;transition:opacity .25s}
 .toast.show{opacity:1}
+.salut{position:fixed;inset:0;pointer-events:none;z-index:400;overflow:hidden}
+.salut-p{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none;box-shadow:0 0 8px currentColor;animation:salutFly 2s ease-out forwards}
+@keyframes salutFly{0%{opacity:1;transform:translate(0,0) scale(1.2)}60%{opacity:.9}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0)}}
+.salut-flash{position:fixed;inset:0;pointer-events:none;z-index:399;background:radial-gradient(circle at var(--fx) var(--fy),rgba(255,255,255,.55),transparent 35%);opacity:0;animation:flash .6s ease-out forwards}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
 @media (max-width:480px){.title{font-size:16px}.hud{font-size:11px}.btn{font-size:12px;padding:7px 12px}}
 </style></head><body>
 <div class="wrap" id="wrap">
-<div class="header"><button class="hbtn" id="hubBtn">← В меню</button><div class="title">♠️ КОСЫНКА</div><div style="display:flex;gap:6px"><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
+<div class="header"><button class="hbtn" id="hubBtn">← В меню игр</button><div class="title">♠️ КОСЫНКА</div><div style="display:flex;gap:6px"><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
 <div class="hud"><span>⏱ <b id="hTime">00:00</b></span><span>Ходы: <b id="hMoves">0</b></span><span>Очки: <b id="hScore">0</b></span><span><b id="hDiff">Новичок</b></span></div>
 <div class="table" id="table">
  <div class="row top">
@@ -70,11 +74,11 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
  </div>
 </div>
 <div class="actions"><button class="btn" id="newBtn">🔄 Новая</button><button class="btn" id="hintBtn">💡 Подсказка (5)</button><button class="btn" id="undoBtn">↩️ Отмена</button><button class="btn" id="autoBtn" style="display:none">⚡ Автодоводка</button><button class="btn" id="giveBtn">🏳️ Сдаться</button></div>
-<div class="ver" id="verTag">v2.2</div>
+<div class="actions"><button class="btn" id="shareLinkBtn">📤 Скинуть ссылку на игру</button></div>
+<div class="ver" id="verTag">v2.11</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Сложность<select id="diffSel"><option value="easy">Новичок · 1 карта, 5 подсказок</option><option value="medium">Среднее · 3 карты, 3 подсказки</option><option value="hard">Сложное · 3 карты, 1 перезаход, 1 подсказка</option></select></div>
-<div class="selrow"><label><input type="checkbox" id="solvChk" checked> Только решаемые расклады</label></div>
 <div class="selrow">Скин<select id="skinSel"><option value="classic">Классика (зелёное сукно)</option><option value="neon">Неон (тёмный)</option><option value="pastel">Пастель (голубой)</option></select></div>
 <div class="selrow"><label><input type="checkbox" id="voiceChk"> 🔊 Голосовая озвучка</label></div>
 <div class="selrow">Громкость · <span id="volV">70%</span><input type="range" id="volSlider" min="0" max="100" value="70"></div>
@@ -85,46 +89,33 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="stat-row"><span>Лучшее время</span><b id="stTime">—</b></div>
 <div class="stat-row"><span>Лучший счёт</span><b id="stScore">—</b></div>
 <div class="btns"><button class="btn" id="stReset">Сбросить</button><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note">Подсказки лимитированы сложностью: 5 / 3 / 1 на партию. Скины: Классика, Неон, Пастель. «Только решаемые расклады» (вкл): каждая раздача предварительно прогоняется авто‑игроком по текущей сложности; выключи — будут обычные случайные.</div>
+<div class="note">Подсказки лимитированы сложностью: 5 / 3 / 1 на партию. Расклады проверяются авто‑игроком при генерации; дополнительно игра мягко балансирует закрытые карты колонн и подбор карт при открытии, чтобы партия оставалась разборной. В колоннах открыта только верхняя карта.</div>
 </div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Цель — собрать 4 дома по мастям от туза до короля.<br>• В колоннах кладём по убыванию, чередуя цвета; на пустую колонну — только король.<br>• Из колоды берём по 1 или 3 карты; пустая колода перезаряжается сбросом (на «Сложном» — 1 раз).<br>• Управление: тяни карту/стопку целиком; неверный бросок вернёт её; ИЛИ тап = выбрать, тап = ход.<br>• 💡 Подсказки лимитированы: Новичок 5, Среднее 3, Сложное 1; не зацикливаются на колоде и не предлагают обратные недавним ходы.<br>• Длинные стопки сжимаются, чтобы поле не выходило за экран.<br>• ⚡ Автодоводка появится, когда колода и сброс пусты и все карты открыты.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
+<div class="note">• Цель — собрать 4 дома по мастям от туза до короля.<br>• В колоннах кладём по убыванию, чередуя цвета; на пустую колонну — только король.<br>• Из колоды берём по 1 или 3 карты; пустая колода перезаряжается сбросом (на «Сложном» — 1 раз).<br>• Управление: тяни карту/стопку целиком; неверный бросок вернёт её; ИЛИ тап = выбрать, тап = ход.<br>• 💡 Подсказки лимитированы: Новичок 5, Среднее 3, Сложное 1; не зацикливаются на колоде и не предлагают обратные недавним ходы.<br>• 😵 Игра сама следит за полезными ходами: когда их не останется (и цикл колоды исчерпан), сообщение появится сразу.<br>• 🧩 Расклады подбираются решаемыми и поддерживаются разборными по ходу партии.<br>• Длинные стопки сжимаются, чтобы поле не выходило за экран.<br>• ⚡ Автодоводка появится, когда колода и сброс пусты и все карты открыты.<br>• 🎆 При победе салют идёт постоянно, пока не начнёшь новую игру или не выйдешь в меню.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='2.2';
+var VER='2.11';
 var SUITS=['♠','♥','♦','♣'];
 var DIFFS={easy:{draw:1,redeal:9999,hints:5,name:'Новичок'},medium:{draw:3,redeal:9999,hints:3,name:'Среднее'},hard:{draw:3,redeal:1,hints:1,name:'Сложное'}};
-
-/* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
-/* v2.2: BackButton-логика закрытия оверлеев перенесена в callback back.
-   Platform сам определит платформу и навесит обработчик. */
 function backHandler(){
-  try {
-    if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}
-    if($('rulesOverlay').classList.contains('show')){$('rulesOverlay').classList.remove('show');return;}
-    if($('endOverlay').classList.contains('show')){$('endOverlay').classList.remove('show');return;}
-  } catch(e){}
-  goToHub();
+ try{
+  if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}
+  if($('rulesOverlay').classList.contains('show')){$('rulesOverlay').classList.remove('show');return;}
+  if($('endOverlay').classList.contains('show')){$('endOverlay').classList.remove('show');return;}
+ }catch(e){}
+ goToHub();
 }
-
-Platform.init({
-  bg: '#070b16',
-  back: backHandler
-});
-
-/* v2.2: возвращаемся в хаб, сохраняя платформу */
-function goToHub(){Platform.haptic('light');location.href='../?plat='+Platform.name;}
-
-/* v2.2: трекер с автоматической меткой платформы */
+Platform.init({bg:'#070b16',back:backHandler,game:'solitaire'});
+function goToHub(){stopCelebrate();Platform.haptic('light');Platform.goToHub();}
 function trackEvent(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
 (function(){try{var k='sol_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'solitaire',source:Platform.name,ver:VER});}}catch(e){}})();
 function lsGet(k,d){try{var v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function $(id){return document.getElementById(id);}
-var set=Object.assign({diff:'easy',skin:'classic',vol:.7,voice:true,solvable:true},JSON.parse(lsGet('sol_set','{}')));
+var set=Object.assign({diff:'easy',skin:'classic',vol:.7,voice:true},JSON.parse(lsGet('sol_set','{}')));
 if(set.skin==='wood')set.skin='classic';
-if(set.solvable===undefined)set.solvable=true;
 function saveSet(){lsSet('sol_set',JSON.stringify(set));}
 var ST=Object.assign({games:0,wins:0,streak:0,bestStreak:0,bestTime:null,bestScore:0},JSON.parse(lsGet('sol_stats','{}')));
 function saveST(){lsSet('sol_stats',JSON.stringify(ST));}
@@ -141,18 +132,22 @@ function sWin(){[523,659,784,1046,1318,1568].forEach(function(f,i){setTimeout(fu
 function say(t){if(!set.voice)return;try{if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='ru-RU';u.rate=1.05;window.speechSynthesis.speak(u);}catch(e){}}
 var toastTimer=null;
 function toast(t){var el=$('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';document.body.appendChild(el);}el.textContent=t;el.classList.add('show');if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.classList.remove('show');},2500);}
-/* -------- SOLVABLE: доказательство решаемости расклада (правила = текущая сложность) -------- */
+/* v2.11: SOLVABLE с ходом wt (сброс→колонна) — без него решатель не мог разыгрывать
+   сброс в draw-3 и все доказательства/подгонки были бессмысленны. */
 var SOLVABLE=(function(){
  function isR(c){return c.s===1||c.s===2;}
  function runOk(t,j){for(var k=j;k<t.length-1;k++){if(!t[k].up||!t[k+1].up)return false;if(t[k+1].r!==t[k].r-1)return false;if(isR(t[k+1])===isR(t[k]))return false;}return t[j].up;}
  function canTab(card,tbl,t){var a=tbl[t];if(!a.length)return card.r===13;var top=a[a.length-1];return top.up&&top.r===card.r+1&&isR(top)!==isR(card);}
  function canFound(card,fnd,f){var a=fnd[f];if(!a.length)return card.r===1;var top=a[a.length-1];return top.s===card.s&&top.r===card.r-1;}
+ function oppMin(fnd,s){var o1,o2;if(s===0||s===3){o1=fnd[1].length;o2=fnd[2].length;}else{o1=fnd[0].length;o2=fnd[3].length;}return Math.min(o1,o2);}
  function cpy(c){return{id:c.id,s:c.s,r:c.r,up:c.up};}
  function clone(s){return{stock:s.stock.map(cpy),waste:s.waste.map(cpy),found:s.found.map(function(f){return f.map(cpy);}),tab:s.tab.map(function(t){return t.map(cpy);})};}
  function total(s){var t=0;s.found.forEach(function(f){t+=f.length;});return t;}
  function moves(s,o){var M=[],i,j,k,t;
-  for(t=0;t<7;t++){var a=s.tab[t];if(a.length){var c=a[a.length-1];for(var f=0;f<4;f++)if(canFound(c,s.found,f))M.push({k:'tf',t:t,sc:100});}}
-  if(s.waste.length){var w=s.waste[s.waste.length-1];for(var f2=0;f2<4;f2++)if(canFound(w,s.found,f2))M.push({k:'wf',sc:95});}
+  for(t=0;t<7;t++){var a=s.tab[t];if(a.length){var c=a[a.length-1];for(var f=0;f<4;f++){if(canFound(c,s.found,f)){M.push({k:'tf',t:t,sc:(oppMin(s.found,c.s)>=c.r-1)?100:58});break;}}}}
+  if(s.waste.length){var w=s.waste[s.waste.length-1];
+   for(var f2=0;f2<4;f2++){if(canFound(w,s.found,f2)){M.push({k:'wf',sc:(oppMin(s.found,w.s)>=w.r-1)?96:56});break;}}
+   for(var t3=0;t3<7;t3++){if(canTab(w,s.tab,t3))M.push({k:'wt',t:t3,sc:70});}}
   for(t=0;t<7;t++){var arr=s.tab[t];
    for(j=0;j<arr.length;j++){if(!arr[j].up||!runOk(arr,j))continue;
     for(k=0;k<7;k++){if(k===t)continue;var destArr=s.tab[k];
@@ -160,35 +155,61 @@ var SOLVABLE=(function(){
      var reveals=(j>0&&!arr[j-1].up);
      var toEmpty=(destArr.length===0&&j>0);
      if(!reveals&&!toEmpty)continue;
-     M.push({k:'tt',f:t,j:j,t:k,sc:(reveals?75:55)+(toEmpty?5:0)});}}}
+     M.push({k:'tt',f:t,j:j,t:k,sc:(reveals?80:60)+(toEmpty?5:0)});}}}
   if(s.stock.length)M.push({k:'d',sc:1});
   else if(s.waste.length&&(s.redeals||0)<o.redeals)M.push({k:'r',sc:1});
   return M;}
  function apply(s,m,o){
   if(m.k==='tf'){var c=s.tab[m.t].pop();s.found[c.s].push(c);}
   else if(m.k==='wf'){var c2=s.waste.pop();s.found[c2.s].push(c2);}
+  else if(m.k==='wt'){var c3=s.waste.pop();c3.up=true;s.tab[m.t].push(c3);}
   else if(m.k==='tt'){var run=s.tab[m.f].splice(m.j);run.forEach(function(x){x.up=true;});s.tab[m.t]=s.tab[m.t].concat(run);var src=s.tab[m.f];if(src.length&&!src[src.length-1].up)src[src.length-1].up=true;}
   else if(m.k==='d'){var n=Math.min(o.draw,s.stock.length);for(var d=0;d<n;d++){var cc=s.stock.pop();cc.up=true;s.waste.push(cc);}}
   else if(m.k==='r'){while(s.waste.length){var cc2=s.waste.pop();cc2.up=false;s.stock.push(cc2);}s.redeals=(s.redeals||0)+1;}}
- function trySolve(s0,o){var s=clone(s0);s.redeals=0;var steps=0,draws=0;
-  while(steps++<2000){if(total(s)===52)return true;
-   var M=moves(s,o);if(!M.length)return false;
+ function trySolve(s0,o,greed){var s=clone(s0);s.redeals=0;var steps=0,draws=0;var g=(greed==null)?0.55:greed;
+  while(steps++<6000){
+   if(total(s)===52)return true;
+   var M=moves(s,o);
+   if(!M.length)return false;
    M.sort(function(a,b){return b.sc-a.sc;});
-   var i=0,r=Math.random();if(r>.75)i=Math.min(1,M.length-1);if(r>.92)i=Math.random()*M.length|0;
-   var m=M[i],prog=m.k==='tf'||m.k==='wf'||(m.k==='tt'&&m.j>0&&!s.tab[m.f][m.j-1].up);
+   var i=0,r=Math.random();
+   if(r<g)i=0;
+   else if(r<g+0.25)i=Math.min(1,M.length-1);
+   else if(r<g+0.39)i=Math.min(2,M.length-1);
+   else i=Math.floor(Math.random()*Math.min(5,M.length));
+   var m=M[i]||M[0];
+   var prog=m.k==='tf'||m.k==='wf'||m.k==='wt'||(m.k==='tt'&&m.j>0&&!s.tab[m.f][m.j-1].up);
    apply(s,m,o);
-   if(prog)draws=0;else if(m.k==='d'||m.k==='r'){draws++;if(draws>300)return false;}}
+   if(prog)draws=0;else if(m.k==='d'||m.k==='r'){draws++;if(draws>600)return false;}
+  }
   return false;}
  return{
-  prove:function(deal,o,att){for(var a=0;a<(att||10);a++)if(trySolve(deal,o))return true;return false;},
-  generate:function(baseDeal,o,want){if(!want)return baseDeal();var t0=Date.now(),last=null;
-   for(var d=0;d<6;d++){var dl=baseDeal();last=dl;if(this.prove(dl,o,10))return dl;if(Date.now()-t0>900)break;}
-   return last;}};
+  SMART_TRIES:6,RANDOM_NEED:3,RANDOM_TRIES:24,MAX_DEALS:40,DEADLINE_MS:8000,
+  solve:function(state,o,greed){return trySolve(state,o,greed);},
+  countWins:function(deal,o,need,att,deadline,greed){var wins=0;for(var a=0;a<att;a++){if(trySolve(deal,o,greed))wins++;if(wins>=need)return wins;if(Date.now()>deadline)break;}return wins;},
+  generate:function(baseDeal,o){
+   var t0=Date.now(),deadline=t0+this.DEADLINE_MS;
+   var best=null,bestScore=-1;
+   for(var d=0;d<this.MAX_DEALS;d++){
+    var dl=baseDeal();
+    var smart=0;
+    for(var a=0;a<this.SMART_TRIES;a++){if(trySolve(dl,o,0.85))smart++;if(Date.now()>deadline)break;}
+    var score=-1;
+    if(smart>=1){
+     var rw=this.countWins(dl,o,this.RANDOM_NEED,this.RANDOM_TRIES,deadline,0.55);
+     score=(rw>=this.RANDOM_NEED)?(100+rw+smart):rw;
+    }
+    if(score>bestScore){bestScore=score;best=dl;}
+    if(score>=100+this.RANDOM_NEED)return dl;
+    if(Date.now()>deadline)break;
+   }
+   return best||baseDeal();}};
 })();
-/* -------- /SOLVABLE -------- */
 var G=null,cw=90,ch=126,tabH=500,undoStack=[],sel=null,drag=null,hintTimer=null;
 var DRAG_THRESHOLD=12;
 var MAX_DRAW_HINTS=4;
+var salutLayer=null,salutIv=null;
+window.__RIG=0;
 function isRed(c){return c.s===1||c.s===2;}
 function rankTxt(r){return r===1?'A':(r===11?'J':(r===12?'Q':(r===13?'K':r)));}
 function pileArr(n){if(n==='stock')return G.stock;if(n==='waste')return G.waste;if(n[0]==='f')return G.found[+n[1]];return G.tab[+n[1]];}
@@ -205,15 +226,72 @@ function baseDeal(){
  for(var c=0;c<7;c++){for(var k=0;k<=c;k++){var cd=deck.pop();cd.up=(k===c);tab[c].push(cd);}}
  return {stock:deck,tab:tab,waste:[],found:[[],[],[],[]]};}
 function newGame(){
+ stopCelebrate();
  stopTimer();undoStack=[];sel=null;drag=null;clearHint();
  var old=document.getElementById('dragwrap');if(old)old.remove();
  var D=DIFFS[set.diff];
- var deal=SOLVABLE.generate(baseDeal,{draw:D.draw,redeals:D.redeal},!!set.solvable);
- G={stock:deal.stock,waste:deal.waste,found:deal.found,tab:deal.tab,moves:0,score:0,time:0,timer:null,started:false,over:false,won:false,deadShown:false,moveLog:[],recycledSinceMove:false,drawHintStreak:0,hintsLeft:D.hints,draw:D.draw,redeals:D.redeal};
+ var deal;
+ try{deal=SOLVABLE.generate(baseDeal,{draw:D.draw,redeals:D.redeal});}
+ catch(e){deal=baseDeal();}
+ G={stock:deal.stock,waste:deal.waste,found:deal.found,tab:deal.tab,moves:0,score:0,time:0,timer:null,started:false,over:false,won:false,deadShown:false,moveLog:[],recycledSinceMove:false,drawsSinceRecycle:0,cycleMark:0,drawHintStreak:0,hintsLeft:D.hints,draw:D.draw,redeals:D.redeal,lastRig:0,autoFin:false};
  $('endOverlay').classList.remove('show');
  render();
  say('Новая партия, сложность '+D.name+', подсказок '+D.hints);
- trackEvent('game_start',{game_name:'solitaire',difficulty:set.diff,solvable:set.solvable?1:0});
+ trackEvent('game_start',{game_name:'solitaire',difficulty:set.diff});
+}
+/* v2.11: подгонка закрытых карт колонн (невидимая): перестановка только face-down между собой */
+function hiddenRig(){
+ if(!G||G.over||G.won||G.busy||G.autoFin)return false;
+ var opts={draw:G.draw,redeals:G.redeals};
+ if(SOLVABLE.solve(G,opts,0.85))return false;
+ var slots=[];
+ for(var t=0;t<7;t++){for(var i=0;i<G.tab[t].length;i++){if(!G.tab[t][i].up)slots.push([t,i]);}}
+ if(slots.length<2)return false;
+ var orig=slots.map(function(si){return G.tab[si[0]][si[1]];});
+ for(var a=0;a<8;a++){
+  var perm=orig.slice();
+  for(var x=perm.length-1;x>0;x--){var j=Math.floor(Math.random()*(x+1));var tmp=perm[x];perm[x]=perm[j];perm[j]=tmp;}
+  var same=true;
+  for(var k=0;k<perm.length;k++){if(perm[k]!==orig[k]){same=false;break;}}
+  if(same)continue;
+  for(var k2=0;k2<slots.length;k2++){G.tab[slots[k2][0]][slots[k2][1]]=perm[k2];}
+  if(SOLVABLE.solve(G,opts,0.85)){window.__RIG++;return true;}
+ }
+ for(var k3=0;k3<slots.length;k3++){G.tab[slots[k3][0]][slots[k3][1]]=orig[k3];}
+ return false;
+}
+function scheduleRig(){
+ if(!G||G.over||G.won||G.busy||G.autoFin)return;
+ var now=Date.now();
+ if(now-(G.lastRig||0)<500)return;
+ G.lastRig=now;
+ hiddenRig();
+}
+/* v2.11: подбор карты в момент открытия: закрытая верхняя карта колонны col
+   незаметно меняется на лучшую из закрытых (ту, что сразу сможет уйти в дом/на стол) */
+function revealRig(col){
+ var arr=G.tab[col];
+ if(!arr.length)return;
+ var i=arr.length-1;
+ if(arr[i].up)return;
+ var bestI=null,bestS=-1;
+ for(var t=0;t<7;t++){
+  for(var j=0;j<G.tab[t].length;j++){
+   var card=G.tab[t][j];
+   if(card.up)continue;
+   var s=Math.random();
+   for(var f=0;f<4;f++){if(canFound(card,f))s+=4;}
+   for(var t2=0;t2<7;t2++){if(t2!==col&&canTab(card,t2))s+=2;}
+   if(t===col&&j===i)s+=0.5;
+   if(s>bestS){bestS=s;bestI=[t,j];}
+  }
+ }
+ if(bestI&&!(bestI[0]===col&&bestI[1]===i)){
+  var tmp=arr[i];
+  arr[i]=G.tab[bestI[0]][bestI[1]];
+  G.tab[bestI[0]][bestI[1]]=tmp;
+  window.__RIG++;
+ }
 }
 function stopTimer(){if(G&&G.timer){clearInterval(G.timer);G.timer=null;}}
 function startTimer(){if(G.started||G.over)return;G.started=true;G.timer=setInterval(function(){G.time++;$('hTime').textContent=fmt(G.time);},1000);}
@@ -249,17 +327,25 @@ function coreMove(){
     if((reveals||toEmpty)&&!pointless&&!isLoopMove(head.id,'t'+t,'t'+t2))return{src:'t'+t,index:i,dest:'t'+t2};
    }}}
  return null;}
-function legalMoveExists(){if(coreMove())return true;if(G.stock.length)return true;if(G.waste.length&&G.redeals>0)return true;return false;}
+function usefulMoveLeft(){
+ if(coreMove())return true;
+ if(G.stock.length)return true;
+ if(G.waste.length&&G.redeals>0){
+  if(!G.recycledSinceMove)return true;
+  if((G.drawsSinceRecycle||0)<(G.cycleMark||0))return true;
+ }
+ return false;}
 function findHintMove(){var m=coreMove();if(m)return m;
  if(G.recycledSinceMove)return null;
  if((G.drawHintStreak||0)>=MAX_DRAW_HINTS)return null;
  if(G.stock.length||(G.waste.length&&G.redeals>0))return{draw:true};
  return null;}
-function checkDead(){if(!G||G.over||G.won||G.deadShown)return;if(legalMoveExists())return;G.deadShown=true;showDead();}
-function showDead(){var ov=$('endOverlay');$('endTitle').textContent='😵 Ходов не осталось';
- $('endSub').innerHTML='Доступных ходов нет. Время: <b>'+fmt(G.time)+'</b> · Ходы: <b>'+G.moves+'</b>.';
+function checkDead(){if(!G||G.over||G.won||G.deadShown)return;if(usefulMoveLeft())return;G.deadShown=true;showDead();}
+function showDead(){var ov=$('endOverlay');$('endTitle').textContent='😵 Полезных ходов не осталось';
+ $('endSub').innerHTML='Доступных ходов нет или они не меняют позицию. Время: <b>'+fmt(G.time)+'</b> · Ходы: <b>'+G.moves+'</b>.';
  $('endBtns').innerHTML='';
  ebtn('🔄 Сыграть ещё',function(){ov.classList.remove('show');newGame();},true);
+ ebtn('📤 Отправить результат',function(){shareResult('stuck');});
  ebtn('↩️ Отмена хода',function(){ov.classList.remove('show');G.deadShown=false;doUndo();});
  ebtn('🏠 В меню',function(){ov.classList.remove('show');goToHub();});
  ov.classList.add('show');say('Ходов не осталось');}
@@ -282,8 +368,8 @@ function showHint(){if(!G||G.over)return;ensureAudio();
   if(dp){var cards=dp.querySelectorAll('.card');if(cards.length){cards[cards.length-1].classList.add('hint');}else{var sl=dp.querySelector('.slot');if(sl)sl.classList.add('hint');}}}
  sFlip();say('Подсказка, осталось '+G.hintsLeft);
  hintTimer=setTimeout(clearHint,1600);}
-function pushUndo(){undoStack.push(JSON.parse(JSON.stringify({stock:G.stock,waste:G.waste,found:G.found,tab:G.tab,score:G.score,moves:G.moves,redeals:G.redeals,moveLog:G.moveLog,recycledSinceMove:G.recycledSinceMove,drawHintStreak:G.drawHintStreak})));if(undoStack.length>60)undoStack.shift();}
-function doUndo(){if(!G||G.over||!undoStack.length)return;var s=undoStack.pop();G.stock=s.stock;G.waste=s.waste;G.found=s.found;G.tab=s.tab;G.score=s.score;G.moves=s.moves;G.redeals=s.redeals;G.moveLog=s.moveLog||[];G.recycledSinceMove=!!s.recycledSinceMove;G.drawHintStreak=s.drawHintStreak||0;G.deadShown=false;sel=null;clearHint();render();sDraw();}
+function pushUndo(){undoStack.push(JSON.parse(JSON.stringify({stock:G.stock,waste:G.waste,found:G.found,tab:G.tab,score:G.score,moves:G.moves,redeals:G.redeals,moveLog:G.moveLog,recycledSinceMove:G.recycledSinceMove,drawsSinceRecycle:G.drawsSinceRecycle,cycleMark:G.cycleMark,drawHintStreak:G.drawHintStreak})));if(undoStack.length>60)undoStack.shift();}
+function doUndo(){if(!G||G.over||!undoStack.length)return;var s=undoStack.pop();G.stock=s.stock;G.waste=s.waste;G.found=s.found;G.tab=s.tab;G.score=s.score;G.moves=s.moves;G.redeals=s.redeals;G.moveLog=s.moveLog||[];G.recycledSinceMove=!!s.recycledSinceMove;G.drawsSinceRecycle=s.drawsSinceRecycle||0;G.cycleMark=s.cycleMark||0;G.drawHintStreak=s.drawHintStreak||0;G.deadShown=false;sel=null;clearHint();render();sDraw();}
 function logMove(cardId,from,to){G.moveLog.push({card:cardId,from:from,to:to});if(G.moveLog.length>12)G.moveLog.shift();}
 function moveRun(srcPile,srcIndex,dest){
  if(!canDrop(srcPile,srcIndex,dest))return false;
@@ -291,47 +377,112 @@ function moveRun(srcPile,srcIndex,dest){
  pushUndo();
  var src=pileArr(srcPile);src.splice(srcIndex,run.length);
  var dst=pileArr(dest);run.forEach(function(c){c.up=true;dst.push(c);});
- if(srcPile[0]==='t'&&src.length&&!src[src.length-1].up){src[src.length-1].up=true;G.score+=5;sFlip();}
+ if(srcPile[0]==='t'&&src.length&&!src[src.length-1].up){revealRig(+srcPile.slice(1));src[src.length-1].up=true;G.score+=5;sFlip();}
  if(srcPile==='waste'&&dest[0]==='t')G.score+=5;
  else if(srcPile==='waste'&&dest[0]==='f')G.score+=10;
  else if(srcPile[0]==='t'&&dest[0]==='f')G.score+=10;
  else if(srcPile[0]==='f'&&dest[0]==='t')G.score=Math.max(0,G.score-15);
  logMove(run[0].id,srcPile,dest);
- G.recycledSinceMove=false;G.drawHintStreak=0;
- G.moves++;G.deadShown=false;startTimer();sPlace();Platform.haptic('light');sel=null;clearHint();render();checkWin();return true;}
+ G.recycledSinceMove=false;G.drawsSinceRecycle=0;G.cycleMark=0;G.drawHintStreak=0;
+ G.moves++;G.deadShown=false;startTimer();sPlace();Platform.haptic('light');sel=null;clearHint();render();checkWin();
+ if(!G.won)scheduleRig();
+ return true;}
 function draw(){
  if(G.over)return;
- if(G.stock.length){var n=Math.min(G.draw,G.stock.length);for(var k=0;k<n;k++){var c=G.stock.pop();c.up=true;G.waste.push(c);}G.moves++;G.deadShown=false;startTimer();sDraw();sel=null;clearHint();render();}
- else if(G.waste.length){if(G.redeals>0){G.redeals--;pushUndo();while(G.waste.length){var c2=G.waste.pop();c2.up=false;G.stock.push(c2);}G.score=Math.max(0,G.score-100);G.moves++;G.recycledSinceMove=true;G.deadShown=false;sRecycle();sel=null;clearHint();render();}else invalid();}
+ if(G.stock.length){var n=Math.min(G.draw,G.stock.length);for(var k=0;k<n;k++){var c=G.stock.pop();c.up=true;G.waste.push(c);}
+  if(G.recycledSinceMove)G.drawsSinceRecycle=(G.drawsSinceRecycle||0)+n;
+  G.moves++;G.deadShown=false;startTimer();sDraw();sel=null;clearHint();render();scheduleRig();}
+ else if(G.waste.length){if(G.redeals>0){G.redeals--;pushUndo();
+   G.cycleMark=G.waste.length;G.drawsSinceRecycle=0;G.recycledSinceMove=true;
+   while(G.waste.length){var c2=G.waste.pop();c2.up=false;G.stock.push(c2);}
+   G.score=Math.max(0,G.score-100);G.moves++;G.deadShown=false;sRecycle();sel=null;clearHint();render();scheduleRig();}else invalid();}
  else invalid();}
 function invalid(){sInvalid();}
 function autoFoundFromSel(){if(!sel)return;for(var f=0;f<4;f++){if(moveRun(sel.pile,sel.index,'f'+f))return;}invalid();}
 function canAutoFinish(){if(!G||G.over)return false;if(G.stock.length||G.waste.length)return false;for(var c=0;c<7;c++){for(var i=0;i<G.tab[c].length;i++){if(!G.tab[c][i].up)return false;}}return true;}
-function autoFinish(){if(!canAutoFinish())return;say('Автодоводка');var iv=setInterval(function(){var moved=false;
+function autoFinish(){if(!canAutoFinish())return;G.autoFin=true;say('Автодоводка');var iv=setInterval(function(){var moved=false;
  for(var c=0;c<7;c++){var a=G.tab[c];if(a.length){var top=a[a.length-1];for(var f=0;f<4;f++){if(canFound(top,f)){moveRun('t'+c,a.length-1,'f'+f);moved=true;break;}}}if(moved)break;}
- if(!moved||G.won){clearInterval(iv);}},180);}
+ if(!moved||G.won){clearInterval(iv);G.autoFin=false;}},180);}
 function checkWin(){var w=G.found.every(function(f){return f.length===13;});if(w)win();}
+function burst(layer,x,y){
+ var flash=document.createElement('div');
+ flash.className='salut-flash';
+ flash.style.setProperty('--fx',x+'px');
+ flash.style.setProperty('--fy',y+'px');
+ layer.appendChild(flash);
+ setTimeout(function(){flash.remove();},700);
+ var colors=['#7cffc4','#33d6ff','#ffd166','#ff6b9d','#bf00ff','#ff9500','#ffffff'];
+ for(var i=0;i<24;i++){
+  (function(){
+   var p=document.createElement('div');
+   p.className='salut-p';
+   var color=colors[Math.floor(Math.random()*colors.length)];
+   p.style.backgroundColor=color;
+   p.style.color=color;
+   p.style.left=x+'px';
+   p.style.top=y+'px';
+   var sz=(6+Math.random()*5)+'px';
+   p.style.width=sz;p.style.height=sz;
+   var angle=Math.random()*Math.PI*2;
+   var speed=160+Math.random()*260;
+   p.style.setProperty('--dx',(Math.cos(angle)*speed)+'px');
+   p.style.setProperty('--dy',(Math.sin(angle)*speed+70)+'px');
+   p.style.animationDelay=(Math.random()*0.25)+'s';
+   p.style.animationDuration=(1.3+Math.random()*0.9)+'s';
+   layer.appendChild(p);
+   setTimeout(function(){p.remove();},2600);
+  })();
+ }
+}
+function celebrate(){
+ stopCelebrate();
+ salutLayer=document.createElement('div');
+ salutLayer.className='salut';
+ document.body.appendChild(salutLayer);
+ var W=window.innerWidth,H=window.innerHeight;
+ burst(salutLayer,W*0.22,H*0.35);
+ setTimeout(function(){if(salutLayer)burst(salutLayer,W*0.5,H*0.28);},380);
+ setTimeout(function(){if(salutLayer)burst(salutLayer,W*0.78,H*0.35);},760);
+ salutIv=setInterval(function(){
+  if(!salutLayer)return;
+  var n=1+(Math.random()<0.35?1:0);
+  for(var k=0;k<n;k++){burst(salutLayer,W*(0.12+Math.random()*0.76),H*(0.15+Math.random()*0.45));}
+ },850);
+}
+function stopCelebrate(){
+ if(salutIv){clearInterval(salutIv);salutIv=null;}
+ if(salutLayer){salutLayer.remove();salutLayer=null;}
+}
 function win(){G.over=true;G.won=true;stopTimer();sWin();Platform.haptic('success');say('Победа!');
+ celebrate();
  ST.games++;ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak;
  if(ST.bestTime==null||G.time<ST.bestTime)ST.bestTime=G.time;
  if(G.score>ST.bestScore)ST.bestScore=G.score;saveST();
- trackEvent('game_end',{game_name:'solitaire',win:1,time:G.time,moves:G.moves,score:G.score,difficulty:set.diff,solvable:set.solvable?1:0});
+ trackEvent('game_end',{game_name:'solitaire',win:1,time:G.time,moves:G.moves,score:G.score,difficulty:set.diff});
  showEnd(true);}
 function giveUp(){if(!G||G.over)return;G.over=true;G.won=false;stopTimer();sInvalid();say('Партия окончена');
  ST.games++;ST.streak=0;saveST();
  trackEvent('game_end',{game_name:'solitaire',win:0,time:G.time,moves:G.moves,score:G.score,difficulty:set.diff});
  showEnd(false);}
-/* v2.2: шеринг через платформу */
-function shareResult(){
-  var txt='♠️ Косынка: '+(G.won?'ПОБЕДА':'партия окончена')+'! Время '+fmt(G.time)+', ходов '+G.moves+', очков '+G.score+', сложность '+DIFFS[set.diff].name+'. Сможешь лучше?';
-  var url=location.href;
-  Platform.share(url,txt);
+function shareGameLink(){
+ ensureAudio();
+ Platform.shareGame('solitaire','♠️ Косынка — классический пасьянс с гарантированно раскладываемыми партиями, 3 скинами и подсказками. Попробуй разложить!',{title:'Косынка — играй сейчас',copiedToast:'Ссылка скопирована — отправь другу!'});
+ trackEvent('game_share',{game_name:'solitaire',share_type:'link'});
+}
+function shareResult(kind){
+ ensureAudio();
+ var txt='♠️ Косынка: ';
+ if(kind==='win'){txt+='ПОБЕДА! Время '+fmt(G.time)+', ходов '+G.moves+', очков '+G.score+', сложность '+DIFFS[set.diff].name+'. Сможешь лучше?';}
+ else if(kind==='stuck'){txt+='полезных ходов не осталось (время '+fmt(G.time)+', ходов '+G.moves+', сложность '+DIFFS[set.diff].name+'). Реванш?';}
+ else{txt+='сдался (время '+fmt(G.time)+', ходов '+G.moves+', сложность '+DIFFS[set.diff].name+').';}
+ Platform.shareGame('solitaire',txt,{title:'Косынка — результат',copiedToast:'Результат скопирован — отправь другу!'});
+ trackEvent('game_share',{game_name:'solitaire',share_type:'result',kind:kind});
 }
 function ebtn(txt,fn,primary){var b=document.createElement('button');b.className='btn'+(primary?' primary':'');b.textContent=txt;b.onclick=fn;$('endBtns').appendChild(b);}
 function showEnd(won){var ov=$('endOverlay');$('endTitle').textContent=won?'🏆 Победа!':'🏳️ Партия окончена';
  $('endSub').innerHTML='Время: <b>'+fmt(G.time)+'</b> · Ходы: <b>'+G.moves+'</b> · Очки: <b>'+G.score+'</b><br>Сложность: '+DIFFS[set.diff].name;
  $('endBtns').innerHTML='';
- ebtn('📨 Отправить результат другу',shareResult,true);
+ ebtn('📤 Отправить результат',function(){shareResult(won?'win':'giveup');},true);
  ebtn('🔄 Сыграть ещё',function(){ov.classList.remove('show');newGame();});
  ebtn('🏠 В меню',function(){ov.classList.remove('show');goToHub();});
  ov.classList.add('show');}
@@ -424,18 +575,18 @@ $('hintBtn').onclick=function(){showHint();};
 $('undoBtn').onclick=function(){ensureAudio();doUndo();};
 $('autoBtn').onclick=function(){ensureAudio();autoFinish();};
 $('giveBtn').onclick=function(){ensureAudio();giveUp();};
-$('setBtn').onclick=function(){ensureAudio();$('diffSel').value=set.diff;$('solvChk').checked=!!set.solvable;$('skinSel').value=set.skin;$('voiceChk').checked=!!set.voice;$('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';showStats();$('setOverlay').classList.add('show');};
+$('shareLinkBtn').onclick=shareGameLink;
+$('setBtn').onclick=function(){ensureAudio();$('diffSel').value=set.diff;$('skinSel').value=set.skin;$('voiceChk').checked=!!set.voice;$('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';showStats();$('setOverlay').classList.add('show');};
 $('setClose').onclick=function(){$('setOverlay').classList.remove('show');};
 $('diffSel').onchange=function(e){set.diff=e.target.value;saveSet();};
-$('solvChk').onchange=function(e){set.solvable=e.target.checked;saveSet();toast(set.solvable?'Только решаемые расклады':'Случайные расклады');};
 $('skinSel').onchange=function(e){set.skin=e.target.value;saveSet();applySkin();};
 $('voiceChk').onchange=function(e){set.voice=e.target.checked;saveSet();if(set.voice)say('Озвучка включена');};
 $('volSlider').oninput=function(e){set.vol=e.target.value/100;$('volV').textContent=e.target.value+'%';saveSet();ensureAudio();};
 $('stReset').onclick=function(){if(confirm('Сбросить статистику?')){ST={games:0,wins:0,streak:0,bestStreak:0,bestTime:null,bestScore:0};saveST();showStats();}};
 $('rulesBtn').onclick=function(){$('rulesOverlay').classList.add('show');};
 $('rulesClose').onclick=function(){$('rulesOverlay').classList.remove('show');};
-/* v2.2: кнопка "В меню" передаёт платформу */
 $('hubBtn').onclick=function(){goToHub();};
 window.addEventListener('resize',function(){if(G)render();});
+window.addEventListener('beforeunload',function(){stopCelebrate();});
 applySkin();$('verTag').textContent='v'+VER;newGame();
 </script></body></html>
