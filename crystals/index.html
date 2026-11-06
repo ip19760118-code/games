@@ -1,6 +1,5 @@
 <!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/><title>Кристаллы</title>
-<script>window.addEventListener('error',function(e){var s=document.getElementById('statusEl');if(s){s.textContent='⚠️ Ошибка скрипта: '+e.message;s.style.color='#ff8f8f';}});</script>
-<!-- Единый слой платформ (TG / VK / MAX / web) -->
+<script>window.addEventListener('error',function(e){var s=document.getElementById('scoreLcd');if(s&&s.parentNode){var n=document.createElement('div');n.style.color='#ff8f8f';n.style.textAlign='center';n.style.fontSize='12px';n.textContent='⚠️ '+(e&&e.message||'');s.parentNode.insertBefore(n,s.nextSibling);}});</script>
 <script src="../js/platform.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
@@ -28,6 +27,13 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .objbar b{color:var(--accent)}
 .tilebar{display:none;flex-wrap:wrap;gap:6px;justify-content:center;margin:-2px 0 8px}
 .tchip{min-width:28px;text-align:center;border-radius:7px;padding:3px 7px;color:#fff;font-weight:800;font-size:12px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.65),0 0 6px rgba(255,255,255,.35);text-shadow:0 1px 2px rgba(0,0,0,.6)}
+/* v4.17: закрывающаяся шторка инструментов над полем */
+.curtain{background:rgba(0,0,0,.25);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.curtain-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:13px;font-weight:700;color:var(--accent);min-height:40px}
+.curtain-head:active .fold{transform:scale(.94)}
+.curtain-fold{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;background:rgba(124,255,196,.14);border:1px solid rgba(124,255,196,.45);color:var(--accent);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:800;letter-spacing:.3px;transition:transform .1s}
+.curtain-body{padding:4px 10px 10px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
+.curtain.collapsed .curtain-body{display:none}
 .catled{display:none;gap:8px;align-items:center;justify-content:center;margin:4px 0 6px;font-size:14px;font-weight:800;color:var(--accent)}
 .catled img{width:28px;height:28px;object-fit:contain;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.7)}
 .basketrow{display:none;grid-template-columns:repeat(8,var(--cs,44px));gap:3px;margin:6px auto 0;width:max-content}
@@ -97,7 +103,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .ring{position:fixed;border:3px solid var(--sc);border-radius:50%;pointer-events:none;z-index:300;animation:ring .4s ease-out forwards}
 @keyframes ring{to{transform:scale(2.6);opacity:0}}
 .bolt{position:fixed;inset:0;pointer-events:none;z-index:350}
-.status{text-align:center;font-size:14px;font-weight:600;margin:8px 0;min-height:20px;color:var(--accent)}
 .actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;align-items:center;margin-top:8px}
 .bankchip{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:30px;padding:8px 14px;font-size:13px;font-weight:800;color:var(--accent);white-space:nowrap}
 .btn.skipglow{border-color:var(--accent);color:var(--accent);animation:glowbtn 1.1s infinite alternate}
@@ -122,23 +127,33 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
  .lcd{font-size:18px;min-width:64px;padding:2px 6px}
  .smiley{width:42px;height:42px;font-size:24px}
  .objbar{font-size:12px}
- .status{font-size:12px}
  .bankchip{font-size:12px;padding:7px 12px}
  .btn{font-size:13px;padding:8px 14px}
 }
 </style></head><body>
 <div class="wrap" id="wrap">
-<div class="header"><button class="hbtn" id="hubBtn">← В меню</button><div class="title">💎 КРИСТАЛЛЫ</div><div style="display:flex;gap:6px"><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
+<div class="header"><button class="hbtn" id="hubBtn">← В меню игр</button><div class="title">💎 КРИСТАЛЛЫ</div><div style="display:flex;gap:6px"><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
 <div class="hud"><div class="lcd"><small>ОЧКИ УРОВНЯ</small><span id="scoreLcd">0</span></div><div class="smiley" id="restartBtn">🔄</div><div class="lcd" id="limitLcd"><small id="limitLbl">ВРЕМЯ</small><span id="timeLcd">150</span></div></div>
 <div class="starbar" id="starBar" style="display:none"><div class="sbfill" id="sbFill"></div><div class="sbstars" id="sbStars"></div></div>
 <div class="objbar" id="objBar" style="display:none"><span id="objText"></span><b id="objProg"></b></div>
 <div class="tilebar" id="tileBar"></div>
+<div class="curtain" id="curtain">
+<div class="curtain-head" id="curtainHead"><span id="curtainHeadTxt">🧰 Инструменты</span><span class="curtain-fold" id="curtainFold">▴ Свернуть</span></div>
+<div class="curtain-body">
+ <span class="bankchip" id="bankChip">⭐ Банк: 0</span>
+ <div class="btns" style="margin:0;width:auto">
+  <button class="btn" id="undoBtn">↩️ Отмена</button>
+  <button class="btn" id="pauseBtn" style="display:none">⏸ Пауза</button>
+  <button class="btn skipglow" id="nextLevelBtn" style="display:none">⏭️ След. уровень (−1000)</button>
+  <button class="btn" id="hintBtn">💡 Подсказка</button>
+ </div>
+</div>
+</div>
 <div class="boardwrap" id="boardwrap"><div class="board" id="board"></div></div>
 <div class="basketrow" id="basketrow"></div>
 <div class="catled" id="catLed"></div>
-<div class="status" id="statusEl">Выбери режим в ⚙️ и нажми 🔄</div>
-<div class="actions"><span class="bankchip" id="bankChip">⭐ Банк: 0</span><button class="btn" id="undoBtn">↩️ Отмена</button><button class="btn" id="pauseBtn" style="display:none">⏸ Пауза</button><button class="btn skipglow" id="nextLevelBtn" style="display:none">⏭️ След. уровень (−1000)</button><button class="btn" id="hintBtn">💡 Подсказка</button></div>
-<div class="ver" id="verTag">v4.16</div>
+<div class="actions"><button class="btn" id="shareLinkBtn">📤 Скинуть ссылку на игру</button></div>
+<div class="ver" id="verTag">v4.17</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Режим<select id="modeSel"><option value="qtime">Задания на время</option><option value="qmoves">Задания на ходы</option><option value="cats">Проведи котиков (∞)</option><option value="endless">Бесконечно</option></select></div>
@@ -157,33 +172,29 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Как играть</h2>
-<div class="note" style="text-align:left">• Управление: тап по кристаллу → тап по соседу, ИЛИ свайп от кристалла к соседу (направление берётся из движения пальца).<br>• ОЧКИ УРОВНЯ (слева); БАНК ⭐ (чип под полем).<br>• Режимы: «На время», «На ходы», «Проведи котиков» (∞), «Бесконечно».<br>• Уровни: каждый 3‑й плитки, каждый 4‑й котики, каждый 6‑й корзины.<br>• 🐱 Кот в пустой клетке; засчитывается сразу у низа; свап бонуса с котом активирует бонус; без разрушения — откат.<br>• 🧺 Корзины: цифра = осталось; собрал — исчезает; 3+ цвета сгорают, проваливаются 1–2.<br>• Звёзды: ≥70% ★★★, 40–69% ★★, 10–39% ★; бонус 3000/2000/1000. Овертайм −50/ход, −10/сек; пропуск −1000.</div>
+<div class="note" style="text-align:left">• Управление: тап по кристаллу → тап по соседу, ИЛИ свайп от кристалла к соседу (направление берётся из движения пальца).<br>• ОЧКИ УРОВНЯ (слева); БАНК ⭐ (в шторке «🧰 Инструменты» над полем).<br>• Задание, прогресс и плитки цели — в полосах над полем.<br>• Режимы: «На время», «На ходы», «Проведи котиков» (∞), «Бесконечно».<br>• Уровни: каждый 3‑й плитки, каждый 4‑й котики, каждый 6‑й корзины.<br>• 🐱 Кот в пустой клетке; засчитывается сразу у низа; свап бонуса с котом активирует бонус; без разрушения — откат.<br>• 🧺 Корзины: цифра = осталось; собрал — исчезает; 3+ цвета сгорают, проваливаются 1–2.<br>• Звёзды: ≥70% ★★★, 40–69% ★★, 10–39% ★; бонус 3000/2000/1000. Овертайм −50/ход, −10/сек; пропуск −1000.<br>• Шторка «🧰 Инструменты» сворачивается кликом — больше места для поля.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='4.16';
+var VER='4.17';
 var IMG='img/';
 var SWAP_MS=240,FALL_MS=240;
 (function(){var t=new Image();t.onerror=function(){document.body.classList.add('noarrow');};t.src=IMG+'arrow_h.png';})();
 
-/* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
-/* v4.16: BackButton-логика закрытия оверлеев перенесена в callback back.
-   Platform сам определит платформу и навесит обработчик. */
 function backHandler(){
   try {
     if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}
     if($('rulesOverlay').classList.contains('show')){$('rulesOverlay').classList.remove('show');return;}
     if($('endOverlay').classList.contains('show')){$('endOverlay').classList.remove('show');return;}
   } catch(e){}
-  /* Все оверлеи закрыты — возвращаемся в хаб */
-  location.href='../?plat='+Platform.name;
+  Platform.goToHub();
 }
 
 Platform.init({
   bg: '#0d1026',
-  back: backHandler
+  back: backHandler,
+  game: 'crystals'
 });
 
-/* v4.16: трекер с автоматической меткой платформы */
 function trackEvent(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
 (function(){try{var k='crystals_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'crystals',source:Platform.name,ver:VER});}}catch(e){}})();
 function lsGet(k,d){try{var v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
@@ -279,7 +290,6 @@ function toast(t,ms,good){var el=$('toast');
  el.textContent=t;el.classList.toggle('good',!!good);el.classList.add('show');
  if(toastTimer)clearTimeout(toastTimer);
  toastTimer=setTimeout(function(){el.classList.remove('show');},ms||3000);}
-function setStatus(t){$('statusEl').innerHTML=t;$('statusEl').className='status';}
 function catAt(i){if(!G||!G.cats)return null;for(var k=0;k<G.cats.length;k++){var ct=G.cats[k];if(ct.r*8+ct.c===i)return ct;}return null;}
 function placeTiles(L){if(L.type!=='tiles')return;var placed=0,guard=0;while(placed<L.tiles&&guard<500){var i=Math.floor(Math.random()*64);if(G.tiles[i]<0&&!catAt(i)){G.tiles[i]=Math.floor(Math.random()*G.colors);placed++;}guard++;}}
 function placeBaskets(L){if(L.type!=='basket')return;G.baskets=[];var cols=[0,2,4,6];for(var k=0;k<cols.length;k++){G.baskets.push({col:cols[k],color:Math.floor(Math.random()*G.colors),count:0,need:L.basketNeed||3});}G.basketDelivered=0;}
@@ -323,12 +333,9 @@ function newGame(){
    else{if(payBank(10))updateHud();}
  },1000);
  buildBoard();renderBaskets();updateCatLed();updateHud();updateObj();
- if(mode==='cats'){$('statusEl').style.display='none';}
- else{$('statusEl').style.display='';setStatus(modeTxt());}
  say(mode==='cats'?'Проведи котиков':(isQuest()?('Уровень '+G.level+'. '+objLabel()):'Бесконечный режим'));
  trackEvent('game_start',{game_name:'crystals',mode:mode,difficulty:set.diff,level:G.level||0});
 }
-function modeTxt(){if(G.mode==='qtime')return'⏰ Задания на время · Уровень '+G.level+': '+objLabel();if(G.mode==='qmoves')return'🎯 Задания на ходы · Уровень '+G.level+': '+objLabel()+' · Ходы: '+G.moves;if(G.mode==='cats')return'🐱 Проведи котиков: проведено '+G.delivered;return'♾ Бесконечно ('+DIFFS[set.diff].name+'): очков как можно больше!';}
 function objLabel(){var o=G.obj;if(!o)return'';var t=OBJTXT[o.type];if(o.type==='color')t+=' '+colorName(o.color);return t;}
 function colorName(c){return['красный','синий','зелёный','фиолетовый','оранжевый','жёлтый','белый'][c]||c;}
 function stopTimer(){if(G&&G.timer){clearInterval(G.timer);G.timer=null;}}
@@ -629,18 +636,39 @@ function skipLevel(){questScore=levelStart;
  toast('⏭️ Пропуск уровня: −1000 баллов. Банк: '+ST.bank,3000);}
 function ebtn(txt,fn,primary){var b=document.createElement('button');b.className='btn'+(primary?' primary':'');b.textContent=txt;b.onclick=fn;$('endBtns').appendChild(b);}
 function starStr(n){var s='';for(var i=0;i<3;i++)s+=i<n?'★':'☆';return s;}
-/* v4.16: все кнопки «В меню» передают платформу в хаб */
+
+/* v4.17: вирусный шеринг ссылки на игру и результата партии */
+function shareGameLink(){
+ ensureAudio();
+ Platform.shareGame('crystals','💎 Кристаллы — match-3 с 4 режимами: котики 🐱, корзины 🧺, бонусы-молнии, плитки. Собери как можно больше!',{title:'Кристаллы — играй сейчас',copiedToast:'Ссылка скопирована — отправь другу!'});
+ trackEvent('game_share',{game_name:'crystals',share_type:'link'});
+}
+function shareResult(kind,stars,bonus){
+ ensureAudio();
+ var txt='💎 Кристаллы: ';
+ if(kind==='win') txt+='уровень '+(G?G.level:'?')+' пройден! '+starStr(stars||0)+', очков уровня: '+levelScore()+(bonus?' +'+bonus+' за звёзды':'')+'. Сможешь лучше?';
+ else if(kind==='bankrupt') txt+='баллы закончились (овертайм). Реванш?';
+ else txt+='цель не выполнена (очки уровня: '+levelScore()+'). Реванш?';
+ Platform.shareGame('crystals',txt,{title:'Кристаллы — результат',copiedToast:'Результат скопирован — отправь другу!'});
+ trackEvent('game_share',{game_name:'crystals',share_type:'result',kind:kind});
+}
+
+/* v4.17: все кнопки «В меню» идут через Platform.goToHub (универсально) */
+function goToHub(){Platform.haptic('light');Platform.goToHub();}
 function showEndOverlay(kind,stars,bonus){var ov=$('endOverlay');var t=$('endTitle'),sub=$('endSub');$('endBtns').innerHTML='';
  if(kind==='win'){t.textContent='🎉 Уровень '+G.level+' пройден!';sub.textContent=starStr(stars||0)+' · Очки уровня: +'+levelScore()+(bonus?' · Бонус за звёзды: +'+bonus:'')+' · В банк: +'+(levelScore()+(bonus||0))+'.';
   ebtn('➡️ Следующий уровень',function(){ov.classList.remove('show');newGame();},true);
-  ebtn('🏠 В меню',function(){ov.classList.remove('show');location.href='../?plat='+Platform.name;});}
+  ebtn('📤 Отправить результат',function(){shareResult('win',stars,bonus);});
+  ebtn('🏠 В меню',function(){ov.classList.remove('show');goToHub();});}
  else if(kind==='bankrupt'){t.textContent='💸 Баллы закончились';sub.textContent='Овертайм съел все баллы. Очки уровня: '+levelScore()+'.';
   ebtn('🔁 Переиграть уровень',function(){ov.classList.remove('show');newGame();},true);
-  ebtn('🏠 В меню',function(){ov.classList.remove('show');location.href='../?plat='+Platform.name;});}
+  ebtn('📤 Отправить результат',function(){shareResult('bankrupt');});
+  ebtn('🏠 В меню',function(){ov.classList.remove('show');goToHub();});}
  else{t.textContent=G.mode==='qtime'?'⏰ Время вышло!':'😔 Ходы закончились';sub.textContent='Цель не выполнена. Очки уровня: '+levelScore()+'. Банк: '+ST.bank+'.';
   ebtn('🔁 Переиграть уровень',function(){ov.classList.remove('show');newGame();},true);
+  ebtn('📤 Отправить результат',function(){shareResult('fail');});
   ebtn('⏭️ Дальше (−1000)',function(){skipLevel();});
-  ebtn('🏠 В меню',function(){ov.classList.remove('show');location.href='../?plat='+Platform.name;});}
+  ebtn('🏠 В меню',function(){ov.classList.remove('show');goToHub();});}
  ov.classList.add('show');}
 function tilesByColor(){var m={};G.tiles.forEach(function(t){if(t>=0)m[t]=(m[t]||0)+1;});return m;}
 function updateHud(){$('scoreLcd').textContent=levelScore();
@@ -652,7 +680,8 @@ function updateHud(){$('scoreLcd').textContent=levelScore();
 function updateObj(){var bar=$('objBar');var tb=$('tileBar');
  if(!isQuest()||!G.obj){bar.style.display='none';tb.style.display='none';return;}
  bar.style.display='flex';var o=G.obj;var extra='';if(o.type==='color')extra=' ('+colorName(o.color)+')';
- $('objText').textContent=OBJTXT[o.type]+extra;
+ var levelPart=G.mode==='qtime'||G.mode==='qmoves'?'Уровень '+G.level+' · ':'';
+ $('objText').textContent=levelPart+OBJTXT[o.type]+extra;
  var cur=o.type==='score'?levelScore():(o.type==='tiles'?(o.target-tilesLeft()):o.progress);
  $('objProg').textContent=Math.min(cur,o.target)+'/'+o.target;
  if(o.type==='tiles'){tb.style.display='flex';tb.innerHTML='';var P=pal();var m=tilesByColor();
@@ -662,11 +691,15 @@ function tilesLeft(){return G.tiles.filter(function(t){return t>=0;}).length;}
 function hint(){if(!G||G.over||G.busy||G.paused)return;var m=findMove();if(!m){shuffleBoard(false);return;}ensureAudio();sSwap();cellEls[m[0]].classList.add('hint');cellEls[m[1]].classList.add('hint');setTimeout(function(){if(cellEls[m[0]])cellEls[m[0]].classList.remove('hint');if(cellEls[m[1]])cellEls[m[1]].classList.remove('hint');},900);}
 function applySkin(){document.getElementById('wrap').setAttribute('data-skin',set.skin);if(G)renderBoard();}
 function showStats(){$('stBank').textContent=ST.bank||0;$('stGames').textContent=ST.games+' / '+ST.cleared;$('stQ').textContent=(ST.quest||1)-1;$('stCats').textContent=ST.bestCats||0;$('stBask').textContent=ST.basketsTotal||0;}
+/* v4.17: toggle шторки инструментов */
+function toggleCurtain(){var c=$('curtain');c.classList.toggle('collapsed');var f=$('curtainFold');f.textContent=c.classList.contains('collapsed')?'▾ Развернуть':'▴ Свернуть';try{Platform.haptic('light');}catch(e){}}
 $('restartBtn').onclick=function(){ensureAudio();sSwap();if(isQuest()){questScore=0;levelStart=0;}newGame();};
 $('undoBtn').onclick=function(){ensureAudio();doUndo();};
 $('pauseBtn').onclick=function(){ensureAudio();togglePause();};
 $('nextLevelBtn').onclick=function(){ensureAudio();skipLevel();};
 $('hintBtn').onclick=function(){hint();};
+$('curtainHead').onclick=toggleCurtain;
+$('shareLinkBtn').onclick=shareGameLink;
 $('setBtn').onclick=function(){ensureAudio();$('modeSel').value=set.mode;$('diffSel').value=set.diff;$('skinSel').value=set.skin;$('voiceChk').checked=!!set.voice;$('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';showStats();$('setOverlay').classList.add('show');};
 $('setClose').onclick=function(){$('setOverlay').classList.remove('show');};
 $('modeSel').onchange=function(e){set.mode=e.target.value;saveSet();trackEvent('settings_change',{game_name:'crystals',setting:'mode',value:set.mode});$('setOverlay').classList.remove('show');if(isQuest()){questScore=0;levelStart=0;}newGame();};
@@ -677,8 +710,7 @@ $('volSlider').oninput=function(e){set.vol=e.target.value/100;$('volV').textCont
 $('stReset').onclick=function(){if(confirm('Сбросить статистику?')){ST={games:0,cleared:0,quest:1,bank:0,bestCats:0,basketsTotal:0};saveST();showStats();updateHud();}};
 $('rulesBtn').onclick=function(){$('rulesOverlay').classList.add('show');};
 $('rulesClose').onclick=function(){$('rulesOverlay').classList.remove('show');};
-/* v4.16: кнопка «В меню» передаёт платформу */
-$('hubBtn').onclick=function(){location.href='../?plat='+Platform.name;};
+$('hubBtn').onclick=function(){goToHub();};
 window.addEventListener('resize',function(){if(G){buildBoard();renderBaskets();}});
 applySkin();$('voiceChk').checked=!!set.voice;$('verTag').textContent='v'+VER;newGame();
 </script></body></html>
