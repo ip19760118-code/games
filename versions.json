@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-06T09:04:31.485Z",
+ "generatedAt": "2026-11-06T09:24:16.144Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.47",
@@ -206,7 +206,7 @@
    ]
   },
   "crystals": {
-   "version": "4.16",
+   "version": "4.17",
    "online": false,
    "addedAt": "2026-10-01",
    "files": [
@@ -317,8 +317,8 @@
     },
     {
      "path": "crystals/index.html",
-     "sha256": "c4f10de3ecf02cccd987b0376c9f7653962e96b8771fc5a9b06b37fda77ae2d6",
-     "size": 64905
+     "sha256": "0faf676823343375cb849dc288108417d0895cd85f43b8b2fbb2383ebe23b948",
+     "size": 67166
     }
    ]
   },
