@@ -1,6 +1,5 @@
 <!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="color-scheme" content="light dark"><link rel="icon" type="image/png" sizes="32x32" href="../icon-32.png"><title>Нарды</title>
-<script src="../js/platform.js"></script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
+<script src="../js/platform.js"></script><script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
 <style>
 :root{--bg1:#241a10;--bg2:#3a2a18;--bg3:#150e07;--panel:rgba(46,32,18,.9);--text:#f0e6d2;--accent:#e6b366;--pt1:#c89b6a;--pt2:#8a5a33;--shadow:rgba(0,0,0,.6)}
@@ -76,7 +75,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--text);padding:9px 18px;border-radius:30px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:box-shadow .2s ease}
 .btn:active{transform:scale(.96)}.btn:disabled{opacity:.35;cursor:not-allowed}
 .btn.primary{background:linear-gradient(135deg,#e6b366,#c98a3e);color:#241505;border:none}
-/* v2.8: pulse-подсветка кнопки, которую стоит нажать */
 @keyframes btnPulse{
   0%,100%{box-shadow:0 0 0 0 rgba(230,179,102,.55),0 2px 6px rgba(0,0,0,.2)}
   50%{box-shadow:0 0 0 9px rgba(230,179,102,0),0 4px 18px rgba(230,179,102,.45)}
@@ -112,15 +110,15 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="board" id="board"></div>
 <div class="status" id="statusEl">Выбери режим</div>
 <div class="actions"><button class="btn primary" id="rollBtn" style="display:none">🎲 Бросить кости</button><button class="btn" id="menuBtn" style="display:none">🏠 Меню нарды</button><button class="btn" id="newBtn" style="display:none">🔄 Новая игра</button><button class="btn" id="shareLinkBtn">📤 Отправить ссылку на игру</button></div>
-<div class="ver" id="verTag">v2.8</div>
+<div class="ver" id="verTag">v2.9</div>
 </div>
 <div class="fieldViewBar" id="fieldViewBar"><span class="title">👁 Просмотр партии</span><button class="btn" id="closeFieldView">Закрыть</button></div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🎲 Нарды <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.8</span></h2><div class="sub">Классические длинные · против часовой</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🎲 Нарды <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.9</span></h2><div class="sub">Классические длинные · против часовой</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="statsOverlay"><div class="cardbox"><h2>📊 Статистика</h2><div class="stat-row"><span>Партий сыграно</span><b id="stT">0</b></div><div class="stat-row"><span>Побед</span><b id="stW">0</b></div><div class="stat-row"><span>Поражений</span><b id="stL">0</b></div><div class="stat-row"><span>Процент побед</span><b id="stPct">—</b></div><div class="stat-row"><span>Серия побед сейчас</span><b id="stSt">0</b></div><div class="stat-row"><span>Рекордная серия</span><b id="stBest">0</b></div><div class="stat-row"><span>Всего снято шашек</span><b id="stBorne">0</b></div><div class="btns"><button class="btn" id="stReset">Сбросить</button><button class="btn primary" id="stClose">Закрыть</button></div></div></div>
-<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (длинные)</h2><div class="sub">• Твоя голова — нижний левый угол, твой дом — верхняя левая четверть; голова соперника — верхний правый угол, его дом — нижняя правая четверть.<br>• Движение против часовой: низ слева→направо, затем верх справа→налево; каждый проходит полный круг и возвращает шашки в свой дом.<br>• Бить нельзя: занятая точка блокирует соперника.<br>• С головы — одна шашка за ход (в первом броске 3-3, 4-4, 6-6 — две).<br>• Нельзя строить шесть точек подряд, если впереди блока нет шашки соперника.<br>• Сброс с дома: точное значение или старше, если позади нет своих.<br>• <b>Комбо-ход:</b> одной шашкой можно пройти сумму костей (например, 2+3=5) или при дубле 2a/3a/4a — если все промежуточные клетки свободны. Зелёная точка = обычный ход, золотой бейдж с цифрой = комбо-ход.<br>• <b>Частичный дубль:</b> после использования части костей дубля (например, одной 3 из 3-3-3-3), оставшиеся кости продолжают суммироваться на любую фишку (3, 6, 9).<br>• В свой ход нажми «🎲 Бросить кости» (кнопка пульсирует — подсказка); зелёная рамка показывает шашки, которые могут ходить; конец хода автоматический.<br>• «🏠 Меню нарды» прерывает партию и возвращает к выбору режима.<br>• Победил — кто первым снял все 15.<br>• После партии жми «🔄 Реванш» — когда оба согласятся, новая партия начнётся автоматически.<br>• После окончания игры (победа или поражение) доступна кнопка «📤 Отправить результат».<br>• Онлайн защищён анонимной авторизацией Firebase.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
+<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (длинные)</h2><div class="sub">• Твоя голова — нижний левый угол, твой дом — верхняя левая четверть; голова соперника — верхний правый угол, его дом — нижняя правая четверть.<br>• Движение против часовой: низ слева→направо, затем верх справа→налево; каждый проходит полный круг и возвращает шашки в свой дом.<br>• Бить нельзя: занятая точка блокирует соперника.<br>• С головы — одна шашка за ход (в первом броске 3-3, 4-4, 6-6 — две).<br>• Нельзя строить шесть точек подряд, если впереди блока нет шашки соперника. <b>Исключение:</b> если все фишки противника уже в его доме — блок разрешён.<br>• Сброс с дома: точное значение костью; если нет точного — можно перебросить большей костью с самой дальней фишки, но только если нет фишки с точным расстоянием для этой кости.<br>• <b>Комбо-ход:</b> одной шашкой можно пройти сумму костей (например, 2+3=5) или при дубле 2a/3a/4a — если все промежуточные клетки свободны. Зелёная точка = обычный ход, золотой бейдж с цифрой = комбо-ход.<br>• <b>Частичный дубль:</b> после использования части костей дубля (например, одной 3 из 3-3-3-3), оставшиеся кости продолжают суммироваться на любую фишку (3, 6, 9).<br>• В свой ход нажми «🎲 Бросить кости» (кнопка пульсирует — подсказка); зелёная рамка показывает шашки, которые могут ходить; конец хода автоматический.<br>• «🏠 Меню нарды» прерывает партию и возвращает к выбору режима.<br>• Победил — кто первым снял все 15.<br>• После партии жми «🔄 Реванш» — когда оба согласятся, новая партия начнётся автоматически.<br>• После окончания игры (победа или поражение) доступна кнопка «📤 Отправить результат».<br>• Онлайн защищён анонимной авторизацией Firebase.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='2.8',FLIGHT_DUR=340;
+const VER='2.9',FLIGHT_DUR=340;
 const HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000;
 let heartbeatTimer=null, myRound=0, fieldViewMode=false;
 let lastEndInfo=null;
@@ -215,18 +213,45 @@ function normState(s){
 const own=(s,side)=>side==='w'?s.W:s.B,opp=(s,side)=>side==='w'?s.B:s.W;
 function allInHome(s,side){const o=own(s,side);for(let i=0;i<24;i++){if(i>=HOME[side][0]&&i<=HOME[side][1])continue;if(o[i]>0)return false;}return true;}
 function headLimit(s,side){return (s.first[side]&&s.rolled[0]===s.rolled[1]&&(s.rolled[0]===3||s.rolled[0]===4||s.rolled[0]===6))?2:1;}
-function legalTarget(s,side,idx,v){const o=own(s,side),p=pOf(side,idx),q=p+v;
- if(idx===HEAD[side]&&s.headUsed>=headLimit(s,side))return null;
- if(q<24){const t=idxOf(side,q);if(opp(s,side)[t]>0)return null;return t;}
- if(!allInHome(s,side))return null;
- if(q===24)return 'off';
- for(let pp=p+1;pp<24;pp++)if(o[idxOf(side,pp)]>0)return null;
- return 'off';}
-function primeViolation(s,side){const o=own(s,side),op=opp(s,side);
- for(let q=0;q<=18;q++){let ok=true;for(let k=0;k<6;k++)if(o[idxOf(side,q+k)]===0){ok=false;break;}if(!ok)continue;
-  let ahead=false;for(let i=0;i<24;i++){if(op[i]>0&&pOf(side,i)>q+5){ahead=true;break;}}
-  if(!ahead)return true;}
- return false;}
+
+/* v2.9: legalTarget — исправлен переброс: если есть фишка с точным расстоянием для данной кости,
+   переброс запрещён. Это соответствует правилу: "снимать только той костью, которая соответствует
+   расстоянию; переброс только если нет точного совпадения". */
+function legalTarget(s,side,idx,v){
+  const o=own(s,side),p=pOf(side,idx),q=p+v;
+  if(idx===HEAD[side]&&s.headUsed>=headLimit(s,side))return null;
+  if(q<24){
+    const t=idxOf(side,q);
+    if(opp(s,side)[t]>0)return null;
+    return t;
+  }
+  if(!allInHome(s,side))return null;
+  if(q===24)return 'off';
+  /* Переброс (q>24): 1) фишка должна быть самой дальней (нет фишек с pp>p),
+     2) нет фишки с точным расстоянием v (т.е. с p = 24-v) */
+  for(let pp=p+1;pp<24;pp++)if(o[idxOf(side,pp)]>0)return null;
+  const exactP=24-v;
+  if(exactP>=0&&exactP<24&&o[idxOf(side,exactP)]>0)return null;
+  return 'off';
+}
+
+/* v2.9: primeViolation — если все фишки противника в их доме, блок из 6 пунктов разрешён */
+function primeViolation(s,side){
+  const o=own(s,side),op=opp(s,side);
+  const oppSide=side==='w'?'b':'w';
+  if(allInHome(s,oppSide))return false;
+  for(let q=0;q<=18;q++){
+    let ok=true;
+    for(let k=0;k<6;k++)if(o[idxOf(side,q+k)]===0){ok=false;break;}
+    if(!ok)continue;
+    let ahead=false;
+    for(let i=0;i<24;i++){
+      if(op[i]>0&&pOf(side,i)>q+5){ahead=true;break;}
+    }
+    if(!ahead)return true;
+  }
+  return false;
+}
 function moveTarget(s,side,idx,v){const t=legalTarget(s,side,idx,v);if(t===null)return null;const ns=clone(s);applyMove(ns,side,idx,t,v);if(primeViolation(ns,side))return null;return t;}
 function applyMove(s,side,idx,to,v){const o=own(s,side);o[idx]--;if(to==='off')s.borne[side]++;else o[to]++;if(idx===HEAD[side])s.headUsed++;const di=s.dice.indexOf(v);if(di>-1)s.dice.splice(di,1);s.turnAt=Date.now();return s;}
 function comboTarget(s,side,idx,steps){
@@ -446,7 +471,6 @@ function startHeartbeat(){
 }
 function stopHeartbeat(){if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}}
 function removePresence(){if(!roomRef||!mySide)return;try{roomRef.child('presence/'+mySide).remove();}catch(e){}}
-/* v2.8: управление шторкой */
 function collapseCurtain(){
   const ex=$('rbExtra');if(ex)ex.style.display='none';
   $('roomBar').classList.remove('open');
@@ -496,7 +520,7 @@ function showLobbyInBar(){
   const list=$('lobbyList');list.innerHTML='';
   playersList().forEach((p,i)=>{
     const r=document.createElement('div');r.className='row'+(p.side==='w'?' host':'');
-    r.innerHTML='<span>'+(i+1)+'. '+esc(p.name)+(p.side===mySide?' (вы)':'')+(p.side==='w'?' 👑':'')+'</span><span>'+(p.connected?'🟢':'⚪')+'</span>';
+    r.innerHTML='<span>'+(i+1)+'. '+esc(p.name)+(p.side===mySide?' (вы)':'')+(p.side===w?' 👑':'')+'</span><span>'+(p.connected?'🟢':'⚪')+'</span>';
     list.appendChild(r);
   });
   if(playersList().length<2){
@@ -514,7 +538,6 @@ function subscribeRoom(){roomRef.on('value',snap=>{
  if(!roomData.state||!roomData.state.W||!roomData.state.B){try{roomRef.update({state:newState()});}catch(e){}roomData.state=roomData.state||newState();}
  roomData.state=normState(roomData.state);
  if(roomData.status==='waiting')showLobbyInBar();else hideLobbyInBar();
- /* v2.8: автосворачивание шторки при старте партии, авто-раскрытие при finished */
  if(roomData.status==='playing')collapseCurtain();
  else if(roomData.status==='finished')expandCurtain();
  const s=roomData.state,lm=s.lastMove;
@@ -570,13 +593,11 @@ function shareInvite(){
   const text='🎲 Нарды онлайн! Комната '+roomCode+'. Заходи играть:\n'+url;
   Platform.share(url,text,{brand:true,title:'Нарды — партия по коду '+roomCode,copiedToast:'Ссылка-приглашение скопирована'});
 }
-/* v2.8: вирусный шеринг ссылки на игру */
 function shareGameLink(){
  unlockAudio();
  Platform.shareGame('nardy','🎲 Нарды — классические длинные: против компьютера или онлайн-партия по коду комнаты. Сможешь первым снять все 15 шашек?',{title:'Нарды — играй сейчас',copiedToast:'Ссылка на игру скопирована — отправь другу!'});
  trackEvent('game_share',{game_name:'nardy',share_type:'link'});
 }
-/* v2.8: шеринг результата после партии */
 function shareResult(){
  unlockAudio();
  let txt;
@@ -628,7 +649,6 @@ function updateRoomActions(){
   const lb=document.createElement('button');lb.className='rbtn danger';lb.textContent='🚪 Выйти';lb.onclick=()=>{if(confirm('Выйти из комнаты?')){leaveRoom();modeOverlay.classList.add('show');}};box.appendChild(lb);
 }
 function updateLiveBadge(){if(!onlineMode||!roomData)return;const pl=playersList();const live=pl.filter(p=>p.connected).length;$('rbLive').textContent=live;$('rbDot').className='live-dot'+(pl.length>0&&live<pl.length?' some-off':'');$('roomCount').textContent=pl.length+'/2';}
-/* v2.8: pulse-подсказки — подсветка кнопки, которую стоит нажать */
 function updatePulse(){
   const clearAll=()=>{
     ['modeAi','modeHost','modeJoin'].forEach(id=>{const e=$(id);if(e)e.classList.remove('pulse');});
@@ -637,13 +657,11 @@ function updatePulse(){
     document.querySelectorAll('#endBtns .btn').forEach(b=>b.classList.remove('pulse'));
   };
   clearAll();
-  /* Экран выбора режима */
   if(modeOverlay.classList.contains('show')){
     $('modeHost').classList.add('pulse');
     $('modeAi').classList.add('pulse');
     return;
   }
-  /* Онлайн-комната */
   if(onlineMode && roomData){
     const s=S();
     if(roomData.status==='waiting'){
@@ -665,7 +683,6 @@ function updatePulse(){
       }
     }
   }else if(G && !G.result){
-    /* Оффлайн: rollBtn пульсирует когда мой ход и костей нет */
     if(G.turn===playerViewSide && !G.dice.length && !diceAnim){
       $('rollBtn').classList.add('pulse');
     }
@@ -812,7 +829,6 @@ $('stReset').onclick=()=>{if(confirm('Сбросить статистику?')){
 function requestRematch(){
   if(!roomRef||!mySide)return;
   console.log('[NA] propose rematch · side=',mySide);
-  /* v2.8: клик по реваншу раскрывает шторку — чтобы видеть лобби и статус соперника */
   expandCurtain();
   roomRef.child('rematch/'+mySide).set(true).catch(e=>console.warn('[NA] rematch write failed:',e.message));
   if(roomData && roomData.status==='playing' && isHost()){
@@ -836,13 +852,12 @@ function closeFieldView(){
 }
 function showEnd(){const s=S();if(!s||!s.result)return;flight=null;const me=meSide();const win=s.result.winner===me;
  bumpST(win,s.borne[me]||0);
- /* v2.8: сохраняем инфо о партии для shareResult */
  lastEndInfo={
    mode:onlineMode?'online':'ai',
    won:win,
    winner:s.result.winner,
    sidesInfo: onlineMode
-     ? (meSide()+='w'?'⚪':'⚫')+' vs '+(meSide()==='w'?'⚫':'⚪')
+     ? (meSide()==='w'?'⚪ Белые':'⚫ Чёрные')+' vs '+(meSide()==='w'?'⚫ Чёрные':'⚪ Белые')
      : (playerViewSide==='w'?'⚪ Белые':'⚫ Чёрные')+' vs ИИ',
    borneMe:s.borne[me]||0,
    time:Date.now()
@@ -864,7 +879,6 @@ function showEnd(){const s=S();if(!s||!s.result)return;flight=null;const me=meSi
    const h=document.createElement('button');h.className='btn';h.textContent='🏠 В меню нарды';h.onclick=()=>{endOverlay.classList.remove('show');G=newState();flight=null;lastEndInfo=null;buildBoard();renderAll();modeOverlay.classList.add('show');};b.appendChild(h);
    const h2=document.createElement('button');h2.className='btn';h2.textContent='← В меню игр';h2.onclick=goToHub;b.appendChild(h2);}
  endOverlay.classList.add('show');
- /* v2.8: pulse на «Реванш»/«Ещё партию» в endOverlay */
  setTimeout(()=>updatePulse(),50);
  trackEvent('game_end',{game_name:'nardy',mode:onlineMode?'online':'ai',winner:win?'player':'other'});}
 $('closeFieldView').onclick=closeFieldView;
