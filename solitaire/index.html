@@ -7,6 +7,10 @@
 [data-skin="classic"]{--felt:#0b6623;--felt2:#084a19;--back:#1d4ed8;--back2:#173a9e;--cardface:#ffffff;--ink:#20242c;--inkred:#c1121f}
 [data-skin="neon"]{--felt:#0b0f2a;--felt2:#070a1c;--back:#00b8d4;--back2:#0077aa;--cardface:#141a33;--ink:#dfe6ff;--inkred:#ff6b9d}
 [data-skin="pastel"]{--felt:#6f8fb3;--felt2:#54749a;--back:#b56576;--back2:#8a4a5a;--cardface:#ffffff;--ink:#3a3f4a;--inkred:#d05a6e}
+[data-skin="light"]{--felt:#e9f1e9;--felt2:#d5e2d5;--back:#5a8ab0;--back2:#3f6f8f;--cardface:#ffffff;--ink:#20242c;--inkred:#c1121f}
+[data-skin="light"] .slot{border-color:rgba(0,0,0,.28)}
+[data-skin="light"] .slot.recycle{color:#333;background:rgba(0,0,0,.06)}
+[data-skin="light"] .table{box-shadow:inset 0 2px 14px rgba(0,0,0,.15)}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
 body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:8px;padding-top:calc(8px + env(safe-area-inset-top));padding-bottom:calc(8px + env(safe-area-inset-bottom))}
 .wrap{max-width:760px;width:100%;background:var(--panel);border-radius:20px;padding:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08)}
@@ -23,7 +27,19 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .pile{position:relative;width:var(--cw);overflow:visible}
 .spacer{pointer-events:none}
 .card{position:absolute;width:var(--cw);height:var(--ch);border-radius:calc(var(--cw)*.09);background:var(--cardface);border:1px solid rgba(0,0,0,.28);box-shadow:0 1px 3px rgba(0,0,0,.4);cursor:pointer}
-.card.back{background:repeating-linear-gradient(45deg,var(--back),var(--back) 6px,var(--back2) 6px,var(--back2) 12px);border-color:rgba(0,0,0,.45)}
+.card.back{background:repeating-linear-gradient(45deg,var(--back),var(--back) 6px,var(--back2) 6px,var(--back2) 12px);border-color:rgba(0,0,0,.45);background-size:cover,auto;background-position:center,0 0}
+/* v2.16: фолбэк-узоры (пока картинка не загрузилась / отсутствует) */
+.card.back[data-back="1"]{background-image:repeating-linear-gradient(45deg,#1d4ed8,#1d4ed8 6px,#173a9e 6px,#173a9e 12px)}
+.card.back[data-back="2"]{background-image:repeating-linear-gradient(45deg,#b91c1c,#b91c1c 6px,#7f1d1d 6px,#7f1d1d 12px)}
+.card.back[data-back="3"]{background-image:repeating-linear-gradient(45deg,#047857,#047857 6px,#065f46 6px,#065f46 12px)}
+.card.back[data-back="4"]{background-image:repeating-linear-gradient(45deg,#6d28d9,#6d28d9 6px,#4c1d95 6px,#4c1d95 12px)}
+.card.back[data-back="5"]{background-image:repeating-linear-gradient(45deg,#b45309,#b45309 6px,#92400e 6px,#92400e 12px)}
+/* v2.16: картинка загружена → под ней чистый слегка жёлтый лист, узора нет */
+body.bk1ok .card.back[data-back="1"]{background-image:url("img/back1.png"),linear-gradient(160deg,#f5eed6,#ece2c4);background-size:cover,cover}
+body.bk2ok .card.back[data-back="2"]{background-image:url("img/back2.png"),linear-gradient(160deg,#f5eed6,#ece2c4);background-size:cover,cover}
+body.bk3ok .card.back[data-back="3"]{background-image:url("img/back3.png"),linear-gradient(160deg,#f5eed6,#ece2c4);background-size:cover,cover}
+body.bk4ok .card.back[data-back="4"]{background-image:url("img/back4.png"),linear-gradient(160deg,#f5eed6,#ece2c4);background-size:cover,cover}
+body.bk5ok .card.back[data-back="5"]{background-image:url("img/back5.png"),linear-gradient(160deg,#f5eed6,#ece2c4);background-size:cover,cover}
 .card .tl{position:absolute;top:4%;left:7%;font-size:calc(var(--cw)*.26);font-weight:800;line-height:1}
 .card .cs{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:calc(var(--cw)*.5);line-height:1}
 .red{color:var(--inkred)}.blk{color:var(--ink)}
@@ -75,12 +91,13 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div>
 <div class="actions"><button class="btn" id="newBtn">🔄 Новая</button><button class="btn" id="hintBtn">💡 Подсказка (5)</button><button class="btn" id="undoBtn">↩️ Отмена</button><button class="btn" id="autoBtn" style="display:none">⚡ Автодоводка</button><button class="btn" id="giveBtn">🏳️ Сдаться</button></div>
 <div class="actions"><button class="btn" id="shareLinkBtn">📤 Скинуть ссылку на игру</button></div>
-<div class="ver" id="verTag">v2.14</div>
+<div class="ver" id="verTag">v2.16</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Сложность<select id="diffSel"><option value="easy">Новичок · 1 карта, 5 подсказок</option><option value="medium">Среднее · 3 карты, 3 подсказки</option><option value="hard">Сложное · 3 карты, 1 перезаход, 1 подсказка</option></select></div>
 <div class="selrow">Помощь при разборе<select id="assistSel"><option value="1">Максимальная · каждый ход</option><option value="2">Умеренная · через ход</option><option value="3">Минимальная · через два хода</option><option value="0">Без помощи</option></select></div>
-<div class="selrow">Скин<select id="skinSel"><option value="classic">Классика (зелёное сукно)</option><option value="neon">Неон (тёмный)</option><option value="pastel">Пастель (голубой)</option></select></div>
+<div class="selrow">Скин<select id="skinSel"><option value="classic">Классика (зелёное сукно)</option><option value="neon">Неон (тёмный)</option><option value="pastel">Пастель (голубой)</option><option value="light">Светлый (светлое сукно)</option></select></div>
+<div class="selrow">Рубашка карт<select id="backSel"><option value="1">Синяя клетка</option><option value="2">Красный узор</option><option value="3">Зелёное сукно</option><option value="4">Фиолетовая волна</option><option value="5">Золотая вязь</option></select></div>
 <div class="selrow"><label><input type="checkbox" id="voiceChk"> 🔊 Голосовая озвучка</label></div>
 <div class="selrow">Громкость · <span id="volV">70%</span><input type="range" id="volSlider" min="0" max="100" value="70"></div>
 <div class="selrow">📊 Статистика</div>
@@ -90,14 +107,14 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="stat-row"><span>Лучшее время</span><b id="stTime">—</b></div>
 <div class="stat-row"><span>Лучший счёт</span><b id="stScore">—</b></div>
 <div class="btns"><button class="btn" id="stReset">Сбросить</button><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note">Подсказки: 5 / 3 / 1 на партию. «Помощь при разборе»: каждый ход / через ход / через два хода / без помощи (полностью честная игра). Расклады при старте проверяются всегда.</div>
+<div class="note">Подсказки: 5 / 3 / 1 на партию. «Помощь при разборе»: каждый ход / через ход / через два хода / без помощи. Рубашки: свои картинки клади в img/back1.png … img/back5.png (PNG/WEBP, ~300×420); под загруженной картинкой — чистый слегка жёлтый лист, без файлов работает цветной узор.</div>
 </div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Цель — собрать 4 дома по мастям от туза до короля.<br>• В колоннах кладём по убыванию, чередуя цвета; на пустую колонну — только король.<br>• Из колоды берём по 1 или 3 карты; пустая колода перезаряжается сбросом (на «Сложном» — 1 раз).<br>• Управление: тяни карту/стопку целиком; неверный бросок вернёт её; ИЛИ тап = выбрать, тап = ход.<br>• 💡 Подсказки: Новичок 5, Среднее 3, Сложное 1.<br>• 😵 Когда полезных ходов не останется (и цикл колоды исчерпан) — сообщение появится сразу.<br>• 🧩 Расклады решаемые; помощь настраивается в ⚙️ (вплоть до полного отключения).<br>• ⚡ Автодоводка появится, когда колода и сброс пусты и все карты открыты.<br>• 🎆 При победе салют идёт до новой игры или выхода в меню.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
+<div class="note">• Цель — собрать 4 дома по мастям от туза до короля.<br>• В колоннах кладём по убыванию, чередуя цвета; на пустую колонну — только король.<br>• Из колоды берём по 1 или 3 карты; пустая колода перезаряжается сбросом (на «Сложном» — 1 раз).<br>• Управление: тяни карту/стопку целиком; неверный бросок вернёт её; ИЛИ тап = выбрать, тап = ход.<br>• 💡 Подсказки: Новичок 5, Среднее 3, Сложное 1.<br>• 😵 Когда полезных ходов не останется (и цикл колоды исчерпан) — сообщение появится сразу.<br>• 🧩 Расклады решаемые; помощь настраивается в ⚙️ (вплоть до полного отключения).<br>• 🎨 Скины поля и рубашки карт выбираются в ⚙️.<br>• ⚡ Автодоводка появится, когда колода и сброс пусты и все карты открыты.<br>• 🎆 При победе салют идёт до новой игры или выхода в меню.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='2.14';
+var VER='2.16';
 var SUITS=['♠','♥','♦','♣'];
 var DIFFS={easy:{draw:1,redeal:9999,hints:5,name:'Новичок'},medium:{draw:3,redeal:9999,hints:3,name:'Среднее'},hard:{draw:3,redeal:1,hints:1,name:'Сложное'}};
 function backHandler(){
@@ -115,9 +132,10 @@ function trackEvent(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='
 function lsGet(k,d){try{var v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function $(id){return document.getElementById(id);}
-var set=Object.assign({diff:'easy',skin:'classic',vol:.7,voice:true,assist:1},JSON.parse(lsGet('sol_set','{}')));
+var set=Object.assign({diff:'easy',skin:'classic',vol:.7,voice:true,assist:1,back:1},JSON.parse(lsGet('sol_set','{}')));
 if(set.skin==='wood')set.skin='classic';
 if([0,1,2,3].indexOf(set.assist)<0)set.assist=1;
+if(set.back<1||set.back>5)set.back=1;
 function saveSet(){lsSet('sol_set',JSON.stringify(set));}
 var ST=Object.assign({games:0,wins:0,streak:0,bestStreak:0,bestTime:null,bestScore:0},JSON.parse(lsGet('sol_stats','{}')));
 function saveST(){lsSet('sol_stats',JSON.stringify(ST));}
@@ -134,6 +152,8 @@ function sWin(){[523,659,784,1046,1318,1568].forEach(function(f,i){setTimeout(fu
 function say(t){if(!set.voice)return;try{if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='ru-RU';u.rate=1.05;window.speechSynthesis.speak(u);}catch(e){}}
 var toastTimer=null;
 function toast(t){var el=$('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';document.body.appendChild(el);}el.textContent=t;el.classList.add('show');if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.classList.remove('show');},2500);}
+/* v2.16: проба загрузки рубашек — класс bkNok на body включает слой картинки */
+(function(){for(var b=1;b<=5;b++){(function(n){var im=new Image();im.onload=function(){document.body.classList.add('bk'+n+'ok');};im.onerror=function(){};im.src='img/back'+n+'.png';})(b);}})();
 var SOLVABLE=(function(){
  function isR(c){return c.s===1||c.s===2;}
  function runOk(t,j){for(var k=j;k<t.length-1;k++){if(!t[k].up||!t[k+1].up)return false;if(t[k+1].r!==t[k].r-1)return false;if(isR(t[k+1])===isR(t[k]))return false;}return t[j].up;}
@@ -466,7 +486,7 @@ function giveUp(){if(!G||G.over)return;G.over=true;G.won=false;stopTimer();sInva
  showEnd(false);}
 function shareGameLink(){
  ensureAudio();
- Platform.shareGame('solitaire','♠️ Косынка — классический пасьянс с гарантированно раскладываемыми партиями, 3 скинами и подсказками. Попробуй разложить!',{title:'Косынка — играй сейчас',copiedToast:'Ссылка скопирована — отправь другу!'});
+ Platform.shareGame('solitaire','♠️ Косынка — классический пасьянс с гарантированно раскладываемыми партиями, скинами и рубашками карт. Попробуй разложить!',{title:'Косынка — играй сейчас',copiedToast:'Ссылка скопирована — отправь другу!'});
  trackEvent('game_share',{game_name:'solitaire',share_type:'link'});
 }
 function shareResult(kind){
@@ -487,10 +507,10 @@ function showEnd(won){var ov=$('endOverlay');$('endTitle').textContent=won?'🏆
  ebtn('🏠 В меню',function(){ov.classList.remove('show');goToHub();});
  ov.classList.add('show');}
 function cardEl(card,left,top,faceUp,index){var d=document.createElement('div');d.className='card'+(faceUp?'':' back');d.style.left=left+'px';d.style.top=top+'px';d.dataset.id=card.id;if(index!=null)d.dataset.index=index;
+ if(!faceUp){d.dataset.back=set.back||1;}
  if(faceUp){var col=isRed(card)?'red':'blk';d.innerHTML='<span class="tl '+col+'">'+rankTxt(card.r)+SUITS[card.s]+'</span><span class="cs '+col+'">'+SUITS[card.s]+'</span>';}
  return d;}
 function slotEl(recycle){var s=document.createElement('div');s.className='slot'+(recycle?' recycle':'');if(recycle)s.textContent='↻';return s;}
-/* v2.14: фонды и сброс учитывают dragHide — пока карта в руке, стопка показывает карту под ней */
 function renderPile(el,name){el.innerHTML='';var a=pileArr(name);
  if(name==='stock'){el.style.height=ch+'px';if(a.length){el.appendChild(cardEl(a[a.length-1],0,0,false,null));}else{el.appendChild(slotEl(G.waste.length&&G.redeals>0));}return;}
  if(name==='waste'){el.style.height=ch+'px';
@@ -590,11 +610,12 @@ $('undoBtn').onclick=function(){ensureAudio();doUndo();};
 $('autoBtn').onclick=function(){ensureAudio();autoFinish();};
 $('giveBtn').onclick=function(){ensureAudio();giveUp();};
 $('shareLinkBtn').onclick=shareGameLink;
-$('setBtn').onclick=function(){ensureAudio();$('diffSel').value=set.diff;$('assistSel').value=String(set.assist==null?1:set.assist);$('skinSel').value=set.skin;$('voiceChk').checked=!!set.voice;$('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';showStats();$('setOverlay').classList.add('show');};
+$('setBtn').onclick=function(){ensureAudio();$('diffSel').value=set.diff;$('assistSel').value=String(set.assist==null?1:set.assist);$('skinSel').value=set.skin;$('backSel').value=String(set.back||1);$('voiceChk').checked=!!set.voice;$('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';showStats();$('setOverlay').classList.add('show');};
 $('setClose').onclick=function(){$('setOverlay').classList.remove('show');};
 $('diffSel').onchange=function(e){set.diff=e.target.value;saveSet();};
 $('assistSel').onchange=function(e){set.assist=parseInt(e.target.value);if(isNaN(set.assist))set.assist=1;saveSet();toast('Помощь: '+({0:'выключена',1:'каждый ход',2:'через ход',3:'через два хода'})[set.assist]);trackEvent('settings_change',{game_name:'solitaire',setting:'assist',value:set.assist});};
 $('skinSel').onchange=function(e){set.skin=e.target.value;saveSet();applySkin();};
+$('backSel').onchange=function(e){set.back=parseInt(e.target.value)||1;saveSet();render();trackEvent('settings_change',{game_name:'solitaire',setting:'back',value:set.back});};
 $('voiceChk').onchange=function(e){set.voice=e.target.checked;saveSet();if(set.voice)say('Озвучка включена');};
 $('volSlider').oninput=function(e){set.vol=e.target.value/100;$('volV').textContent=e.target.value+'%';saveSet();ensureAudio();};
 $('stReset').onclick=function(){if(confirm('Сбросить статистику?')){ST={games:0,wins:0,streak:0,bestStreak:0,bestTime:null,bestScore:0};saveST();showStats();}};
