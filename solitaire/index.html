@@ -75,7 +75,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div>
 <div class="actions"><button class="btn" id="newBtn">🔄 Новая</button><button class="btn" id="hintBtn">💡 Подсказка (5)</button><button class="btn" id="undoBtn">↩️ Отмена</button><button class="btn" id="autoBtn" style="display:none">⚡ Автодоводка</button><button class="btn" id="giveBtn">🏳️ Сдаться</button></div>
 <div class="actions"><button class="btn" id="shareLinkBtn">📤 Скинуть ссылку на игру</button></div>
-<div class="ver" id="verTag">v2.13</div>
+<div class="ver" id="verTag">v2.14</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Сложность<select id="diffSel"><option value="easy">Новичок · 1 карта, 5 подсказок</option><option value="medium">Среднее · 3 карты, 3 подсказки</option><option value="hard">Сложное · 3 карты, 1 перезаход, 1 подсказка</option></select></div>
@@ -97,7 +97,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="note">• Цель — собрать 4 дома по мастям от туза до короля.<br>• В колоннах кладём по убыванию, чередуя цвета; на пустую колонну — только король.<br>• Из колоды берём по 1 или 3 карты; пустая колода перезаряжается сбросом (на «Сложном» — 1 раз).<br>• Управление: тяни карту/стопку целиком; неверный бросок вернёт её; ИЛИ тап = выбрать, тап = ход.<br>• 💡 Подсказки: Новичок 5, Среднее 3, Сложное 1.<br>• 😵 Когда полезных ходов не останется (и цикл колоды исчерпан) — сообщение появится сразу.<br>• 🧩 Расклады решаемые; помощь настраивается в ⚙️ (вплоть до полного отключения).<br>• ⚡ Автодоводка появится, когда колода и сброс пусты и все карты открыты.<br>• 🎆 При победе салют идёт до новой игры или выхода в меню.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='2.13';
+var VER='2.14';
 var SUITS=['♠','♥','♦','♣'];
 var DIFFS={easy:{draw:1,redeal:9999,hints:5,name:'Новичок'},medium:{draw:3,redeal:9999,hints:3,name:'Среднее'},hard:{draw:3,redeal:1,hints:1,name:'Сложное'}};
 function backHandler(){
@@ -209,6 +209,7 @@ var G=null,cw=90,ch=126,tabH=500,undoStack=[],sel=null,drag=null,hintTimer=null;
 var DRAG_THRESHOLD=12;
 var MAX_DRAW_HINTS=4;
 var salutLayer=null,salutIv=null;
+var dragHide=null;
 window.__RIG=0;
 function isRed(c){return c.s===1||c.s===2;}
 function rankTxt(r){return r===1?'A':(r===11?'J':(r===12?'Q':(r===13?'K':r)));}
@@ -227,7 +228,7 @@ function baseDeal(){
  return {stock:deck,tab:tab,waste:[],found:[[],[],[],[]]};}
 function newGame(){
  stopCelebrate();
- stopTimer();undoStack=[];sel=null;drag=null;clearHint();
+ stopTimer();undoStack=[];sel=null;drag=null;dragHide=null;clearHint();
  var old=document.getElementById('dragwrap');if(old)old.remove();
  var D=DIFFS[set.diff];
  var deal;
@@ -239,7 +240,6 @@ function newGame(){
  say('Новая партия, сложность '+D.name+', подсказок '+D.hints);
  trackEvent('game_start',{game_name:'solitaire',difficulty:set.diff,assist:set.assist});
 }
-/* v2.13: assist=0 («Без помощи») полностью отключает подгонку и reveal-rig */
 function assistNow(){var a=(set.assist==null)?1:set.assist;if(a===0)return false;return ((G.stepCount||0)%a)===0;}
 function stepPlayer(){G.stepCount=(G.stepCount||0)+1;}
 function hiddenRig(){
@@ -490,10 +490,22 @@ function cardEl(card,left,top,faceUp,index){var d=document.createElement('div');
  if(faceUp){var col=isRed(card)?'red':'blk';d.innerHTML='<span class="tl '+col+'">'+rankTxt(card.r)+SUITS[card.s]+'</span><span class="cs '+col+'">'+SUITS[card.s]+'</span>';}
  return d;}
 function slotEl(recycle){var s=document.createElement('div');s.className='slot'+(recycle?' recycle':'');if(recycle)s.textContent='↻';return s;}
+/* v2.14: фонды и сброс учитывают dragHide — пока карта в руке, стопка показывает карту под ней */
 function renderPile(el,name){el.innerHTML='';var a=pileArr(name);
  if(name==='stock'){el.style.height=ch+'px';if(a.length){el.appendChild(cardEl(a[a.length-1],0,0,false,null));}else{el.appendChild(slotEl(G.waste.length&&G.redeals>0));}return;}
- if(name==='waste'){el.style.height=ch+'px';if(!a.length){el.appendChild(slotEl(false));return;}var show=Math.min(3,a.length);for(var k=0;k<show;k++){var idx=a.length-show+k;el.appendChild(cardEl(a[idx],k*Math.round(cw*0.30),0,true,idx));}return;}
- if(name[0]==='f'){el.style.height=ch+'px';if(a.length){el.appendChild(cardEl(a[a.length-1],0,0,true,a.length-1));}else{el.appendChild(slotEl(false));}return;}
+ if(name==='waste'){el.style.height=ch+'px';
+  if(!a.length){el.appendChild(slotEl(false));return;}
+  var skip=(dragHide&&dragHide.pile==='waste')?1:0;
+  var avail=a.length-skip;
+  if(avail<=0){el.appendChild(slotEl(false));return;}
+  var show=Math.min(3,avail);
+  for(var k=0;k<show;k++){var idx=avail-show+k;el.appendChild(cardEl(a[idx],k*Math.round(cw*0.30),0,true,idx));}
+  return;}
+ if(name[0]==='f'){el.style.height=ch+'px';
+  var ti=a.length-1;
+  if(dragHide&&dragHide.pile===name&&dragHide.index===ti)ti=a.length-2;
+  if(ti>=0){el.appendChild(cardEl(a[ti],0,0,true,ti));}else{el.appendChild(slotEl(false));}
+  return;}
  if(!a.length){el.appendChild(slotEl(false));el.style.height=tabH+'px';return;}
  var offs=[],total=0;
  for(var i=0;i<a.length-1;i++){var o=a[i].up?upOff():downOff();offs.push(o);total+=o;}
@@ -545,18 +557,20 @@ function startWrap(e){var run=movableRun(drag.pile,drag.index);if(!run){drag.wra
  var top=0;els.forEach(function(el){el.style.left='0px';el.style.top=top+'px';el.classList.remove('sel');el.classList.remove('hint');w.appendChild(el);top+=upOff();});
  w.style.height=(top-upOff()+ch)+'px';
  $('wrap').appendChild(w);drag.wrap=w;
- w.style.left=(e.clientX-drag.grabDX)+'px';w.style.top=(e.clientY-drag.grabDY)+'px';}
+ w.style.left=(e.clientX-drag.grabDX)+'px';w.style.top=(e.clientY-drag.grabDY)+'px';
+ dragHide={pile:drag.pile,index:drag.index};
+ if(drag.pile[0]==='f'||drag.pile==='waste'){renderPile(pileEl,drag.pile);}}
 function flyBack(d){var w=d.wrap;if(!w)return;
  w.style.transition='left .22s cubic-bezier(.25,.8,.3,1), top .22s cubic-bezier(.25,.8,.3,1)';
  w.style.left=d.origLeft+'px';w.style.top=d.origTop+'px';
  sInvalid();
  setTimeout(function(){w.remove();if(G)render();},230);}
 function onCancel(ev){window.removeEventListener('pointermove',onMove);window.removeEventListener('pointerup',onUp);window.removeEventListener('pointercancel',onCancel);
- var d=drag;drag=null;if(!d)return;
+ var d=drag;drag=null;dragHide=null;if(!d)return;
  if(d.wrap){flyBack(d);return;}
  if(!d.moved){tapHandler(d.pile,d.index);}}
 function onUp(e){window.removeEventListener('pointermove',onMove);window.removeEventListener('pointerup',onUp);window.removeEventListener('pointercancel',onCancel);
- var d=drag;drag=null;if(!d)return;
+ var d=drag;drag=null;dragHide=null;if(!d)return;
  if(d.wrap){
   var under=document.elementFromPoint(e.clientX,e.clientY);
   var pileEl=under&&under.closest?under.closest('.pile'):null;
