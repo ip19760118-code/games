@@ -36,6 +36,9 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 /* v3.25: боковые места приподняты на 15% от опущенного значения (0.5cw -> 0.425cw) */
 .seat-left{left:10%;top:calc(20% + var(--cw) * 0.425)}
 .seat-right{left:90%;top:calc(20% + var(--cw) * 0.425)}
+/* v3.26: двое соперников — диагонали сверху, ближе к центру */
+.felt-oval.duo .seat-left{left:27%;top:calc(7% + var(--cw) * 0.425)}
+.felt-oval.duo .seat-right{left:73%;top:calc(7% + var(--cw) * 0.425)}
 /* v3.25: колода приподнята на 10% от опущенного значения (2cw -> 1.9cw) */
 .deckbox{position:absolute;left:calc(16% - var(--cw) * 0.33);top:calc(62% + var(--cw) * 1.9);transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;z-index:1}
 .deckpile{position:relative;width:var(--cw);height:calc(var(--cw)*1.4)}
@@ -135,7 +138,9 @@ body.bk5fail .card.back.skin-5{background-image:repeating-linear-gradient(45deg,
 .note{font-size:12px;opacity:.7;line-height:1.45;margin-bottom:10px}
 .selrow{margin:12px 0 4px;font-size:14px;font-weight:600;text-align:left}
 .selrow select{width:100%;margin-top:6px;padding:7px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);color:var(--text);font-size:14px}
-@media (max-width:520px){.felt-oval{height:clamp(220px,44vh,360px);margin:calc(var(--cw) * 0.7 + 6px) 4px 10px}.seat-left{left:12%;top:calc(18% + var(--cw) * 0.425)}.seat-right{left:88%;top:calc(18% + var(--cw) * 0.425)}.deckbox{left:calc(18% - var(--cw) * 0.33);top:calc(64% + var(--cw) * 1.9)}.table{width:66%}.player-chip{min-width:74px;padding:4px 8px;font-size:11px}.opponent-hand{width:calc(var(--cw)*3.0)}.opponent-hand.compact{width:calc(var(--cw)*2.4)}}
+@media (max-width:520px){.felt-oval{height:clamp(220px,44vh,360px);margin:calc(var(--cw) * 0.7 + 6px) 4px 10px}.seat-left{left:12%;top:calc(18% + var(--cw) * 0.425)}.seat-right{left:88%;top:calc(18% + var(--cw) * 0.425)}
+.felt-oval.duo .seat-left{left:30%;top:calc(5% + var(--cw) * 0.425)}
+.felt-oval.duo .seat-right{left:70%;top:calc(5% + var(--cw) * 0.425)}.deckbox{left:calc(18% - var(--cw) * 0.33);top:calc(64% + var(--cw) * 1.9)}.table{width:66%}.player-chip{min-width:74px;padding:4px 8px;font-size:11px}.opponent-hand{width:calc(var(--cw)*3.0)}.opponent-hand.compact{width:calc(var(--cw)*2.4)}}
 .six-badge{display:inline-block;font-size:13px;font-weight:700;color:var(--accent);background:rgba(255,209,102,.15);border:1px solid var(--accent);border-radius:10px;padding:4px 10px;margin:6px 0}
 </style></head><body>
 <div class="wrap">
