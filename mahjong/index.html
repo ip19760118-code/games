@@ -14,7 +14,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:24px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .hud{display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;background:rgba(0,0,0,.3);border-radius:10px;padding:5px 10px;margin-bottom:8px;font-size:12px;font-weight:700}
 .hud b{color:var(--accent)}
-.boardbox{display:flex;justify-content:center;background:linear-gradient(160deg,#0b6623,#084a19);border-radius:12px;padding:12px;box-shadow:inset 0 2px 14px rgba(0,0,0,.5);overflow:auto}
+.boardbox{display:flex;justify-content:center;background:linear-gradient(160deg,#0b6623,#084a19);border-radius:12px;padding:16px;box-shadow:inset 0 2px 14px rgba(0,0,0,.5);overflow:auto}
 #board{position:relative;z-index:1;margin:auto}
 .tile{position:absolute;border-radius:6px;background:linear-gradient(160deg,#fdfbf4,#e6dfcd);border:1px solid #b6ae9c;box-shadow:0 3px 0 #8d8677,0 6px 10px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:none;transition:left .3s ease-out,top .3s ease-out,width .3s ease-out,height .3s ease-out}
 .tile .fc{font-size:calc(var(--tw)*.56);line-height:1;pointer-events:none;transition:font-size .3s ease-out}
@@ -53,10 +53,10 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="wrap" id="wrap">
 <div class="header"><button class="hbtn" id="hubBtn">← В меню</button><div class="title">🀄 МАДЖОНГ</div><div style="display:flex;gap:5px"><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
 <div class="hud"><span>⏱ <b id="hTime">00:00</b></span><span>Пары: <b id="hPairs">36</b></span><span>Открыто: <b id="hFree">0</b></span><span><b id="hDiff">Средняя</b></span><span><b id="hSet">Фрукты</b></span></div>
-<div class="boardbox"><div id="board"></div></div>
+<div class="boardbox" id="boardbox"><div id="board"></div></div>
 <div class="status" id="statusEl">Собирай пары одинаковых свободных плиток</div>
 <div class="actions"><button class="btn" id="newBtn">🔄 Новая</button><button class="btn" id="hintBtn">💡 Подсказка (3)</button><button class="btn" id="undoBtn" disabled>↩️ Отмена</button><button class="btn" id="shufBtn">🔀 Перемешать</button></div>
-<div class="ver" id="verTag">v2.3</div>
+<div class="ver" id="verTag">v2.10</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Сложность<select id="diffSel"><option value="easy">Лёгкая · 72 плитки · 5 подсказок</option><option value="medium">Средняя · 120 плиток · 3 подсказки</option><option value="hard">Сложная · 180 плиток · 1 подсказка</option></select></div>
@@ -70,13 +70,13 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="stat-row"><span>Лучшее время</span><b id="stTime">—</b></div>
 <div class="stat-row"><span>Снято плиток</span><b id="stTiles">0</b></div>
 <div class="btns"><button class="btn" id="stReset">Сброс</button><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note">Подсказки лимитированы сложностью: 5 / 3 / 1 на партию. Отмена хода подсказки не возвращает. Кости плавно увеличиваются при снятии пар (не более 1/8 ширины поля).</div></div></div>
+<div class="note">Подсказки лимитированы сложностью: 5 / 3 / 1 на партию. Отмена хода подсказки не возвращает. Кости плавно увеличиваются по мере освобождения места (в 2 раза медленнее, не более 1/4 ширины поля); кластер центрирован с равными отступами; поле занимает доступную высоту экрана с учётом кнопок; сукно во всю ширину панели.</div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Снимай пары одинаковых плиток: тап‑тап ИЛИ перетащи плитку на такую же свободную (неверный бросок плавно возвращается).<br>• Плитка свободна, если НЕ накрыта сверху и открыта слева ИЛИ справа.<br>• ↩️ Отмена возвращает последнюю снятую пару.<br>• 💡 Подсказка обводит пару жёлтым; лимит на партию: Лёгкая 5, Средняя 3, Сложная 1 (остаток на кнопке).<br>• 🔀 перемешает, если ходов нет.<br>• Сложности: 72 / 120 / 180 плиток. Собери все пары — победа!<br>• Кости плавно увеличиваются при снятии пар, приближаясь к краям поля (максимум 1/8 ширины поля).<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
+<div class="note">• Снимай пары одинаковых плиток: тап‑тап ИЛИ перетащи плитку на такую же свободную (неверный бросок плавно возвращается).<br>• Плитка свободна, если НЕ накрыта сверху и открыта слева ИЛИ справа.<br>• ↩️ Отмена возвращает последнюю снятую пару.<br>• 💡 Подсказка обводит пару жёлтым; лимит на партию: Лёгкая 5, Средняя 3, Сложная 1 (остаток на кнопке).<br>• 🔀 перемешает, если ходов нет.<br>• Сложности: 72 / 120 / 180 плиток. Собери все пары — победа!<br>• Кости плавно увеличиваются по мере освобождения места (вдвое медленнее, максимум 1/4 ширины поля); кластер центрирован с равными отступами до краёв.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='2.3';
+var VER='2.10';
 var HINTLIMIT={easy:5,medium:3,hard:1};
 
 /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
@@ -164,29 +164,87 @@ function genBoard(pos){var pairs=pos.length/2,bag=[],i;for(i=0;i<pairs;i++)bag.p
    rem.splice(Math.max(a,b),1);rem.splice(Math.min(a,b),1)}
   if(ok)return{pos:pos,faces:faces}}
  var f=[];for(i=0;i<pairs;i++){var v=i%18;f.push(v,v)}shuffle(f);return{pos:pos,faces:f}}
-function extents(){var mx=0,my=0;G.pos.forEach(function(p){if(p.x>mx)mx=p.x;if(p.y>my)my=p.y});return{cols:mx/2+1,rows:my/2+1}}
-/* v2.3: ограничение размера костей 1/8 ширины поля + плавное увеличение при снятии пар */
-function layoutSize(){var b=$('board');var portrait=innerWidth<620;if(G)G.portrait=portrait;
- var ex=extents();
- var availW=Math.min(innerWidth,960)-(portrait?44:56);
- var availH=innerHeight-(portrait?235:250);
- var maxTW=Math.floor(availW/8);
- if(portrait){TW=Math.max(18,Math.min(64,Math.floor(availW/(ex.rows+0.8)),Math.floor(availH/((ex.cols*1.3)+1)),maxTW))}
- else{TW=Math.max(18,Math.min(64,Math.floor(availW/(ex.cols+0.8)),Math.floor(availH/((ex.rows*1.3)+1)),maxTW))}
- TH=Math.round(TW*1.3);
- OX=Math.max(4,Math.round(TW*0.10));OY=Math.max(4,Math.round(TH*0.10));
+function extentsLive(){var mnx=99,mxx=-1,mny=99,mxy=-1,ml=0,i,p;
+ for(i=0;i<G.pos.length;i++){if(G.removed[i])continue;p=G.pos[i];
+  if(p.x<mnx)mnx=p.x;if(p.x>mxx)mxx=p.x;if(p.y<mny)mny=p.y;if(p.y>mxy)mxy=p.y;if(p.l>ml)ml=p.l;}
+ if(mxx<0)return{minX:0,maxX:0,minY:0,maxY:0,cols:1,rows:1,maxL:0};
+ return{minX:mnx,maxX:mxx,minY:mny,maxY:mxy,cols:(mxx-mnx)/2+1,rows:(mxy-mny)/2+1,maxL:ml}}
+function extentsAll(){var mx=0,my=0,ml=0;G.pos.forEach(function(p){if(p.x>mx)mx=p.x;if(p.y>my)my=p.y;if(p.l>ml)ml=p.l});return{cols:mx/2+1,rows:my/2+1,maxL:ml}}
+function extentsAllPos(pos){var mx=0,my=0,ml=0;pos.forEach(function(p){if(p.x>mx)mx=p.x;if(p.y>my)my=p.y;if(p.l>ml)ml=p.l});return{cols:mx/2+1,rows:my/2+1,maxL:ml}}
+/* v2.10: сукно снова во всю ширину — ширина из клиента boardbox минус его паддинги 32 */
+function availSize(){
+ var bb=$('boardbox');
+ var wr=$('wrap');
+ var w=(bb?bb.clientWidth:(wr?wr.clientWidth-20:Math.min(innerWidth,960)-20))-32;
+ var reserved=0;
+ var ids=['header','hud','statusEl','verTag'];
+ for(var i=0;i<ids.length;i++){var e=$(ids[i]);if(e)reserved+=e.offsetHeight+8;}
+ var acts=document.querySelectorAll('.actions');
+ for(var k=0;k<acts.length;k++)reserved+=acts[k].offsetHeight+8;
+ reserved+=20+32+12+8;
+ var h=innerHeight-reserved;
+ return{w:Math.max(160,w),h:Math.max(160,h)}}
+function computeBoardBox(){var portrait=innerWidth<620;G.portrait=portrait;
+ var ex=extentsAll();var av=availSize();
+ var tw0;
+ if(portrait){tw0=Math.max(16,Math.min(Math.floor((av.w-8-ex.maxL*4)/ex.rows),Math.floor((av.h-8-ex.maxL*4)/(ex.cols*1.3)),Math.floor(av.w/4)))}
+ else{tw0=Math.max(16,Math.min(Math.floor((av.w-8-ex.maxL*4)/ex.cols),Math.floor((av.h-8-ex.maxL*4)/(ex.rows*1.3)),Math.floor(av.w/4)))}
+ var th0=Math.round(tw0*1.3);
+ var ox=Math.max(3,Math.round(tw0*0.08)),oy=Math.max(3,Math.round(th0*0.08));
+ if(portrait){G.boardW=ex.rows*tw0+ex.maxL*ox+8;G.boardH=ex.cols*th0+ex.maxL*oy+8}
+ else{G.boardW=ex.cols*tw0+ex.maxL*ox+8;G.boardH=ex.rows*th0+ex.maxL*oy+8}
+ if(G.boardW>av.w)G.boardW=av.w;
+ if(G.boardH>av.h)G.boardH=av.h}
+function layoutSize(){var b=$('board');computeBoardBox();
+ var portrait=G.portrait;
+ var ex=extentsLive();
+ var av=availSize();
+ var maxTW=Math.floor(av.w/4);
+ var effCols=G.ex0.cols-(G.ex0.cols-ex.cols)*0.5;
+ var effRows=G.ex0.rows-(G.ex0.rows-ex.rows)*0.5;
+ var tw;
+ if(portrait){tw=Math.min(Math.floor((G.boardW-8-ex.maxL*OX)/effRows),Math.floor((G.boardH-8-ex.maxL*OY)/(effCols*1.3)),maxTW)}
+ else{tw=Math.min(Math.floor((G.boardW-8-ex.maxL*OX)/effCols),Math.floor((G.boardH-8-ex.maxL*OY)/(effRows*1.3)),maxTW)}
+ TW=Math.max(16,tw);TH=Math.round(TW*1.3);
+ OX=Math.max(3,Math.round(TW*0.08));OY=Math.max(3,Math.round(TH*0.08));
  b.style.setProperty('--tw',TW+'px');b.style.setProperty('--th',TH+'px');
- if(portrait){b.style.width=(ex.rows*TW+OX*4+14)+'px';b.style.height=(ex.cols*TH+OY*4+14)+'px'}
- else{b.style.width=(ex.cols*TW+OX*4+14)+'px';b.style.height=(ex.rows*TH+OY*4+14)+'px'}}
+ b.style.width=G.boardW+'px';b.style.height=G.boardH+'px';
+ G.liveEx=ex}
 function baseZ(i){var p=G.pos[i];return p.l*1000+p.y*10+p.x}
-function posTile(i,el){var p=G.pos[i],L,T;
- if(G.portrait){L=(p.y/2)*TW+OX*2+4-p.l*OX;T=(p.x/2)*TH+OY*2+4-p.l*OY}
- else{L=(p.x/2)*TW+OX*2+4-p.l*OX;T=(p.y/2)*TH+OY*2+4-p.l*OY}
+function posTile(i,el){var p=G.pos[i],ex=G.liveEx||extentsLive(),L,T,offX,offY,inX=OX*2+2,inY=OY*2+2,ml=ex.maxL||0;
+ if(G.portrait){
+  offX=(G.boardW-(ex.rows*TW+ml*OX))/2+ml*OX-inX;
+  offY=(G.boardH-(ex.cols*TH+ml*OY))/2+ml*OY-inY;
+  L=offX+((p.y-ex.minY)/2)*TW+inX-p.l*OX;T=offY+((p.x-ex.minX)/2)*TH+inY-p.l*OY}
+ else{
+  offX=(G.boardW-(ex.cols*TW+ml*OX))/2+ml*OX-inX;
+  offY=(G.boardH-(ex.rows*TH+ml*OY))/2+ml*OY-inY;
+  L=offX+((p.x-ex.minX)/2)*TW+inX-p.l*OX;T=offY+((p.y-ex.minY)/2)*TH+inY-p.l*OY}
  el.style.left=L+'px';el.style.top=T+'px';
  el.style.zIndex=String(baseZ(i));
  el.style.width=TW+'px';el.style.height=TH+'px';
  el.style.boxShadow='0 3px 0 #8d8677,0 '+(5+p.l*2)+'px '+(8+p.l*3)+'px rgba(0,0,0,.5)';
  if(G.rect)G.rect[i]={L:L,T:T}}
+function centerCluster(){
+ if(!G||!G.el||!G.el.length)return;
+ var minL=1e9,maxR=-1e9,minT=1e9,maxB=-1e9,i,r;
+ for(i=0;i<G.pos.length;i++){
+  if(G.removed[i])continue;
+  r=G.rect[i];if(!r)continue;
+  if(r.L<minL)minL=r.L;
+  if(r.L+TW>maxR)maxR=r.L+TW;
+  if(r.T<minT)minT=r.T;
+  if(r.T+TH>maxB)maxB=r.T+TH;}
+ if(maxR<0)return;
+ var dx=Math.round(((G.boardW-(maxR-minL))/2)-minL);
+ var dy=Math.round(((G.boardH-(maxB-minT))/2)-minT);
+ if(!dx&&!dy)return;
+ for(i=0;i<G.pos.length;i++){
+  if(G.removed[i])continue;
+  var el=G.el[i];if(!el)continue;
+  var nr={L:G.rect[i].L+dx,T:G.rect[i].T+dy};
+  G.rect[i]=nr;
+  el.style.left=nr.L+'px';el.style.top=nr.T+'px'}}
 function blockedReason(i){var p=G.pos[i],lb=false,rb=false,j,q;
  for(j=0;j<G.pos.length;j++){if(j===i||G.removed[j])continue;q=G.pos[j];
   if(q.l>p.l&&Math.abs(q.x-p.x)<2&&Math.abs(q.y-p.y)<2)return 'top';
@@ -198,6 +256,7 @@ function findPair(){var fr=freeList();for(var i=0;i<fr.length;i++)for(var j=i+1;
 function buildTiles(){var b=$('board');b.innerHTML='';G.el=[];G.rect=[];layoutSize();
  for(var i=0;i<G.pos.length;i++){(function(i){var d=document.createElement('div');d.className='tile';d.dataset.idx=i;var s=document.createElement('span');s.className='fc';d.appendChild(s);posTile(i,d);
   d.addEventListener('pointerdown',function(e){onTileDown(e,i)});b.appendChild(d);G.el.push(d)})(i)}
+ centerCluster();
  updateFaces();updateFree();updateHud()}
 function updateFaces(){var S=SETS[set.skin];for(var i=0;i<G.el.length;i++){G.el[i].firstChild.textContent=S[G.faces[i]];G.el[i].classList.toggle('glyph',set.skin==='glyphs')}}
 function updateFree(){var fr=freeList();for(var i=0;i<G.el.length;i++){if(!G.removed[i])G.el[i].classList.toggle('blocked',fr.indexOf(i)<0)}$('hFree').textContent=fr.length}
@@ -227,14 +286,13 @@ function tapSelect(i){if(G.sel===i){G.sel=-1;G.el[i].classList.remove('sel');sSe
  if(G.sel>=0&&G.faces[G.sel]===G.faces[i]){var a=G.sel;G.sel=-1;removePair(a,i);return}
  if(G.sel>=0)G.el[G.sel].classList.remove('sel');
  G.sel=i;G.el[i].classList.add('sel');sSel();Platform.haptic('light')}
-/* v2.3: после снятия пары пересчитываем размер и позиции оставшихся костей */
 function removePair(a,b){G.removed[a]=true;G.removed[b]=true;G.el[a].classList.remove('sel');G.el[b].classList.remove('sel');G.el[a].classList.add('gone');G.el[b].classList.add('gone');G.sel=-1;G.pairs++;G.tilesRemoved+=2;undoStack.push([a,b]);if(undoStack.length>60)undoStack.shift();sMatch();Platform.haptic('light');updateFree();updateHud();
  var left=0;for(var i=0;i<G.removed.length;i++)if(!G.removed[i])left++;
  if(left===0){win();return}
- layoutSize();for(var i=0;i<G.el.length;i++)if(!G.removed[i])posTile(i,G.el[i]);
+ layoutSize();for(var i=0;i<G.el.length;i++)if(!G.removed[i])posTile(i,G.el[i]);centerCluster();
  if(!findPair()){setStatus('Ходов не осталось — нажми 🔀 Перемешать');toast('Ходов нет!')}
  else setStatus('Пар снято: '+G.pairs)}
-function undoMove(){if(!G||G.over||!undoStack.length)return;var pr=undoStack.pop();G.removed[pr[0]]=false;G.removed[pr[1]]=false;G.pairs--;G.tilesRemoved-=2;G.el[pr[0]].classList.remove('gone');G.el[pr[1]].classList.remove('gone');G.sel=-1;sSel();updateFree();updateHud();layoutSize();for(var i=0;i<G.el.length;i++)if(!G.removed[i])posTile(i,G.el[i]);setStatus('Ход отменён')}
+function undoMove(){if(!G||G.over||!undoStack.length)return;var pr=undoStack.pop();G.removed[pr[0]]=false;G.removed[pr[1]]=false;G.pairs--;G.tilesRemoved-=2;G.el[pr[0]].classList.remove('gone');G.el[pr[1]].classList.remove('gone');G.sel=-1;sSel();updateFree();updateHud();layoutSize();for(var i=0;i<G.el.length;i++)if(!G.removed[i])posTile(i,G.el[i]);centerCluster();setStatus('Ход отменён')}
 function shuffleLeft(){if(!G||G.over)return;var idx=[],i;for(i=0;i<G.removed.length;i++)if(!G.removed[i])idx.push(i);
  var vals=idx.map(function(k){return G.faces[k]});
  for(var t=0;t<60;t++){shuffle(vals);for(i=0;i<idx.length;i++)G.faces[idx[i]]=vals[i];G.sel=-1;updateFaces();if(findPair())break}
@@ -256,14 +314,13 @@ function hint(){if(!G||G.over)return;
 function stopT(){if(G&&G.timer){clearInterval(G.timer);G.timer=null}}
 function startT(){if(!G||G.timer)return;G.timer=setInterval(function(){G.time++;$('hTime').textContent=fmt(G.time)},1000)}
 function newGame(){stopT();undoStack=[];var pos=LAYOUTS[set.diff]();var gb=genBoard(pos);
- G={pos:gb.pos,faces:gb.faces,removed:new Array(gb.pos.length).fill(false),sel:-1,pairs:0,tilesRemoved:0,time:0,timer:null,over:false,won:false,hintsLeft:HINTLIMIT[set.diff],portrait:innerWidth<620,el:[],rect:[]};
+ G={pos:gb.pos,faces:gb.faces,removed:new Array(gb.pos.length).fill(false),sel:-1,pairs:0,tilesRemoved:0,time:0,timer:null,over:false,won:false,hintsLeft:HINTLIMIT[set.diff],portrait:innerWidth<620,el:[],rect:[],boardW:0,boardH:0,liveEx:null,ex0:extentsAllPos(pos)};
  $('endOverlay').classList.remove('show');buildTiles();startT();setStatus('Сложность: '+DIFFNAMES[set.diff]+' · '+G.pos.length+' плиток · подсказок '+G.hintsLeft);say('Новая партия маджонга');trk('game_start',{game_name:'mahjong',set:set.skin,difficulty:set.diff,tiles:G.pos.length})}
 function win(){G.over=true;G.won=true;stopT();sWin();Platform.haptic('success');say('Победа!');
  ST.games++;ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak;ST.tiles=(ST.tiles||0)+G.tilesRemoved;
  if(ST.bestTime==null||G.time<ST.bestTime)ST.bestTime=G.time;saveST();
  trk('game_end',{game_name:'mahjong',win:1,time:G.time,pairs:G.pairs,set:set.skin,difficulty:set.diff});showEnd(true)}
 
-/* v2.2: шеринг через платформу */
 function share(){
   var txt='🀄 Маджонг ('+DIFFNAMES[set.diff]+', '+G.pos.length+' плиток): '+(G.won?'ПОБЕДА за '+fmt(G.time)+'!':'партия окончена')+' Пар снято: '+G.pairs+', набор: '+SETNAMES[set.skin]+'. Сможешь лучше?';
   Platform.share(location.href, txt);
@@ -289,8 +346,8 @@ $('stReset').onclick=function(){if(confirm('Сбросить статистик�
 $('rulesBtn').onclick=function(){$('rulesOverlay').classList.add('show')};
 $('rulesClose').onclick=function(){$('rulesOverlay').classList.remove('show')};
 $('hubBtn').onclick=function(){goToHub()};
-window.addEventListener('resize',function(){if(!G)return;layoutSize();for(var i=0;i<G.el.length;i++)if(!G.removed[i])posTile(i,G.el[i])});
-window.addEventListener('orientationchange',function(){if(!G)return;setTimeout(function(){layoutSize();for(var i=0;i<G.el.length;i++)if(!G.removed[i])posTile(i,G.el[i])},120)});}
+window.addEventListener('resize',function(){if(!G)return;layoutSize();for(var i=0;i<G.el.length;i++)if(!G.removed[i])posTile(i,G.el[i]);centerCluster()});
+window.addEventListener('orientationchange',function(){if(!G)return;setTimeout(function(){layoutSize();for(var i=0;i<G.el.length;i++)if(!G.removed[i])posTile(i,G.el[i]);centerCluster()},120)});}
 function boot(){set=Object.assign({diff:'medium',skin:'fruits',vol:.7,voice:true},JSON.parse(lsGet('mj_set','{}')));
  ST=Object.assign({games:0,wins:0,streak:0,bestStreak:0,bestTime:null,tiles:0},JSON.parse(lsGet('mj_stats','{}')));
  try{if(!sessionStorage.getItem('mj_session')){sessionStorage.setItem('mj_session','1');trk('game_open',{game_name:'mahjong',source:Platform.name,ver:VER})}}catch(e){}
