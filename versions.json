@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-07T03:38:16.305Z",
+ "generatedAt": "2026-11-07T04:23:44.630Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.47",
@@ -323,14 +323,39 @@
    ]
   },
   "solitaire": {
-   "version": "2.14",
+   "version": "2.16",
    "online": false,
    "addedAt": "2026-10-01",
    "files": [
     {
+     "path": "solitaire/img/back1.png",
+     "sha256": "1466a36d24be60faf90d9d4d31863af2008e03da02296e83584c3b8c32c21a6d",
+     "size": 1061096
+    },
+    {
+     "path": "solitaire/img/back2.png",
+     "sha256": "84556e452b74e8ec30c14b9910a76723b645d8118d5239777380a8cd6f9bab05",
+     "size": 1172276
+    },
+    {
+     "path": "solitaire/img/back3.png",
+     "sha256": "125876507a5d59bd3d8828925c2912ba06858489dbf58844816f373a12b34fe4",
+     "size": 1140379
+    },
+    {
+     "path": "solitaire/img/back4.png",
+     "sha256": "5eb9cfbc31335c047992ffe3f93801651616817f2e896e4b8426cf6ee2216d08",
+     "size": 1213856
+    },
+    {
+     "path": "solitaire/img/back5.png",
+     "sha256": "02f2879ac0569f3393af382044d2c582f6cc9e7021241f5c1108c387fc1a415c",
+     "size": 988010
+    },
+    {
      "path": "solitaire/index.html",
-     "sha256": "604ee0f437746439602d34d2f4a4e4081f771668d9f59db8893cef71b2d5ae0d",
-     "size": 47158
+     "sha256": "6a4ff5515a6b995ad165096a67f852c57b02a4753b345f28cee1adee6af867d0",
+     "size": 50260
     }
    ]
   },
