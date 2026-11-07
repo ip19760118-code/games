@@ -16,7 +16,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .hud b{color:var(--accent)}
 .boardbox{display:flex;justify-content:center;background:linear-gradient(160deg,#0b6623,#084a19);border-radius:12px;padding:16px;box-shadow:inset 0 2px 14px rgba(0,0,0,.5);overflow:auto}
 #board{position:relative;z-index:1;margin:auto}
-/* v2.11+: геометрию ведёт tween-цикл; браузерные transition на left/top/width/height отключены */
+/* v2.11+: геометрию ведёт rAF-цикл сглаживания; браузерные transition на left/top/width/height отключены */
 .tile{position:absolute;border-radius:6px;background:linear-gradient(160deg,#fdfbf4,#e6dfcd);border:1px solid #b6ae9c;box-shadow:0 3px 0 #8d8677,0 6px 10px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:none;transition:transform .15s ease,box-shadow .15s ease}
 .tile .fc{font-size:calc(var(--tw)*.56);line-height:1;pointer-events:none}
 .tile.glyph .fc{font-weight:700;color:var(--ink);font-size:calc(var(--tw)*.62);font-family:'Segoe UI',serif}
@@ -57,7 +57,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="boardbox" id="boardbox"><div id="board"></div></div>
 <div class="status" id="statusEl">Собирай пары одинаковых свободных плиток</div>
 <div class="actions"><button class="btn" id="newBtn">🔄 Новая</button><button class="btn" id="hintBtn">💡 Подсказка (3)</button><button class="btn" id="undoBtn" disabled>↩️ Отмена</button><button class="btn" id="shufBtn">🔀 Перемешать</button></div>
-<div class="ver" id="verTag">v2.12</div>
+<div class="ver" id="verTag">v2.13</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Сложность<select id="diffSel"><option value="easy">Лёгкая · 72 плитки · 5 подсказок</option><option value="medium">Средняя · 120 плиток · 3 подсказки</option><option value="hard">Сложная · 180 плиток · 1 подсказка</option></select></div>
@@ -71,13 +71,13 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="stat-row"><span>Лучшее время</span><b id="stTime">—</b></div>
 <div class="stat-row"><span>Снято плиток</span><b id="stTiles">0</b></div>
 <div class="btns"><button class="btn" id="stReset">Сброс</button><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note">Подсказки лимитированы сложностью: 5 / 3 / 1 на партию. Отмена хода подсказки не возвращает. Перемещение и рост костей — плавный tween 600 мс и только при изменении больше 6px; темп роста замедленный (0.35), потолок 1/4 ширины поля; отступы до краёв равны; поле по высоте экрана с учётом кнопок; сукно во всю ширину.</div></div></div>
+<div class="note">Подсказки лимитированы сложностью: 5 / 3 / 1 на партию. Отмена хода подсказки не возвращает. Перемещение и рост костей — непрерывное экспоненциальное сглаживание (без перезапусков анимации), срабатывает только при изменении больше 10px; темп роста замедленный (0.35), потолок 1/4 ширины поля; отступы до краёв равны; поле по высоте экрана с учётом кнопок; сукно во всю ширину.</div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Снимай пары одинаковых плиток: тап‑тап ИЛИ перетащи плитку на такую же свободную (неверный бросок плавно возвращается).<br>• Плитка свободна, если НЕ накрыта сверху и открыта слева ИЛИ справа.<br>• ↩️ Отмена возвращает последнюю снятую пару.<br>• 💡 Подсказка обводит пару жёлтым; лимит на партию: Лёгкая 5, Средняя 3, Сложная 1 (остаток на кнопке).<br>• 🔀 перемешает, если ходов нет.<br>• Сложности: 72 / 120 / 180 плиток. Собери все пары — победа!<br>• Кости плавно (tween 600 мс) растут и центрируются по мере освобождения места, но только если изменение больше 6px; максимум роста — 1/4 ширины поля.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
+<div class="note">• Снимай пары одинаковых плиток: тап‑тап ИЛИ перетащи плитку на такую же свободную (неверный бросок плавно возвращается).<br>• Плитка свободна, если НЕ накрыта сверху и открыта слева ИЛИ справа.<br>• ↩️ Отмена возвращает последнюю снятую пару.<br>• 💡 Подсказка обводит пару жёлтым; лимит на партию: Лёгкая 5, Средняя 3, Сложная 1 (остаток на кнопке).<br>• 🔀 перемешает, если ходов нет.<br>• Сложности: 72 / 120 / 180 плиток. Собери все пары — победа!<br>• Кости плавно растут и центрируются по мере освобождения места (только если изменение больше 10px; максимум роста — 1/4 ширины поля).<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='2.12';
+var VER='2.13';
 var HINTLIMIT={easy:5,medium:3,hard:1};
 
 /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
@@ -134,7 +134,7 @@ hard:function(){var P=[],x,y;
  for(y=4;y<7;y+=2)for(x=12;x<20;x+=2)P.push({l:4,x:x,y:y});
  return P}};
 var AC=null,MASTER=null,toastT=null,set=null,ST=null,G=null,drag=null,undoStack=[];
-var TW=52,TH=68,OX=5,OY=6,rafId=0,tween=null;
+var TW=52,TH=68,OX=5,OY=6,rafId=0,lastTs=0;
 function $(i){return document.getElementById(i)}
 function lsGet(k,d){try{var v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
@@ -197,8 +197,7 @@ function computeBoardBox(){var portrait=innerWidth<620;G.portrait=portrait;
  if(G.boardW>av.w)G.boardW=av.w;
  if(G.boardH>av.h)G.boardH=av.h}
 function baseZ(i){var p=G.pos[i];return p.l*1000+p.y*10+p.x}
-/* ---------- v2.12: tween-геометрия ---------- */
-function easeIO(p){return p<0.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2}
+/* ---------- v2.13: экспоненциальное сглаживание (непрерывная скорость, без перезапусков) ---------- */
 function setBoardVars(){var b=$('board');b.style.setProperty('--tw',TW+'px');b.style.setProperty('--th',TH+'px')}
 function writeTile(i){var el=G.el[i];if(!el)return;var r=G.rect[i];if(!r)return;
  el.style.left=r.L+'px';el.style.top=r.T+'px';el.style.width=TW+'px';el.style.height=TH+'px'}
@@ -220,28 +219,32 @@ function computeTargetRects(ex,tw){
  if(maxR>0){var dx=((G.boardW-(maxR-minL))/2)-minL,dy=((G.boardH-(maxB-minT))/2)-minT;
   for(i=0;i<out.length;i++){if(out[i]){out[i].L+=dx;out[i].T+=dy;}}}
  return out}
-function stopTween(){if(rafId){cancelAnimationFrame(rafId);rafId=0}tween=null}
-function startTween(targets,twTo){
- var from=[],to=[],i;
- for(i=0;i<G.pos.length;i++){
-  if(G.removed[i]){from.push(null);to.push(null);continue}
-  from.push({L:(G.rect[i]?G.rect[i].L:targets[i].L),T:(G.rect[i]?G.rect[i].T:targets[i].T)});
-  to.push(targets[i]);}
- tween={from:from,to:to,twFrom:TW,twTo:twTo,t0:performance.now(),dur:600};
- if(!rafId)rafId=requestAnimationFrame(stepTween)}
-function stepTween(ts){
- if(!tween||!G||!G.el){rafId=0;return}
- var p=Math.min(1,(ts-tween.t0)/tween.dur);var e=easeIO(p);
- TW=tween.twFrom+(tween.twTo-tween.twFrom)*e;
+function stopSmooth(){if(rafId){cancelAnimationFrame(rafId);rafId=0}lastTs=0}
+function startSmooth(){if(!rafId){lastTs=0;rafId=requestAnimationFrame(stepFrame)}}
+function stepFrame(ts){
+ if(!G||!G.el||!G.el.length){rafId=0;lastTs=0;return}
+ if(!lastTs)lastTs=ts;
+ var dt=Math.min(64,ts-lastTs);lastTs=ts;
+ var k=1-Math.exp(-dt/170);
+ TW+=(G.twTarget-TW)*k;
  TH=TW*1.3;OX=Math.max(3,TW*0.08);OY=Math.max(3,TH*0.08);
  setBoardVars();
- for(var i=0;i<G.pos.length;i++){
+ var maxLeft=0,i;
+ for(i=0;i<G.pos.length;i++){
   if(G.removed[i])continue;
-  var f=tween.from[i],t=tween.to[i];if(!f||!t)continue;
-  G.rect[i]={L:f.L+(t.L-f.L)*e,T:f.T+(t.T-f.T)*e};
+  var t=G.trects?G.trects[i]:null,c=G.rect[i];
+  if(!t||!c)continue;
+  c.L+=(t.L-c.L)*k;c.T+=(t.T-c.T)*k;
+  var d=Math.abs(t.L-c.L)+Math.abs(t.T-c.T);
+  if(d>maxLeft)maxLeft=d;
   writeTile(i);}
- if(p<1){rafId=requestAnimationFrame(stepTween)}else{rafId=0;tween=null}}
-/* v2.12: порог 6px — мельче не дёргаем; snap=true только при сборке новой партии */
+ var twLeft=Math.abs(G.twTarget-TW);
+ if(maxLeft<0.05&&twLeft<0.05){
+  TW=G.twTarget;TH=TW*1.3;OX=Math.max(3,TW*0.08);OY=Math.max(3,TH*0.08);setBoardVars();
+  for(i=0;i<G.pos.length;i++){if(G.removed[i])continue;var tt=G.trects?G.trects[i]:null;if(tt){G.rect[i]={L:tt.L,T:tt.T};writeTile(i);}}
+  rafId=0;lastTs=0;return;}
+ rafId=requestAnimationFrame(stepFrame)}
+/* v2.13: порог 10px — мельче не двигаем и не растём */
 function layoutSize(snap){
  var b=$('board');computeBoardBox();
  var ex=extentsLive();var av=availSize();var maxTW=av.w/4;
@@ -251,19 +254,20 @@ function layoutSize(snap){
  if(G.portrait){twT=Math.min((G.boardW-8-ex.maxL*OX)/effRows,(G.boardH-8-ex.maxL*OY)/(effCols*1.3),maxTW)}
  else{twT=Math.min((G.boardW-8-ex.maxL*OX)/effCols,(G.boardH-8-ex.maxL*OY)/(effRows*1.3),maxTW)}
  twT=Math.max(16,twT);
- G.liveEx=ex;G.twTarget=twT;
+ G.liveEx=ex;
  b.style.width=G.boardW+'px';b.style.height=G.boardH+'px';
  var targets=computeTargetRects(ex,twT);
- if(snap){stopTween();TW=twT;TH=TW*1.3;OX=Math.max(3,TW*0.08);OY=Math.max(3,TH*0.08);setBoardVars();
-  for(var i=0;i<G.pos.length;i++){if(G.removed[i])continue;G.rect[i]=targets[i];writeTile(i);}
+ if(snap){stopSmooth();G.twTarget=twT;G.trects=targets;TW=twT;TH=TW*1.3;OX=Math.max(3,TW*0.08);OY=Math.max(3,TH*0.08);setBoardVars();
+  for(var i0=0;i0<G.pos.length;i0++){if(G.removed[i0])continue;G.rect[i0]={L:targets[i0].L,T:targets[i0].T};writeTile(i0);}
   return}
  var maxD=Math.abs(twT-TW);
- for(i=0;i<G.pos.length;i++){
+ for(var i=0;i<G.pos.length;i++){
   if(G.removed[i]||!G.rect[i]||!targets[i])continue;
   var d=Math.abs(targets[i].L-G.rect[i].L)+Math.abs(targets[i].T-G.rect[i].T);
   if(d>maxD)maxD=d;}
- if(maxD<=6)return;
- startTween(targets,twT)}
+ if(maxD<=10)return;
+ G.twTarget=twT;G.trects=targets;
+ startSmooth()}
 function blockedReason(i){var p=G.pos[i],lb=false,rb=false,j,q;
  for(j=0;j<G.pos.length;j++){if(j===i||G.removed[j])continue;q=G.pos[j];
   if(q.l>p.l&&Math.abs(q.x-p.x)<2&&Math.abs(q.y-p.y)<2)return 'top';
@@ -334,10 +338,10 @@ function hint(){if(!G||G.over)return;
  setTimeout(function(){if(f0.parentNode)f0.parentNode.removeChild(f0);if(f1.parentNode)f1.parentNode.removeChild(f1)},1700)}
 function stopT(){if(G&&G.timer){clearInterval(G.timer);G.timer=null}}
 function startT(){if(!G||G.timer)return;G.timer=setInterval(function(){G.time++;$('hTime').textContent=fmt(G.time)},1000)}
-function newGame(){stopT();stopTween();undoStack=[];var pos=LAYOUTS[set.diff]();var gb=genBoard(pos);
- G={pos:gb.pos,faces:gb.faces,removed:new Array(gb.pos.length).fill(false),sel:-1,pairs:0,tilesRemoved:0,time:0,timer:null,over:false,won:false,hintsLeft:HINTLIMIT[set.diff],portrait:innerWidth<620,el:[],rect:[],boardW:0,boardH:0,liveEx:null,ex0:extentsAllPos(pos),twTarget:TW,offX:0,offY:0};
+function newGame(){stopT();stopSmooth();undoStack=[];var pos=LAYOUTS[set.diff]();var gb=genBoard(pos);
+ G={pos:gb.pos,faces:gb.faces,removed:new Array(gb.pos.length).fill(false),sel:-1,pairs:0,tilesRemoved:0,time:0,timer:null,over:false,won:false,hintsLeft:HINTLIMIT[set.diff],portrait:innerWidth<620,el:[],rect:[],boardW:0,boardH:0,liveEx:null,ex0:extentsAllPos(pos),twTarget:TW,trects:null,offX:0,offY:0};
  $('endOverlay').classList.remove('show');buildTiles();startT();setStatus('Сложность: '+DIFFNAMES[set.diff]+' · '+G.pos.length+' плиток · подсказок '+G.hintsLeft);say('Новая партия маджонга');trk('game_start',{game_name:'mahjong',set:set.skin,difficulty:set.diff,tiles:G.pos.length})}
-function win(){G.over=true;G.won=true;stopT();stopTween();sWin();Platform.haptic('success');say('Победа!');
+function win(){G.over=true;G.won=true;stopT();stopSmooth();sWin();Platform.haptic('success');say('Победа!');
  ST.games++;ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak;ST.tiles=(ST.tiles||0)+G.tilesRemoved;
  if(ST.bestTime==null||G.time<ST.bestTime)ST.bestTime=G.time;saveST();
  trk('game_end',{game_name:'mahjong',win:1,time:G.time,pairs:G.pairs,set:set.skin,difficulty:set.diff});showEnd(true)}
