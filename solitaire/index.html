@@ -28,13 +28,11 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .spacer{pointer-events:none}
 .card{position:absolute;width:var(--cw);height:var(--ch);border-radius:calc(var(--cw)*.09);background:var(--cardface);border:1px solid rgba(0,0,0,.28);box-shadow:0 1px 3px rgba(0,0,0,.4);cursor:pointer}
 .card.back{background:repeating-linear-gradient(45deg,var(--back),var(--back) 6px,var(--back2) 6px,var(--back2) 12px);border-color:rgba(0,0,0,.45);background-size:cover,auto;background-position:center,0 0}
-/* v2.16: фолбэк-узоры (пока картинка не загрузилась / отсутствует) */
 .card.back[data-back="1"]{background-image:repeating-linear-gradient(45deg,#1d4ed8,#1d4ed8 6px,#173a9e 6px,#173a9e 12px)}
 .card.back[data-back="2"]{background-image:repeating-linear-gradient(45deg,#b91c1c,#b91c1c 6px,#7f1d1d 6px,#7f1d1d 12px)}
 .card.back[data-back="3"]{background-image:repeating-linear-gradient(45deg,#047857,#047857 6px,#065f46 6px,#065f46 12px)}
 .card.back[data-back="4"]{background-image:repeating-linear-gradient(45deg,#6d28d9,#6d28d9 6px,#4c1d95 6px,#4c1d95 12px)}
 .card.back[data-back="5"]{background-image:repeating-linear-gradient(45deg,#b45309,#b45309 6px,#92400e 6px,#92400e 12px)}
-/* v2.16: картинка загружена → под ней чистый слегка жёлтый лист, узора нет */
 body.bk1ok .card.back[data-back="1"]{background-image:url("img/back1.png"),linear-gradient(160deg,#f5eed6,#ece2c4);background-size:cover,cover}
 body.bk2ok .card.back[data-back="2"]{background-image:url("img/back2.png"),linear-gradient(160deg,#f5eed6,#ece2c4);background-size:cover,cover}
 body.bk3ok .card.back[data-back="3"]{background-image:url("img/back3.png"),linear-gradient(160deg,#f5eed6,#ece2c4);background-size:cover,cover}
@@ -51,11 +49,11 @@ body.bk5ok .card.back[data-back="5"]{background-image:url("img/back5.png"),linea
 .slot.recycle{border-style:solid;display:flex;align-items:center;justify-content:center;color:#fff;font-size:calc(var(--cw)*.55);background:rgba(255,255,255,.06)}
 #dragwrap{position:fixed;left:0;top:0;z-index:500;pointer-events:none;transform:scale(1.04);filter:drop-shadow(0 12px 22px rgba(0,0,0,.55))}
 #dragwrap .card{position:absolute;box-shadow:0 2px 6px rgba(0,0,0,.4)}
-.actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
-.btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--text);padding:8px 16px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.actions{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--text);padding:8px 14px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
 .btn.primary{background:linear-gradient(135deg,#7cffc4,#33d6ff);color:#061019;border:none}
 .btn:disabled{opacity:.4;cursor:default}
-.ver{text-align:center;font-size:10px;opacity:.45;margin-top:8px;font-family:monospace;letter-spacing:1px}
+.ver{text-align:center;font-size:10px;opacity:.45;margin-top:6px;font-family:monospace;letter-spacing:1px}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
 .overlay.show{display:flex}
 .cardbox{background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:22px;max-width:420px;width:100%;text-align:center;max-height:88vh;overflow-y:auto;color:var(--text)}
@@ -75,7 +73,7 @@ body.bk5ok .card.back[data-back="5"]{background-image:url("img/back5.png"),linea
 @keyframes salutFly{0%{opacity:1;transform:translate(0,0) scale(1.2)}60%{opacity:.9}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0)}}
 .salut-flash{position:fixed;inset:0;pointer-events:none;z-index:399;background:radial-gradient(circle at var(--fx) var(--fy),rgba(255,255,255,.55),transparent 35%);opacity:0;animation:flash .6s ease-out forwards}
 @keyframes flash{0%{opacity:1}100%{opacity:0}}
-@media (max-width:480px){.title{font-size:16px}.hud{font-size:11px}.btn{font-size:12px;padding:7px 12px}}
+@media (max-width:480px){.title{font-size:16px}.hud{font-size:11px}.btn{font-size:12px;padding:7px 10px}.hbtn{padding:5px 9px;font-size:11px}}
 </style></head><body>
 <div class="wrap" id="wrap">
 <div class="header"><button class="hbtn" id="hubBtn">← В меню игр</button><div class="title">♠️ КОСЫНКА</div><div style="display:flex;gap:6px"><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
@@ -91,7 +89,7 @@ body.bk5ok .card.back[data-back="5"]{background-image:url("img/back5.png"),linea
 </div>
 <div class="actions"><button class="btn" id="newBtn">🔄 Новая</button><button class="btn" id="hintBtn">💡 Подсказка (5)</button><button class="btn" id="undoBtn">↩️ Отмена</button><button class="btn" id="autoBtn" style="display:none">⚡ Автодоводка</button><button class="btn" id="giveBtn">🏳️ Сдаться</button></div>
 <div class="actions"><button class="btn" id="shareLinkBtn">📤 Скинуть ссылку на игру</button></div>
-<div class="ver" id="verTag">v2.16</div>
+<div class="ver" id="verTag">v2.17</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Сложность<select id="diffSel"><option value="easy">Новичок · 1 карта, 5 подсказок</option><option value="medium">Среднее · 3 карты, 3 подсказки</option><option value="hard">Сложное · 3 карты, 1 перезаход, 1 подсказка</option></select></div>
@@ -114,7 +112,7 @@ body.bk5ok .card.back[data-back="5"]{background-image:url("img/back5.png"),linea
 <div class="note">• Цель — собрать 4 дома по мастям от туза до короля.<br>• В колоннах кладём по убыванию, чередуя цвета; на пустую колонну — только король.<br>• Из колоды берём по 1 или 3 карты; пустая колода перезаряжается сбросом (на «Сложном» — 1 раз).<br>• Управление: тяни карту/стопку целиком; неверный бросок вернёт её; ИЛИ тап = выбрать, тап = ход.<br>• 💡 Подсказки: Новичок 5, Среднее 3, Сложное 1.<br>• 😵 Когда полезных ходов не останется (и цикл колоды исчерпан) — сообщение появится сразу.<br>• 🧩 Расклады решаемые; помощь настраивается в ⚙️ (вплоть до полного отключения).<br>• 🎨 Скины поля и рубашки карт выбираются в ⚙️.<br>• ⚡ Автодоводка появится, когда колода и сброс пусты и все карты открыты.<br>• 🎆 При победе салют идёт до новой игры или выхода в меню.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='2.16';
+var VER='2.17';
 var SUITS=['♠','♥','♦','♣'];
 var DIFFS={easy:{draw:1,redeal:9999,hints:5,name:'Новичок'},medium:{draw:3,redeal:9999,hints:3,name:'Среднее'},hard:{draw:3,redeal:1,hints:1,name:'Сложное'}};
 function backHandler(){
@@ -152,7 +150,6 @@ function sWin(){[523,659,784,1046,1318,1568].forEach(function(f,i){setTimeout(fu
 function say(t){if(!set.voice)return;try{if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='ru-RU';u.rate=1.05;window.speechSynthesis.speak(u);}catch(e){}}
 var toastTimer=null;
 function toast(t){var el=$('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';document.body.appendChild(el);}el.textContent=t;el.classList.add('show');if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.classList.remove('show');},2500);}
-/* v2.16: проба загрузки рубашек — класс bkNok на body включает слой картинки */
 (function(){for(var b=1;b<=5;b++){(function(n){var im=new Image();im.onload=function(){document.body.classList.add('bk'+n+'ok');};im.onerror=function(){};im.src='img/back'+n+'.png';})(b);}})();
 var SOLVABLE=(function(){
  function isR(c){return c.s===1||c.s===2;}
@@ -236,10 +233,23 @@ function rankTxt(r){return r===1?'A':(r===11?'J':(r===12?'Q':(r===13?'K':r)));}
 function pileArr(n){if(n==='stock')return G.stock;if(n==='waste')return G.waste;if(n[0]==='f')return G.found[+n[1]];return G.tab[+n[1]];}
 function downOff(){return Math.round(ch*0.12);}
 function upOff(){return Math.round(ch*0.30);}
-function layout(){var wrapW=Math.min(window.innerWidth-36,720);var gap=6;cw=Math.min(110,Math.floor((wrapW-6*gap)/7));ch=Math.round(cw*1.4);
+/* v2.17: высота колонок = остаток экрана после ЗАМЕРА реальных высот шапки, HUD,
+   обеих панелей кнопок, футера, отступов и верхнего ряда — кнопки всегда на экране */
+function layout(){
+ var wrapW=Math.min(window.innerWidth-36,720);var gap=6;
+ cw=Math.min(110,Math.floor((wrapW-6*gap)/7));ch=Math.round(cw*1.4);
  var vh=window.innerHeight;
- tabH=Math.max(Math.round(ch*1.6), vh - ch - 210);
- var w=$('wrap');w.style.setProperty('--cw',cw+'px');w.style.setProperty('--ch',ch+'px');w.style.setProperty('--gap',gap+'px');}
+ function hOf(sel){var e=document.querySelector(sel);return e?e.offsetHeight:0;}
+ var fixed=hOf('.header')+hOf('.hud')+hOf('.ver');
+ var acts=document.querySelectorAll('.actions');
+ for(var i=0;i<acts.length;i++)fixed+=acts[i].offsetHeight;
+ fixed+=8*5;
+ fixed+=20+16;
+ fixed+=ch+gap;
+ fixed+=24;
+ tabH=Math.max(Math.round(ch*1.6), vh-Math.round(fixed));
+ var w=$('wrap');w.style.setProperty('--cw',cw+'px');w.style.setProperty('--ch',ch+'px');w.style.setProperty('--gap',gap+'px');
+}
 function baseDeal(){
  var deck=[];for(var s=0;s<4;s++)for(var r=1;r<=13;r++)deck.push({id:s+'_'+r,s:s,r:r,up:false});
  for(var i=deck.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=deck[i];deck[i]=deck[j];deck[j]=t;}
@@ -623,6 +633,7 @@ $('rulesBtn').onclick=function(){$('rulesOverlay').classList.add('show');};
 $('rulesClose').onclick=function(){$('rulesOverlay').classList.remove('show');};
 $('hubBtn').onclick=function(){goToHub();};
 window.addEventListener('resize',function(){if(G)render();});
+window.addEventListener('orientationchange',function(){setTimeout(function(){if(G)render();},120);});
 window.addEventListener('beforeunload',function(){stopCelebrate();});
 applySkin();$('verTag').textContent='v'+VER;newGame();
 </script></body></html>
