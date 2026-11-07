@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-07T09:06:45.272Z",
+ "generatedAt": "2026-11-07T09:23:26.274Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.47",
@@ -360,14 +360,14 @@
    ]
   },
   "mahjong": {
-   "version": "2.12",
+   "version": "2.13",
    "online": false,
    "addedAt": "2026-10-01",
    "files": [
     {
      "path": "mahjong/index.html",
-     "sha256": "613929fd5ff209785012b2a08d5a744227586fae2d84f0f45a54a565b9beaaf3",
-     "size": 33805
+     "sha256": "1a4f3d6b5b7b0091516a50e6c09321af4e757cc62dbee8202e778e7085114c09",
+     "size": 34104
     }
    ]
   },
