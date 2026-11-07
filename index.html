@@ -85,12 +85,12 @@
       <p class="hub-desc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. В браузере и мессенджерах игры запускаются без установки: нажми и играй. Для ПК есть приложение Windows: оно устанавливается один раз, хранит игры на устройстве (работают офлайн) и само обновляет контент. Для Android — лёгкое приложение с офлайн-играми. Ссылки на установщики — в кнопке выше: скопируй или отправь другу, открой в браузере и скачай. Список игр умный: любимые игры поднимаются наверх сами, новинки неделю помечены значком NEW. Новые игры добавляются регулярно.</p>
 
       <div id="gamesList">
-        <button class="game-btn" data-game="trend_catch" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
-        <button class="game-btn" data-game="lights_out" id="lightsOutBtn"><span class="game-emoji">💡</span><span class="game-text"><b>Выключи Свет</b><small>Логическая головоломка</small></span></button>
+        <button class="game-btn" data-game="trend-catch" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
+        <button class="game-btn" data-game="lights-out" id="lightsOutBtn"><span class="game-emoji">💡</span><span class="game-text"><b>Выключи Свет</b><small>Логическая головоломка</small></span></button>
         <button class="game-btn" data-game="arkanoid" id="arkanoidBtn"><span class="game-emoji">🧱</span><span class="game-text"><b>Neon Arkanoid 3D</b><small>Классический арканоид с бонусами и ловушками</small></span></button>
         <button class="game-btn" data-game="domino" id="dominoBtn"><span class="game-emoji">🧩</span><span class="game-text"><b>Домино <span class="tag-online">ONLINE</span></b><small>Классика, игра с ИИ или друзьями до 4</small></span></button>
         <button class="game-btn" data-game="shooter" id="shooterBtn"><span class="game-emoji">🔫</span><span class="game-text"><b>3D Shooter</b><small>3D-шутер с волнами врагов и тремя видами оружия</small></span></button>
-        <button class="game-btn" data-game="fruit_samurai" id="fruitSamuraiBtn"><span class="game-emoji">🍉</span><span class="game-text"><b>Фруктовый самурай</b><small>Режь фрукты на лету и уворачивайся от бомб</small></span></button>
+        <button class="game-btn" data-game="fruit-samurai" id="fruitSamuraiBtn"><span class="game-emoji">🍉</span><span class="game-text"><b>Фруктовый самурай</b><small>Режь фрукты на лету и уворачивайся от бомб</small></span></button>
         <button class="game-btn" data-game="chess" id="chessBtn"><span class="game-emoji">♟️</span><span class="game-text"><b>Шахматы <span class="tag-online">ONLINE</span></b><small>Игра с ИИ или с другом онлайн</small></span></button>
         <button class="game-btn" data-game="durak" id="durakBtn"><span class="game-emoji">🃏</span><span class="game-text"><b>Дурак <span class="tag-online">ONLINE</span></b><small>Подкидной, переводной, игра с ИИ или друзьями до 4</small></span></button>
         <button class="game-btn" data-game="nardy" id="nardyBtn"><span class="game-emoji">🎲</span><span class="game-text"><b>Нарды <span class="tag-online">ONLINE</span></b><small>Классические длинные, игра с ИИ или с другом онлайн</small></span></button>
@@ -276,7 +276,7 @@
     function openGame(url, gameName) {
       trackEvent('hub_game_click', { game_name: gameName });
       try {
-        const key = String(url).replace(/^\.\//, '').replace(/\/$/, '').replace(/-/g, '_');
+        const key = String(url).replace(/^\.\//, '').replace(/\/$/, '');
         bumpGameStat(key);
       } catch (e) {}
       try { Platform.haptic('light'); } catch (e) {}
