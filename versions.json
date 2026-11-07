@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-07T09:33:16.712Z",
+ "generatedAt": "2026-11-07T09:42:01.993Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.47",
@@ -396,14 +396,14 @@
    ]
   },
   "fruit-samurai": {
-   "version": "0",
+   "version": "1.2",
    "online": false,
    "addedAt": "2026-10-01",
    "files": [
     {
      "path": "fruit-samurai/index.html",
-     "sha256": "c51cb6d7838a94e8bacdc8bc5b8a5cd5b7bfc7ffe4e1dcb484d6d1858c2aa4c8",
-     "size": 39629
+     "sha256": "a3174cd4f676593c68918f05cd60d99e6187103f7990c84692b94240ee3724d4",
+     "size": 41277
     }
    ]
   },
