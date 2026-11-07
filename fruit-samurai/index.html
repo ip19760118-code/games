@@ -56,6 +56,15 @@ input[type=range]{width:100%;accent-color:#ff5b3a}
 .sw button.on{border-color:#ffd23f;box-shadow:0 0 12px rgba(255,210,63,.55);transform:scale(1.08)}
 .stats{color:#ffd9a0;font-size:14px;line-height:1.7}.stats b{color:#fff}
 .btns{display:flex;gap:10px;margin-top:18px;justify-content:flex-end}
+/* v1.2: переключатель режима без мин */
+.toggle{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.toggle input{display:none}
+.toggle .track{width:48px;height:28px;background:rgba(255,255,255,.12);border-radius:14px;position:relative;transition:.25s}
+.toggle .track::after{content:'';position:absolute;left:3px;top:3px;width:22px;height:22px;background:#ffd9a0;border-radius:50%;transition:.25s}
+.toggle input:checked+.track{background:#ff5b3a;box-shadow:0 0 12px rgba(255,91,58,.5)}
+.toggle input:checked+.track::after{left:23px;background:#fff}
+.toggle span{font:400 14px Rubik;color:#ffd9a0}
+.ver{font:400 10px monospace;color:#c9a06a;opacity:.6;letter-spacing:.1em;margin-top:6px}
 #hud{position:fixed;inset:0;z-index:4;pointer-events:none;padding:max(12px,env(safe-area-inset-top)) 16px}
 #score{position:absolute;left:16px;top:max(12px,env(safe-area-inset-top));font:400 clamp(28px,7vw,42px) "Russo One";color:#fff;text-shadow:0 3px 0 #b34a1e,0 7px 18px rgba(0,0,0,.6)}
 #best{position:absolute;right:16px;top:max(18px,env(safe-area-inset-top));font:700 clamp(11px,2.8vw,14px) Rubik;color:#ffd23f;letter-spacing:.12em;text-shadow:0 2px 6px #000}
@@ -74,8 +83,9 @@ input[type=range]{width:100%;accent-color:#ff5b3a}
   <button class="btn-hub" id="hubBtnMenu">← В меню игр</button>
   <div class="logo"><span class="l1">ФРУКТОВЫЙ</span><span class="l2">САМУРАЙ</span></div><div class="slash"></div>
   <div class="tag">режь фрукты · 10 промахов = −1 жизнь · не трогай бомбы · лови звёзды</div>
-  <div class="mrow"><button class="btn ghost" id="setBtn">⚙ НАСТРОЙКИ</button><button class="btn ghost" id="advBtn">📤 ПОСОВЕТОВАТЬ ДРУГУ</button></div>
+  <div class="mrow"><button class="btn ghost" id="setBtn">⚙ НАСТРОЙКИ</button><button class="btn ghost" id="advBtn">📤 СКИНУТЬ ССЫЛКУ</button></div>
   <div class="go">КОСНИСЬ ИЛИ МАХНИ, ЧТОБЫ НАЧАТЬ</div><div class="mb" id="mBest"></div>
+  <div class="ver" id="verTag">v1.2</div>
 </div>
 
 <div class="ov hide" id="set">
@@ -83,9 +93,11 @@ input[type=range]{width:100%;accent-color:#ff5b3a}
     <button class="btn-hub" id="hubBtnSettings">← В меню игр</button>
     <div class="ot sm">⚙ НАСТРОЙКИ</div>
     <div class="srow"><label>Сложность</label><div class="seg" id="diffSeg"><b data-d="0">ЛЕГКО</b><b data-d="1">НОРМА</b><b data-d="2">ХАРДКОР</b></div></div>
+    <div class="srow"><label>Режим игры</label><label class="toggle"><input type="checkbox" id="noBombsChk"><div class="track"></div><span>Без мин (жизни −1 за 10 промахов)</span></label></div>
     <div class="srow"><label>Громкость · <span id="volV"></span></label><input type="range" id="vol" min="0" max="100"></div>
     <div class="srow"><label>Фон</label><div class="sw" id="bgSw"></div></div>
     <div class="srow"><label>Статистика</label><div class="stats" id="statsBox"></div></div>
+    <div class="ver">v1.2</div>
     <div class="btns"><button class="btn ghost" id="resetBtn">СБРОСИТЬ ПРОГРЕСС</button><button class="btn" id="setClose">ГОТОВО</button></div>
   </div>
 </div>
@@ -98,16 +110,16 @@ input[type=range]{width:100%;accent-color:#ff5b3a}
     <div class="mrow">
       <button class="btn ghost" id="menuBtnOver">🏠 В МЕНЮ</button>
       <button class="btn" id="retryBtn">🔄 ЕЩЁ РАЗ</button>
-      <button class="btn" id="sendBtn">📤 ПОДЕЛИТЬСЯ</button>
+      <button class="btn" id="sendBtn">📤 ОТПРАВИТЬ РЕЗУЛЬТАТ</button>
     </div>
     <div class="oh">МАХНИ, ЧТОБЫ СЫГРАТЬ ЕЩЁ</div>
   </div>
 </div>
 
 <script>
+var VER = '1.2';
+
 /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
-/* v1.1: BackButton-логика закрытия экранов перенесена в callback back.
-   Platform сам определит платформу и навесит обработчик. */
 function backButtonHandler() {
   try {
     if (!setEl.classList.contains('hide')) { setEl.classList.add('hide'); return; }
@@ -134,13 +146,11 @@ Platform.init({
   back: backButtonHandler
 });
 
-/* v1.1: возвращаемся в хаб, сохраняя платформу */
 function goToHub() {
   Platform.haptic('light');
   location.href = '../?plat=' + Platform.name;
 }
 
-/* v1.1: трекер с автоматической меткой платформы */
 function trackEvent(name, params) {
   params = params || {};
   params.platform = Platform.name;
@@ -165,10 +175,9 @@ const $ = id => document.getElementById(id);
 const scoreEl = $('score'), bestEl = $('best'), livesEl = $('lives'), missInfoEl = $('missInfo');
 const menuEl = $('menu'), overEl = $('over'), hudEl = $('hud'), setEl = $('set');
 
-/* v1.1: hap теперь использует Platform.haptic */
 const hap = s => Platform.haptic(s);
 
-let set = Object.assign({ d: 1, v: .8, bg: 0 }, JSON.parse(localStorage.fs_set || '{}'));
+let set = Object.assign({ d: 1, v: .8, bg: 0, noBombs: false }, JSON.parse(localStorage.fs_set || '{}'));
 const save = () => localStorage.fs_set = JSON.stringify(set);
 let best = +(localStorage.fs_b || 0);
 
@@ -331,7 +340,9 @@ const sBonus = () => {
   setTimeout(() => tone(784, 1568, .25, 'sine', .14), 120);
 };
 
+/* v1.2: spawn с учётом режима без мин (set.noBombs) */
 function spawn(bomb, bonus) {
+  if (set.noBombs && bomb) bomb = false;
   const r = Math.min(W, H) * (bomb ? .052 : (bonus ? .065 : rnd(.055, .078)));
   const x = rnd(r + 4, W - r - 4);
   const g = H * 1.45 * dc().spd;
@@ -501,6 +512,7 @@ function endGame(bomb) {
     game_name: 'fruit_samurai',
     difficulty: DIFF[set.d].n,
     theme: THEMES[set.bg].n,
+    mode: set.noBombs ? 'no_bombs' : 'normal',
     score: score, cuts: cutN, max_combo: maxCh,
     stars_collected: starsCollected,
     reason: bomb ? 'bomb' : 'misses',
@@ -521,7 +533,8 @@ function startGame() {
   trackEvent('game_start', {
     game_name: 'fruit_samurai',
     difficulty: DIFF[set.d].n,
-    theme: THEMES[set.bg].n
+    theme: THEMES[set.bg].n,
+    mode: set.noBombs ? 'no_bombs' : 'normal'
   });
 
   fr.length = hv.length = fx.length = pop.length = pend.length = 0;
@@ -556,19 +569,30 @@ function goToMainMenu() {
   bestEl.textContent = 'РЕКОРД ' + best;
 }
 
-/* v1.1: шеринг через платформу */
 function share(text) {
   Platform.share(location.href, text);
 }
 
+/* v1.2: "Скинуть ссылку на игру" — шеринг диплинка через Platform.shareGame */
 $('advBtn').onclick = () => {
-  trackEvent('game_share', { game_name: 'fruit_samurai', type: 'invite' });
-  share('🍉 Советую игру «Фруктовый самурай» — режь фрукты, уворачивайся от бомб и лови звёзды!');
+  trackEvent('game_share', { game_name: 'fruit_samurai', type: 'link' });
+  if (typeof Platform.shareGame === 'function') {
+    Platform.shareGame('fruit_samurai', '🍉 Фруктовый самурай — режь фрукты, уворачивайся от бомб и лови звёзды!', { game: true });
+  } else {
+    var deepLink = (typeof Platform.gameDeepLink === 'function' ? Platform.gameDeepLink('fruit_samurai') : location.href);
+    share('🍉 Фруктовый самурай — режь фрукты, уворачивайся от бомб и лови звёзды! 👉 ' + deepLink);
+  }
 };
 
+/* v1.2: "Отправить результат" — шеринг с результатом */
 $('sendBtn').onclick = () => {
-  trackEvent('game_share', { game_name: 'fruit_samurai', type: 'score', score: score });
-  share(`🍉 «Фруктовый самурай»: мой результат ${score} (рекорд ${best}, звёзд ${starsCollected}). Побьёшь?`);
+  trackEvent('game_share', { game_name: 'fruit_samurai', type: 'result', score: score });
+  var txt = '🍉 «Фруктовый самурай»: мой результат ' + score + ' (рекорд ' + best + ', звёзд ' + starsCollected + '). Побьёшь?';
+  if (typeof Platform.shareGame === 'function') {
+    Platform.shareGame('fruit_samurai', txt, { brand: true });
+  } else {
+    share(txt);
+  }
 };
 
 $('retryBtn').onclick = () => {
@@ -593,7 +617,6 @@ THEMES.forEach((th, i) => {
   b.style.background = `linear-gradient(135deg,${th.sky[0]},${th.sky[2]})`;
   b.onclick = () => {
     set.bg = i; save(); paintBG(); updSw();
-    /* v1.1: смена темы сообщает платформе цвет шапки мессенджера */
     try { Platform.colors(th.sky[0]); } catch (e) {}
     trackEvent('settings_change', { game_name: 'fruit_samurai', setting: 'theme', value: th.n });
   };
@@ -605,6 +628,13 @@ THEMES.forEach((th, i) => {
   trackEvent('settings_change', { game_name: 'fruit_samurai', setting: 'difficulty', value: DIFF[set.d].n });
 });
 
+/* v1.2: переключатель режима без мин */
+$('noBombsChk').checked = !!set.noBombs;
+$('noBombsChk').onchange = (e) => {
+  set.noBombs = e.target.checked; save();
+  trackEvent('settings_change', { game_name: 'fruit_samurai', setting: 'no_bombs', value: set.noBombs });
+};
+
 $('vol').value = set.v * 100;
 $('volV').textContent = Math.round(set.v * 100) + '%';
 $('vol').oninput = e => {
@@ -614,7 +644,7 @@ $('vol').oninput = e => {
   MASTER && (MASTER.gain.value = set.v);
 };
 
-$('setBtn').onclick = () => { showStats(); updSeg(); updSw(); setEl.classList.remove('hide'); };
+$('setBtn').onclick = () => { showStats(); updSeg(); updSw(); $('noBombsChk').checked = !!set.noBombs; setEl.classList.remove('hide'); };
 $('setClose').onclick = () => setEl.classList.add('hide');
 $('resetBtn').onclick = () => {
   if (confirm('Сбросить весь прогресс и статистику?')) {
@@ -625,7 +655,6 @@ $('resetBtn').onclick = () => {
   }
 };
 
-/* v1.1: все кнопки "В меню игр" передают платформу через goToHub() */
 $('hubBtnMenu').addEventListener('click', (e) => { e.stopPropagation(); goToHub(); });
 $('hubBtnGameOver').addEventListener('click', (e) => { e.stopPropagation(); goToHub(); });
 $('hubBtnSettings').addEventListener('click', (e) => { e.stopPropagation(); goToHub(); });
@@ -974,7 +1003,8 @@ function update(dt) {
       for (let i = 0; i < n; i++) {
         pend.push({
           t: tNow + i * 150 + rnd(0, 90),
-          bomb: score > 6 && Math.random() < dc().bomb
+          /* v1.2: бомбы не спавнятся в режиме без мин */
+          bomb: !set.noBombs && score > 6 && Math.random() < dc().bomb
         });
       }
       spT = (1.6 - .8 * d) * rnd(.75, 1.25) * dc().freq;
@@ -1128,7 +1158,6 @@ function loop(ts) {
   render();
 }
 
-/* v1.1: устанавливаем цвет шапки мессенджера при старте */
 try { Platform.colors(THEMES[set.bg].sky[0]); } catch (e) {}
 
 resize();
