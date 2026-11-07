@@ -16,7 +16,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .hud b{color:var(--accent)}
 .boardbox{display:flex;justify-content:center;background:linear-gradient(160deg,#0b6623,#084a19);border-radius:12px;padding:16px;box-shadow:inset 0 2px 14px rgba(0,0,0,.5);overflow:auto}
 #board{position:relative;z-index:1;margin:auto}
-/* v2.11+: геометрию ведёт rAF-цикл сглаживания; браузерные transition на left/top/width/height отключены */
 .tile{position:absolute;border-radius:6px;background:linear-gradient(160deg,#fdfbf4,#e6dfcd);border:1px solid #b6ae9c;box-shadow:0 3px 0 #8d8677,0 6px 10px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:none;transition:transform .15s ease,box-shadow .15s ease}
 .tile .fc{font-size:calc(var(--tw)*.56);line-height:1;pointer-events:none}
 .tile.glyph .fc{font-weight:700;color:var(--ink);font-size:calc(var(--tw)*.62);font-family:'Segoe UI',serif}
@@ -57,7 +56,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="boardbox" id="boardbox"><div id="board"></div></div>
 <div class="status" id="statusEl">Собирай пары одинаковых свободных плиток</div>
 <div class="actions"><button class="btn" id="newBtn">🔄 Новая</button><button class="btn" id="hintBtn">💡 Подсказка (3)</button><button class="btn" id="undoBtn" disabled>↩️ Отмена</button><button class="btn" id="shufBtn">🔀 Перемешать</button></div>
-<div class="ver" id="verTag">v2.13</div>
+<div class="ver" id="verTag">v2.14</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Сложность<select id="diffSel"><option value="easy">Лёгкая · 72 плитки · 5 подсказок</option><option value="medium">Средняя · 120 плиток · 3 подсказки</option><option value="hard">Сложная · 180 плиток · 1 подсказка</option></select></div>
@@ -71,13 +70,13 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="stat-row"><span>Лучшее время</span><b id="stTime">—</b></div>
 <div class="stat-row"><span>Снято плиток</span><b id="stTiles">0</b></div>
 <div class="btns"><button class="btn" id="stReset">Сброс</button><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note">Подсказки лимитированы сложностью: 5 / 3 / 1 на партию. Отмена хода подсказки не возвращает. Перемещение и рост костей — непрерывное экспоненциальное сглаживание (без перезапусков анимации), срабатывает только при изменении больше 10px; темп роста замедленный (0.35), потолок 1/4 ширины поля; отступы до краёв равны; поле по высоте экрана с учётом кнопок; сукно во всю ширину.</div></div></div>
+<div class="note">Подсказки лимитированы сложностью: 5 / 3 / 1 на партию. Отмена хода подсказки не возвращает. Перемещение и рост костей — непрерывное сглаживание, срабатывает при изменении больше 10px; потолок роста 1/4 ширины поля; отступы до краёв равны; поле занимает доступную высоту с учётом кнопок (кнопки всегда на экране); окно победы появляется с задержкой 1.2 с и кнопки его заблокированы ещё 0.6 с.</div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Снимай пары одинаковых плиток: тап‑тап ИЛИ перетащи плитку на такую же свободную (неверный бросок плавно возвращается).<br>• Плитка свободна, если НЕ накрыта сверху и открыта слева ИЛИ справа.<br>• ↩️ Отмена возвращает последнюю снятую пару.<br>• 💡 Подсказка обводит пару жёлтым; лимит на партию: Лёгкая 5, Средняя 3, Сложная 1 (остаток на кнопке).<br>• 🔀 перемешает, если ходов нет.<br>• Сложности: 72 / 120 / 180 плиток. Собери все пары — победа!<br>• Кости плавно растут и центрируются по мере освобождения места (только если изменение больше 10px; максимум роста — 1/4 ширины поля).<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
+<div class="note">• Снимай пары одинаковых плиток: тап‑тап ИЛИ перетащи плитку на такую же свободную (неверный бросок плавно возвращается).<br>• Плитка свободна, если НЕ накрыта сверху и открыта слева ИЛИ справа.<br>• ↩️ Отмена возвращает последнюю снятую пару.<br>• 💡 Подсказка обводит пару жёлтым; лимит на партию: Лёгкая 5, Средняя 3, Сложная 1 (остаток на кнопке).<br>• 🔀 перемешает, если ходов нет.<br>• Сложности: 72 / 120 / 180 плиток. Собери все пары — победа!<br>• Кости плавно растут и центрируются по мере освобождения места (только если изменение больше 10px; максимум роста — 1/4 ширины поля).<br>• Окно победы всплывает с задержкой, чтобы последний тап не нажал лишнюю кнопку.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='2.13';
+var VER='2.14';
 var HINTLIMIT={easy:5,medium:3,hard:1};
 
 /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
@@ -173,18 +172,14 @@ function extentsLive(){var mnx=99,mxx=-1,mny=99,mxy=-1,ml=0,i,p;
  return{minX:mnx,maxX:mxx,minY:mny,maxY:mxy,cols:(mxx-mnx)/2+1,rows:(mxy-mny)/2+1,maxL:ml}}
 function extentsAll(){var mx=0,my=0,ml=0;G.pos.forEach(function(p){if(p.x>mx)mx=p.x;if(p.y>my)my=p.y;if(p.l>ml)ml=p.l});return{cols:mx/2+1,rows:my/2+1,maxL:ml}}
 function extentsAllPos(pos){var mx=0,my=0,ml=0;pos.forEach(function(p){if(p.x>mx)mx=p.x;if(p.y>my)my=p.y;if(p.l>ml)ml=p.l});return{cols:mx/2+1,rows:my/2+1,maxL:ml}}
+/* v2.14: точный замер — высота поля = экран минус ВСЁ остальное содержимое wrap (кнопки всегда видны) */
 function availSize(){
- var bb=$('boardbox');
- var wr=$('wrap');
+ var wr=$('wrap'),bb=$('boardbox');
  var w=(bb?bb.clientWidth:(wr?wr.clientWidth-20:Math.min(innerWidth,960)-20))-32;
- var reserved=0;
- var ids=['header','hud','statusEl','verTag'];
- for(var i=0;i<ids.length;i++){var e=$(ids[i]);if(e)reserved+=e.offsetHeight+8;}
- var acts=document.querySelectorAll('.actions');
- for(var k=0;k<acts.length;k++)reserved+=acts[k].offsetHeight+8;
- reserved+=20+32+12+8;
- var h=innerHeight-reserved;
- return{w:Math.max(160,w),h:Math.max(160,h)}}
+ var other=220;
+ if(wr&&bb){other=wr.scrollHeight-bb.offsetHeight;}
+ var h=innerHeight-other-48;
+ return{w:Math.max(160,w),h:Math.max(140,h)}}
 function computeBoardBox(){var portrait=innerWidth<620;G.portrait=portrait;
  var ex=extentsAll();var av=availSize();
  var tw0;
@@ -197,7 +192,7 @@ function computeBoardBox(){var portrait=innerWidth<620;G.portrait=portrait;
  if(G.boardW>av.w)G.boardW=av.w;
  if(G.boardH>av.h)G.boardH=av.h}
 function baseZ(i){var p=G.pos[i];return p.l*1000+p.y*10+p.x}
-/* ---------- v2.13: экспоненциальное сглаживание (непрерывная скорость, без перезапусков) ---------- */
+/* ---------- v2.13+: экспоненциальное сглаживание (непрерывная скорость) ---------- */
 function setBoardVars(){var b=$('board');b.style.setProperty('--tw',TW+'px');b.style.setProperty('--th',TH+'px')}
 function writeTile(i){var el=G.el[i];if(!el)return;var r=G.rect[i];if(!r)return;
  el.style.left=r.L+'px';el.style.top=r.T+'px';el.style.width=TW+'px';el.style.height=TH+'px'}
@@ -244,7 +239,6 @@ function stepFrame(ts){
   for(i=0;i<G.pos.length;i++){if(G.removed[i])continue;var tt=G.trects?G.trects[i]:null;if(tt){G.rect[i]={L:tt.L,T:tt.T};writeTile(i);}}
   rafId=0;lastTs=0;return;}
  rafId=requestAnimationFrame(stepFrame)}
-/* v2.13: порог 10px — мельче не двигаем и не растём */
 function layoutSize(snap){
  var b=$('board');computeBoardBox();
  var ex=extentsLive();var av=availSize();var maxTW=av.w/4;
@@ -338,13 +332,16 @@ function hint(){if(!G||G.over)return;
  setTimeout(function(){if(f0.parentNode)f0.parentNode.removeChild(f0);if(f1.parentNode)f1.parentNode.removeChild(f1)},1700)}
 function stopT(){if(G&&G.timer){clearInterval(G.timer);G.timer=null}}
 function startT(){if(!G||G.timer)return;G.timer=setInterval(function(){G.time++;$('hTime').textContent=fmt(G.time)},1000)}
-function newGame(){stopT();stopSmooth();undoStack=[];var pos=LAYOUTS[set.diff]();var gb=genBoard(pos);
- G={pos:gb.pos,faces:gb.faces,removed:new Array(gb.pos.length).fill(false),sel:-1,pairs:0,tilesRemoved:0,time:0,timer:null,over:false,won:false,hintsLeft:HINTLIMIT[set.diff],portrait:innerWidth<620,el:[],rect:[],boardW:0,boardH:0,liveEx:null,ex0:extentsAllPos(pos),twTarget:TW,trects:null,offX:0,offY:0};
+function newGame(){stopT();stopSmooth();if(G&&G.endTimer){clearTimeout(G.endTimer);G.endTimer=null;}
+ undoStack=[];var pos=LAYOUTS[set.diff]();var gb=genBoard(pos);
+ G={pos:gb.pos,faces:gb.faces,removed:new Array(gb.pos.length).fill(false),sel:-1,pairs:0,tilesRemoved:0,time:0,timer:null,over:false,won:false,hintsLeft:HINTLIMIT[set.diff],portrait:innerWidth<620,el:[],rect:[],boardW:0,boardH:0,liveEx:null,ex0:extentsAllPos(pos),twTarget:TW,trects:null,offX:0,offY:0,endTimer:null};
  $('endOverlay').classList.remove('show');buildTiles();startT();setStatus('Сложность: '+DIFFNAMES[set.diff]+' · '+G.pos.length+' плиток · подсказок '+G.hintsLeft);say('Новая партия маджонга');trk('game_start',{game_name:'mahjong',set:set.skin,difficulty:set.diff,tiles:G.pos.length})}
+/* v2.14: окно победы с задержкой 1.2 с + блокировка его кнопок ещё 0.6 с — последний тап не нажмёт лишнее */
 function win(){G.over=true;G.won=true;stopT();stopSmooth();sWin();Platform.haptic('success');say('Победа!');
  ST.games++;ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak;ST.tiles=(ST.tiles||0)+G.tilesRemoved;
  if(ST.bestTime==null||G.time<ST.bestTime)ST.bestTime=G.time;saveST();
- trk('game_end',{game_name:'mahjong',win:1,time:G.time,pairs:G.pairs,set:set.skin,difficulty:set.diff});showEnd(true)}
+ trk('game_end',{game_name:'mahjong',win:1,time:G.time,pairs:G.pairs,set:set.skin,difficulty:set.diff});
+ G.endTimer=setTimeout(function(){if(G&&G.over&&G.won)showEnd(true);},1200)}
 
 function share(){
   var txt='🀄 Маджонг ('+DIFFNAMES[set.diff]+', '+G.pos.length+' плиток): '+(G.won?'ПОБЕДА за '+fmt(G.time)+'!':'партия окончена')+' Пар снято: '+G.pairs+', набор: '+SETNAMES[set.skin]+'. Сможешь лучше?';
@@ -354,7 +351,10 @@ function share(){
 function ebtn(t,f,p){var b=document.createElement('button');b.className='btn'+(p?' primary':'');b.textContent=t;b.onclick=f;$('endBtns').appendChild(b)}
 function showEnd(w){var ov=$('endOverlay');$('endTitle').textContent=w?'🏆 Победа!':'🀄 Партия окончена';
  $('endSub').innerHTML='Время: <b>'+fmt(G.time)+'</b> · Пар снято: <b>'+G.pairs+'</b> / '+Math.round(G.pos.length/2)+'<br>Сложность: '+DIFFNAMES[set.diff]+' · Набор: '+SETNAMES[set.skin];
- $('endBtns').innerHTML='';ebtn('📨 Отправить результат',share,true);ebtn('🔄 Сыграть ещё',function(){ov.classList.remove('show');newGame()});ebtn('🏠 В меню',function(){ov.classList.remove('show');goToHub()});ov.classList.add('show')}
+ $('endBtns').innerHTML='';ebtn('📨 Отправить результат',share,true);ebtn('🔄 Сыграть ещё',function(){ov.classList.remove('show');newGame()});ebtn('🏠 В меню',function(){ov.classList.remove('show');goToHub()});
+ ov.classList.add('show');
+ var bn=$('endBtns');bn.style.pointerEvents='none';
+ setTimeout(function(){bn.style.pointerEvents='';},600)}
 function showStats(){$('stGW').textContent=ST.games+' / '+ST.wins;$('stPct').textContent=(ST.games?Math.round(ST.wins/ST.games*100):0)+'%';$('stStreak').textContent=ST.streak+' / '+ST.bestStreak;$('stTime').textContent=ST.bestTime==null?'—':fmt(ST.bestTime);$('stTiles').textContent=ST.tiles||0}
 function bind(){
 $('newBtn').onclick=function(){aud();newGame()};
