@@ -316,10 +316,10 @@
     })();
 
     const GAME_MAP = {
-      'trend_catch': './trend-catch/', 'trend': './trend-catch/',
-      'lights_out': './lights-out/', 'lights': './lights-out/',
+      'trend_catch': './trend-catch/', 'trend': './trend-catch/', 'trend-catch': './trend-catch/',
+      'lights_out': './lights-out/', 'lights': './lights-out/', 'lights-out': './lights-out/',
       'arkanoid': './arkanoid/', 'domino': './domino/', 'shooter': './shooter/',
-      'fruit_samurai': './fruit-samurai/', 'samurai': './fruit-samurai/',
+      'fruit_samurai': './fruit-samurai/', 'samurai': './fruit-samurai/', 'fruit-samurai': './fruit-samurai/',
       'chess': './chess/', 'durak': './durak/', 'nardy': './nardy/', 'shashki': './shashki/',
       'minesweeper': './minesweeper/', 'mines': './minesweeper/',
       'crystals': './crystals/', 'solitaire': './solitaire/',
@@ -330,12 +330,12 @@
       'findpair': './findpair/', 'pairs': './findpair/', 'pair': './findpair/', 'найди пару': './findpair/', 'память': './findpair/', 'мемори': './findpair/'
     };
 
-    document.getElementById('trendCatchBtn').addEventListener('click', () => openGame('./trend-catch/', 'trend_catch'));
-    document.getElementById('lightsOutBtn').addEventListener('click', () => openGame('./lights-out/', 'lights_out'));
+    document.getElementById('trendCatchBtn').addEventListener('click', () => openGame('./trend-catch/', 'trend-catch'));
+    document.getElementById('lightsOutBtn').addEventListener('click', () => openGame('./lights-out/', 'lights-out'));
     document.getElementById('arkanoidBtn').addEventListener('click', () => openGame('./arkanoid/', 'arkanoid'));
     document.getElementById('dominoBtn').addEventListener('click', () => openGame('./domino/', 'domino'));
     document.getElementById('shooterBtn').addEventListener('click', () => openGame('./shooter/', 'shooter'));
-    document.getElementById('fruitSamuraiBtn').addEventListener('click', () => openGame('./fruit-samurai/', 'fruit_samurai'));
+    document.getElementById('fruitSamuraiBtn').addEventListener('click', () => openGame('./fruit-samurai/', 'fruit-samurai'));
     document.getElementById('chessBtn').addEventListener('click', () => openGame('./chess/', 'chess'));
     document.getElementById('durakBtn').addEventListener('click', () => openGame('./durak/', 'durak'));
     document.getElementById('nardyBtn').addEventListener('click', () => openGame('./nardy/', 'nardy'));
