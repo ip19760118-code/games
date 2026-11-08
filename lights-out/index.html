@@ -50,9 +50,20 @@
   button.secondary { background: transparent; border: 2px solid var(--text); color: var(--text); }
   button.secondary:hover:not(:disabled) { background: rgba(128,128,128,0.1); }
 
+  /* v2.3: кнопки-пилюли шапки и действий — одинаковая высота */
+  .hbtn { background: rgba(128,128,128,0.12); border: 1px solid rgba(128,128,128,0.35); color: var(--text); border-radius: 30px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; width: auto; display: inline-block; margin: 0; min-height: 32px; }
+  .hbtn:active { transform: scale(0.95); }
+  .g-header { display: flex; flex-direction: column; gap: 6px; align-items: center; margin-bottom: 8px; width: 100%; }
+  .g-title { font-size: 20px; font-weight: 800; letter-spacing: 1px; }
+  .g-diff { font-size: 14px; opacity: 0.75; font-weight: 600; }
+  .g-hrow { display: flex; gap: 6px; justify-content: center; flex-wrap: nowrap; }
+  .moves-row { font-size: 13px; opacity: 0.85; margin-bottom: 6px; font-weight: 600; }
+  .actions { display: flex; gap: 8px; justify-content: center; align-items: stretch; flex-wrap: wrap; margin-top: 12px; width: 100%; max-width: 380px; }
+  .actions .btn { flex: 0 1 auto; width: auto; margin: 0; padding: 9px 14px; border-radius: 30px; font-size: 13px; font-weight: 600; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+  .actions .btn.secondary { border-width: 2px; }
+
   #btn-hub { margin-bottom: 0.9rem; font-size: 0.9rem; padding: 0.6rem 1rem; }
 
-  #game-header { display: flex; justify-content: space-between; width: 100%; margin-bottom: 0.6rem; font-size: 0.9rem; align-items: center; }
   #grid { 
     display: grid; grid-template-columns: repeat(var(--grid-size, 5), 1fr); 
     gap: clamp(5px, 1.5vw, 8px); width: min(85vw, 350px); aspect-ratio: 1/1; 
@@ -79,33 +90,15 @@
   }
   @keyframes hintPulse { from { box-shadow: 0 0 0 2px var(--accent); } to { box-shadow: 0 0 0 6px transparent; } }
 
-  #game-controls { 
-    display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; 
-    margin-top: 1rem; width: 100%; max-width: 340px; 
-  }
-  #game-controls button { flex: 1; min-width: 90px; font-size: 0.9rem; padding: 0.7rem 0.5rem; margin: 0; }
-  #btn-hint { background: var(--cell-on); }
-  #btn-hint:hover:not(:disabled) { background: #d97706; }
-
-  /* v2.2: кнопка ссылки под полем */
-  #share-row { display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.8rem; width: 100%; max-width: 340px; }
-  #share-row button { flex: 1; font-size: 0.85rem; padding: 0.6rem 0.5rem; margin: 0; }
-
-  #win-msg { 
-    margin-top: 1.2rem; padding: 1.2rem; background: var(--surface); 
-    border-radius: var(--radius); box-shadow: var(--shadow); 
-    display: none; flex-direction: column; gap: 0.8rem; width: 100%; max-width: 320px;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  #win-msg.show { display: flex; animation: popWin 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  @keyframes popWin { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
   .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 100; padding: 1rem; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s; }
   .modal.active { display: flex; opacity: 1; }
   .modal-content { background: var(--surface); padding: 1.5rem; border-radius: var(--radius); width: 100%; max-width: 400px; box-shadow: var(--shadow); position: relative; max-height: 85vh; overflow-y: auto; transform: scale(0.9); transition: transform 0.3s; }
   .modal.active .modal-content { transform: scale(1); }
-  .modal-content h2 { margin-bottom: 0.8rem; text-align: left; }
+  .modal-content h2 { margin-bottom: 0.8rem; text-align: center; }
+  .modal-content .sub { opacity: 0.85; margin-bottom: 0.6rem; font-size: 0.95rem; line-height: 1.5; text-align: center; }
   .modal-content label { display: block; margin: 0.8rem 0 0.3rem; font-weight: 600; text-align: left; }
+  .modal-content .btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+  .modal-content .btns button { width: auto; margin: 0; padding: 9px 16px; border-radius: 30px; font-size: 13px; font-weight: 600; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
   select { width: 100%; padding: 0.6rem; border-radius: 8px; border: 2px solid var(--cell-off); background: var(--bg); color: var(--text); font-size: 1rem; margin-bottom: 0.5rem; }
   .stats-box { padding: 0.8rem; margin: 0.8rem 0 0.5rem; background: rgba(0,0,0,0.15); border-radius: 8px; }
   .stats-box ul { padding-left: 1.2rem; margin-top: 0.3rem; }
@@ -114,7 +107,7 @@
 
   .ver { text-align:center; font-size:10px; opacity:.45; margin-top:12px; font-family:monospace; letter-spacing:1px; }
 
-  @media (max-width: 380px) { #app { padding: 0.8rem 0.5rem; } }
+  @media (max-width: 380px) { #app { padding: 0.8rem 0.5rem; } .g-hrow .hbtn { padding: 5px 9px; font-size: 11px; } .actions .btn { padding: 8px 11px; font-size: 12px; } }
 </style>
 </head>
 <body>
@@ -126,37 +119,44 @@
     <button id="btn-start" class="ui-sound">▶ Начать игру</button>
     <button id="btn-rules" class="secondary ui-sound">📖 Правила</button>
     <button id="btn-settings" class="secondary ui-sound">⚙️ Настройки</button>
-    <div class="ver" id="verTag">v2.2</div>
+    <div class="ver" id="verTag">v2.3</div>
   </section>
 
   <section id="game-screen" class="screen">
-    <div id="game-header">
-      <button id="btn-back" style="width:auto; padding:0.5rem 0.7rem; margin:0;" class="ui-sound">←</button>
-      <span>Ходов: <b id="moves">0</b></span>
-      <span id="diff-label">5×5</span>
+    <div class="g-header">
+      <div class="g-title">💡 Выключи Свет <span class="g-diff" id="diff-label">(5×5)</span></div>
+      <div class="g-hrow">
+        <button class="hbtn ui-sound" id="btn-hub2">← В меню игр</button>
+        <button class="hbtn ui-sound" id="btn-gamemenu">🏠 В меню выключи свет</button>
+        <button class="hbtn ui-sound" id="btn-rules2">📖</button>
+      </div>
     </div>
+    <div class="moves-row">Ходов: <b id="moves">0</b></div>
     <div id="grid"></div>
-    <div id="game-controls">
-      <button id="btn-undo" class="secondary ui-sound" disabled>↩️ Отмена</button>
-      <button id="btn-reset" class="secondary ui-sound">🔄 Сброс</button>
-      <button id="btn-hint" class="ui-sound">💡 Подсказка</button>
-    </div>
-    <div id="share-row">
-      <button id="btn-share" class="secondary ui-sound">📤 Скинуть ссылку на игру</button>
-    </div>
-    <div id="win-msg">
-      <b style="font-size: 1.3rem;">🎉 Победа!</b>
-      <div style="font-size:0.9rem; opacity:0.8;">Решено за <span id="win-moves">0</span> ходов</div>
-      <button id="btn-share-result" class="ui-sound">📤 Отправить результат</button>
-      <button id="btn-retry" class="ui-sound">🔄 Заново</button>
-      <button id="btn-menu" class="secondary ui-sound">В меню</button>
+    <div class="actions" id="game-controls">
+      <button id="btn-share" class="btn secondary ui-sound">📤 Скинуть ссылку</button>
+      <button id="btn-hint" class="btn ui-sound">💡 Подсказка</button>
+      <button id="btn-undo" class="btn secondary ui-sound" disabled>↩️ Отмена</button>
+      <button id="btn-reset" class="btn secondary ui-sound">🔄 Начать заново</button>
     </div>
   </section>
+
+  <div id="end-modal" class="modal">
+    <div class="modal-content">
+      <h2 id="endTitle">🎉 Победа!</h2>
+      <div class="sub" id="endSub">Решено за 0 ходов</div>
+      <div class="btns">
+        <button id="btn-share-result" class="ui-sound">📤 Отправить результат</button>
+        <button id="btn-retry" class="ui-sound">🔄 Ещё раз</button>
+        <button id="btn-endmenu" class="secondary ui-sound">🏠 В меню игры</button>
+      </div>
+    </div>
+  </div>
 
   <div id="settings-modal" class="modal">
     <div class="modal-content">
       <button class="close-btn" data-modal="settings-modal">✕</button>
-      <h2>⚙️ Настройки</h2>
+      <h2 style="text-align:left">⚙️ Настройки</h2>
       <label>Сложность:
         <select id="set-diff">
           <option value="3">Лёгкая (3×3)</option>
@@ -184,7 +184,7 @@
   <div id="rules-modal" class="modal">
     <div class="modal-content">
       <button class="close-btn" data-modal="rules-modal">✕</button>
-      <h2>📖 Как играть</h2>
+      <h2 style="text-align:left">📖 Как играть</h2>
       <ul style="text-align:left; padding-left:1.2rem; line-height:1.6; font-size:0.95rem;">
         <li>Нажми на клетку: она и соседние (вверх/вниз/влево/вправо) переключатся.</li>
         <li>🟡 = включено, ⬛ = выключено.</li>
@@ -198,7 +198,7 @@
 </div>
 
 <script>
-const VER = '2.2';
+const VER = '2.3';
 
 function backHandler() {
   try {
@@ -267,7 +267,7 @@ const AudioEngine = {
 const $ = id => document.getElementById(id);
 const state = {
   difficulty: 5, theme: 'dark', moves: 0, board: [],
-  history: [], initialBoard: null,
+  history: [], initialBoard: null, won: false,
   stats: { played: 0, won: 0, best: {3:null, 4:null, 5:null, 6:null} }
 };
 
@@ -289,7 +289,7 @@ function saveState() {
 
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', state.theme);
-  try { $('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(); } catch(e) {}
+  try { document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(); } catch(e) {}
   const map = { dark: '#0f172a', light: '#f8fafc', neon: '#050505' };
   const color = map[state.theme] || '#0f172a';
   try { Platform.colors(color); } catch(e) {}
@@ -311,13 +311,10 @@ function updateStatsUI() {
 
 /* ============================================================
    v2.2: SOLVER над GF(2) — метод Гаусса.
-   Для поля N×N строит матрицу A (n×n) и вектор b (n) и решает A·x = b (mod 2).
-   Возвращает массив {r, c} — клетки, нажатие которых решает расклад.
    ============================================================ */
 function solveBoard(board) {
   const N = board.length;
   const n = N * N;
-  // Расширенная матрица A | b (n строк, n+1 столбцов)
   const A = [];
   for (let i = 0; i < n; i++) {
     const row = new Array(n + 1).fill(0);
@@ -330,7 +327,6 @@ function solveBoard(board) {
     row[n] = board[r][c];
     A.push(row);
   }
-  // Прямой ход Гаусса
   let row = 0;
   const pivotCol = new Array(n).fill(-1);
   for (let col = 0; col < n && row < n; col++) {
@@ -348,18 +344,12 @@ function solveBoard(board) {
     }
     row++;
   }
-  // Проверка совместности
   for (let i = row; i < n; i++) {
-    if (A[i][n] === 1) return null; // не должно случиться — расклады всегда решаемы
+    if (A[i][n] === 1) return null;
   }
-  // Обратный ход: ставим свободные переменные = 0, вычисляем зависимые
   const x = new Array(n).fill(0);
-  const leadingOf = new Array(n).fill(-1);
-  for (let i = 0; i < row; i++) {
-    if (pivotCol[i] >= 0) leadingOf[i] = pivotCol[i];
-  }
   for (let i = row - 1; i >= 0; i--) {
-    const lead = leadingOf[i];
+    const lead = pivotCol[i];
     if (lead === -1) continue;
     let sum = A[i][n];
     for (let j = lead + 1; j < n; j++) {
@@ -374,6 +364,11 @@ function solveBoard(board) {
   return solution;
 }
 
+function boardIsEmpty(b) {
+  for (const row of b) for (const v of row) if (v === 1) return false;
+  return true;
+}
+
 function initGame() {
   trackEvent('game_start', {
     game_name: 'lights_out',
@@ -385,13 +380,14 @@ function initGame() {
   state.board = Array.from({ length: N }, () => Array(N).fill(0));
   state.history = [];
   state.moves = 0;
+  state.won = false;
+  currentHintCell = null;
   $('moves').textContent = 0;
-  $('diff-label').textContent = `${N}×${N}`;
-  $('win-msg').classList.remove('show');
+  $('diff-label').textContent = `(${N}×${N})`;
+  closeModal('end-modal');
   document.documentElement.style.setProperty('--grid-size', N);
   updateButtons();
 
-  // v2.2: гарантированно решаемый + непустой расклад
   let attempts = 0;
   do {
     state.board = Array.from({ length: N }, () => Array(N).fill(0));
@@ -410,12 +406,8 @@ function initGame() {
   renderGrid(); showScreen('game');
 }
 
-function boardIsEmpty(b) {
-  for (const row of b) for (const v of row) if (v === 1) return false;
-  return true;
-}
-
 function toggleCell(r, c, silent = false) {
+  if (state.won && !silent) return;
   const N = state.board.length;
   if (!silent) {
     state.history.push(JSON.parse(JSON.stringify(state.board)));
@@ -458,8 +450,10 @@ function renderGrid() {
   }
 }
 
+/* v2.3: победа = оверлей с итогами и кнопками */
 function checkWin() {
   if (boardIsEmpty(state.board)) {
+    state.won = true;
     trackEvent('game_win', {
       game_name: 'lights_out',
       difficulty: state.board.length,
@@ -468,48 +462,51 @@ function checkWin() {
 
     AudioEngine.play('win');
     Platform.haptic('success');
-    $('win-msg').classList.add('show');
-    $('win-moves').textContent = state.moves;
-    state.stats.played++; state.stats.won++;
     const N = state.board.length;
+    state.stats.played++; state.stats.won++;
     if (state.stats.best[N] === null || state.moves < state.stats.best[N]) state.stats.best[N] = state.moves;
     saveState(); updateStatsUI();
+    $('endTitle').textContent = '🎉 Победа!';
+    $('endSub').innerHTML = 'Поле <b>' + N + '×' + N + '</b> решено за <b>' + state.moves + '</b> ходов<br>Рекорд для этого поля: <b>' + (state.stats.best[N] !== null ? state.stats.best[N] : '—') + '</b> ходов';
     updateButtons();
+    setTimeout(() => openModal('end-modal'), 320);
   }
 }
 
 function undoMove() {
-  if (state.history.length === 0 || $('win-msg').classList.contains('show')) return;
+  if (state.history.length === 0 || state.won) return;
   AudioEngine.play('ui');
   state.board = state.history.pop();
   state.moves = Math.max(0, state.moves - 1);
   $('moves').textContent = state.moves;
+  clearHintHighlight();
   renderGrid(); updateButtons();
 }
 
 function resetGame() {
-  if ($('win-msg').classList.contains('show')) return;
+  if (state.won) return;
   AudioEngine.play('ui');
   state.board = JSON.parse(JSON.stringify(state.initialBoard));
   state.history = [];
   state.moves = 0;
   $('moves').textContent = 0;
+  clearHintHighlight();
   renderGrid(); updateButtons();
 }
 
-/* v2.2: правильная подсказка — одна клетка из реального решения */
 let currentHintCell = null;
-function showHint() {
-  if ($('win-msg').classList.contains('show')) return;
-  // Убрать старую подсветку
+function clearHintHighlight() {
   if (currentHintCell) {
     const prev = document.querySelector(`.cell[data-r="${currentHintCell.r}"][data-c="${currentHintCell.c}"]`);
     if (prev) prev.classList.remove('hint');
     currentHintCell = null;
   }
+}
+function showHint() {
+  if (state.won) return;
+  clearHintHighlight();
   const solution = solveBoard(state.board);
   if (!solution || solution.length === 0) return;
-  // Берём первую клетку из решения — это корректный следующий ход
   const hint = solution[0];
   currentHintCell = hint;
   AudioEngine.play('hint');
@@ -517,16 +514,15 @@ function showHint() {
   if (cell) {
     cell.classList.remove('hint'); void cell.offsetWidth;
     cell.classList.add('hint');
-    // Подсветка остаётся до следующего хода игрока (снимается в toggleCell/renderGrid)
   }
 }
 
 function updateButtons() {
-  $('btn-undo').disabled = state.history.length === 0 || $('win-msg').classList.contains('show');
-  $('btn-hint').disabled = $('win-msg').classList.contains('show');
+  $('btn-undo').disabled = state.history.length === 0 || state.won;
+  $('btn-hint').disabled = state.won;
+  $('btn-reset').disabled = state.won;
 }
 
-/* v2.2: кнопки шеринга */
 function shareGameLink() {
   AudioEngine.init(); AudioEngine.play('ui');
   const text = '💡 Выключи Свет — логическая головоломка: нажимай клетки, чтобы выключить всё поле. 4 уровня сложности, честный solver и правильные подсказки.';
@@ -563,10 +559,12 @@ document.addEventListener('DOMContentLoaded', () => {
   loadState();
 
   $('btn-hub').onclick = () => { goToHub(); };
+  $('btn-hub2').onclick = () => { goToHub(); };
+  $('btn-gamemenu').onclick = () => { AudioEngine.play('ui'); showScreen('menu'); };
+  $('btn-rules2').onclick = () => { AudioEngine.play('ui'); openModal('rules-modal'); };
   $('btn-start').onclick = () => { AudioEngine.init(); initGame(); };
-  $('btn-retry').onclick = () => { AudioEngine.init(); initGame(); };
-  $('btn-menu').onclick = () => showScreen('menu');
-  $('btn-back').onclick = () => showScreen('menu');
+  $('btn-retry').onclick = () => { initGame(); };
+  $('btn-endmenu').onclick = () => { AudioEngine.play('ui'); closeModal('end-modal'); showScreen('menu'); };
   $('btn-undo').onclick = undoMove;
   $('btn-reset').onclick = resetGame;
   $('btn-hint').onclick = showHint;
@@ -602,12 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('grid').addEventListener('click', e => {
     const cell = e.target.closest('.cell');
     if (cell) {
-      // Снять подсветку подсказки при любом ходе
-      if (currentHintCell) {
-        const prev = document.querySelector(`.cell[data-r="${currentHintCell.r}"][data-c="${currentHintCell.c}"]`);
-        if (prev) prev.classList.remove('hint');
-        currentHintCell = null;
-      }
+      clearHintHighlight();
       toggleCell(+cell.dataset.r, +cell.dataset.c);
     }
   });
