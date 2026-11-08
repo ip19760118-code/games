@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-08T08:01:30.289Z",
+ "generatedAt": "2026-11-08T08:14:49.391Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.48",
@@ -433,14 +433,14 @@
    ]
   },
   "lights-out": {
-   "version": "2.1",
+   "version": "2.2",
    "online": false,
    "addedAt": "2026-10-01",
    "files": [
     {
      "path": "lights-out/index.html",
-     "sha256": "d4b6126e54c8a85199190d2265651eb40cf5014de8584ff24e79f08392ab0b1b",
-     "size": 22517
+     "sha256": "b927c41ee493bee507ccefcaad36f5490465536b81c5b73038decd6fb0dcfc78",
+     "size": 27429
     }
    ]
   },
