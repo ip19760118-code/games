@@ -6,13 +6,8 @@
 <meta name="theme-color" content="#0f172a">
 <title>💡 Выключи Свет</title>
 
-<!-- Telegram Mini App SDK (оставляем для обратной совместимости) -->
-<!-- Единый слой платформ (TG / VK / MAX / web) -->
 <script src="../js/platform.js"></script>
 
-<!-- ============================================================ -->
-<!-- GOOGLE ANALYTICS 4                                           -->
-<!-- ============================================================ -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -23,7 +18,6 @@
     'page_path': location.pathname
   });
 </script>
-<!-- ============ КОНЕЦ БЛОКА GOOGLE ANALYTICS ================== -->
 
 <style>
   :root {
@@ -93,6 +87,10 @@
   #btn-hint { background: var(--cell-on); }
   #btn-hint:hover:not(:disabled) { background: #d97706; }
 
+  /* v2.2: кнопка ссылки под полем */
+  #share-row { display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.8rem; width: 100%; max-width: 340px; }
+  #share-row button { flex: 1; font-size: 0.85rem; padding: 0.6rem 0.5rem; margin: 0; }
+
   #win-msg { 
     margin-top: 1.2rem; padding: 1.2rem; background: var(--surface); 
     border-radius: var(--radius); box-shadow: var(--shadow); 
@@ -128,7 +126,7 @@
     <button id="btn-start" class="ui-sound">▶ Начать игру</button>
     <button id="btn-rules" class="secondary ui-sound">📖 Правила</button>
     <button id="btn-settings" class="secondary ui-sound">⚙️ Настройки</button>
-    <div class="ver" id="verTag">v2.1</div>
+    <div class="ver" id="verTag">v2.2</div>
   </section>
 
   <section id="game-screen" class="screen">
@@ -143,9 +141,13 @@
       <button id="btn-reset" class="secondary ui-sound">🔄 Сброс</button>
       <button id="btn-hint" class="ui-sound">💡 Подсказка</button>
     </div>
+    <div id="share-row">
+      <button id="btn-share" class="secondary ui-sound">📤 Скинуть ссылку на игру</button>
+    </div>
     <div id="win-msg">
       <b style="font-size: 1.3rem;">🎉 Победа!</b>
       <div style="font-size:0.9rem; opacity:0.8;">Решено за <span id="win-moves">0</span> ходов</div>
+      <button id="btn-share-result" class="ui-sound">📤 Отправить результат</button>
       <button id="btn-retry" class="ui-sound">🔄 Заново</button>
       <button id="btn-menu" class="secondary ui-sound">В меню</button>
     </div>
@@ -187,8 +189,8 @@
         <li>Нажми на клетку: она и соседние (вверх/вниз/влево/вправо) переключатся.</li>
         <li>🟡 = включено, ⬛ = выключено.</li>
         <li><b>Цель:</b> сделать всё поле выключенным (серым/тёмным).</li>
-        <li>Каждый уровень гарантированно решаем.</li>
-        <li>Используй «Отмену» для экспериментов и «Подсказку», если застрял.</li>
+        <li>Каждый уровень гарантированно решаем (генерируется случайными ходами из собранного состояния).</li>
+        <li>Используй «Отмену» для экспериментов и «💡 Подсказку», если застрял — она покажет клетку из реального решения.</li>
         <li>В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</li>
       </ul>
     </div>
@@ -196,11 +198,8 @@
 </div>
 
 <script>
-const VER = '2.1';
+const VER = '2.2';
 
-/* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
-/* v2.1: BackButton-логика закрытия модалок/экранов перенесена в callback back.
-   Platform сам определит платформу и навесит обработчик. */
 function backHandler() {
   try {
     const activeModal = document.querySelector('.modal.active');
@@ -217,13 +216,11 @@ Platform.init({
   back: backHandler
 });
 
-/* v2.1: возвращаемся в хаб, сохраняя платформу */
 function goToHub() {
   Platform.haptic('light');
   location.href = '../?plat=' + Platform.name;
 }
 
-/* v2.1: трекер с автоматической меткой платформы */
 function trackEvent(name, params) {
   params = params || {};
   params.platform = Platform.name;
@@ -234,7 +231,6 @@ function trackEvent(name, params) {
   } catch (e) {}
 }
 
-/* v2.1: событие открытия игры с source=платформа */
 (function trackGameOpen() {
   try {
     const key = 'lightsout_session_tracked';
@@ -291,7 +287,6 @@ function saveState() {
   try { localStorage.setItem('lightsout_data', JSON.stringify({ theme: state.theme, difficulty: state.difficulty, stats: state.stats })); } catch(e) {}
 }
 
-/* v2.1: смена темы сообщает платформе цвет шапки мессенджера */
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', state.theme);
   try { $('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(); } catch(e) {}
@@ -314,6 +309,71 @@ function updateStatsUI() {
   $('stat-best').innerHTML = Object.entries(state.stats.best).map(([k,v]) => `<li>${k}×${k}: <b>${v !== null ? v : '—'}</b></li>`).join('');
 }
 
+/* ============================================================
+   v2.2: SOLVER над GF(2) — метод Гаусса.
+   Для поля N×N строит матрицу A (n×n) и вектор b (n) и решает A·x = b (mod 2).
+   Возвращает массив {r, c} — клетки, нажатие которых решает расклад.
+   ============================================================ */
+function solveBoard(board) {
+  const N = board.length;
+  const n = N * N;
+  // Расширенная матрица A | b (n строк, n+1 столбцов)
+  const A = [];
+  for (let i = 0; i < n; i++) {
+    const row = new Array(n + 1).fill(0);
+    const r = Math.floor(i / N), c = i % N;
+    row[i] = 1;
+    if (r > 0)     row[i - N] = 1;
+    if (r < N - 1) row[i + N] = 1;
+    if (c > 0)     row[i - 1] = 1;
+    if (c < N - 1) row[i + 1] = 1;
+    row[n] = board[r][c];
+    A.push(row);
+  }
+  // Прямой ход Гаусса
+  let row = 0;
+  const pivotCol = new Array(n).fill(-1);
+  for (let col = 0; col < n && row < n; col++) {
+    let pivot = -1;
+    for (let i = row; i < n; i++) {
+      if (A[i][col] === 1) { pivot = i; break; }
+    }
+    if (pivot === -1) continue;
+    [A[row], A[pivot]] = [A[pivot], A[row]];
+    pivotCol[row] = col;
+    for (let i = 0; i < n; i++) {
+      if (i !== row && A[i][col] === 1) {
+        for (let j = col; j <= n; j++) A[i][j] ^= A[row][j];
+      }
+    }
+    row++;
+  }
+  // Проверка совместности
+  for (let i = row; i < n; i++) {
+    if (A[i][n] === 1) return null; // не должно случиться — расклады всегда решаемы
+  }
+  // Обратный ход: ставим свободные переменные = 0, вычисляем зависимые
+  const x = new Array(n).fill(0);
+  const leadingOf = new Array(n).fill(-1);
+  for (let i = 0; i < row; i++) {
+    if (pivotCol[i] >= 0) leadingOf[i] = pivotCol[i];
+  }
+  for (let i = row - 1; i >= 0; i--) {
+    const lead = leadingOf[i];
+    if (lead === -1) continue;
+    let sum = A[i][n];
+    for (let j = lead + 1; j < n; j++) {
+      if (A[i][j] === 1) sum ^= x[j];
+    }
+    x[lead] = sum;
+  }
+  const solution = [];
+  for (let i = 0; i < n; i++) {
+    if (x[i] === 1) solution.push({ r: Math.floor(i / N), c: i % N });
+  }
+  return solution;
+}
+
 function initGame() {
   trackEvent('game_start', {
     game_name: 'lights_out',
@@ -331,11 +391,28 @@ function initGame() {
   document.documentElement.style.setProperty('--grid-size', N);
   updateButtons();
 
-  const steps = Math.floor(N * 2.5) + Math.floor(Math.random() * 3);
-  for (let i = 0; i < steps; i++) toggleCell(Math.floor(Math.random()*N), Math.floor(Math.random()*N), true);
+  // v2.2: гарантированно решаемый + непустой расклад
+  let attempts = 0;
+  do {
+    state.board = Array.from({ length: N }, () => Array(N).fill(0));
+    const steps = Math.floor(N * 2.5) + Math.floor(Math.random() * 3) + 1;
+    const pressed = new Set();
+    for (let i = 0; i < steps; i++) {
+      const r = Math.floor(Math.random()*N), c = Math.floor(Math.random()*N);
+      const key = r*N+c;
+      if (pressed.has(key)) { pressed.delete(key); } else { pressed.add(key); }
+      toggleCell(r, c, true);
+    }
+    attempts++;
+  } while (boardIsEmpty(state.board) && attempts < 10);
   
   state.initialBoard = JSON.parse(JSON.stringify(state.board));
   renderGrid(); showScreen('game');
+}
+
+function boardIsEmpty(b) {
+  for (const row of b) for (const v of row) if (v === 1) return false;
+  return true;
 }
 
 function toggleCell(r, c, silent = false) {
@@ -382,9 +459,7 @@ function renderGrid() {
 }
 
 function checkWin() {
-  let allOff = true;
-  for (const row of state.board) for (const v of row) if (v === 1) { allOff = false; break; }
-  if (allOff) {
+  if (boardIsEmpty(state.board)) {
     trackEvent('game_win', {
       game_name: 'lights_out',
       difficulty: state.board.length,
@@ -422,43 +497,81 @@ function resetGame() {
   renderGrid(); updateButtons();
 }
 
+/* v2.2: правильная подсказка — одна клетка из реального решения */
+let currentHintCell = null;
 function showHint() {
   if ($('win-msg').classList.contains('show')) return;
-  AudioEngine.play('hint');
-  let hintCell = null;
-  for(let r=0; r<state.board.length; r++) {
-    for(let c=0; c<state.board[r].length; c++) {
-      if(state.board[r][c] === 1) { hintCell = {r, c}; break; }
-    }
-    if(hintCell) break;
+  // Убрать старую подсветку
+  if (currentHintCell) {
+    const prev = document.querySelector(`.cell[data-r="${currentHintCell.r}"][data-c="${currentHintCell.c}"]`);
+    if (prev) prev.classList.remove('hint');
+    currentHintCell = null;
   }
-  if(hintCell) {
-    const cell = document.querySelector(`.cell[data-r="${hintCell.r}"][data-c="${hintCell.c}"]`);
-    if(cell) {
-      cell.classList.remove('hint'); void cell.offsetWidth;
-      cell.classList.add('hint');
-      setTimeout(() => cell.classList.remove('hint'), 2000);
-    }
+  const solution = solveBoard(state.board);
+  if (!solution || solution.length === 0) return;
+  // Берём первую клетку из решения — это корректный следующий ход
+  const hint = solution[0];
+  currentHintCell = hint;
+  AudioEngine.play('hint');
+  const cell = document.querySelector(`.cell[data-r="${hint.r}"][data-c="${hint.c}"]`);
+  if (cell) {
+    cell.classList.remove('hint'); void cell.offsetWidth;
+    cell.classList.add('hint');
+    // Подсветка остаётся до следующего хода игрока (снимается в toggleCell/renderGrid)
   }
 }
 
 function updateButtons() {
-  $('btn-undo').disabled = state.history.length === 0;
+  $('btn-undo').disabled = state.history.length === 0 || $('win-msg').classList.contains('show');
   $('btn-hint').disabled = $('win-msg').classList.contains('show');
+}
+
+/* v2.2: кнопки шеринга */
+function shareGameLink() {
+  AudioEngine.init(); AudioEngine.play('ui');
+  const text = '💡 Выключи Свет — логическая головоломка: нажимай клетки, чтобы выключить всё поле. 4 уровня сложности, честный solver и правильные подсказки.';
+  if (typeof Platform.shareGame === 'function') {
+    Platform.shareGame('lights_out', text, {
+      title: 'Выключи Свет — играй сейчас',
+      copiedToast: 'Ссылка на игру скопирована — отправь другу!'
+    });
+  } else {
+    Platform.share(location.href, text);
+  }
+  trackEvent('game_share', { game_name: 'lights_out', share_type: 'link' });
+}
+
+function shareResult() {
+  AudioEngine.init(); AudioEngine.play('ui');
+  const N = state.board.length;
+  const best = state.stats.best[N];
+  const text = '💡 Выключи Свет: решено ' + N + '×' + N + ' за ' + state.moves + ' ходов'
+    + (best !== null && best !== undefined ? ' (рекорд: ' + best + ')' : '')
+    + '. Сможешь лучше?';
+  if (typeof Platform.shareGame === 'function') {
+    Platform.shareGame('lights_out', text, {
+      title: 'Выключи Свет — мой результат',
+      copiedToast: 'Результат скопирован — отправь другу!'
+    });
+  } else {
+    Platform.share(location.href, text);
+  }
+  trackEvent('game_share', { game_name: 'lights_out', share_type: 'result', moves: state.moves, difficulty: N });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   loadState();
 
-  /* v2.1: все переходы в хаб через goToHub() */
   $('btn-hub').onclick = () => { goToHub(); };
   $('btn-start').onclick = () => { AudioEngine.init(); initGame(); };
-  $('btn-retry').onclick = initGame;
+  $('btn-retry').onclick = () => { AudioEngine.init(); initGame(); };
   $('btn-menu').onclick = () => showScreen('menu');
   $('btn-back').onclick = () => showScreen('menu');
   $('btn-undo').onclick = undoMove;
   $('btn-reset').onclick = resetGame;
   $('btn-hint').onclick = showHint;
+  $('btn-share').onclick = shareGameLink;
+  $('btn-share-result').onclick = shareResult;
   
   $('btn-settings').onclick = () => { AudioEngine.play('ui'); openModal('settings-modal'); };
   $('btn-rules').onclick = () => { AudioEngine.play('ui'); openModal('rules-modal'); };
@@ -488,7 +601,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('grid').addEventListener('click', e => {
     const cell = e.target.closest('.cell');
-    if (cell) toggleCell(+cell.dataset.r, +cell.dataset.c);
+    if (cell) {
+      // Снять подсветку подсказки при любом ходе
+      if (currentHintCell) {
+        const prev = document.querySelector(`.cell[data-r="${currentHintCell.r}"][data-c="${currentHintCell.c}"]`);
+        if (prev) prev.classList.remove('hint');
+        currentHintCell = null;
+      }
+      toggleCell(+cell.dataset.r, +cell.dataset.c);
+    }
   });
 
   document.querySelectorAll('.close-btn').forEach(btn => btn.onclick = () => closeModal(btn.dataset.modal));
