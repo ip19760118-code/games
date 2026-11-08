@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-08T04:24:15.848Z",
+ "generatedAt": "2026-11-08T04:55:36.613Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.48",
@@ -112,7 +112,7 @@
    ]
   },
   "durak": {
-   "version": "3.31",
+   "version": "3.32",
    "online": true,
    "addedAt": "2026-10-01",
    "files": [
@@ -143,8 +143,8 @@
     },
     {
      "path": "durak/index.html",
-     "sha256": "cf007a2d0647280e9db2adb564ce44f67bd3d9f27f7fc2078fbc914b91fb7362",
-     "size": 89268
+     "sha256": "36283c31567d49ab935c9730f31becb090d174b4a80e9fed0136199cf7125a9a",
+     "size": 89412
     }
    ]
   },
