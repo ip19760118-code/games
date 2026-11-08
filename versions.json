@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-08T07:00:11.862Z",
+ "generatedAt": "2026-11-08T08:01:30.289Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.48",
@@ -457,14 +457,14 @@
    ]
   },
   "pyatnashki": {
-   "version": "1.3",
+   "version": "1.4",
    "online": false,
    "addedAt": "2026-11-03",
    "files": [
     {
      "path": "pyatnashki/index.html",
-     "sha256": "3edddfe735c490d5de3b9f2178c183f3538b0a2814bfc5f94cad059f661e5df3",
-     "size": 24357
+     "sha256": "2198a3f230f227ea71956d497c749467c55317887c63830a1de4f119f103904f",
+     "size": 27320
     }
    ]
   },
