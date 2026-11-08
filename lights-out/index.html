@@ -39,9 +39,6 @@
   .screen.active { display: flex; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-  h1 { font-size: clamp(1.6rem, 6vw, 2.2rem); margin-bottom: 0.4rem; line-height: 1.2; }
-  .desc { opacity: 0.85; margin-bottom: 1.5rem; line-height: 1.5; max-width: 92%; font-size: 0.95rem; }
-
   button { 
     background: var(--accent); color: #000; border: none; padding: 0.85rem 1.2rem; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin: 0.35rem 0; transition: transform 0.1s, background 0.2s, box-shadow 0.2s; touch-action: manipulation; width: min(100%, 260px); display: block; position: relative; overflow: hidden; 
   }
@@ -50,7 +47,7 @@
   button.secondary { background: transparent; border: 2px solid var(--text); color: var(--text); }
   button.secondary:hover:not(:disabled) { background: rgba(128,128,128,0.1); }
 
-  /* v2.3: кнопки-пилюли шапки и действий — одинаковая высота */
+  /* v2.3+: кнопки-пилюли шапки и действий — одинаковая высота */
   .hbtn { background: rgba(128,128,128,0.12); border: 1px solid rgba(128,128,128,0.35); color: var(--text); border-radius: 30px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; width: auto; display: inline-block; margin: 0; min-height: 32px; }
   .hbtn:active { transform: scale(0.95); }
   .g-header { display: flex; flex-direction: column; gap: 6px; align-items: center; margin-bottom: 8px; width: 100%; }
@@ -61,8 +58,6 @@
   .actions { display: flex; gap: 8px; justify-content: center; align-items: stretch; flex-wrap: wrap; margin-top: 12px; width: 100%; max-width: 380px; }
   .actions .btn { flex: 0 1 auto; width: auto; margin: 0; padding: 9px 14px; border-radius: 30px; font-size: 13px; font-weight: 600; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
   .actions .btn.secondary { border-width: 2px; }
-
-  #btn-hub { margin-bottom: 0.9rem; font-size: 0.9rem; padding: 0.6rem 1rem; }
 
   #grid { 
     display: grid; grid-template-columns: repeat(var(--grid-size, 5), 1fr); 
@@ -112,22 +107,12 @@
 </head>
 <body>
 <div id="app">
-  <section id="menu-screen" class="screen active">
-    <button id="btn-hub" class="secondary ui-sound">← В меню игр</button>
-    <h1>💡 Выключи Свет</h1>
-    <p class="desc">Логическая головоломка. Нажимай на клетки, чтобы выключить всё поле. Только дедукция.</p>
-    <button id="btn-start" class="ui-sound">▶ Начать игру</button>
-    <button id="btn-rules" class="secondary ui-sound">📖 Правила</button>
-    <button id="btn-settings" class="secondary ui-sound">⚙️ Настройки</button>
-    <div class="ver" id="verTag">v2.3</div>
-  </section>
-
-  <section id="game-screen" class="screen">
+  <section id="game-screen" class="screen active">
     <div class="g-header">
       <div class="g-title">💡 Выключи Свет <span class="g-diff" id="diff-label">(5×5)</span></div>
       <div class="g-hrow">
         <button class="hbtn ui-sound" id="btn-hub2">← В меню игр</button>
-        <button class="hbtn ui-sound" id="btn-gamemenu">🏠 В меню выключи свет</button>
+        <button class="hbtn ui-sound" id="btn-settings2">⚙️</button>
         <button class="hbtn ui-sound" id="btn-rules2">📖</button>
       </div>
     </div>
@@ -135,10 +120,11 @@
     <div id="grid"></div>
     <div class="actions" id="game-controls">
       <button id="btn-share" class="btn secondary ui-sound">📤 Скинуть ссылку</button>
-      <button id="btn-hint" class="btn ui-sound">💡 Подсказка</button>
+      <button id="btn-hint" class="btn ui-sound">💡 Подсказка (0)</button>
       <button id="btn-undo" class="btn secondary ui-sound" disabled>↩️ Отмена</button>
       <button id="btn-reset" class="btn secondary ui-sound">🔄 Начать заново</button>
     </div>
+    <div class="ver" id="verTag">v2.4</div>
   </section>
 
   <div id="end-modal" class="modal">
@@ -148,7 +134,7 @@
       <div class="btns">
         <button id="btn-share-result" class="ui-sound">📤 Отправить результат</button>
         <button id="btn-retry" class="ui-sound">🔄 Ещё раз</button>
-        <button id="btn-endmenu" class="secondary ui-sound">🏠 В меню игры</button>
+        <button id="btn-endhub" class="secondary ui-sound">🏠 В меню игр</button>
       </div>
     </div>
   </div>
@@ -190,7 +176,8 @@
         <li>🟡 = включено, ⬛ = выключено.</li>
         <li><b>Цель:</b> сделать всё поле выключенным (серым/тёмным).</li>
         <li>Каждый уровень гарантированно решаем (генерируется случайными ходами из собранного состояния).</li>
-        <li>Используй «Отмену» для экспериментов и «💡 Подсказку», если застрял — она покажет клетку из реального решения.</li>
+        <li>«💡 Подсказка (N)» показывает клетку из реального решения; N — сколько ходов осталось до полной сборки.</li>
+        <li>Используй «Отмену» для экспериментов и «Начать заново», если запутался.</li>
         <li>В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</li>
       </ul>
     </div>
@@ -198,15 +185,12 @@
 </div>
 
 <script>
-const VER = '2.3';
+const VER = '2.4';
 
 function backHandler() {
   try {
     const activeModal = document.querySelector('.modal.active');
     if (activeModal) { closeModal(activeModal.id); return; }
-    if (document.getElementById('game-screen').classList.contains('active')) {
-      showScreen('menu'); return;
-    }
   } catch (e) {}
   goToHub();
 }
@@ -295,11 +279,6 @@ function applyTheme() {
   try { Platform.colors(color); } catch(e) {}
 }
 
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const target = $(name + '-screen'); if (target) target.classList.add('active');
-}
-
 function openModal(id) { $(id).classList.add('active'); }
 function closeModal(id) { $(id).classList.remove('active'); }
 
@@ -310,7 +289,7 @@ function updateStatsUI() {
 }
 
 /* ============================================================
-   v2.2: SOLVER над GF(2) — метод Гаусса.
+   SOLVER над GF(2) — метод Гаусса: точное решение расклада.
    ============================================================ */
 function solveBoard(board) {
   const N = board.length;
@@ -403,7 +382,7 @@ function initGame() {
   } while (boardIsEmpty(state.board) && attempts < 10);
   
   state.initialBoard = JSON.parse(JSON.stringify(state.board));
-  renderGrid(); showScreen('game');
+  renderGrid(); updateHintBadge();
 }
 
 function toggleCell(r, c, silent = false) {
@@ -434,6 +413,7 @@ function toggleCell(r, c, silent = false) {
       clickedCell.classList.add('pop');
       if(isNowOn) clickedCell.classList.add('on-anim');
     }
+    updateHintBadge();
     checkWin();
   }
 }
@@ -450,7 +430,6 @@ function renderGrid() {
   }
 }
 
-/* v2.3: победа = оверлей с итогами и кнопками */
 function checkWin() {
   if (boardIsEmpty(state.board)) {
     state.won = true;
@@ -468,7 +447,7 @@ function checkWin() {
     saveState(); updateStatsUI();
     $('endTitle').textContent = '🎉 Победа!';
     $('endSub').innerHTML = 'Поле <b>' + N + '×' + N + '</b> решено за <b>' + state.moves + '</b> ходов<br>Рекорд для этого поля: <b>' + (state.stats.best[N] !== null ? state.stats.best[N] : '—') + '</b> ходов';
-    updateButtons();
+    updateButtons(); updateHintBadge();
     setTimeout(() => openModal('end-modal'), 320);
   }
 }
@@ -480,7 +459,7 @@ function undoMove() {
   state.moves = Math.max(0, state.moves - 1);
   $('moves').textContent = state.moves;
   clearHintHighlight();
-  renderGrid(); updateButtons();
+  renderGrid(); updateButtons(); updateHintBadge();
 }
 
 function resetGame() {
@@ -491,7 +470,7 @@ function resetGame() {
   state.moves = 0;
   $('moves').textContent = 0;
   clearHintHighlight();
-  renderGrid(); updateButtons();
+  renderGrid(); updateButtons(); updateHintBadge();
 }
 
 let currentHintCell = null;
@@ -501,6 +480,16 @@ function clearHintHighlight() {
     if (prev) prev.classList.remove('hint');
     currentHintCell = null;
   }
+}
+/* v2.4: цифра на кнопке = ходов в текущем оптимальном решении */
+function updateHintBadge() {
+  const btn = $('btn-hint');
+  if (!btn) return;
+  if (state.won || !state.board.length) { btn.textContent = '💡 Подсказка (0)'; btn.disabled = true; return; }
+  const sol = solveBoard(state.board);
+  const n = sol ? sol.length : 0;
+  btn.textContent = '💡 Подсказка (' + n + ')';
+  btn.disabled = (n === 0);
 }
 function showHint() {
   if (state.won) return;
@@ -519,13 +508,12 @@ function showHint() {
 
 function updateButtons() {
   $('btn-undo').disabled = state.history.length === 0 || state.won;
-  $('btn-hint').disabled = state.won;
   $('btn-reset').disabled = state.won;
 }
 
 function shareGameLink() {
   AudioEngine.init(); AudioEngine.play('ui');
-  const text = '💡 Выключи Свет — логическая головоломка: нажимай клетки, чтобы выключить всё поле. 4 уровня сложности, честный solver и правильные подсказки.';
+  const text = '💡 Выключи Свет — логическая головоломка: нажимай клетки, чтобы выключить всё поле. 4 уровня сложности, честный solver и подсказки с числом ходов до победы.';
   if (typeof Platform.shareGame === 'function') {
     Platform.shareGame('lights_out', text, {
       title: 'Выключи Свет — играй сейчас',
@@ -558,21 +546,16 @@ function shareResult() {
 document.addEventListener('DOMContentLoaded', () => {
   loadState();
 
-  $('btn-hub').onclick = () => { goToHub(); };
   $('btn-hub2').onclick = () => { goToHub(); };
-  $('btn-gamemenu').onclick = () => { AudioEngine.play('ui'); showScreen('menu'); };
+  $('btn-settings2').onclick = () => { AudioEngine.play('ui'); openModal('settings-modal'); };
   $('btn-rules2').onclick = () => { AudioEngine.play('ui'); openModal('rules-modal'); };
-  $('btn-start').onclick = () => { AudioEngine.init(); initGame(); };
   $('btn-retry').onclick = () => { initGame(); };
-  $('btn-endmenu').onclick = () => { AudioEngine.play('ui'); closeModal('end-modal'); showScreen('menu'); };
+  $('btn-endhub').onclick = () => { AudioEngine.play('ui'); closeModal('end-modal'); goToHub(); };
   $('btn-undo').onclick = undoMove;
   $('btn-reset').onclick = resetGame;
   $('btn-hint').onclick = showHint;
   $('btn-share').onclick = shareGameLink;
   $('btn-share-result').onclick = shareResult;
-  
-  $('btn-settings').onclick = () => { AudioEngine.play('ui'); openModal('settings-modal'); };
-  $('btn-rules').onclick = () => { AudioEngine.play('ui'); openModal('rules-modal'); };
 
   document.querySelectorAll('.ui-sound').forEach(b => b.addEventListener('click', () => AudioEngine.play('ui')));
 
@@ -584,6 +567,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setting: 'difficulty',
       value: state.difficulty
     });
+    closeModal('settings-modal');
+    initGame();
   };
 
   $('set-theme').onchange = e => {
@@ -609,6 +594,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if(e.target===m) closeModal(m.id); }));
 
   try { $('verTag').textContent = 'v' + VER; } catch(e) {}
+  /* v2.4: меню убрано — партия стартует сразу */
+  initGame();
 });
 </script>
 </body>
