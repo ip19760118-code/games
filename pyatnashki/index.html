@@ -6,14 +6,14 @@
 :root{--bg1:#171310;--bg2:#241c14;--bg3:#0d0a07;--panel:rgba(40,32,24,.92);--text:#f0e6d2;--accent:#e6b366;--shadow:rgba(0,0,0,.6)}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
 html,body{overscroll-behavior:none;overscroll-behavior-y:none}
-body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:10px;padding-top:calc(10px + env(safe-area-inset-top));padding-bottom:calc(10px + env(safe-area-inset-bottom))}
-.wrap{max-width:560px;width:100%;background:var(--panel);border-radius:22px;padding:12px;box-shadow:0 20px 60px var(--shadow);border:1px solid rgba(255,255,255,.08)}
+body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:10px;padding-top:calc(10px + env(safe-area-inset-top));padding-bottom:calc(10px + env(safe-area-inset-bottom));transition:background .25s ease,color .25s ease}
+.wrap{max-width:560px;width:100%;background:var(--panel);border-radius:22px;padding:12px;box-shadow:0 20px 60px var(--shadow);border:1px solid rgba(255,255,255,.08);transition:background .25s ease,border-color .25s ease,box-shadow .25s ease}
 .header{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:10px}
 .title-row{display:flex;align-items:center;justify-content:center;gap:10px}
 .logo{font-size:30px;line-height:1;filter:drop-shadow(0 3px 8px rgba(0,0,0,.45))}
 .title{font-size:22px;font-weight:800;letter-spacing:2px;color:var(--accent);text-shadow:0 2px 6px rgba(0,0,0,.35)}
 .hrow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
-.hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:30px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:30px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
 .hbtn:active{transform:scale(.95)}
 .topline{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
 .pill{font-size:12px;font-weight:700;background:rgba(0,0,0,.3);border:1px solid rgba(230,179,102,.25);color:var(--accent);border-radius:16px;padding:4px 12px;font-family:monospace}
@@ -33,6 +33,22 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 #wrap[data-skin="neon"]{--b-bg:linear-gradient(160deg,#161b22,#0b0e12);--t-bg:linear-gradient(145deg,#232b36,#151a21);--t-num:#7cffc4;--slot-bg:rgba(124,255,196,.06)}
 #wrap[data-skin="neon"] .tile{box-shadow:0 6px 16px rgba(0,0,0,.6),0 0 12px rgba(124,255,196,.18),inset 0 2px 3px rgba(255,255,255,.12),inset 0 -4px 8px rgba(0,0,0,.4);text-shadow:0 0 8px rgba(124,255,196,.55)}
 #wrap[data-skin="pastel"]{--b-bg:linear-gradient(160deg,#efe7dc,#d9cdbb);--t-bg:linear-gradient(145deg,#ffffff,#e4dccd);--t-num:#5b4a33;--slot-bg:rgba(0,0,0,.12)}
+/* v1.4: светлая тема */
+body.light-mode{background:#f3f1ec;background:radial-gradient(ellipse at center,#fafaf6,#e8e5dc);--bg1:#f3f1ec;--bg2:#fafaf6;--bg3:#e8e5dc;--panel:rgba(255,255,255,.94);--text:#2a2620;--accent:#c47d2e;--shadow:rgba(60,40,20,.15);color:#2a2620}
+body.light-mode .wrap{background:rgba(255,255,255,.94);border-color:rgba(0,0,0,.08);box-shadow:0 18px 50px rgba(60,40,20,.18)}
+body.light-mode .hbtn{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.12);color:#2a2620}
+body.light-mode .pill{background:rgba(196,125,46,.12);border-color:rgba(196,125,46,.35);color:#9a5a1a}
+body.light-mode .status{color:#9a5a1a}
+body.light-mode .cardbox{background:rgba(255,255,255,.98);border-color:rgba(0,0,0,.1);box-shadow:0 18px 50px rgba(60,40,20,.22);color:#2a2620}
+body.light-mode .selrow select{background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.15);color:#2a2620}
+body.light-mode .stat-row{border-bottom-color:rgba(0,0,0,.08)}
+body.light-mode .btn{background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.14);color:#2a2620}
+body.light-mode .btn.primary{background:linear-gradient(135deg,#e6b366,#c47d2e);color:#fff5e1}
+body.light-mode .overlay{background:rgba(40,30,20,.45)}
+#wrap[data-skin="light"]{--b-bg:linear-gradient(160deg,#e8e2d4,#cdc4b0);--t-bg:linear-gradient(145deg,#ffffff,#f2ead8);--t-num:#3a2e1c;--slot-bg:rgba(90,60,30,.14)}
+#wrap[data-skin="light"] .board{box-shadow:inset 0 3px 14px rgba(90,60,30,.22),0 10px 26px rgba(90,60,30,.22)}
+#wrap[data-skin="light"] .tile{box-shadow:0 4px 12px rgba(90,60,30,.25),0 2px 4px rgba(90,60,30,.18),inset 0 2px 3px rgba(255,255,255,.9),inset 0 -3px 6px rgba(90,60,30,.18);text-shadow:0 1px 1px rgba(255,255,255,.7)}
+#wrap[data-skin="light"] .slot{box-shadow:inset 0 2px 5px rgba(90,60,30,.22)}
 .status{text-align:center;font-size:13px;font-weight:600;margin:8px 0;min-height:18px;color:var(--accent)}
 .actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}
 .btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--text);padding:9px 16px;border-radius:30px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
@@ -51,14 +67,18 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .stat-row{display:flex;justify-content:space-between;padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
 .stat-row b{color:var(--accent)}
 .note{font-size:11px;opacity:.7;line-height:1.45;margin-top:8px;text-align:left}
-/* v1.3: мини-схема собранного поля в правилах (CSS-сетка в стиле костяшек) */
 .mini-board{display:grid;grid-template-columns:repeat(4,36px);grid-auto-rows:36px;gap:4px;justify-content:center;margin:12px auto 6px}
 .mini-board span{display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px;font-weight:800;color:#241505;
  background:linear-gradient(145deg,#f2c67c,#c98a3e);
  box-shadow:0 2px 5px rgba(0,0,0,.45),inset 0 1px 2px rgba(255,255,255,.4),inset 0 -2px 4px rgba(0,0,0,.25)}
 .mini-board span.empty{background:rgba(0,0,0,.28);box-shadow:inset 0 2px 6px rgba(0,0,0,.55)}
+/* v1.4: мини-схема подстраивается под тему */
+body.light-mode .mini-board span{color:#3a2e1c;background:linear-gradient(145deg,#ffffff,#f2ead8);box-shadow:0 2px 5px rgba(90,60,30,.25),inset 0 1px 2px rgba(255,255,255,.9),inset 0 -2px 4px rgba(90,60,30,.18)}
+body.light-mode .mini-board span.empty{background:rgba(90,60,30,.14);box-shadow:inset 0 2px 6px rgba(90,60,30,.22)}
+#wrap[data-skin="light"] .mini-board span{color:#3a2e1c;background:linear-gradient(145deg,#ffffff,#f2ead8);box-shadow:0 2px 5px rgba(90,60,30,.25),inset 0 1px 2px rgba(255,255,255,.9),inset 0 -2px 4px rgba(90,60,30,.18)}
+#wrap[data-skin="light"] .mini-board span.empty{background:rgba(90,60,30,.14);box-shadow:inset 0 2px 6px rgba(90,60,30,.22)}
 .mini-cap{font-size:11px;opacity:.75;margin-bottom:4px}
-@media (hover:hover) and (pointer:fine){.tile:hover{box-shadow:0 8px 18px rgba(0,0,0,.55),inset 0 2px 3px rgba(255,255,255,.45),inset 0 -4px 8px rgba(0,0,0,.28)}.btn:hover{background:rgba(255,255,255,.14)}.hbtn:hover{background:rgba(255,255,255,.13)}}
+@media (hover:hover) and (pointer:fine){.tile:hover{box-shadow:0 8px 18px rgba(0,0,0,.55),inset 0 2px 3px rgba(255,255,255,.45),inset 0 -4px 8px rgba(0,0,0,.28)}.btn:hover{background:rgba(255,255,255,.14)}.hbtn:hover{background:rgba(255,255,255,.13)}body.light-mode .btn:hover{background:rgba(0,0,0,.1)}body.light-mode .hbtn:hover{background:rgba(0,0,0,.09)}#wrap[data-skin="light"] .tile:hover{box-shadow:0 6px 16px rgba(90,60,30,.3),inset 0 2px 3px rgba(255,255,255,1),inset 0 -3px 6px rgba(90,60,30,.22)}}
 </style></head><body>
 <div class="wrap" id="wrap" data-skin="classic">
 <div class="header">
@@ -74,12 +94,12 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="boardbox"><div class="board" id="board"><div class="slots" id="slots"></div><div class="tiles" id="tiles"></div></div></div>
 <div class="status" id="statusEl">Нажми «Новая игра»</div>
 <div class="actions"><button class="btn primary" id="newBtn">🔄 Новая игра</button><button class="btn" id="shareLinkBtn">📤 Отправить ссылку на игру</button></div>
-<div class="ver" id="verTag">v1.3</div>
+<div class="ver" id="verTag">v1.4</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Громкость · <span id="volV">70%</span><input type="range" id="volSlider" min="0" max="100" value="70"></div>
 <div class="selrow">Глубина расклада (сложность)<select id="diffSel"><option value="easy">Лёгкая</option><option value="medium">Средняя</option><option value="hard">Сложная</option><option value="expert">Эксперт</option></select></div>
-<div class="selrow">Тема оформления<select id="skinSel"><option value="classic">Классика · дерево</option><option value="sea">Море</option><option value="neon">Неон</option><option value="pastel">Пастель</option></select></div>
+<div class="selrow">Тема оформления<select id="skinSel"><option value="classic">Классика · дерево</option><option value="sea">Море</option><option value="neon">Неон</option><option value="pastel">Пастель</option><option value="light">Light · дневная</option></select></div>
 <div class="btns"><button class="btn" id="setShare">📤 Отправить ссылку на игру</button><button class="btn primary" id="setClose">Готово</button></div>
 <div class="note">Расклад всегда решаем: перемешивание случайными ходами из собранного состояния. Глубина влияет на длину оптимального решения.</div>
 </div></div>
@@ -102,7 +122,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div>
 </div></div>
 <script>
-const VER='1.3';
+const VER='1.4';
 const $=id=>document.getElementById(id);
 const DIFFS={easy:{n:30,label:'Лёгкая'},medium:{n:90,label:'Средняя'},hard:{n:180,label:'Сложная'},expert:{n:320,label:'Эксперт'}};
 let set=Object.assign({vol:.7,diff:'medium',skin:'classic'},JSON.parse(localStorage.pyatnashki_set||'{}'));
@@ -239,13 +259,11 @@ function win(){
   setTimeout(()=>$('endOverlay').classList.add('show'),320);
   trackEvent('game_end',{game_name:'pyatnashki',time:t,moves:moves,difficulty:set.diff});
 }
-/* v1.3: шеринг ссылки на игру (до победы) */
 function shareGameLink(){
   unlockAudio();
-  Platform.shareGame('pyatnashki','🧩 Пятнашки — классика головоломок: собери 1…15 скольжением костяшек. 4 темы оформления и 4 уровня сложности.',{title:'Пятнашки — играй сейчас',copiedToast:'Ссылка на игру скопирована — отправь другу!'});
+  Platform.shareGame('pyatnashki','🧩 Пятнашки — классика головоломок: собери 1…15 скольжением костяшек. 5 тем оформления (включая дневную) и 4 уровня сложности.',{title:'Пятнашки — играй сейчас',copiedToast:'Ссылка на игру скопирована — отправь другу!'});
   trackEvent('game_share',{game_name:'pyatnashki',share_type:'link'});
 }
-/* v1.3: шеринг результата (только после победы) */
 function shareResult(){
   unlockAudio();
   const txt=ST.lastTime
@@ -265,7 +283,13 @@ function showStats(){
   $('stLast').textContent=ST.lastTime?(fmt(ST.lastTime)+' / '+ST.lastMoves):'—';
   $('statsOverlay').classList.add('show');
 }
-function applySkin(){$('wrap').dataset.skin=set.skin;}
+/* v1.4: применение темы + обновление Platform.init bg */
+function applySkin(){
+  $('wrap').dataset.skin=set.skin;
+  const light=(set.skin==='light');
+  document.body.classList.toggle('light-mode',light);
+  try{Platform.colors(light?'#f3f1ec':'#171310');}catch(e){}
+}
 function openSettings(){
   $('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';
   $('diffSel').value=set.diff;$('skinSel').value=set.skin;
