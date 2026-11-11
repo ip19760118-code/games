@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Игровой центр</title>
   <meta property="og:title" content="Игровой центр">
-  <meta property="og:description" content="Мини-игры в Telegram, VK и MAX: выбирай, играй и делись рекордами с друзьями.">
+  <meta property="og:description" content="Мини-игры: выбирай, играй и делись рекордами с друзьями.">
   <meta property="og:image" content="https://ip19760118-code.github.io/games/icon-512.png">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#070b16">
@@ -78,11 +78,11 @@
     <div class="panel">
       <button class="set-btn" id="hubSetBtn" aria-label="Настройки">⚙️</button>
       <h1><img class="hub-logo" src="./icon-512.png" alt="">Игровой центр</h1>
-      <p class="hub-subtitle">Мини-игры в Telegram, VK и MAX</p>
+      <p class="hub-subtitle" id="hubSubtitle">Мини-игры в Telegram, VK и MAX</p>
 
       <button class="download-btn" id="downloadBtn">📥 Приложение для ПК и Android</button>
 
-      <p class="hub-desc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. В браузере и мессенджерах игры запускаются без установки: нажми и играй. Для ПК есть приложение Windows: оно устанавливается один раз, хранит игры на устройстве (работают офлайн) и само обновляет контент. Для Android — лёгкое приложение с офлайн-играми. Ссылки на установщики — в кнопке выше: скопируй или отправь другу, открой в браузере и скачай. Список игр умный: любимые игры поднимаются наверх сами, новинки неделю помечены значком NEW. Новые игры добавляются регулярно.</p>
+      <p class="hub-desc" id="hubDesc">Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. В браузере и мессенджерах игры запускаются без установки: нажми и играй. Для ПК есть приложение Windows: оно устанавливается один раз, хранит игры на устройстве (работают офлайн) и само обновляет контент. Для Android — лёгкое приложение с офлайн-играми. Ссылки на установщики — в кнопке выше: скопируй или отправь другу, открой в браузере и скачай. Список игр умный: любимые игры поднимаются наверх сами, новинки неделю помечены значком NEW. Новые игры добавляются регулярно.</p>
 
       <div id="gamesList">
         <button class="game-btn" data-game="trend-catch" id="trendCatchBtn"><span class="game-emoji">📈</span><span class="game-text"><b>Trend Catch</b><small>Лови тренды интернета и избегай инфошум</small></span></button>
@@ -108,7 +108,7 @@
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.48 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.49 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
@@ -143,7 +143,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.48';
+    const HUB_VER = '3.49';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
@@ -162,6 +162,20 @@
     });
 
     try { document.getElementById('platTag').textContent = Platform.name; } catch(e) {}
+
+    /* v3.49: VK-комплаенс (п.4.1.8 / 4.2.6): убираем все упоминания и ссылки на другие площадки. */
+    (function vkCompliance(){
+      try {
+        if (Platform.name !== 'vk') return;
+        var db = document.getElementById('downloadBtn'); if (db) db.style.display = 'none';
+        var ov = document.getElementById('dlOverlay'); if (ov) { ov.classList.remove('show'); ov.style.display = 'none'; }
+        var sub = document.getElementById('hubSubtitle'); if (sub) sub.textContent = 'Мини-игры ВКонтакте';
+        var desc = document.getElementById('hubDesc');
+        if (desc) desc.textContent = 'Аркады, головоломки, классика и онлайн‑партии — всё в одном центре. Нажми на игру и играй прямо здесь, без установки. Список игр умный: любимые игры поднимаются наверх сами, новинки неделю помечены значком NEW. Новые игры добавляются регулярно.';
+        var og = document.querySelector('meta[property="og:description"]');
+        if (og) og.setAttribute('content', 'Мини-игры ВКонтакте: выбирай, играй и делись рекордами с друзьями.');
+      } catch(e) {}
+    })();
 
     (function(){
       try {

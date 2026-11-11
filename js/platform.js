@@ -1,9 +1,12 @@
-/* tg-games: единый слой платформ v3.4 — TG / VK / MAX / web / PC / Android.
+/* tg-games: единый слой платформ v3.5 — TG / VK / MAX / web / PC / Android.
+   v3.5: VK-комплаенс (п.4.1.8 / 4.2.6 / 2.2.5):
+         - все шаринги и ссылки для VK ведут ТОЛЬКО на vk.com/app{vk_app_id} (авто из параметров запуска);
+         - внешние URL (github.io и др.) вычищаются из текста и ссылок для VK;
+         - downloadAsset для VK — заглушка (никаких внешних загрузок);
+         - VKWebAppViewHide/Show → suspend/resume всех AudioContext (звук не играет после сворачивания).
    v3.4: downloadAsset в мессенджерах НЕ пытается fetch (CORS-блок → ложные «загрузка не удалась»):
          TG → WebApp.openLink, VK → VKWebAppOpenExternalLink (фолбэки window.open/location.href),
          MAX → WebApp.openLink; MAX-внешний-браузер → location.href (загрузка стартует сразу).
-         Внешний браузер устройства открывает GitHub-ссылку → Content-Disposition: attachment →
-         файл уходит в «Загрузки» без внутренних браузеров мессенджеров.
    v3.3: ПК → AppBridge.downloadFile нативно; Android → DownloadManager; web → fetch+blob. */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
@@ -13,6 +16,10 @@ var Platform=(function(){
  var MAX_NAV_MODE='external';
  var CANONICAL_ORIGIN='https://ip19760118-code.github.io/games';
  var BRAND_LINE='\n🎮 Игровой центр — классика и новинки, онлайн и офлайн';
+ /* Резерв, если vk_app_id не пришёл в параметрах запуска: сообщество внутри VK (не увод). */
+ var VK_FALLBACK_LINK='https://vk.com/club242534673';
+ var VK_APP_ID_FALLBACK=''; /* при желании впиши сюда число из vk.com/appXXXX */
+ var vkAppIdCache='';
  var name='web',user=null,backFn=null,inited=false;
 
  function qs(k){try{return new URLSearchParams(location.search).get(k)||''}catch(e){return ''}}
@@ -26,6 +33,49 @@ var Platform=(function(){
   if(window.WebApp&&window.WebApp.version)return 'max';
   return 'web'}
  name=detect();
+
+ function isVK(){return name==='vk'}
+ function vkAppId(){
+  if(vkAppIdCache)return vkAppIdCache;
+  var q=qs('vk_app_id');
+  if(q){vkAppIdCache=q;return q}
+  if(VK_APP_ID_FALLBACK){vkAppIdCache=VK_APP_ID_FALLBACK;return vkAppIdCache}
+  return '';
+ }
+ function vkAppLink(){
+  var id=vkAppId();
+  if(id)return 'https://vk.com/app'+id;
+  return VK_FALLBACK_LINK;
+ }
+ /* Для VK любую внешнюю ссылку заменяем на ссылку внутри VK. */
+ function vkSafeUrl(url){
+  if(!isVK())return url;
+  return vkAppLink();
+ }
+ /* Для VK вычищаем из текста все внешние URL (github.io/github.com/прочие), оставляя vk.com. */
+ function vkSafeText(text){
+  var t=String(text==null?'':text);
+  if(!isVK())return t;
+  return t.replace(/https?:\/\/[^\s'")<>]+/gi,function(m){
+   if(/^https?:\/\/([a-z0-9-]+\.)*vk\.(com|ru)\//i.test(m))return m;
+   return vkAppLink();
+  });
+ }
+
+ /* Реестр AudioContext: чтобы глушить звук по VKWebAppViewHide (п.2.2.5). */
+ var audioCtxs=[];
+ (function(){
+  try{
+   var AC=window.AudioContext||window.webkitAudioContext;
+   if(!AC)return;
+   function WrappedAC(){var ctx=new AC();audioCtxs.push(ctx);return ctx}
+   WrappedAC.prototype=AC.prototype;
+   window.AudioContext=WrappedAC;
+   if(window.webkitAudioContext)window.webkitAudioContext=WrappedAC;
+  }catch(e){}
+ })();
+ function suspendAllAudio(){for(var i=0;i<audioCtxs.length;i++){try{if(audioCtxs[i].state==='running')audioCtxs[i].suspend()}catch(e){}}}
+ function resumeAllAudio(){for(var i=0;i<audioCtxs.length;i++){try{if(audioCtxs[i].state==='suspended')audioCtxs[i].resume()}catch(e){}}}
 
  (function(){
   try{
@@ -63,7 +113,7 @@ var Platform=(function(){
   if(name==='max'&&window.WebApp&&maxClientReal()){try{
     var m=window.WebApp.initDataUnsafe&&window.WebApp.initDataUnsafe.user;
     if(m)user={id:'mx'+m.id,name:m.first_name||'Игрок'}
-    }catch(e){}}
+   }catch(e){}}
   if(!user)user={id:'g'+Math.floor(Math.random()*1e9),name:'Гость'}}
 
  function canonicalUrl(){
@@ -209,6 +259,15 @@ var Platform=(function(){
      if(o.bg)vkBridge.send('VKWebAppSetViewSettings',{status_bar_style:'light',action_bar_color:o.bg,navigation_bar_color:o.bg}).catch(function(){});
      vkBridge.send('VKWebAppShowCloseButton').catch(function(){});
      vkBridge.send('VKWebAppEnableSwipeBack').catch(function(){});
+     /* п.2.2.5: глушим звук при сворачивании и возвращаем при развороте */
+     try{vkBridge.subscribe(function(e){
+      if(e&&e.detail){
+       if(e.detail.type==='VKWebAppViewHide')suspendAllAudio();
+       if(e.detail.type==='VKWebAppViewShow')resumeAllAudio();
+      }
+     })}catch(e){}
+     /* кэшируем vk_app_id из параметров запуска для ссылок */
+     try{vkBridge.send('VKWebAppGetLaunchParams').then(function(lp){if(lp&&lp.vk_app_id)vkAppIdCache=String(lp.vk_app_id)}).catch(function(){})}catch(e){}
      if(o.back){
       backFn=o.back;
       try{vkBridge.subscribe(function(e){
@@ -226,14 +285,19 @@ var Platform=(function(){
  function withBrand(text,opts){
   opts=opts||{};
   var extra='';
-  if(opts.game)extra+='\n👉 Сыграть сейчас: '+gameDeepLink(opts.game);
+  if(opts.game)extra+='\n👉 Сыграть сейчас: '+(isVK()?vkAppLink():gameDeepLink(opts.game));
   if(opts.game||opts.brand)extra+=BRAND_LINE;
-  return String(text==null?'':text)+extra;
+  return vkSafeText(String(text==null?'':text)+extra);
  }
 
  function share(url,text,opts){
   opts=opts||{};
+  url=vkSafeUrl(url);
   text=withBrand(text,opts);
+  /* Для VK шарим только внутри VK через VKWebAppShare, без системного/внешнего шаринга. */
+  if(isVK()&&window.vkBridge){
+   try{vkBridge.send('VKWebAppShare',{link:url,text:text});return}catch(e){}
+  }
   function onCopied(){copyText(text+'\n'+url);if(opts.onCopied)opts.onCopied();else platToast(opts.copiedToast||'Ссылка скопирована — отправьте её другу')}
   function messengerShare(){
    if(name==='android'&&window.AppBridge&&window.AppBridge.share){try{window.AppBridge.share(text,url);return true}catch(e){}}
@@ -249,7 +313,7 @@ var Platform=(function(){
    return false}
   var coarse=false;
   try{ coarse=!!(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches); }catch(e){}
-  if(navigator.share&&(name!=='web'||coarse)){
+  if(navigator.share&&(name!=='web'||coarse)&&!isVK()){
    try{navigator.share({title:opts.title||document.title,text:text,url:url})
     .then(function(){if(opts.onShared)opts.onShared('native')})
     .catch(function(err){if(err&&err.name==='AbortError')return;if(!messengerShare())onCopied()});
@@ -259,12 +323,14 @@ var Platform=(function(){
  function shareGame(key,text,opts){
   opts=opts||{};
   opts.game=key;
-  return share(gameDeepLink(key),text,opts);
+  return share(isVK()?vkAppLink():gameDeepLink(key),text,opts);
  }
 
- /* v3.4: каскад скачивания: оболочки — нативно; мессенджеры — ВНЕШНИЙ браузер устройства */
+ /* v3.4: каскад скачивания: оболочки — нативно; мессенджеры — ВНЕШНИЙ браузер устройства.
+    v3.5: для VK загрузка внешних файлов запрещена (п.4.1.8) — заглушка. */
  function downloadAsset(url,fileName,opts){
   opts=opts||{};
+  if(isVK()){platToast('Загрузка приложений недоступна в этой версии');return;}
   var shareText=opts.shareText||('📥 '+fileName);
   var shareTitle=opts.shareTitle||fileName;
   function openBrowser(){
@@ -322,13 +388,11 @@ var Platform=(function(){
      openBrowser();
     });
   }
-  /* 1) Android-оболочка: DownloadManager */
   if(name==='android'&&window.AppBridge&&typeof AppBridge.downloadFile==='function'){
    platToast('Начинаю загрузку '+fileName+'…');
    try{ AppBridge.downloadFile(url,fileName); }catch(e){ openBrowser(); }
    return;
   }
-  /* 2) ПК-оболочка: нативно (0.3.4+), иначе системный браузер */
   if(name==='pc'){
    if(window.AppBridge&&typeof AppBridge.downloadFile==='function'){
     platToast('Начинаю загрузку '+fileName+'…');
@@ -344,7 +408,6 @@ var Platform=(function(){
    }
    return;
   }
-  /* 3) Мессенджеры: только ВНЕШНИЙ браузер устройства, без fetch */
   if(name==='tg'||name==='vk'||name==='max'){
    if(isMaxExternal()){
     platToast('Загрузка началась в браузере…');
@@ -354,7 +417,6 @@ var Platform=(function(){
    }
    return;
   }
-  /* 4) Обычный web-браузер: fetch+blob, фолбэк навигация */
   if(name==='web'&&!window.AppBridge){
    fetchBlob(function(blob){ if(!tryShareFile(blob)) saveViaAnchor(blob); });
    return;
@@ -364,6 +426,8 @@ var Platform=(function(){
 
  return{
   get name(){return name},
+  isVK:isVK,
+  vkAppLink:vkAppLink,
   init:init,
   user:function(){return user||{id:'g0',name:'Гость'}},
   maxClientReal:maxClientReal,
@@ -395,7 +459,7 @@ var Platform=(function(){
    if(name==='android'){window.__androidBack=fn;}
    if(name==='tg')try{Telegram.WebApp.BackButton.show();Telegram.WebApp.BackButton.onClick(fn)}catch(e){}
    if(name==='vk'&&window.vkBridge)try{vkBridge.subscribe(function(e){if(e&&e.detail&&e.detail.type==='VKWebAppSwipeBack')fn()})}catch(e){}
-   if(name==='max'&&window.WebApp&&maxClientReal()&&window.WebApp.BackButton)try{window.WebApp.BackButton.show();window.WebApp.BackButton.onClick(fn)}catch(e){}},
+   if(name==='max'&&maxClientReal()&&window.WebApp&&window.WebApp.BackButton)try{window.WebApp.BackButton.show();window.WebApp.BackButton.onClick(fn)}catch(e){}},
   fireBack:function(){if(backFn)backFn()},
   close:function(){try{
    if(name==='pc'){try{window.AppBridge.quit();return}catch(e){window.close();return}}
@@ -408,6 +472,6 @@ var Platform=(function(){
   colors:function(bg){try{
    if(name==='tg'){Telegram.WebApp.setHeaderColor(bg);Telegram.WebApp.setBackgroundColor(bg)}
    else if(name==='vk'&&window.vkBridge)vkBridge.send('VKWebAppSetViewSettings',{status_bar_style:'light',action_bar_color:bg,navigation_bar_color:bg}).catch(function(){});
-   else if(name==='max'&&window.WebApp&&maxClientReal()&&window.WebApp.setHeaderColor)window.WebApp.setHeaderColor(bg);}catch(e){}}
+   else if(name==='max'&&maxClientReal()&&window.WebApp.setHeaderColor)window.WebApp.setHeaderColor(bg);}catch(e){}}
  };
 })();
