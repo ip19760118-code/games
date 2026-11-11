@@ -1,4 +1,7 @@
-/* tg-games: единый слой платформ v3.5 — TG / VK / MAX / web / PC / Android.
+/* tg-games: единый слой платформ v3.6 — TG / VK / MAX / web / PC / Android.
+   v3.6: экран согласия (п.1.1.4): до нажатия «Принимаю и играю» приложение заблокировано
+         оверлеем со ссылками на Пользовательское соглашение и Политику конфиденциальности;
+         принятие запоминается в localStorage (igc_consent_v1).
    v3.5: VK-комплаенс (п.4.1.8 / 4.2.6 / 2.2.5):
          - все шаринги и ссылки для VK ведут ТОЛЬКО на vk.com/app{vk_app_id} (авто из параметров запуска);
          - внешние URL (github.io и др.) вычищаются из текста и ссылок для VK;
@@ -16,10 +19,12 @@ var Platform=(function(){
  var MAX_NAV_MODE='external';
  var CANONICAL_ORIGIN='https://ip19760118-code.github.io/games';
  var BRAND_LINE='\n🎮 Игровой центр — классика и новинки, онлайн и офлайн';
- /* Резерв, если vk_app_id не пришёл в параметрах запуска: сообщество внутри VK (не увод). */
  var VK_FALLBACK_LINK='https://vk.com/club242534673';
- var VK_APP_ID_FALLBACK=''; /* при желании впиши сюда число из vk.com/appXXXX */
+ var VK_APP_ID_FALLBACK=''; /* при желании впиши число из vk.com/appXXXX */
  var vkAppIdCache='';
+ var CONSENT_KEY='igc_consent_v1';
+ var TERMS_URL=CANONICAL_ORIGIN+'/legal/terms.html';
+ var PRIVACY_URL=CANONICAL_ORIGIN+'/legal/privacy.html';
  var name='web',user=null,backFn=null,inited=false;
 
  function qs(k){try{return new URLSearchParams(location.search).get(k)||''}catch(e){return ''}}
@@ -47,12 +52,10 @@ var Platform=(function(){
   if(id)return 'https://vk.com/app'+id;
   return VK_FALLBACK_LINK;
  }
- /* Для VK любую внешнюю ссылку заменяем на ссылку внутри VK. */
  function vkSafeUrl(url){
   if(!isVK())return url;
   return vkAppLink();
  }
- /* Для VK вычищаем из текста все внешние URL (github.io/github.com/прочие), оставляя vk.com. */
  function vkSafeText(text){
   var t=String(text==null?'':text);
   if(!isVK())return t;
@@ -62,7 +65,6 @@ var Platform=(function(){
   });
  }
 
- /* Реестр AudioContext: чтобы глушить звук по VKWebAppViewHide (п.2.2.5). */
  var audioCtxs=[];
  (function(){
   try{
@@ -76,6 +78,28 @@ var Platform=(function(){
  })();
  function suspendAllAudio(){for(var i=0;i<audioCtxs.length;i++){try{if(audioCtxs[i].state==='running')audioCtxs[i].suspend()}catch(e){}}}
  function resumeAllAudio(){for(var i=0;i<audioCtxs.length;i++){try{if(audioCtxs[i].state==='suspended')audioCtxs[i].resume()}catch(e){}}}
+
+ /* ---- v3.6: экран согласия (п.1.1.4) ---- */
+ function consentAccepted(){try{return localStorage.getItem(CONSENT_KEY)==='1'}catch(e){return true}}
+ function showConsentGate(){
+  if(consentAccepted())return;
+  if(document.getElementById('igcConsentOverlay'))return;
+  var ov=document.createElement('div');
+  ov.id='igcConsentOverlay';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
+  ov.innerHTML='<div style="background:#1b2228;color:#eaf0ff;border-radius:20px;padding:22px;max-width:420px;width:100%;text-align:center;font-family:system-ui,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.6)">'
+   +'<h2 style="margin:0 0 10px;color:#7cffc4;font-size:20px">📄 Документы сервиса</h2>'
+   +'<p style="font-size:13px;line-height:1.55;margin:0 0 16px;color:#a8b4d8">Перед началом игры ознакомься и прими '
+   +'<a href="'+TERMS_URL+'" target="_blank" rel="noopener" style="color:#7cffc4">Пользовательское соглашение</a> и '
+   +'<a href="'+PRIVACY_URL+'" target="_blank" rel="noopener" style="color:#7cffc4">Политику конфиденциальности</a>. '
+   +'Нажимая «Принимаю и играю», ты соглашаешься с условиями и обработкой данных.</p>'
+   +'<button id="igcConsentBtn" style="background:#7cffc4;color:#061019;border:none;border-radius:24px;padding:12px 22px;font-weight:700;font-size:14px;cursor:pointer;width:100%">Принимаю и играю</button></div>';
+  document.body.appendChild(ov);
+  ov.querySelector('#igcConsentBtn').addEventListener('click',function(){
+   try{localStorage.setItem(CONSENT_KEY,'1')}catch(e){}
+   ov.remove();
+  });
+ }
 
  (function(){
   try{
@@ -239,6 +263,7 @@ var Platform=(function(){
   }catch(e){}
 
   ensureSdk(function(){pickUser();
+   showConsentGate();
    try{
     if(name==='pc'){
      if(o.back){backFn=o.back;try{window.AppBridge.onBack(o.back)}catch(e){}}
@@ -259,14 +284,12 @@ var Platform=(function(){
      if(o.bg)vkBridge.send('VKWebAppSetViewSettings',{status_bar_style:'light',action_bar_color:o.bg,navigation_bar_color:o.bg}).catch(function(){});
      vkBridge.send('VKWebAppShowCloseButton').catch(function(){});
      vkBridge.send('VKWebAppEnableSwipeBack').catch(function(){});
-     /* п.2.2.5: глушим звук при сворачивании и возвращаем при развороте */
      try{vkBridge.subscribe(function(e){
       if(e&&e.detail){
        if(e.detail.type==='VKWebAppViewHide')suspendAllAudio();
        if(e.detail.type==='VKWebAppViewShow')resumeAllAudio();
       }
      })}catch(e){}
-     /* кэшируем vk_app_id из параметров запуска для ссылок */
      try{vkBridge.send('VKWebAppGetLaunchParams').then(function(lp){if(lp&&lp.vk_app_id)vkAppIdCache=String(lp.vk_app_id)}).catch(function(){})}catch(e){}
      if(o.back){
       backFn=o.back;
@@ -294,7 +317,6 @@ var Platform=(function(){
   opts=opts||{};
   url=vkSafeUrl(url);
   text=withBrand(text,opts);
-  /* Для VK шарим только внутри VK через VKWebAppShare, без системного/внешнего шаринга. */
   if(isVK()&&window.vkBridge){
    try{vkBridge.send('VKWebAppShare',{link:url,text:text});return}catch(e){}
   }
@@ -326,8 +348,6 @@ var Platform=(function(){
   return share(isVK()?vkAppLink():gameDeepLink(key),text,opts);
  }
 
- /* v3.4: каскад скачивания: оболочки — нативно; мессенджеры — ВНЕШНИЙ браузер устройства.
-    v3.5: для VK загрузка внешних файлов запрещена (п.4.1.8) — заглушка. */
  function downloadAsset(url,fileName,opts){
   opts=opts||{};
   if(isVK()){platToast('Загрузка приложений недоступна в этой версии');return;}
@@ -428,6 +448,7 @@ var Platform=(function(){
   get name(){return name},
   isVK:isVK,
   vkAppLink:vkAppLink,
+  consentAccepted:consentAccepted,
   init:init,
   user:function(){return user||{id:'g0',name:'Гость'}},
   maxClientReal:maxClientReal,
