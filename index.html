@@ -93,6 +93,7 @@
         <button class="game-btn" data-game="fruit-samurai" id="fruitSamuraiBtn"><span class="game-emoji">🍉</span><span class="game-text"><b>Фруктовый самурай</b><small>Режь фрукты на лету и уворачивайся от бомб</small></span></button>
         <button class="game-btn" data-game="chess" id="chessBtn"><span class="game-emoji">♟️</span><span class="game-text"><b>Шахматы <span class="tag-online">ONLINE</span></b><small>Игра с ИИ или с другом онлайн</small></span></button>
         <button class="game-btn" data-game="durak" id="durakBtn"><span class="game-emoji">🃏</span><span class="game-text"><b>Дурак <span class="tag-online">ONLINE</span></b><small>Подкидной, переводной, игра с ИИ или друзьями до 4</small></span></button>
+        <button class="game-btn" data-game="poker" id="pokerBtn"><span class="game-emoji">♠️</span><span class="game-text"><b>Покер <span class="tag-online">ONLINE</span></b><small>Техасский Холдем No-Limit, до 9 игроков</small></span></button>
         <button class="game-btn" data-game="nardy" id="nardyBtn"><span class="game-emoji">🎲</span><span class="game-text"><b>Нарды <span class="tag-online">ONLINE</span></b><small>Классические длинные, игра с ИИ или с другом онлайн</small></span></button>
         <button class="game-btn" data-game="shashki" id="shashkiBtn"><span class="game-emoji">⚫</span><span class="game-text"><b>Шашки <span class="tag-online">ONLINE</span></b><small>Русские шашки, игра с ИИ или с другом онлайн</small></span></button>
         <button class="game-btn" data-game="minesweeper" id="minesBtn"><span class="game-emoji">💣</span><span class="game-text"><b>Сапёр</b><small>3 жизни, 3 уровня, скины, очки за жизни</small></span></button>
@@ -108,7 +109,7 @@
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.49 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.50 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
@@ -143,7 +144,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.49';
+    const HUB_VER = '3.50';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
@@ -163,7 +164,7 @@
 
     try { document.getElementById('platTag').textContent = Platform.name; } catch(e) {}
 
-    /* v3.49: VK-комплаенс (п.4.1.8 / 4.2.6): убираем все упоминания и ссылки на другие площадки. */
+    /* VK-комплаенс (п.4.1.8 / 4.2.6): убираем упоминания и ссылки на другие площадки. */
     (function vkCompliance(){
       try {
         if (Platform.name !== 'vk') return;
@@ -319,7 +320,7 @@
       try {
         if (navigator.connection && navigator.connection.saveData) return;
         setTimeout(function(){
-          ['chess','seabattle','durak','tetris','tictactoe','findpair'].forEach(function(g){
+          ['chess','seabattle','durak','poker','tetris','tictactoe','findpair'].forEach(function(g){
             var l = document.createElement('link');
             l.rel = 'prefetch';
             l.href = './' + g + '/';
@@ -335,6 +336,7 @@
       'arkanoid': './arkanoid/', 'domino': './domino/', 'shooter': './shooter/',
       'fruit_samurai': './fruit-samurai/', 'samurai': './fruit-samurai/', 'fruit-samurai': './fruit-samurai/',
       'chess': './chess/', 'durak': './durak/', 'nardy': './nardy/', 'shashki': './shashki/',
+      'poker': './poker/', 'holdem': './poker/', 'холдем': './poker/', 'покер': './poker/', 'texas': './poker/',
       'minesweeper': './minesweeper/', 'mines': './minesweeper/',
       'crystals': './crystals/', 'solitaire': './solitaire/',
       'seabattle': './seabattle/', 'mahjong': './mahjong/',
@@ -352,6 +354,7 @@
     document.getElementById('fruitSamuraiBtn').addEventListener('click', () => openGame('./fruit-samurai/', 'fruit-samurai'));
     document.getElementById('chessBtn').addEventListener('click', () => openGame('./chess/', 'chess'));
     document.getElementById('durakBtn').addEventListener('click', () => openGame('./durak/', 'durak'));
+    document.getElementById('pokerBtn').addEventListener('click', () => openGame('./poker/', 'poker'));
     document.getElementById('nardyBtn').addEventListener('click', () => openGame('./nardy/', 'nardy'));
     document.getElementById('shashkiBtn').addEventListener('click', () => openGame('./shashki/', 'shashki'));
     document.getElementById('minesBtn').addEventListener('click', () => openGame('./minesweeper/', 'minesweeper'));
