@@ -1,16 +1,9 @@
-/* tg-games: единый слой платформ v3.6 — TG / VK / MAX / web / PC / Android.
-   v3.6: экран согласия (п.1.1.4): до нажатия «Принимаю и играю» приложение заблокировано
-         оверлеем со ссылками на Пользовательское соглашение и Политику конфиденциальности;
-         принятие запоминается в localStorage (igc_consent_v1).
-   v3.5: VK-комплаенс (п.4.1.8 / 4.2.6 / 2.2.5):
-         - все шаринги и ссылки для VK ведут ТОЛЬКО на vk.com/app{vk_app_id} (авто из параметров запуска);
-         - внешние URL (github.io и др.) вычищаются из текста и ссылок для VK;
-         - downloadAsset для VK — заглушка (никаких внешних загрузок);
-         - VKWebAppViewHide/Show → suspend/resume всех AudioContext (звук не играет после сворачивания).
-   v3.4: downloadAsset в мессенджерах НЕ пытается fetch (CORS-блок → ложные «загрузка не удалась»):
-         TG → WebApp.openLink, VK → VKWebAppOpenExternalLink (фолбэки window.open/location.href),
-         MAX → WebApp.openLink; MAX-внешний-браузер → location.href (загрузка стартует сразу).
-   v3.3: ПК → AppBridge.downloadFile нативно; Android → DownloadManager; web → fetch+blob. */
+/* tg-games: единый слой платформ v3.7 — TG / VK / MAX / web / PC / Android.
+   v3.7: VK определяется не только по ?plat=vk, но и по параметрам запуска vk_app_id/vk_user_id,
+         которые VK добавляет к адресу сам — хаб работает даже если в настройках URL без ?plat=vk.
+   v3.6: экран согласия (п.1.1.4): до «Принимаю и играю» приложение заблокировано оверлеем.
+   v3.5: VK-комплаенс (п.4.1.8 / 4.2.6 / 2.2.5): ссылки только внутри VK, звук глушится по ViewHide.
+   v3.4: downloadAsset в мессенджерах — внешний браузер; ПК/Android — нативно; web — fetch+blob. */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
@@ -20,7 +13,7 @@ var Platform=(function(){
  var CANONICAL_ORIGIN='https://ip19760118-code.github.io/games';
  var BRAND_LINE='\n🎮 Игровой центр — классика и новинки, онлайн и офлайн';
  var VK_FALLBACK_LINK='https://vk.com/club242534673';
- var VK_APP_ID_FALLBACK=''; /* при желании впиши число из vk.com/appXXXX */
+ var VK_APP_ID_FALLBACK='54850501';
  var vkAppIdCache='';
  var CONSENT_KEY='igc_consent_v1';
  var TERMS_URL=CANONICAL_ORIGIN+'/legal/terms.html';
@@ -31,6 +24,7 @@ var Platform=(function(){
  function load(src){return new Promise(function(res){var s=document.createElement('script');s.src=src;s.onload=function(){res(true)};s.onerror=function(){res(false)};document.head.appendChild(s)})}
  function detect(){var p=(qs('plat')||'').toLowerCase();
   if(p==='tg'||p==='vk'||p==='max'||p==='pc'||p==='android')return p;
+  if(qs('vk_app_id')||qs('vk_user_id'))return 'vk';
   var bp=(window.AppBridge&&window.AppBridge.platform)?String(window.AppBridge.platform):'';
   if(bp==='pc'||bp==='android')return bp;
   if(window.Telegram&&window.Telegram.WebApp)return 'tg';
@@ -79,7 +73,6 @@ var Platform=(function(){
  function suspendAllAudio(){for(var i=0;i<audioCtxs.length;i++){try{if(audioCtxs[i].state==='running')audioCtxs[i].suspend()}catch(e){}}}
  function resumeAllAudio(){for(var i=0;i<audioCtxs.length;i++){try{if(audioCtxs[i].state==='suspended')audioCtxs[i].resume()}catch(e){}}}
 
- /* ---- v3.6: экран согласия (п.1.1.4) ---- */
  function consentAccepted(){try{return localStorage.getItem(CONSENT_KEY)==='1'}catch(e){return true}}
  function showConsentGate(){
   if(consentAccepted())return;
@@ -135,8 +128,8 @@ var Platform=(function(){
     var u=Telegram.WebApp.initDataUnsafe.user;user={id:'tg'+u.id,name:u.first_name||'Игрок'};return}}catch(e){}
   if(name==='vk'&&window.vkBridge){try{vkBridge.send('VKWebAppGetUserInfo').then(function(d){user={id:'vk'+d.id,name:d.first_name||'Игрок'}}).catch(function(){})}catch(e){}}
   if(name==='max'&&window.WebApp&&maxClientReal()){try{
-    var m=window.WebApp.initDataUnsafe&&window.WebApp.initDataUnsafe.user;
-    if(m)user={id:'mx'+m.id,name:m.first_name||'Игрок'}
+   var m=window.WebApp.initDataUnsafe&&window.WebApp.initDataUnsafe.user;
+   if(m)user={id:'mx'+m.id,name:m.first_name||'Игрок'}
    }catch(e){}}
   if(!user)user={id:'g'+Math.floor(Math.random()*1e9),name:'Гость'}}
 
