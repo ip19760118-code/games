@@ -1,6 +1,6 @@
 # PLATFORM-SPEC — МК «Игровой центр»: кроссплатформенная спецификация и грабли
 
-**Версия документа: 2.12** | Дата: 2026-11-06 | Статус: TG ✅ / MAX ✅ / VK ✅ / web ✅ / PC (Electron, Win 7 SP1–11) ✅ / Android (WebView, 8.0+) ✅
+**Версия документа: 2.13** | Дата: 2026-11-11 | Статус: TG ✅ / MAX ✅ / VK ✅ (модерация-комплаенс) / web ✅ / PC (Electron, Win 7 SP1–11) ✅ / Android (WebView, 8.0+) ✅
 Репозиторий: `github.com/ip19760118-code/games`
 Pages: `https://ip19760118-code.github.io/games/`
 
@@ -13,46 +13,50 @@ Pages: `https://ip19760118-code.github.io/games/`
 
 | Компонент | Где живёт | Комментарий |
 |---|---|---|
-| Хаб (витрина 19 игр + модалка ссылок на установщики + умная сортировка + ⚙️ android + чипы версий/NEW) | GitHub Pages, корень репо `games/` | `index.html` **v3.47** |
-| Игры | папки `chess/ … trend-catch/`, `tetris/`, `pyatnashki/`, `tictactoe/`, `findpair/` | мультиплатформенные через `js/platform.js` |
+| Хаб (витрина **20 игр** + модалка ссылок на установщики + умная сортировка + ⚙️ android + чипы версий/NEW + **VK-комплаенс**) | GitHub Pages, корень репо `games/` | `index.html` **v3.50** |
+| Игры | папки `chess/ … trend-catch/`, `tetris/`, `pyatnashki/`, `tictactoe/`, `findpair/`, **`poker/`** | мультиплатформенные через `js/platform.js` |
+| **Правовые документы VK** | `legal/terms.html`, `legal/privacy.html` (Pages) | п.1.1.4; ссылки вбиты в кабинете VK; consent-gate в platform.js |
 | Онлайн-комнаты | Firebase RTDB (имя проекта не менять!) | единая схема: раздел 5 |
 | Desktop-оболочка (Windows) | локальный проект `gc-desktop/` (**НЕ в репо**) | Electron **22**, релизы GitHub Releases: раздел 6 |
 | Android-оболочка | локальный проект `gc-android/` (**НЕ в репо**) | системный WebView, релизы там же: раздел 7 |
 | MAX-бот | Vercel, Root Dir `max-bot`, вебхук `/max` | Callback: platform-api2.max.ru |
 | VK-бот | Vercel, Root Dir `vk-bot`, вебхук `/vk` | Callback API api.vk.com |
+| **VK Mini App** | кабинет `vk.com/apps?act=manage`, APP_ID **54850501** | сообщество **club242534673** |
 | TG-бот | меню-кнопка «Играть» → hub `?plat=tg` | Web App |
 | Кэш web | `sw.js` (service worker, **v9**) | навигации network-first, статика cache-first; в оболочках НЕ регистрируется |
 | Аналитика | GA4 | hub_open / hub_game_click / hub_download_* / game_* / game_share(share_type) |
 
-Единый слой платформ: `js/platform.js` (**v3.4**) → глобальный `Platform`
+Единый слой платформ: `js/platform.js` (**v3.7**) → глобальный `Platform`
 (init, haptic, share, **shareGame**, **gameDeepLink**, **downloadAsset**, toast, onBack/fireBack, close, colors, user, name,
-maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
-Детект: `?plat=` → `AppBridge.platform` ('pc'|'android') → глобалки TG/VK/MAX → 'web'.
+maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl, **isVK, vkAppLink, consentAccepted**).
+Детект: `?plat=` → **`vk_app_id`/`vk_user_id` (v3.7)** → `AppBridge.platform` ('pc'|'android') → глобалки TG/VK/MAX → 'web'.
+Детали VK-комплаенса: раздел 3.4 (consent-gate, санитизация ссылок, глушение звука).
 
 ### 0.1 Текущие версии компонентов
 
 | Компонент | Версия |
 |---|---|
-| hub `index.html` | v3.47 |
-| `js/platform.js` | v3.4 |
+| hub `index.html` | v3.50 |
+| `js/platform.js` | v3.7 |
 | `sw.js` | v9 |
-| `tools/gen-versions.js` (gc-desktop) | v1.5 |
+| `tools/gen-versions.js` (gc-desktop) | **v1.6** |
 | vk-bot `server.js` | v1.13 |
 | max-bot `server.js` | v2.0 |
 | Морской бой | v4.30 |
 | Шахматы | v2.8 |
-| Дурак | v3.20 |
+| Дурак | **v3.38.1** |
 | Домино | v2.3 |
-| Шашки | v1.7 |
+| Шашки | v1.8.1 |
 | Нарды | v2.10 |
 | Тетрис | v1.4 |
 | Сапёр | v1.7 |
-| Пятнашки | v1.3 |
+| Пятнашки | v1.4 |
 | Крестики-нолики | v1.7.9 |
 | Кристаллы | v4.17 |
 | Косынка | v2.17 |
 | Найди пару | v1.5 |
-| Desktop-оболочка | v0.3.7 (Electron 22.3.27) |
+| **Покер (Холдем No-Limit)** | **v0.2** |
+| Desktop-оболочка | **v0.10.3** (Electron 22.3.27, **shell-updater v4**) |
 | Android-оболочка | v0.10.0 (system WebView, ContentUpdater v1.5) |
 
 ---
@@ -151,15 +155,71 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 - Кнопка действия сообщества: «Открыть приложение сообщества» → наше мини-приложение.
 - VK Bridge: `VKWebAppInit`, `VKWebAppEnableSwipeBack` + subscribe(`VKWebAppSwipeBack`),
   `VKWebAppTapticImpactOccurred/NotificationOccurred`, `VKWebAppShare({link,text})`,
-  `VKWebAppSetViewSettings`, `VKWebAppShowCloseButton`, `VKWebAppClose`, `VKWebAppGetUserInfo`.
+  `VKWebAppSetViewSettings`, `VKWebAppShowCloseButton`, `VKWebAppClose`, `VKWebAppGetUserInfo`,
+  **`VKWebAppGetLaunchParams`** (vk_app_id), **`VKWebAppViewHide`/`VKWebAppViewShow`** (звук, 3.4).
+- **APP_ID = 54850501** (`app54850501`). Не путать с ID сообщества **242534673** (`club242534673`) —
+  это разные сущности (приложение vs группа); Callback API сообщества использует group_id, Mini App — vk_app_id.
+
+### 3.4 VK-комплаенс и модерация (Правила VK Mini Apps, ред. 17.03.2026) — platform.js v3.5–3.7, hub v3.49–3.50
+
+Отклонение модерации по **п.4.1.8** («увод аудитории на другие площадки») лечится комплексно; ниже —
+все применённые меры и их причины.
+
+**п.4.1.8 — запрет увода аудитории (ссылки/реклама других платформ внутри приложения):**
+- `platform.js`: `vkSafeUrl(url)` для VK **всегда** возвращает ссылку внутри VK
+  (`https://vk.com/app{vk_app_id}`, фолбэк `https://vk.com/club242534673`); `vkSafeText(text)`
+  регуляркой вычищает/подменяет любые внешние `http(s)`-URL в тексте шаринга, кроме `*.vk.com`/`*.vk.ru`.
+- `share()`/`shareGame()` для VK идут **только** через `VKWebAppShare` с vk-ссылкой; системный
+  `navigator.share` и внешние URL для VK не используются.
+- `downloadAsset()` для VK — заглушка с тостом «Загрузка приложений недоступна в этой версии»
+  (никаких GitHub-загрузок из VK-контекста).
+- `hub index.html`: блок `vkCompliance()` при `Platform.name==='vk'` скрывает кнопку
+  «📥 Приложение для ПК и Android» и весь `dl-overlay`, меняет подзаголовок на «Мини-игры ВКонтакте»,
+  переписывает `hub-desc` и `og:description` без упоминаний Windows/Android/Telegram/MAX/GitHub.
+
+**п.4.2.6 — запрет логотипов/упоминаний других соцсетей и платформ в игре:**
+- Все пользовательские тексты (правила, описания, шеринг) для VK не содержат названий других
+  площадок; бренд-строка шеринга нейтральна («🎮 Игровой центр — классика и новинки, онлайн и офлайн»).
+- Внутренняя навигация (`location.href` на github.io внутри iframe) **не является нарушением**:
+  приложение просто хостится на Pages, но отображается внутри VK; запрещены именно видимые
+  ссылки/призывы уйти на другие площадки.
+
+**п.2.2.5 — звук не должен играть после закрытия/сворачивания:**
+- `platform.js` оборачивает конструктор `AudioContext`/`webkitAudioContext` в реестр `audioCtxs[]`;
+  подписка `VKWebAppViewHide` → `suspendAllAudio()`, `VKWebAppViewShow` → `resumeAllAudio()`.
+  Работает для всех игр сразу (игры создают контексты через обёртку).
+
+**п.1.1.4 — пользовательское соглашение и политика конфиденциальности + согласие:**
+- Документы хостятся на Pages: `legal/terms.html`, `legal/privacy.html` (публичные, HTTPS, RU, без авторизации).
+- В кабинете VK: «Правовые документы» → «Использовать свои документы» → вставить оба URL → Сохранить.
+- `platform.js` v3.6: **consent-gate** `showConsentGate()` — полноэкранный оверлей со ссылками на оба
+  документа и кнопкой «Принимаю и играю»; блокирует приложение до принятия; согласие пишется в
+  `localStorage['igc_consent_v1']='1'`; вызывается в `init()` сразу после `pickUser()`.
+- Контакты/поддержка (п.2.4): официальное сообщество `club242534673` (указано в «Информация» кабинета,
+  в обоих документах и строкой в описании хаба). Email не обязателен, если есть публичное сообщество.
+- Документы НЕ содержат заглушек `[email]`/`[ФИО]` — модерация их отклоняет; контакт = сообщество.
+
+**Загрузка приложения (кейс «Ошибка загрузки. Проверьте подключение»):**
+- Причина: placement-URL без `?plat=vk` → `detect()` возвращал 'web' → `VKWebAppInit` не вызывался →
+  клиент VK таймаутил и показывал нативную ошибку загрузки.
+- Лечение 1 (настройки): placement URL = `https://ip19760118-code.github.io/games/?plat=vk` (mobile + desktop).
+- Лечение 2 (platform.js v3.7): автодетект VK по launch-параметрам `vk_app_id`/`vk_user_id`
+  (VK сам дописывает их к адресу iframe) — работает даже без `?plat=vk`.
+- `VK_APP_ID_FALLBACK='54850501'` в platform.js как резерв, плюс кэш из `VKWebAppGetLaunchParams`.
+
+**Чек-лист подачи на модерацию (VK):**
+1. Placement URL с `?plat=vk` (или положиться на v3.7-автодетект). 2. «Состояние: Включено».
+3. Правовые документы = свои URL (terms/privacy). 4. Официальное сообщество привязано.
+5. Описание витрины без чисел игр и без упоминаний других платформ. 6. Иконки 512/100, скриншот.
+7. Consent-gate виден при первом запуске. 8. Шаринг из любой игры даёт только vk.com-ссылку.
 
 ---
 
 ## 4. Общий слой (hub + platform.js + sw.js + шеринг + релизы)
 
-- Детект платформы: сначала `?plat=` из URL, затем `AppBridge.platform` ('pc'|'android'),
-  затем глобалки (Telegram → vkBridge → WebApp+version). SDK грузим лениво (`ensureSdk`),
-  хардкод тегов в hub запрещён.
+- Детект платформы: сначала `?plat=` из URL, **затем `vk_app_id`/`vk_user_id` (v3.7)**, затем
+  `AppBridge.platform` ('pc'|'android'), затем глобалки (Telegram → vkBridge → WebApp+version).
+  SDK грузим лениво (`ensureSdk`), хардкод тегов в hub запрещён.
 - `openGame()`: TG/VK/web/pc/android — `location.href`; MAX real client — `openLink` во внешнее окно
   (тост «Открываю игру…» обязателен); MAX external browser — обычная навигация.
 - Service worker `sw.js` (**v9**): навигации network-first с кэш-фолбэком; статика cache-first
@@ -167,20 +227,24 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
   удаляет ВСЕ старые кэши (`skipWaiting` + `clients.claim`) — лечение «залипшего» platform.js в TG-desktop.
   Регистрация из `platform.js` по маске `^(.*\/games\/)` только на github.io
   **и только при отсутствии `window.AppBridge`** (в оболочках кэшем управляет апдейтер).
-- Prefetch топовых игр (chess/seabattle/durak/tetris/tictactoe) через `<link rel=prefetch>`; пропуск при `saveData`.
+- Prefetch топовых игр (chess/seabattle/durak/**poker**/tetris/tictactoe) через `<link rel=prefetch>`; пропуск при `saveData`.
 - Firebase-комнаты работают ТОЛЬКО в first-party контексте: никаких iframe внутри мессенджер-вью.
 - `window.open` может блокироваться popup-блокером → всегда fallback `location.href`.
 - **Favicon:** во всех играх и хабе `<link rel="icon" … icon-32.png>` (+apple-touch 180); убирает 404 `/favicon.ico`.
 - **Звук:** mp3 в `assets/snd` отсутствуют → эффекты через синтез в приоритете; `SND.preload()` не вызывать (404).
   AudioContext создаётся/разблокируется ТОЛЬКО после user gesture (autoplay-policy); эталон-функция `unlockAudio()`
   (однократный silent-осциллятор + resume; повторные вызовы дешёвые).
+  **VK: глобальное глушение по `VKWebAppViewHide` через реестр контекстов (3.4, п.2.2.5).**
+- **Consent-gate (platform.js v3.6, п.1.1.4):** оверлей согласия до любого геймплея; ключ `igc_consent_v1`;
+  ссылки на `legal/terms.html` / `legal/privacy.html`; показывается на ВСЕХ платформах (не только VK).
+- **VK-изолированная сборка (platform.js v3.5–3.7 + hub v3.49–3.50, п.4.1.8/4.2.6):** см. раздел 3.4.
+  Ключевые API: `Platform.isVK()`, `Platform.vkAppLink()`, `Platform.consentAccepted()`;
+  внутренние `vkSafeUrl/vkSafeText/suspendAllAudio/resumeAllAudio`.
 - **Модалка хаба «📥 Приложение для ПК и Android» (v3.29–3.33 двухэтапная, v3.44 — без закачки):**
   экран действий содержит ТОЛЬКО «📤 Отправить ссылку» и «💾 Скачать ссылку» (буфер обмена);
   экран платформ: Windows / Android → обе кнопки работают со **ссылкой на установщик**
-  (`WIN_EXE_URL` / `APK_URL`), прямая загрузка бинарников из хаба УБРАНА (v3.44):
-  WebView/мессенджеры не могут надёжно скачать 140 МБ (CORS, attachment-навигация, зависания VK) —
-  получатель открывает ссылку в своём браузере и скачивает там. Системная «Назад»/Esc
-  на экране платформ возвращает на экран действий (`ov.dataset.screen`).
+  (`WIN_EXE_URL` / `APK_URL`), прямая загрузка бинарников из хаба УБРАНА (v3.44).
+  **Для VK модалка и кнопка скрыты полностью (vkCompliance, 3.4).**
 - **Шестерёнка настроек (hub v3.34):** кнопка `#hubSetBtn` в правом верхнем углу панели;
   видна только при `Platform.name==='android' && AppBridge.openSettings` → открывает нативный
   экран настроек оболочки (7.9). На pc/web/TG/MAX/VK скрыта.
@@ -191,15 +255,15 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
   при любой ошибке (404-страница оболочек, HTML вместо JSON) — фолбэк на абсолютный
   Pages-URL (`Access-Control-Allow-Origin: *`); оба fail → чипы молча скрываются.
   **Чип/NEW есть ТОЛЬКО у игр, присутствующих в манифесте** — см. правило GAMES генератора (6.3).
-- **📤 Вирусный шеринг (platform.js v3.0–3.1):**
+- **📤 Вирусный шеринг (platform.js v3.0–3.1, VK-санитизация v3.5):**
   - `Platform.gameDeepLink(key)` = `CANONICAL_ORIGIN + '/?game=' + key` — получатель открывается
     в хабе и сразу попадает в игру (`handleDeepLink`), plat подставляется уже на его стороне.
-  - `Platform.shareGame(key, text, opts)` — шеринг результата/анонса: url = диплинк; к тексту
-    авто-добавки: строка «👉 Сыграть сейчас: <диплинк>» (opts.game) и бренд-строка
-    «🎮 Игровой центр — классика и новинки, онлайн и офлайн» (opts.game ИЛИ opts.brand).
-    **Бренд без чисел** — никаких «16/17 игр» в текстах (числа устаревают).
+    Для VK подменяется на vk-ссылку приложения.
+  - `Platform.shareGame(key, text, opts)` — шеринг результата/анонса: url = диплинк (VK → vkAppLink);
+    к тексту авто-добавки: строка «👉 Сыграть сейчас: <ссылка>» и бренд-строка
+    «🎮 Игровой центр — классика и новинки, онлайн и офлайн»; текст проходит `vkSafeText`.
   - Обычный `Platform.share(url,text,opts)` без опций НЕ меняется: инвайты комнат
-    остаются как были (инвайтам добавляем `{brand:true}` при миграции).
+    остаются как были, но для VK url/text санитизируются.
   - **v3.1 фикс десктоп-web:** `navigator.share` (OS share-sheet) на Windows отдаёт таргетам
     (Telegram) только url, текст терялся → при `name==='web'` и pointer:fine шеринг идёт
     в буфер обмена полным сообщением + тост; мобильный web (pointer:coarse) и оболочки — прежние пути.
@@ -208,7 +272,7 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
   - финальный оверлей: **«📤 Отправить результат»** (`shareResult`: исход + очки/время + диплинк + бренд);
     появляется при любом исходе, не только победа;
   - GA `game_share` с `share_type:'link'|'result'` — метрика виральности K = hub_deeplink / игроки.
-- **UX-паттерн pulse-подсказок (v2.7 → уточнение v2.10):** `@keyframes btnPulse` подсвечивает
+- **UX-паттерн pulse-подсветок (v2.7 → уточнение v2.10):** `@keyframes btnPulse` подсвечивает
   ТОЛЬКО кнопки шторки комнаты (`.rbtn`: 📤 Пригласить → ▶ Начать → 🔄 Реванш) и кнопки финального
   оверлея endOverlay. **Клетки/карты игрового поля и кнопки выбора режима НЕ пульсируют**
   (требование пользователя: подсветка поля и модалки отвлекает; tictactoe v1.7.7, durak v3.17).
@@ -240,7 +304,7 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
   Ключ нормализуется из пути папки (`./trend-catch/` → `trend_catch`), работает и для диплинков.
 - Описания витрин без чисел игр (лимиты платформ).
 
-### 4.1 Каскадное скачивание ассетов (platform.js v3.4, hub v3.44)
+### 4.1 Каскадное скачивание ассетов (platform.js v3.4, hub v3.44, VK-заглушка v3.5)
 
 `Platform.downloadAsset(url, fileName, opts)` — единая точка входа для бинарников из оболочек и web:
 
@@ -249,7 +313,8 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 | Android-оболочка ≥0.9.0 | `AppBridge.downloadFile` → системный `DownloadManager` (уведомление, `Downloads/`) | `ACTION_VIEW` браузер |
 | ПК-оболочка ≥0.3.6 | IPC `bridge:download-file` → `node:https` с редиректами (до 5) → `app.getPath('downloads')` + `shell.showItemInFolder` | `AppBridge.openExternal` |
 | Web-браузер desktop | `fetch` → `blob` → `<a download>` (blob same-origin обходит Chrome-игнор download-атрибута на кросс-оригин редиректе GitHub) | `window.open` |
-| TG/VK/MAX WebApp | **без fetch** (CORS-блок): сразу ВНЕШНИЙ браузер (`WebApp.openLink` / `VKWebAppOpenExternalLink` / `Telegram.WebApp.openLink`), mobile сначала пробует `navigator.share({files})` | `location.href` |
+| TG/MAX WebApp | **без fetch** (CORS-блок): сразу ВНЕШНИЙ браузер (`WebApp.openLink` / `Telegram.WebApp.openLink`), mobile сначала пробует `navigator.share({files})` | `location.href` |
+| **VK (любой контекст, п.4.1.8)** | **заглушка: тост «Загрузка приложений недоступна в этой версии»** | **—** |
 | MAX во внешнем браузере | `location.href = url` (GitHub отдаёт `Content-Disposition: attachment` → загрузка стартует сама) | — |
 
 **Hub v3.44:** прямая закачка установщиков из хаба УБРАНА полностью (см. раздел 4, модалка):
@@ -278,7 +343,8 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
   смерть ВСЕГО `<script>` = «пустое поле без меню и без видимых ошибок» (кейсы: durak v3.19
   `try` без закрывающей скобки в joinRoom; tictactoe v1.6.2 дубль `const sC`+`function sC`;
   tictactoe v1.7.4 опечатка `goHub` вместо `goToHub` в присваивании обработчика;
-  solitaire v2.9 лишняя скобка в `burst()`).
+  solitaire v2.9 лишняя скобка в `burst()`; **durak v3.38** `new Promise(r){…}` вместо
+  `new Promise(r=>{…})` в `ensureFirebase` → смерть всего script, «зависание» после окна режимов).
   Обязательно до поставки: `node --check` извлечённого JS ИЛИ открытие в браузере с консолью;
   в играх держать boot-guard (`window.__BOOT_OK` + fallback-оверлей с текстом ошибки, паттерн durak).
 - **Идентификаторы:** запрещены дубли имён `const/let/var` и `function` в одном scope;
@@ -295,13 +361,13 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl).
 
 ## 5. Единая архитектура онлайн-комнат
 
-Применяется во всех 7 онлайн-играх: Морской бой, Шахматы, Дурак, Домино, Шашки, Нарды, Крестики-нолики.
+Применяется во всех **8** онлайн-играх: Морской бой, Шахматы, Дурак, Домино, Шашки, Нарды, Крестики-нолики, **Покер**.
 
 ### 5.1 Структура комнаты в Firebase RTDB
 
 ```
 rooms/{code}/
-├── game: 'chess'|'seabattle'|'durak'|'domino'|'shashki'|'nardy'|'tictactoe'
+├── game: 'chess'|'seabattle'|'durak'|'domino'|'shashki'|'nardy'|'tictactoe'|'poker'
 ├── host: seat|side|uid хоста
 ├── round: number            // счётчик партий, +1 на каждую новую
 ├── status: 'waiting'|'playing'|'finished'
@@ -309,7 +375,7 @@ rooms/{code}/
 ├── players|seats: {key: {name, uid, at}}   // состав (схемы различаются, см. 5.9)
 ├── presence: {key: {name, uid, at}}        // heartbeat
 ├── rematch: {key: true}                    // флаги согласия на реванш
-├── flags: {drawOffer, drawAccept, surrender, winner}
+├── flags: {drawOffer, drawAccept, surrender, winner, leftNotice}
 ├── scores: {key: number}                   // суммарные победы
 └── state: {...}                            // игровое состояние (см. 5.12 про null/массивы!)
 ```
@@ -317,9 +383,9 @@ rooms/{code}/
 ### 5.2 Жизненный цикл партии
 
 ```
-waiting ──[host: «▶ Начать»]──► playing ──[result зафиксирован]──► finished
-   ▲                                                                  │
-   └──[все активные rematch=true && isHost]───────────────────────────┘
+waiting ──[host: «▶ Начать» / автостарт при 2-м игроке]──► playing ──[result]──► finished
+   ▲                                                                              │
+   └──[все активные rematch=true && isHost]───────────────────────────────────────┘
         (status='playing', round+1, rematch={}, players=только активные, state=new)
 ```
 
@@ -396,6 +462,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | Шахматы, Шашки, Нарды, Крестики-нолики | `players/w`, `players/b` (объекты с `uid`; в Крестиках w=❌, b=⭕) |
 | Домино | `players/{uid}` |
 | Дурак | `seats/p0..p3` (объекты с `uid`) |
+| **Покер** | **`seats/p0..p8` (объекты с `uid`, до 9 игроков)** |
 
 Консолидированные правила RTDB (`.write` комнаты = создание ИЛИ участник):
 
@@ -406,11 +473,11 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
       "$code": {
         ".read": "auth != null",
         ".validate": "$code.matches(/^[A-Z0-9]{4,10}$/)",
-        ".write": "auth != null && (!data.exists() || data.child('host').child('id').val() === auth.uid || data.child('guest').child('id').val() === auth.uid || data.child('players').child(auth.uid).exists() || data.child('players').child('w').child('uid').val() === auth.uid || data.child('players').child('b').child('uid').val() === auth.uid || data.child('seats').child('p0').child('uid').val() === auth.uid || data.child('seats').child('p1').child('uid').val() === auth.uid || data.child('seats').child('p2').child('uid').val() === auth.uid || data.child('seats').child('p3').child('uid').val() === auth.uid)",
+        ".write": "auth != null && (!data.exists() || data.child('host').child('id').val() === auth.uid || data.child('guest').child('id').val() === auth.uid || data.child('players').child(auth.uid).exists() || data.child('players').child('w').child('uid').val() === auth.uid || data.child('players').child('b').child('uid').val() === auth.uid || data.child('seats').child('p0').child('uid').val() === auth.uid || data.child('seats').child('p1').child('uid').val() === auth.uid || data.child('seats').child('p2').child('uid').val() === auth.uid || data.child('seats').child('p3').child('uid').val() === auth.uid || data.child('seats').child('p4').child('uid').val() === auth.uid || data.child('seats').child('p5').child('uid').val() === auth.uid || data.child('seats').child('p6').child('uid').val() === auth.uid || data.child('seats').child('p7').child('uid').val() === auth.uid || data.child('seats').child('p8').child('uid').val() === auth.uid)",
         "guest": { ".write": "auth != null && (!data.exists() || data.child('id').val() === auth.uid)" },
         "players": { "$key": { ".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid || data.child('id').val() === auth.uid || $key === auth.uid)" } },
         "seats": { "$key": { ".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid || data.child('id').val() === auth.uid || $key === auth.uid)" } },
-        "presence": { "$role": { ".write": "auth != null && (root.child('rooms/'+$code+'/host/id').val() === auth.uid || root.child('rooms/'+$code+'/guest/id').val() === auth.uid || root.child('rooms/'+$code+'/players').child(auth.uid).exists() || root.child('rooms/'+$code+'/players/w/uid').val() === auth.uid || root.child('rooms/'+$code+'/players/b/uid').val() === auth.uid || root.child('rooms/'+$code+'/seats/p0/uid').val() === auth.uid || root.child('rooms/'+$code+'/seats/p1/uid').val() === auth.uid || root.child('rooms/'+$code+'/seats/p2/uid').val() === auth.uid || root.child('rooms/'+$code+'/seats/p3/uid').val() === auth.uid)" } }
+        "presence": { "$role": { ".write": "auth != null && (root.child('rooms/'+$code+'/host/id').val() === auth.uid || root.child('rooms/'+$code+'/guest/id').val() === auth.uid || root.child('rooms/'+$code+'/players').child(auth.uid).exists() || root.child('rooms/'+$code+'/players/w/uid').val() === auth.uid || root.child('rooms/'+$code+'/players/b/uid').val() === auth.uid || root.child('rooms/'+$code+'/seats/p0/uid').val() === auth.uid || root.child('rooms/'+$code+'/seats/p1/uid').val() === auth.uid || root.child('rooms/'+$code+'/seats/p2/uid').val() === auth.uid || root.child('rooms/'+$code+'/seats/p3/uid').val() === auth.uid || root.child('rooms/'+$code+'/seats/p4/uid').val() === auth.uid || root.child('rooms/'+$code+'/seats/p5/uid').val() === auth.uid || root.child('rooms/'+$code+'/seats/p6/uid').val() === auth.uid || root.child('rooms/'+$code+'/seats/p7/uid').val() === auth.uid || root.child('rooms/'+$code+'/seats/p8/uid').val() === auth.uid)" } }
       }
     },
     ".read": false,
@@ -430,6 +497,7 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 | Шашки | `[SH]` |
 | Нарды | `[NA]` |
 | Крестики-нолики | `[TT]` |
+| **Покер** | **`[PK]`** |
 
 Ключевые строки: `startHeartbeat …`, `presence write failed …`, `propose rematch …`,
 `rematch check: rm=… active=… allAgreed=…`, `all agreed -> start new game immediately`,
@@ -440,7 +508,8 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 ### 5.11 Watchdog автоходов
 
 Хост каждые 5 c: если актёр без fresh presence и `turnAt` старше 30 с → автоход по правилам игры
-(взятие/пропуск/бито/ролл/бросок костей/передача хода) с `lastMove.action='автоход (нет связи)'`.
+(взятие/пропуск/бито/ролл/бросок костей/передача хода/**фолд-или-чек в покере**) с `lastMove.action='автоход (нет связи)'`.
+В покере: если `toCall>0` → фолд, иначе → чек.
 
 ### 5.12 Firebase RTDB: массивы, null и merge-удаления (Крестики v1.7.6–1.7.7)
 
@@ -505,28 +574,45 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   проигравшему — «Вам прилипили…», победителю — «Вы прилипили сопернику…»; при ничьей — без бейджа.
 - Бейдж `.six-badge` в endOverlay + отдельный звук `sSix()`.
 
+### 5.18 Покер (Холдем No-Limit, v0.2) — специфика движка
+
+- **Состав:** 52 карты без джокеров (13 рангов × 4 масти); 2 карманные + 5 общих.
+- **Блайнды:** `SB=10`, `BB=20`; heads-up: дилер = SB.
+- **Улицы:** `preflop → flop (3) → turn (1) → river (1) → showdown`.
+- **Сайд-поты:** при нескольких олл-инах банк разбивается по уровням `totalBet`; каждый пот разыгрывается
+  только между теми, кто вложился в этот уровень; сплит при равенстве `best7`.
+- **Оценщик комбинаций:** `eval5` (8 категорий, колесо A-2-3-4-5 учтено); `best7` (C(7,5)=21).
+- **Действия:** `fold`/`check`/`call`/`bet`/`raise`/`allin`; `acted[]` сбрасывается при рейзе у всех,
+  кроме рейзера; min-raise = предыдущий инкремент (стандарт No-Limit).
+- **Дилер-кнопка:** двигается по кругу (`nextLive`) после каждой раздачи; роли D/SB/BB на чипах.
+- **Боты:** сила руки + пот-оддсы + шум по сложности (easy/medium/hard).
+- **Шоудаун-ривил:** `showdownRevealed=true` после финала → карты всех активных вскрываются в UI.
+- **Автоход watchdog (5.11):** `toCall>0 → fold`, иначе `check`.
+
 ---
 
-## 6. Desktop-оболочка (Windows, Electron 22) — v0.3.7
+## 6. Desktop-оболочка (Windows, Electron 22) — v0.10.3
 
 ### 6.1 Состав и расположение
 
 - Проект **локальный**: `C:\Telegram\gc-desktop\` (в репо НЕ коммитится).
 - `src/main/`: `main.js` (окно, протокол, меню, IPC, скачивание), `config.js` (JSON в userData),
-  `updater.js` (контент, **v1.4.2**), `shell-updater.js` (оболочка, electron-updater).
+  `updater.js` (контент, **v1.4.2**), `shell-updater.js` (**v4: собственный node-https апдейтер, electron-updater удалён**).
 - `src/preload/preload.js` → `window.AppBridge` (platform='pc'): share/openExternal/notify/
   getProfile/getVersions/quit/onBack/onToast/getUpdateWarnings/getShellInfo/setProfile/
   setUpdateMode/setContentSource/openPath/checkUpdates/getShellUpdateStatus/shellUpdateCheck/
   shellUpdateInstall/onShellUpdateState/**downloadFile**.
 - `src/renderer/settings.html` — экран настроек (`app://shell/settings.html`).
-- `tools/gen-versions.js` (v1.5: +игра `findpair` в массиве GAMES; v1.4: +`tictactoe`; v1.3: `addedAt`
-  и реестр `games-added.json`) — генератор манифеста `versions.json` **в корень репо**.
+- `tools/gen-versions.js` (**v1.6**: +игра `poker`; v1.5: +`findpair`; v1.4: +`tictactoe`;
+  v1.3: `addedAt` и реестр `games-added.json`) — генератор манифеста `versions.json` **в корень репо**.
 - `assets/icons/` — вывод electron-icon-builder (`win/icon.ico`, `png/*`).
 - `electron-builder.yaml`, `package.json` (version = версия оболочки; **см. правило package.json в 6.2**).
 - **Electron 22.3.27** — последняя линейка с поддержкой Windows 7 SP1/8/8.1 (Chromium 108, Node 16).
   Electron 23+ требует Windows 10 (см. 8.3). electron-builder 24.x: NSIS per-user,
   `artifactName: IgrovojCentr-Setup.exe`, `compression: maximum`, `electronLanguages: [ru, en]`,
-  `publish: github`, иконки `assets/icons/win/icon.ico`.
+  иконки `assets/icons/win/icon.ico`.
+  **Блок `publish: github` УДАЛЁН (v0.10.3, shell-updater v4)** — фид теперь generic через Pages/GitHub latest.yml;
+  с блоком `publish` electron-builder даёт ValidationError схемы.
 
 ### 6.2 Контент: паки, протокол app://, контракты модулей и package.json
 
@@ -551,22 +637,29 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   Любая замена имени класса/сигнатур/экспорта = TypeError в `whenReady` ДО создания окна:
   процессы висят в диспетчере, окна нет, автообновление не стартует (кейс v1.4.1, фикс v1.4.2).
   Менять можно только внутренности методов.
-- **🔒 API-КОНТРАКТ `shell-updater.js` (НЕ НАРУШАТЬ):** main.js зовёт
+- **🔒 API-КОНТРАКТ `shell-updater.js` v4 (НЕ НАРУШАТЬ):** main.js зовёт
   `shellUpdater.init({mode, toast, onState})` (а НЕ `init(app, config, hooks)`);
   методы `check(silent)`, `menuAction()`, `getStatus()`. Любое отклонение = молчащее автообновление.
+  **v4 (2026-11-11): собственный апдейтер на `node:https`** (electron-updater УДАЛЁН):
+  - Фиды в порядке приоритета: Pages `desktop/latest.yml` → GitHub `releases/latest/download/latest.yml`.
+  - Парсинг `version:`/`path:`/`sha512:` из yml-файда (generic provider).
+  - Скачивание exe через `node:https` с редиректами (до 5 hop, `Accept-Encoding: identity`, таймаут 60 с)
+    во временный файл, затем spawn нового процесса с ключом `--update=<path>` и quit текущего.
+  - Ошибки **тихие**: короткий тост + автоповтор через 10 минут (никакого полноэкранного полотна `fullscreenerror`).
 - **🔒 API-КОНТРАКТ `config.js` (НЕ НАРУШАТЬ):** main.js зовёт
   `const { makeConfig, DEFAULT_ROOT } = require('./config')` (НЕ объект с `get/set` напрямую);
   `config = makeConfig(app)` → `config.get()` / `config.set(k,v)` / `config.save()`.
   **`packsRoot` = текущая папка контента** (pages: `userData/packs/current`; local: `DEFAULT_ROOT`);
   не путать с внутренним `updater.currentDir`. Несовпадение семантик = страница 404 при живых паках
   (кейс реконструкции main.js v0.3.5, см. 6.9).
-- **🔒 ПРАВИЛО `package.json` (кейс v0.3.6→v0.3.7):** runtime-зависимости (`electron-updater` и любые,
-  которые `require`-ятся в main.js) держать **ТОЛЬКО** в секции `dependencies`.
+- **🔒 ПРАВИЛО `package.json` (кейс v0.3.6→v0.3.7, обновлено v0.10.3):** runtime-зависимости (`electron-updater`
+  и любые, которые `require`-ятся в main.js) держать **ТОЛЬКО** в секции `dependencies`.
   `devDependencies` (electron, electron-builder) electron-builder **НЕ пакует** в `app.asar`.
-  Потеря зависимости = краш main-процесса на первом же `require` в runtime
-  (`Cannot find module 'electron-updater'`, диалог «A JavaScript error occurred in the main process»).
+  Потеря зависимости = краш main-процесса на первом же `require` в runtime.
+  **v0.10.3: `electron-updater` полностью удалён из `dependencies`** (заменён на `node:https` в shell-updater v4).
+  `devDependencies` содержат только electron и electron-builder.
   **Контроль сборки:** `npx @electron/asar list release/win-unpacked/resources/app.asar | findstr electron-updater`
-  — должны быть строки `node_modules/electron-updater/…`; пустой вывод = релиз НЕ публиковать.
+  — для v0.10.3+ вывод должен быть **пустой** (модуля больше нет); для более старых релизов — непустой.
 - Источники: `local` (dev: паки = рабочая копия репо) | `pages` (боевой: GitHub Pages).
   В установленном exe дефолт `pages`, если локального репо нет.
 - Бутстрап: `pages` + (`auto` ИЛИ нет валидного контента) → синхронизация ДО окна (таймаут 60 с).
@@ -600,13 +693,14 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
   (кейс 2026-11-03: platform.js v3.0/v3.1 и sw.js v9 не доехали до паков при HUB_VER 3.37;
   web/мессенджеры работали, т.к. грузят с Pages напрямую). Изменения ОТДЕЛЬНЫХ ИГР правила не требуют:
   игры сравниваются по собственной `VER`.
-- **🔒 ПРАВИЛО GAMES (gen-versions v1.4, кейс 2026-11-04):** массив `GAMES` в `tools/gen-versions.js`
+- **🔒 ПРАВИЛО GAMES (gen-versions v1.4→v1.6):** массив `GAMES` в `tools/gen-versions.js`
   — единственный источник состава манифеста. Новая игра, закоммиченная БЕЗ добавления id в массив,
   не попадает в `versions.json` → паки оболочек её не скачивают (на ПК клик = страница «Файл не найден»,
   т.к. fallback в сеть у desktop-протокола НЕТ), хаб не рисует чип версии и NEW;
   при этом web/мессенджеры и Android (сетевой fallback перехватчика) работают — диагностика сбивает с толку.
   Лечение: добавить `['<id>', online?]` в GAMES → реген ПОСЛЕ коммита игры → коммит
   `versions.json` + `games-added.json` → push → синхронизация оболочек.
+  **v1.6 (2026-11-11): добавлен `['poker', true]`; 20-я игра.**
 - **🔒 ПРАВИЛО «МАНИФЕСТ НЕ ОБГОНЯЕТ КОНТЕНТ» (кейс HTTP 404 при синхронизации, 2026-11-06):**
   `versions.json` ссылается на байты из `git show HEAD:path`; если реген сделан по РАБОЧЕЙ папке
   с незакоммиченными файлами (генератор предупреждает «НЕ ЗАКОММИЧЕН»), а затем запушен только
@@ -624,25 +718,30 @@ waiting ──[host: «▶ Начать»]──► playing ──[result заф
 - **Правило деплоя:** коммит контента → `node tools/gen-versions.js` → коммит `versions.json`
   (+`games-added.json` при первом добавлении игры) → push одним пакетом.
 
-### 6.4 Обновление оболочки (electron-updater)
+### 6.4 Обновление оболочки (v4, node-https generic фид, 2026-11-11)
 
-- Фид: GitHub Releases репо `games` (`publish: provider github` в yml).
-- В каждый релиз **обязательно** прикреплять `latest.yml` из `release\` — без него апдейтер слеп.
-- **Грабля «актуальна» при новом релизе:** `latest.yml` несёт `version:` из `package.json`;
-  если версию не bump-нули перед сборкой, установленная оболочка видит равную версию и не обновляется.
-  Чек-лист: bump `package.json` → `npm run dist` → `type release\latest.yml | findstr version`
-  → сверить → только потом релиз.
-- Режимы из конфига контента: `auto` — тихая закачка + диалог «Перезапустить сейчас?»;
+- **v4 (shell-updater.js):** electron-updater УДАЛЁН; апдейтер собственный на `node:https` (generic provider).
+- Фиды в порядке приоритета:
+  1. `https://ip19760118-code.github.io/games/desktop/latest.yml` (собственная копия на Pages);
+  2. `https://github.com/ip19760118-code/games/releases/latest/download/latest.yml` (фолбэк).
+- Парсинг yml: `version:`, `path:`, `sha512:` — строковый разбор, не YAML-либа (в main-процессе без зависимостей).
+- Скачивание: `node:https` через `httpGetBuffer`-хелпер, редиректы до 5 hop, `Accept-Encoding: identity`,
+  таймаут 60 с, ретраи по ошибке. Запись во временный файл `app.getPath('temp')/IgrovojCentr-Update.exe`.
+- Установка: `child_process.spawn(exePath, ['--update', tempExe], {detached:true, stdio:'ignore'})` + `app.quit()`.
+- **Грабля «504 Gateway Timeout» (кейс 2026-11-11, electron-updater v5):** electron-updater парсил
+  HTML-страницу releases/latest как yml → `fullscreenerror` + зелёное полотно ошибки поверх окна;
+  лечение — переход на generic-фид с собственным парсером yml.
+- **Режимы из конфига контента:** `auto` — тихая закачка + диалог «Перезапустить сейчас?»;
   `manual` — тост «Доступна новая версия оболочки» + «Файл → Обновить приложение…».
 - Тихая проверка через 6 c после старта (только `app.isPackaged`); в dev — заглушка с пояснением.
-- Обновления дельтовые (differential downloader) — обычно единицы МБ.
+- При ошибке закачки/парсинга — короткий тост + автоповтор через 10 минут (без полноэкранного полотна).
 - v0.1.0 обновиться сама не может (кода апдейтера не было) — только ручная переустановка.
 - **Сломанная сборка не самолечится:** если main.js падает до инициализации shell-updater
   (кейс контракта updater.js, кейс package.json v0.3.6), автообновление не стартует —
   таким машинам ручная установка нового exe.
 - **Грабля Node 16 (Electron 22):** глобального `fetch` в main-процессе нет →
-  `updater.js` качает через `node:https`-хелпер `httpGetBuffer` (редиректы до 5,
-  `Accept-Encoding: identity`, таймаут 30 с, 1 ретрай на файл).
+  `updater.js` и `shell-updater.js` качают через `node:https`-хелпер `httpGetBuffer` (редиректы до 5,
+  `Accept-Encoding: identity`, таймаут 30–60 с, 1–2 ретрая).
 
 ### 6.5 Релизы оболочки и ссылки скачивания
 
@@ -936,6 +1035,10 @@ packsRoot (404 при живых паках), неверный вызов shell-
 | VK: пропала нижняя клавиатура | сообщение без keyboard | keyboard в каждом send |
 | VK: Rate limit reached | лимит попыток модерации | одна попытка в сутки |
 | VK: встроенный браузер зависает на «Скачивание…» | редиректы GitHub CDN в WebView VK | не скачивать из VK: только ссылки (hub v3.44, 4.1) |
+| **VK: модерация reject п.4.1.8 (ссылки на другие площадки)** | кнопка ПК/Android + github-ссылки в шаринге/текстах | vkCompliance хаба + vkSafeUrl/vkSafeText + downloadAsset-заглушка (3.4) |
+| **VK: «Ошибка загрузки. Проверьте подключение» после смены placement URL** | URL без `?plat=vk` → detect='web' → нет VKWebAppInit → таймаут клиента | placement URL с `?plat=vk` И/ИЛИ автодетект vk_app_id/vk_user_id (platform.js v3.7) |
+| **VK: звук играет после сворачивания** | нет обработки ViewHide | реестр AudioContext + suspend/resume (3.4, п.2.2.5) |
+| **VK/все: нет согласия на документы (п.1.1.4)** | согласие не запрашивалось | consent-gate platform.js v3.6 + legal/*.html + URLs в кабинете |
 | TG: платформа tg в VK/MAX | хардкод TG SDK в hub | ленивая загрузка SDK |
 | TG: «В меню игр» закрывает бота | goToHub вызывал WebApp.close | platform.js v2.8: внутренняя навигация на хаб |
 | TG/BotFather: «Invalid bot selected» | бот выбран ДО команды | порядок: команда → кнопка бота → текст |
@@ -975,8 +1078,9 @@ packsRoot (404 при живых паках), неверный вызов shell-
 | **После установки: диалог «A JavaScript error occurred in the main process», `Cannot find module 'electron-updater'`** | **runtime-зависимость только в `devDependencies` — electron-builder не пакует devDeps в asar** | **🔒 правило package.json (6.2): runtime-зависимости только в `dependencies`; контроль `asar list … \| findstr electron-updater`; кейс 2026-11-04 v0.3.6→v0.3.7** |
 | **Оболочка открывается, но Настройки показывают «vundefined», «Chrome undefined», «(нет index.html!)» при живых паках; контент 404** | **реконструкция main.js вслепую: другие имена IPC (`get-shell-info` vs `shell:get-info`), чужая семантика `packsRoot`, неверный вызов `shellUpdater.init(app,config,…)`** | **🔒 запрет реконструкции (6.9): только инкремент к родным файлам; контракт полей settings.html; кейс 2026-11-04 v0.3.5→v0.3.6** |
 | **Оболочки не получают новый platform.js/sw.js/иконки при живом обновлении игр** | **hub-файлы изменены без bump HUB_VER: селективный sync сравнивает версии, не хэши** | **🔒 правило HUB_VER (6.3): bump `HUB_VER` в том же коммите; кейс 2026-11-03 v3.37→v3.38** |
-| **Кнопка игры в хабе есть, на ПК клик = «Файл не найден», чипа/NEW нет нигде; Android и мессенджеры работают** | **id новой игры не добавлен в массив GAMES генератора: манифест без секции игры → паки не скачивают (у desktop-протокола нет сетевого fallback), хаб без метаданных; Android живёт за счёт fallback перехватчика, web/мессенджеры — напрямую с Pages** | **🔒 правило GAMES (6.3): добавить id в GAMES (gen-versions v1.4), реген ПОСЛЕ коммита игры, коммит versions.json+games-added.json, push, синхронизация оболочек; кейс tictactoe 2026-11-04** |
-| «Оболочка актуальна», хотя релиз свежий | `latest.yml.version` равен установленной: version в package.json не bump-нули перед сборкой | bump → dist → `type release\latest.yml \| findstr version` → сверить → релиз (6.4) |
+| **Кнопка игры в хабе есть, на ПК клик = «Файл не найден», чипа/NEW нет нигде; Android и мессенджеры работают** | **id новой игры не добавлен в массив GAMES генератора: манифест без секции игры → паки не скачивают (у desktop-протокола нет сетевого fallback), хаб без метаданных; Android живёт за счёт fallback перехватчика, web/мессенджеры — напрямую с Pages** | **🔒 правило GAMES (6.3): добавить id в GAMES (gen-versions v1.6), реген ПОСЛЕ коммита игры, коммит versions.json+games-added.json, push, синхронизация оболочек; кейс tictactoe 2026-11-04, poker 2026-11-11** |
+| **«Ошибка обновления оболочки» + зелёное полотно / 504 GitHub** | **electron-updater парсит HTML-страницу releases/latest как yml → `fullscreenerror`** | **shell-updater v4 (2026-11-11): собственный node-https generic-фид, yml-парсер, тихие ошибки + retry 10 мин; удалить блок `publish` из electron-builder.yaml; удалить `electron-updater` из `dependencies` (package.json v0.10.3)** |
+| **«Оболочка актуальна», хотя релиз свежий** | `latest.yml.version` равен установленной: version в package.json не bump-нули перед сборкой | bump → dist → `type release\latest.yml \| findstr version` → сверить → релиз (6.4) |
 | Кнопка шеринга в игре молчит (TypeError: shareGame is not a function) в оболочках | в паках старый platform.js (см. правило HUB_VER) | bump HUB_VER + regen + push + синхронизация оболочек |
 | Шеринг с ПК-web уходит «голой ссылкой» без текста | navigator.share → OS share-sheet: таргет (Telegram) берёт только url | platform.js v3.1: web + pointer:fine → полное сообщение в буфер + тост |
 | Иконка exe/ярлыка «вернулась к атому Electron» | `signAndEditExecutable: false` отключает rcedit (встраивание иконки) | флаг убрать; winCodeSign чинить распаковкой кэша; кэш иконок Windows: `ie4uinit.exe -show` / перезапуск explorer (6.6) |
@@ -993,7 +1097,9 @@ packsRoot (404 при живых паках), неверный вызов shell-
 | Автообновление не видит релиз | в релизе нет `latest.yml` | прикреплять latest.yml в каждый релиз |
 | Win 8.1: «Невозможно запустить это приложение на вашем ПК» | Electron 23+ манифест exe требует Win10 | Electron 22 (оболочка v0.3.0+); один установщик на Win 7 SP1–11 |
 | Win10: хаб открывается как текст (исходник) | `registerBufferProtocol` на Electron 22 для standard-схемы отдаёт `text/plain` | `registerFileProtocol` (v0.11): MIME по расширению; страницы-ошибки файлами |
-| Updater: `fetch is not defined` | Node 16 (Electron 22) без глобального fetch | https-хелпер `httpGetBuffer` в updater.js v1.3 |
+| Updater: `fetch is not defined` | Node 16 (Electron 22) без глобального fetch | https-хелпер `httpGetBuffer` в updater.js v1.3 / shell-updater.js v4 |
+| `npm run dist`: **ValidationError схемы publish** | блок `publish: github` несовместим со схемой после перехода на v4 generic-фид | удалить блок `publish` из electron-builder.yaml (v0.10.3) |
+| Сборка пишет в `release\`, а не `dist\` | `directories.output: release` в yaml | брать артефакты из `release\` |
 | На новом ПК нет `gc-desktop` | проект оболочки никогда не коммитился в репо | копия с накопителя или воссоздание файлов; генератор манифеста = `gc-desktop\tools\gen-versions.js` |
 
 ### 8.4 Android-оболочка и сборка APK
@@ -1032,6 +1138,7 @@ packsRoot (404 при живых паках), неверный вызов shell-
 | Симптом | Причина | Лечение |
 |---|---|---|
 | **Hub v3.45: после деплоя подписи игр применились, но чипы/NEW/сортировка/модалка/диплинки/⚙️ умерли на ПК и Android одновременно** | **ручная компактификация JS-блока хаба в одну строку сломала выполнение в WebView оболочек; hub = единая точка отказа всех 18 игр и всех оболочек** | **v3.46 = формат v3.44 + только текстовые диффы; 🔒 правило «хаб не компактить» (4.2); правки хаба только точечными диффами** |
+| **Дурак v3.38: «зависание» после окна режимов, SyntaxError «Unexpected token {» в ensureFirebase** | **`new Promise(r){...}` вместо `new Promise(r=>{...})` — потеряна стрелка в колбэке загрузчика Firebase** | **v3.38.1 (2026-11-11): переписать загрузчик Firebase на именованные function-колбэки (`function onApp(){…}`) без стрелок в критичных местах; boot-guard показал точное место ошибки** |
 | **Косынка: 0/5 партий разобрано на «Среднем»** | **решатель SOLVABLE не имел хода waste→tableau (`wt`) → доказательства решаемости и подгонка работали вхолостую** | **v2.11: ход `wt` в moves/apply; reveal-rig при открытии закрытой карты; триггеры подгонки после каждого хода/взятия** |
 | **Косынка: при драге из дома стопка пустеет на время переноса** | **фонды рендерят только верхнюю карту; DOM-узел уходил в dragwrap** | **v2.14: флаг dragHide — фонды/сброс рендерят карту под поднятой; сброс флага в onUp/onCancel** |
 | **Косынка: кнопки под полем уходят за нижний край смартфона** | **высота колонок считалась формулой `vh - ch - 210` с жёстким запасом; вторая панель кнопок и переносы его съедали** | **v2.17: layout() измеряет фактические offsetHeight шапки/HUD/панелей/футера + отступы; tabH = остаток экрана** |
@@ -1070,7 +1177,7 @@ packsRoot (404 при живых паках), неверный вызов shell-
 |---|---|---|
 | **Модалка «Скачать приложение»: тост есть, загрузок нет** | **Chrome/Firefox на кросс-оригин редиректе GitHub игнорирует атрибут `download` у `<a>` и делает навигацию** | **fetch+blob+`<a download>` (blob same-origin); hub v3.40** |
 | **ПК-оболочка: скачивание открывает браузер** | **`<a download>` в Electron 22 на `app://`-origin тоже игнорируется** | **IPC `bridge:download-file` (node:https → Downloads + showItemInFolder); main.js v0.3.6+** |
-| **TG/VK/MAX: «Загрузка не удалась» → внутренний браузер мессенджера зависает** | **fetch на внешний домен в WebApp блокируется CORS; внутренний браузер VK зависает на редиректах GitHub** | **🔒 правило мессенджеров (platform.js v3.4): НЕ пытаться fetch, сразу ВНЕШНИЙ системный браузер (`openLink`/`VKWebAppOpenExternalLink`); mobile сначала `navigator.share({files})`; hub v3.44 вообще убрал прямую закачку из хаба — только ссылки** |
+| **TG/VK/MAX: «Загрузка не удалась» → внутренний браузер мессенджера зависает** | **fetch на внешний домен в WebApp блокируется CORS; внутренний браузер VK зависает на редиректах GitHub** | **🔒 правило мессенджеров (platform.js v3.4): НЕ пытаться fetch, сразу ВНЕШНИЙ системный браузер (`openLink`/`VKWebAppOpenExternalLink`); mobile сначала `navigator.share({files})`; hub v3.44 вообще убрал прямую закачку из хаба — только ссылки; VK — заглушка** |
 | **Android-оболочка: скачивание открывает браузер** | **`AppBridge.downloadFile` отсутствовал (<0.9.0), фолбэк в `openExternal`** | **v0.9.0: нативный `DownloadManager.enqueue` → уведомление + `Downloads/`, браузер не открывается** |
 
 ---
@@ -1087,7 +1194,7 @@ packsRoot (404 при живых паках), неверный вызов shell-
    AudioContext разблокируется по user gesture (`unlockAudio()`).
 4. Шеринг по паттерну 4-го раздела: на главном экране «📤 Отправить ссылку на игру»
    (`shareGameLink` → `Platform.shareGame`), «📤 Отправить результат» в финальном оверлее
-   (`shareResult`); GA `share_type`.
+   (`shareResult`); GA `share_type`. **Для VK ссылки санитизируются автоматически (3.4).**
 5. Pulse-подсказки ТОЛЬКО на кнопках шторки и endOverlay (4); авто-шторка по смене статуса (5.14).
 6. Оверлеи: кнопка «← В меню игр» в ряду `.mhdr` над заголовком (4).
 7. GA через `trackEvent`; платформа подставляется автоматически.
@@ -1102,6 +1209,7 @@ packsRoot (404 при живых паках), неверный вызов shell-
 14. Первая генерация манифеста проставит `addedAt` = сегодня → NEW 7 дней (6.3).
 15. Bump `VER` игры при каждой правке её файлов (игры сравниваются по своей версии; HUB_VER не нужен).
 16. Код игры компактный; поставка полным файлом в одном контейнере; синтаксический контроль (4.2).
+17. **VK-комплаенс (3.4): в текстах правил/шеринга нет названий других платформ; весь шеринг через Platform.share*/shareGame.**
 
 ### 9.2 Новая онлайн-игра (подключение к единой схеме)
 1. Структура комнаты по 5.1. 2. Heartbeat 5/15 с, запуск +500 мс после записи места.
@@ -1116,23 +1224,26 @@ packsRoot (404 при живых паках), неверный вызов shell-
 18. `roomRef.off('value')` перед повторной подпиской; guard'ы полей в callback (5.13).
 19. pendingMove-lock вместо оптимистичных мутаций state (5.12).
 20. Имена игроков через `getUserNameAsync()` (5.16).
+21. **Для покера (5.18): seats p0..p8, блайнды SB/BB, сайд-поты по totalBet, watchdog фолд/чек, роли D/SB/BB на чипах.**
 
 ### 9.3 Релиз desktop-оболочки
 1. Bump `version` в `package.json` (**без этого автообновление считает релиз «актуальным»!**).
-2. **Проверить секцию `dependencies`: все модули, которые `require`-ятся в runtime
-   (`electron-updater` и т.п.), должны быть в `dependencies`, а НЕ в `devDependencies`**
-   (🔒 правило 6.2 — кейс v0.3.6: `electron-updater` потерялся в deps → краш main).
+2. **Проверить секцию `dependencies`: все модули, которые `require`-ятся в runtime,
+   должны быть в `dependencies`, а НЕ в `devDependencies`** (🔒 правило 6.2).
+   **v0.10.3: `electron-updater` полностью удалён из deps (shell-updater v4).**
 3. `npm install` → `npm run dist`; проверить `type release\latest.yml | findstr version` = новой версии.
-4. **Контроль упаковки:** `npx @electron/asar list release/win-unpacked/resources/app.asar | findstr electron-updater` —
-   должны быть строки `node_modules/electron-updater/…`; пустой вывод = релиз НЕ публиковать.
-5. Проверить иконку exe в проводнике ДО загрузки ассета (rcedit не сломан, 6.6).
-6. Release: tag `vN.N.N`, ассеты **три под точными именами**: `IgrovojCentr-Setup.exe` + `latest.yml` +
-   `IgrovojCentr.apk` (БЕЗ версий в именах!, правило 4/6.5).
-7. Publish → hub-кнопки подхватят через `latest/download` автоматически.
-8. **Контроль стабильных ссылок:** обе URL `…/releases/latest/download/IgrovojCentr.apk` и
+4. **Контроль упаковки (v0.10.3):** `npx @electron/asar list release/win-unpacked/resources/app.asar | findstr electron-updater` —
+   **должен быть ПУСТОЙ вывод** (модуля больше нет). Для более старых релизов — непустой.
+5. **Убедиться, что в `electron-builder.yaml` НЕТ блока `publish`** (v0.10.3: ValidationError схемы).
+6. Проверить иконку exe в проводнике ДО загрузки ассета (rcedit не сломан, 6.6).
+7. Release: tag `vN.N.N`, ассеты **три под точными именами**: `IgrovojCentr-Setup.exe` + `latest.yml` +
+   `IgrovojCentr.apk` (БЕЗ версий в именах!, правило 4/6.5). **Приложить `desktop/latest.yml` для Pages-фида.**
+8. Publish → hub-кнопки подхватят через `latest/download` автоматически; shell-updater v4 возьмёт
+   фид с Pages `desktop/latest.yml` → GitHub `releases/latest/download/latest.yml`.
+9. **Контроль стабильных ссылок:** обе URL `…/releases/latest/download/IgrovojCentr.apk` и
    `…/IgrovojCentr-Setup.exe` открываются в браузере и качают файл (не 404).
-9. Проверка автообновления с предыдущей установленной версии (Win10) + установка на Win 8.1.
-10. Сломанную сборку (если main.js падал) автообновление не лечит — таким машинам ручная установка.
+10. Проверка автообновления с предыдущей установленной версии (Win10) + установка на Win 8.1.
+11. Сломанную сборку (если main.js падал) автообновление не лечит — таким машинам ручная установка.
 
 ### 9.4 Деплой контента
 1. Коммит контента. **Если коммит трогает `js/platform.js`, `sw.js`, `js/snd.js`, `icon-*.png` —
@@ -1140,7 +1251,7 @@ packsRoot (404 при живых паках), неверный вызов shell-
    **Если коммит добавляет новую игру — её id уже должен быть в GAMES генератора** (🔒 правило 6.3).
    **Если коммит трогает hub `index.html` — правка ТОЛЬКО точечным диффом поверх читаемого формата
    v3.44+; компактификация и полное переписывание JS хаба запрещены** (🔒 правило 4.2, кейс v3.45).
-2. `node tools/gen-versions.js` (v1.5, из git-блобов, +`games-added.json`) →
+2. `node tools/gen-versions.js` (**v1.6**, из git-блобов, +`games-added.json`) →
 3. коммит `versions.json` (+`games-added.json` при первом добавлении игры) → 4. push одним пакетом.
    **Манифест НЕ должен обгонять контент** (🔒 правило 6.3, кейс HTTP 404 в синхронизации оболочек).
 5. В оболочках: авто-синхронизация при запуске (desktop: «Проверить обновления игр»;
@@ -1149,6 +1260,7 @@ packsRoot (404 при живых паках), неверный вызов shell-
 7. После деплоя хаба: регресс-чек фишек витрины — чипы версий, NEW, умная сортировка, модалка ссылок,
    диплинки `?game=`, шестерёнка ⚙️ (android); при одновременной смерти всех — подозревать формат/целостность
    JS хаба (8.5, кейс v3.45).
+8. **VK: после деплоя проверить consent-gate и отсутствие внешних ссылок в VK-сборке (3.4).**
 
 ### 9.5 Новая платформа (бот) / переезд
 1. Вебхук на Vercel; ответ ДО/ПОСЛЕ обработки по freeze-модели. 2. Реестр: подписка + секрет + confirmation.
@@ -1168,7 +1280,7 @@ packsRoot (404 при живых паках), неверный вызов shell-
 5. Тест: устройство с предыдущей версией → авто-диалог обновления (режим auto) или
    ⚙️ → «Проверить обновление оболочки» (режим manual) → загрузка → гейт неизвестных источников →
    установщик показывает НОВУЮ версию → установка поверх без потери паков и имени.
-6. Свежая установка: bootstrap-загрузка паков (оверлей только при пустых паках); **авиарежим →
+6. Свежая установка: bootstrap-загрузки паков (оверлей только при пустых паках); **авиарежим →
    мгновенный старт хаба и игр из памяти** (intercept директорий, 7.2);
    диплинк комнаты, шеринг, иконка (кэш лаунчера!), ⚙️ и все секции настроек (7.9, без хардкодов чисел).
 7. Фоновая синхронизация с интернетом: хаб мгновенно, без «Обновление: N/M»; тост «✅ Игры обновлены»
@@ -1180,7 +1292,8 @@ packsRoot (404 при живых паках), неверный вызов shell-
    - **ПК:** IPC `bridge:download-file` через `node:https` с редиректами → `app.getPath('downloads')/fileName` → `shell.showItemInFolder(dest)` + тост (main.js ≥v0.3.6).
    - **Android:** `@JavascriptInterface downloadFile` → `DownloadManager.enqueue` в `DIRECTORY_DOWNLOADS` + `VISIBILITY_VISIBLE_NOTIFY_COMPLETED` + фолбэк `ACTION_VIEW` (AppBridge.java ≥v0.9.0).
 3. **В мессенджерах (TG/VK/MAX) — НЕ пытаться fetch из WebApp** (CORS-блок = ложные «загрузка не удалась»);
-   сразу переход во внешний браузер: TG `Telegram.WebApp.openLink(url)`; VK `vkBridge.send('VKWebAppOpenExternalLink',{link:url})` с фолбэком `window.open`; MAX `window.WebApp.openLink(url)`; MAX во внешнем браузере `location.href=url`.
+   сразу переход во внешний браузер: TG `Telegram.WebApp.openLink(url)`; MAX `window.WebApp.openLink(url)`; MAX во внешнем браузере `location.href=url`.
+   **VK: НЕ пытаться ни fetch, ни openLink — заглушка с тостом «недоступна в этой версии» (п.4.1.8).**
 4. Обычный web-браузер (desktop): `fetch` → `blob` → `<a href=URL.createObjectURL(blob) download>`.
 5. Мобильный web (pointer:coarse): попытка `navigator.share({files:[new File([blob],fileName)]})` — системный chooser; фолбэк `window.open`.
 6. Тосты честные: «Начинаю загрузку…» в момент старта, «Загрузка запущена…» только после успешной попытки; при fallback в браузер — «Открываем браузер для загрузки…».
@@ -1192,10 +1305,21 @@ packsRoot (404 при живых паках), неверный вызов shell-
    компактный стиль без лишних переносов/пробелов (4.2).
    **Исключение для hub `index.html`: полный файл допускается ТОЛЬКО в исходном читаемом формате
    (v3.44+), компактификация запрещена (4.2); предпочтительны точечные диффы.**
+   **Исключение для спеки/документов: всегда одним блоком-контейнером.**
 3. Точечные правки (1–5 строк) — только как исключение, таблицей «Найти → Заменить» с пометкой.
 4. Bump `VER` игры (+ метки в футере/модалках); синтаксический контроль после компактификации (4.2).
 5. Деплой: коммит игры → `gen-versions.js` → коммит `versions.json` → push (9.4).
 6. После подтверждения пользователем — фиксация грабли в раздел 8 спеки следующей версией.
+
+### 9.9 VK-публикация и комплаенс (новый, 2026-11-11)
+1. Placement URL mobile+desktop = `https://ip19760118-code.github.io/games/?plat=vk` (или автодетект v3.7).
+2. «Правовые документы» = свои URL (`legal/terms.html`, `legal/privacy.html`); документы без заглушек `[email]`/`[ФИО]`, контакт = сообщество.
+3. «Информация»: официальное сообщество привязано; описание без чисел и без чужих платформ; строка поддержки.
+4. Consent-gate виден при первом запуске; повторный запуск не спрашивает (localStorage `igc_consent_v1`).
+5. Шаринг из любой игры в VK даёт только vk.com-ссылку; кнопка скачивания ПК/Android в VK скрыта.
+6. Звук глушится по ViewHide (реестр AudioContext, platform.js v3.5).
+7. Подать на модерацию ОДИН раз; при reject — читать пункт правил и править точечно.
+8. APP_ID (54850501) не путать с ID сообщества (242534673); Callback API сообщества использует group_id, Mini App — vk_app_id.
 
 ---
 
@@ -1205,6 +1329,12 @@ packsRoot (404 при живых паках), неверный вызов shell-
 |---|---|
 | Hub URL | `https://ip19760118-code.github.io/games/` |
 | Диплинк игры | `https://ip19760118-code.github.io/games/?game=<key>` (handleDeepLink хаба; key из GAME_MAP) |
+| **VK APP_ID** | **54850501** (`app54850501`); сообщество **club242534673** (group_id 242534673) |
+| **VK placement URL** | `https://ip19760118-code.github.io/games/?plat=vk` (mobile + desktop) |
+| **VK legal docs** | `…/games/legal/terms.html`, `…/games/legal/privacy.html` |
+| **VK consent key** | `localStorage['igc_consent_v1']` |
+| **VK fallback link** | `https://vk.com/club242534673` (если vk_app_id не пришёл) |
+| **VK APP_ID fallback** | `VK_APP_ID_FALLBACK='54850501'` в platform.js v3.7 |
 | MAX webhook | Vercel-проект max-bot, path `/max` |
 | VK webhook | Vercel-проект vk-bot, path `/vk` |
 | VK Mini App | кабинет `vk.com/apps?act=manage`; диплинк `/app<id>` |
@@ -1215,28 +1345,23 @@ packsRoot (404 при живых паках), неверный вызов shell-
 | EXE (стабильная ссылка) | `…/releases/latest/download/IgrovojCentr-Setup.exe` |
 | APK (стабильная ссылка) | `…/releases/latest/download/IgrovojCentr.apk` |
 | **Имена релиз-ассетов** | **строго `IgrovojCentr.apk`, `IgrovojCentr-Setup.exe`, `latest.yml` — без версий (кейс 404 v0.10.0)** |
+| **Desktop-фид shell-updater v4** | `https://ip19760118-code.github.io/games/desktop/latest.yml` (основной) → `releases/latest/download/latest.yml` (фолбэк) |
 | Манифест контента | `…/games/versions.json` (+ копия в паках оболочек, 6.2/7.2) |
 | Манифест автообновления APK | `…/games/android-update.json` (в репо **games**, коммит строго ПОСЛЕ Publish релиза) |
 | Реестр дат добавления игр | `…/games/games-added.json` (сид 2026-10-01; NEW = 7 суток) |
-| GAMES генератора | 19 id в `gc-desktop\tools\gen-versions.js` (v1.5); новая игра — добавить ДО регена |
+| GAMES генератора | **20 id** в `gc-desktop\tools\gen-versions.js` (**v1.6**, +poker); новая игра — добавить ДО регена |
 | Паки desktop | `%APPDATA%\igrovoj-centr\packs\current` (+`versions.json`) |
 | Паки android | `context.filesDir/packs/current` (+`versions.json`) |
 | APK android (загрузка обновления) | `context.cacheDir/update/IgrovojCentr.apk` |
 | Pref'ы android | SharedPreferences `igrovoj`: `name`, `updateMode` (auto/manual), `apkCheckAt` |
 | JAVA_HOME сборки android | `<Android Studio>\jbr` ИЛИ `C:\Program Files\Eclipse Adoptium\jdk-17…` |
-| Ключи Пятнашек | localStorage `pyatnashki_set` {vol,diff,skin}, `pyatnashki_stats` |
-| Ключи Крестиков | localStorage `tt_set` {aiLvl,first,vol,skin}, `tt_stats`, `tt_name`; картинки `tictactoe/img/{x,o}.png` (512×512, ASCII!) |
-| Ключи Дурака | localStorage `durak_set` {diff,transfer,allAdd,throwPause}, `durak_name`, `durak_uid_fallback`; поле состояния `lastSixesOnMe` (5.17) |
-| Ключи Косынки | localStorage `sol_set` {diff,skin,back,assist,vol,voice}, `sol_stats`; рубашки `solitaire/img/back1..5.png` (300×420, PNG/WEBP) |
-| Ключи Тетриса | localStorage `tetris_set` {skin,speed,ghost,vib,vol}, `tetris_stats` |
-| Ключи Кристаллов | localStorage `crystals_set` {mode,diff,skin,vol,voice}, `crystals_stats` |
-| Ключи Найди пару | localStorage `findpair_set` {lvl,pics,skin,vol}, `findpair_stats`; кнопка-картинка `findpair/img/start.png` |
+| Ключи localStorage игр | `pyatnashki_set` {vol,diff,skin}, `pyatnashki_stats`; `tt_set` {aiLvl,first,vol,skin}, `tt_stats`, `tt_name`; картинки `tictactoe/img/{x,o}.png` (512×512, ASCII!); `durak_set` {diff,transfer,allAdd,throwPause}, `durak_name`, `durak_uid_fallback`, `lastSixesOnMe` (5.17); `sol_set` {diff,skin,back,assist,vol,voice}, `sol_stats`; рубашки `solitaire/img/back1..5.png` (300×420); `tetris_set` {skin,speed,ghost,vib,vol}, `tetris_stats`; `crystals_set` {mode,diff,skin,vol,voice}, `crystals_stats`; `findpair_set` {lvl,pics,skin,vol}, `findpair_stats`; `findpair/img/start.png`; **`poker_set` {diff,back}, `poker_name`, `poker_uid_fb`** |
 | Троттлинг автопроверки APK | 6 часов (ручной вызов игнорирует) |
 | Desktop: runtime | Electron 22.3.27 (Win 7 SP1–11), electron-builder 24, NSIS per-user |
 | Desktop: контракт updater | 6.2 — НЕ НАРУШАТЬ (имя класса/экспорт/сигнатуры) |
-| Desktop: контракт shell-updater | 6.2 — НЕ НАРУШАТЬ (`init({mode,toast,onState})` / `check(silent)` / `menuAction()` / `getStatus()`) |
+| Desktop: контракт shell-updater v4 | 6.2 — НЕ НАРУШАТЬ (`init({mode,toast,onState})` / `check(silent)` / `menuAction()` / `getStatus()`; node-https generic-фид, тихие ошибки) |
 | Desktop: контракт config | 6.2 — `makeConfig(app)` + `DEFAULT_ROOT`; `packsRoot` = текущая папка контента |
-| Desktop: package.json | 6.2 — runtime-зависимости (`electron-updater`) только в `dependencies`, НЕ в `devDependencies` |
+| Desktop: package.json | 6.2 — runtime-зависимости только в `dependencies`; **electron-updater удалён** (v0.10.3) |
 | Android: runtime | system WebView; minSdk 26 (Android 8.0), compile/targetSdk 34, AGP 8.9.1+, Gradle 9.6 |
 | Android: подписи | `gc-android\keystore\release.keystore` (alias igrovoj) + резервная копия |
 | HEARTBEAT_INTERVAL / TTL | 5000 / 15000 мс |
@@ -1247,7 +1372,7 @@ packsRoot (404 при живых паках), неверный вызов shell-
 | BOT_ADD_GAP (Дурак) | 2000 мс на бота-подкидывателя |
 | Тапы: пороги | drag 6px; тап elapsed<400ms; double-tap окно 300ms; single-tap задержка 250ms (5.15) |
 | Hub smart-sort | полураспад 30 дней, ключ `hub_sort_stats`, сброс `?sort=reset` |
-| Формат поставки кода | полный файл одним контейнером, компактно (ИГРЫ); hub — только читаемый формат v3.44+ (4.2) |
+| Формат поставки кода | полный файл одним контейнером, компактно (ИГРЫ); hub — только читаемый формат v3.44+ (4.2); спека — одним контейнером |
 
 > 🔒 Значения секретов — только Vercel Environment Variables и локальные `.env`.
 
@@ -1271,6 +1396,7 @@ packsRoot (404 при живых паках), неверный вызов shell-
 | 2.10 | 2026-11-05 | **🔒 Стиль кода и формат поставки** (4.2): компактный код без лишних переносов/пробелов; полные файлы одним контейнером, точечные правки — исключение; синтаксический контроль после компактификации (SyntaxError убивает весь `<script>`: durak v3.19, tictactoe v1.6.2/1.7.4); временные диагностические логи `[XX]` с последующей чисткой; **hub v3.44**: прямая закачка бинарников из хаба убрана — модалка только отправляет/копирует ссылки (4.1, 8.6); **Firebase RTDB: массивы/null/merge** (5.12) — плейсхолдеры `''`/`0`, атомарный `child('state').set()`, normState object→array, запрет оптимистичных мутаций + pendingMove-lock; **гигиена listener'ов** (5.13); **шторка только по смене статуса** (5.14); **тапы через pointerup + single/double таймеры** (5.15); **имена из оболочек: getProfile строка vs Promise** (5.16); **шестёрки по атаке `lastSixesOnMe`** (5.17); **pulse только шторка+endOverlay**, **`.mhdr`-заголовки оверлеев**, **diff-рендер без мигания**; Крестики v1.6–1.7.9 и Дурак v3.16–3.20 полным циклом; чек-лист 9.8 «Поставка фикса кода» |
 | 2.11 | 2026-11-05 | **Hub v3.45→v3.46 регресс**: ручная компактификация JS-блока хаба убила чипы/NEW/сортировку/модалку/диплинки/⚙️ в оболочках ПК и Android (подписи игр при этом применились — HTML жил, JS молчал); hub = единая точка отказа 18 игр и всех оболочек; **🔒 правило «хаб не компактить»** (4.2): JS хаба только в читаемом формате v3.44+, правки хаба точечными диффами, компактный стиль — только файлы игр; строка в 8.5; шаги регресс-чека фишек витрины в 9.4; исключение формата поставки хаба в 9.8; hub v3.46 (формат v3.44 + новые подписи 12 игр) |
 | 2.12 | 2026-11-06 | **Android v0.10.0 + ContentUpdater v1.5 полным циклом кейсов релиза:** (а) **🔒 имена релиз-ассетов без версий** — ассет `IgrovojCentr-0.10.0.apk` дал HTTP 404 на стабильной ссылке `releases/latest/download/IgrovojCentr.apk` и уронил автообновление оболочки (4/6.5/7.7/9.3/9.6); (б) **shouldInterceptRequest: директория→index.html** — офлайн-игры падали `ERR_INTERNET_DISCONNECTED` при полных паках (7.2/8.4); (в) **самовосстановление полноты паков + безопасный swap с откатом + sanity staging** — installed.json маскировал отсутствующие файлы, «хаб есть, игр нет» (7.2/8.4); (г) **тихий фоновый бутстрап silentSync** — оверлей «Обновление: N/M» больше не блокирует старт (7.2/9.6); (д) `android-update.json` живёт в репо **games**, коммит из gc-desktop = «not a git repository» (7.8/8.4); (е) JAVA_HOME для gradlew: Adoptium JDK 17 как альтернатива JBR студии (7.6/8.4); **🔒 правило «манифест не обгоняет контент»** (6.3, кейс HTTP 404 в синхронизации); игры: hub v3.47 + Найди пару v1.0–1.5 (дебют 19-й игры, GAMES v1.5), Тетрис v1.3–1.4 (старт со стакана, светлая тема), Кристаллы v4.17 (шторка инструментов, шеринг), Косынка v2.3–2.17 (решатель с ходом wt, скрытая подгонка закрытых карт + настройка частоты помощи, рубашки back1–5 с жёлтоватым листом, светлый скин, dragHide-фикс драга из дома, layout по замеру экрана), Нарды v2.9–2.10 (правила сброса/блока по классике) |
+| **2.13** | **2026-11-11** | **VK-политика и модерация (раздел 3.4, платформа v3.5–3.7, hub v3.49–3.50):** п.4.1.8 — vkCompliance хаба (скрытие кнопки/модалки ПК-Android, переписывание подзаголовка/описания/og), `vkSafeUrl/vkSafeText`, шаринг только vk.com, downloadAsset-заглушка; п.4.2.6 — тексты без чужих платформ; п.2.2.5 — реестр AudioContext + suspend/resume по `VKWebAppViewHide/Show`; п.1.1.4 — `legal/terms.html`+`legal/privacy.html` на Pages, URLs в кабинете «Правовые документы», **consent-gate** platform.js v3.6 (`igc_consent_v1`); APP_ID 54850501 + автодетект `vk_app_id`/`vk_user_id` (platform.js v3.7) + лечение «Ошибка загрузки» при placement без `?plat=vk`; чек-лист 9.9; **Покер v0.2** (Холдем No-Limit, 52 карты без джокеров, до 9 игроков seats p0..p8, сайд-поты, олл-ин, шоудаун, боты, онлайн-комнаты) + **gen-versions v1.6** (`['poker',true]`) + hub v3.50 (кнопка Покер/GAME_MAP/префетч); **Дурак v3.38.1**: фикс SyntaxError в `ensureFirebase` (`new Promise(r){}` → именованные function-колбэки) + стрелки-навигаторы руки v3.36 + значок-шеринг v3.37; **Shell v0.10.3**: shell-updater v4 (собственный node-https generic-фид вместо electron-updater, тихие ошибки, retry 10 мин, удаление блока `publish` из electron-builder.yaml, артефакты в `release\`, `electron-updater` удалён из `dependencies`); rules Firebase расширены seats/p4..p8 для покера |
 
 ---
 
