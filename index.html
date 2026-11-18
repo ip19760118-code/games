@@ -109,7 +109,7 @@
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.50 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.51 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
@@ -144,7 +144,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.50';
+    const HUB_VER = '3.51';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
@@ -296,7 +296,8 @@
       } catch (e) {}
       try { Platform.haptic('light'); } catch (e) {}
       const sep = url.indexOf('?') >= 0 ? '&' : '?';
-      const target = url + sep + 'plat=' + Platform.name;
+      let target = url + sep + 'plat=' + Platform.name;
+      try { const rm = new URL(location.href).searchParams.get('room'); if (rm) target += '&room=' + encodeURIComponent(rm); } catch (e) {}
       let abs = target;
       try { abs = new URL(target, location.href).href; } catch (e) {}
 
