@@ -48,7 +48,7 @@
     .tag-online { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 10px; background: rgba(124, 255, 196, 0.15); border: 1px solid rgba(124, 255, 196, 0.4); color: #7cffc4; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; vertical-align: middle; }
     .dl-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 16px; }
     .dl-overlay.show { display: flex; }
-    .dl-card { background: #1b2228; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 24px; padding: 22px; max-width: 420px; width: 100%; text-align: center; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); color: #eaf0ff; }
+    .dl-card { background: #1b2228; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 24px; padding: 22px; max-width: 420px; width: 100%; text-align: center; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); color: #eaf0ff; max-height: 88vh; overflow-y: auto; }
     .dl-card h2 { font-size: 20px; margin: 0 0 14px; color: #7cffc4; }
     .dl-opt { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); cursor: pointer; text-align: left; font-family: inherit; color: #eaf0ff; width: 100%; transition: background 0.15s ease, border-color 0.15s ease; }
     .dl-opt:active { background: rgba(255, 255, 255, 0.1); }
@@ -61,6 +61,17 @@
     .dl-share:active { color: #7cffc4; border-color: rgba(124, 255, 196, 0.6); }
     .dl-note { font-size: 11px; color: #8a94a6; margin-top: 10px; line-height: 1.4; }
     .dl-close { position: absolute; top: 12px; right: 12px; background: rgba(255, 255, 255, 0.08); border: none; color: #eaf0ff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background 0.15s ease; }
+    /* v3.53: карточка платформы + пара кнопок источника ссылки */
+    .dl-plat { border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; text-align: left; }
+    .dl-plat-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .dl-plat-head .emoji { font-size: 26px; width: 42px; height: 42px; border-radius: 12px; background: rgba(124, 255, 196, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .dl-plat-head .txt { flex: 1; min-width: 0; }
+    .dl-plat-head .txt b { display: block; font-size: 15px; margin-bottom: 2px; color: #ffffff; }
+    .dl-plat-head .txt small { display: block; font-size: 12px; color: #8a94a6; }
+    .dl-links { display: flex; gap: 8px; }
+    .dl-linkbtn { flex: 1; padding: 9px 10px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.06); color: #eaf0ff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease; }
+    .dl-linkbtn:active { transform: scale(0.97); }
+    .dl-linkbtn.mirror { border-color: rgba(124, 255, 196, 0.5); color: #7cffc4; background: rgba(124, 255, 196, 0.08); }
     @media (hover: hover) and (pointer: fine) {
       .game-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(124, 255, 196, 0.45); transform: translateY(-1px); }
       .game-btn.disabled:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.08); transform: none; }
@@ -70,6 +81,8 @@
       .dl-opt.disabled:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
       .dl-share:hover { color: #7cffc4; border-color: rgba(124, 255, 196, 0.6); background: rgba(124, 255, 196, 0.06); }
       .dl-close:hover { background: rgba(255, 255, 255, 0.16); }
+      .dl-linkbtn:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.3); }
+      .dl-linkbtn.mirror:hover { background: rgba(124, 255, 196, 0.16); border-color: rgba(124, 255, 196, 0.7); }
     }
   </style>
 </head>
@@ -109,7 +122,7 @@
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.52 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.53 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
@@ -130,23 +143,40 @@
       <div id="dlScreen2" style="display:none">
         <button class="dl-share" id="dlBack" style="margin-top:0;margin-bottom:12px">← Назад к действиям</button>
         <h2 id="dlScreen2Title">Выберите платформу</h2>
-        <button class="dl-opt" id="dlPlatWin">
-          <span class="emoji">🪟</span>
-          <span class="txt"><b>Windows 7 и новее</b><small>Ссылка на установщик для ПК и ноутбуков</small></span>
-        </button>
-        <button class="dl-opt" id="dlPlatAndroid">
-          <span class="emoji">🤖</span>
-          <span class="txt"><b>Android 8 и новее</b><small>Ссылка на APK лёгкого приложения</small></span>
-        </button>
-        <div class="dl-note">Получатель открывает ссылку в браузере и скачивает установщик. Список платформ будет дополняться по мере выхода приложений.</div>
+
+        <div class="dl-plat">
+          <div class="dl-plat-head">
+            <span class="emoji">🪟</span>
+            <span class="txt"><b>Windows 7 и новее</b><small>Установщик для ПК и ноутбуков</small></span>
+          </div>
+          <div class="dl-links">
+            <button class="dl-linkbtn" id="dlWinDirect">Прямая ссылка</button>
+            <button class="dl-linkbtn mirror" id="dlWinMirror">Зеркало</button>
+          </div>
+        </div>
+
+        <div class="dl-plat">
+          <div class="dl-plat-head">
+            <span class="emoji">🤖</span>
+            <span class="txt"><b>Android 8 и новее</b><small>APK лёгкого приложения</small></span>
+          </div>
+          <div class="dl-links">
+            <button class="dl-linkbtn" id="dlAndDirect">Прямая ссылка</button>
+            <button class="dl-linkbtn mirror" id="dlAndMirror">Зеркало</button>
+          </div>
+        </div>
+
+        <div class="dl-note">«Прямая ссылка» — GitHub; «Зеркало» — резервный сервер (если GitHub недоступен). Получатель открывает ссылку в браузере и скачивает установщик.</div>
       </div>
     </div>
   </div>
 
   <script>
-    const HUB_VER = '3.52';
+    const HUB_VER = '3.53';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
+    const WIN_EXE_MIRROR = 'https://igrovoj-centr-mirror.ru/IgrovojCentr-Setup.exe';
+    const APK_MIRROR = 'https://igrovoj-centr-mirror.ru/IgrovojCentr.apk';
     const RELEASE_URL = 'https://github.com/ip19760118-code/games/releases/latest';
     const MANIFEST_REMOTE = 'https://ip19760118-code.github.io/games/versions.json';
     const MIRROR_REMOTE = 'https://igrovoj-centr-mirror.ru';
@@ -392,7 +422,7 @@
       }
       function openPlatformChoice(action){
         dlAction = action;
-        s2Title.textContent = ACTION_TITLES[action] + ' — выберите платформу';
+        s2Title.textContent = ACTION_TITLES[action] + ' — выберите платформу и источник';
         showScreen(2);
       }
 
@@ -440,6 +470,14 @@
         } catch(e){ fallbackCopy(text + '\n' + url); }
       }
 
+      /* v3.53: выполнить выбранное действие (share/copy) с выбранным источником (direct/mirror). */
+      function actOn(url, label, source){
+        trackEvent('hub_download_platform', { platform_target: label, link: source, action: dlAction || '' });
+        if (dlAction === 'share') { shareAppLink(url, label + (source === 'mirror' ? ' [зеркало]' : '')); ov.classList.remove('show'); return; }
+        copyLink(url);
+        ov.classList.remove('show');
+      }
+
       document.getElementById('downloadBtn').addEventListener('click', function(){
         trackEvent('hub_download_open', {});
         try { Platform.haptic('light'); } catch(e){}
@@ -453,19 +491,10 @@
       document.getElementById('dlActShare').addEventListener('click', function(){ openPlatformChoice('share'); });
       document.getElementById('dlActLink').addEventListener('click', function(){ openPlatformChoice('link'); });
 
-      document.getElementById('dlPlatWin').addEventListener('click', function(){
-        trackEvent('hub_download_platform', { platform_target: 'windows', action: dlAction || '' });
-        if (dlAction === 'share') { shareAppLink(WIN_EXE_URL, 'Windows (7 и новее)'); ov.classList.remove('show'); return; }
-        copyLink(WIN_EXE_URL);
-        ov.classList.remove('show');
-      });
-
-      document.getElementById('dlPlatAndroid').addEventListener('click', function(){
-        trackEvent('hub_download_platform', { platform_target: 'android', action: dlAction || '' });
-        if (dlAction === 'share') { shareAppLink(APK_URL, 'Android (8 и новее)'); ov.classList.remove('show'); return; }
-        copyLink(APK_URL);
-        ov.classList.remove('show');
-      });
+      document.getElementById('dlWinDirect').addEventListener('click', function(){ actOn(WIN_EXE_URL, 'windows', 'direct'); });
+      document.getElementById('dlWinMirror').addEventListener('click', function(){ actOn(WIN_EXE_MIRROR, 'windows', 'mirror'); });
+      document.getElementById('dlAndDirect').addEventListener('click', function(){ actOn(APK_URL, 'android', 'direct'); });
+      document.getElementById('dlAndMirror').addEventListener('click', function(){ actOn(APK_MIRROR, 'android', 'mirror'); });
     })();
 
     (function handleDeepLink() {
