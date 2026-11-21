@@ -1,5 +1,5 @@
 {
-  "versionName": "0.10.0",
-  "versionCode": 8,
-  "notes": "Офлайн-игры из паков, тихая фоновая синхронизация, самовосстановление паков"
+  "versionName": "0.10.1",
+  "versionCode": 9,
+  "notes": "mirror fallback + offline"
 }
