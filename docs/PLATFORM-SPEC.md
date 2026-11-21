@@ -1,8 +1,9 @@
 # PLATFORM-SPEC — МК «Игровой центр»: кроссплатформенная спецификация и грабли
 
-**Версия документа: 2.14** | Дата: 2026-11-12 | Статус: TG ✅ / MAX ✅ / VK ✅ (модерация-комплаенс) / web ✅ / PC (Electron, Win 7 SP1–11, **офлайн-first**) ✅ / Android (WebView, 8.0+, офлайн-first) ✅
+**Версия документа: 2.15** | Дата: 2026-11-21 | Статус: TG ✅ / MAX ✅ / VK ✅ (модерация-комплаенс) / web ✅ / PC (Electron, Win 7 SP1–11, **офлайн-first + зеркало**) ✅ / Android (WebView, 8.0+, офлайн-first + зеркало) ✅
 Репозиторий: `github.com/ip19760118-code/games`
 Pages: `https://ip19760118-code.github.io/games/`
+**Зеркало (RF): `https://igrovoj-centr-mirror.ru`** (per.ru «Хост-А», фолбэк при блокировке GitHub — раздел 4.3)
 
 > **⚠️ Секреты (API-ключи Firebase, токены ботов, webhook-секреты, строки подтверждения)
 > в этом документе НЕ хранятся. Только env-переменные Vercel и локальные `.env` (в `.gitignore`).**
@@ -13,12 +14,13 @@ Pages: `https://ip19760118-code.github.io/games/`
 
 | Компонент | Где живёт | Комментарий |
 |---|---|---|
-| Хаб (витрина **20 игр** + модалка ссылок на установщики + умная сортировка + ⚙️ android + чипы версий/NEW + **VK-комплаенс** + **проброс `room` в игру**) | GitHub Pages, корень репо `games/` | `index.html` **v3.51** |
+| Хаб (витрина **20 игр** + модалка ссылок на установщики + умная сортировка + ⚙️ android + чипы версий/NEW + **VK-комплаенс** + **проброс `room` в игру** + **mirror-fallback манифеста**) | GitHub Pages, корень репо `games/` | `index.html` **v3.52** |
 | Игры | папки `chess/ … trend-catch/`, `tetris/`, `pyatnashki/`, `tictactoe/`, `findpair/`, **`poker/`** | мультиплатформенные через `js/platform.js` |
+| **Зеркало обновлений (RF)** | **per.ru «Хост-А», `igrovoj-centr-mirror.ru`** | статика+SSL+CORS; фолбэк GitHub→зеркало во всех загрузчиках (4.3) |
 | **Правовые документы VK** | `legal/terms.html`, `legal/privacy.html` (Pages) | п.1.1.4; ссылки вбиты в кабинете VK; consent-gate в platform.js |
 | Онлайн-комнаты | Firebase RTDB (имя проекта не менять!) | единая схема: раздел 5 |
-| Desktop-оболочка (Windows) | локальный проект `gc-desktop/` (**НЕ в репо**) | Electron **22**, **офлайн-first v0.10.4**, релизы GitHub Releases: раздел 6 + журнал 6.10 |
-| Android-оболочка | локальный проект `gc-android/` (**НЕ в репо**) | системный WebView, офлайн-first, релизы там же: раздел 7 + журнал 7.10 |
+| Desktop-оболочка (Windows) | локальный проект `gc-desktop/` (**НЕ в репо**) | Electron **22**, **офлайн-first v0.10.5 + зеркало**, релизы GitHub Releases: раздел 6 + журнал 6.10 |
+| Android-оболочка | локальный проект `gc-android/` (**НЕ в репо**) | системный WebView, офлайн-first **v0.10.1 + зеркало**, релизы там же: раздел 7 + журнал 7.10 |
 | MAX-бот | Vercel, Root Dir `max-bot`, вебхук `/max` | Callback: platform-api2.max.ru |
 | VK-бот | Vercel, Root Dir `vk-bot`, вебхук `/vk` | Callback API api.vk.com |
 | **VK Mini App** | кабинет `vk.com/apps?act=manage`, APP_ID **54850501** | сообщество **club242534673** |
@@ -26,8 +28,8 @@ Pages: `https://ip19760118-code.github.io/games/`
 | Кэш web | `sw.js` (service worker, **v9**) | навигации network-first, статика cache-first; в оболочках НЕ регистрируется |
 | Аналитика | GA4 | hub_open / hub_game_click / hub_download_* / game_* / game_share(share_type) |
 
-Единый слой платформ: `js/platform.js` (**v3.7**) → глобальный `Platform`
-(init, haptic, share, **shareGame**, **gameDeepLink**, **downloadAsset**, toast, onBack/fireBack, close, colors, user, name,
+Единый слой платформ: `js/platform.js` (**v3.8**) → глобальный `Platform`
+(init, haptic, share, **shareGame**, **gameDeepLink**, **downloadAsset** (+mirror-fallback web), toast, onBack/fireBack, close, colors, user, name,
 maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl, **isVK, vkAppLink, consentAccepted**).
 Детект: `?plat=` → **`vk_app_id`/`vk_user_id` (v3.7)** → `AppBridge.platform` ('pc'|'android') → глобалки TG/VK/MAX → 'web'.
 Детали VK-комплаенса: раздел 3.4 (consent-gate, санитизация ссылок, глушение звука).
@@ -36,11 +38,12 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl, **isVK
 
 | Компонент | Версия |
 |---|---|
-| hub `index.html` | **v3.51** |
-| `js/platform.js` | v3.7 |
+| hub `index.html` | **v3.52** |
+| `js/platform.js` | **v3.8** |
 | `sw.js` | v9 |
 | `tools/gen-versions.js` (gc-desktop) | **v1.6** |
 | **`tools/make-latest.js` (gc-desktop)** | **v1** (генератор `latest.yml`, electron-builder без publish его не делает) |
+| **`sync-mirror.bat` (C:\Telegram)** | **v1** (curl-FTP заливка зеркала после релиза) |
 | vk-bot `server.js` | v1.13 |
 | max-bot `server.js` | v2.0 |
 | Морской бой | v4.30 |
@@ -57,8 +60,9 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl, **isVK
 | Косынка | v2.17 |
 | Найди пару | v1.5 |
 | **Покер (Холдем No-Limit)** | **v0.2** |
-| Desktop-оболочка | **v0.10.4** (Electron 22.3.27, shell-updater v4, **офлайн-first bootstrap**) |
-| Android-оболочка | v0.10.0 (system WebView, ContentUpdater v1.5, офлайн-first) |
+| Desktop-оболочка | **v0.10.5** (Electron 22.3.27, updater **v1.5**, shell-updater **v4.1**, офлайн-first + mirror) |
+| Android-оболочка | **v0.10.1** (system WebView, ContentUpdater **v1.6**, AppUpdater **v1.1**, офлайн-first + mirror) |
+| **Зеркало** | `https://igrovoj-centr-mirror.ru` (per.ru Хост-А, IP 37.140.192.82) |
 
 ---
 
@@ -161,7 +165,7 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl, **isVK
 - **APP_ID = 54850501** (`app54850501`). Не путать с ID сообщества **242534673** (`club242534673`) —
   это разные сущности (приложение vs группа); Callback API сообщества использует group_id, Mini App — vk_app_id.
 
-### 3.4 VK-комплаенс и модерация (Правила VK Mini Apps, ред. 17.03.2026) — platform.js v3.5–3.7, hub v3.49–3.51
+### 3.4 VK-комплаенс и модерация (Правила VK Mini Apps, ред. 17.03.2026) — platform.js v3.5–3.8, hub v3.49–3.52
 
 Отклонение модерации по **п.4.1.8** («увод аудитории на другие площадки») лечится комплексно; ниже —
 все применённые меры и их причины.
@@ -230,7 +234,7 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl, **isVK
   удаляет ВСЕ старые кэши (`skipWaiting` + `clients.claim`) — лечение «залипшего» platform.js в TG-desktop.
   Регистрация из `platform.js` по маске `^(.*\/games\/)` только на github.io
   **и только при отсутствии `window.AppBridge`** (в оболочках кэшем управляет апдейтер).
-- Prefetch топовых игр (chess/seabattle/durak/**poker**/tetris/tictactoe) через `<link rel=prefetch>`; пропуск при `saveData`.
+- Prefetch топовых игр (chess/seabattle/durak/**poker**/tetris/tictactoe/findpair) через `<link rel=prefetch>`; пропуск при `saveData`.
 - Firebase-комнаты работают ТОЛЬКО в first-party контексте: никаких iframe внутри мессенджер-вью.
 - `window.open` может блокироваться popup-блокером → всегда fallback `location.href`.
 - **Favicon:** во всех играх и хабе `<link rel="icon" … icon-32.png>` (+apple-touch 180); убирает 404 `/favicon.ico`.
@@ -240,7 +244,7 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl, **isVK
   **VK: глобальное глушение по `VKWebAppViewHide` через реестр контекстов (3.4, п.2.2.5).**
 - **Consent-gate (platform.js v3.6, п.1.1.4):** оверлей согласия до любого геймплея; ключ `igc_consent_v1`;
   ссылки на `legal/terms.html` / `legal/privacy.html`; показывается на ВСЕХ платформах (не только VK).
-- **VK-изолированная сборка (platform.js v3.5–3.7 + hub v3.49–3.51, п.4.1.8/4.2.6):** см. раздел 3.4.
+- **VK-изолированная сборка (platform.js v3.5–3.8 + hub v3.49–3.52, п.4.1.8/4.2.6):** см. раздел 3.4.
   Ключевые API: `Platform.isVK()`, `Platform.vkAppLink()`, `Platform.consentAccepted()`;
   внутренние `vkSafeUrl/vkSafeText/suspendAllAudio/resumeAllAudio`.
 - **Модалка хаба «📥 Приложение для ПК и Android» (v3.29–3.33 двухэтапная, v3.44 — без закачки):**
@@ -251,12 +255,12 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl, **isVK
 - **Шестерёнка настроек (hub v3.34):** кнопка `#hubSetBtn` в правом верхнем углу панели;
   видна только при `Platform.name==='android' && AppBridge.openSettings` → открывает нативный
   экран настроек оболочки (7.9). На pc/web/TG/MAX/VK скрыта.
-- **Чипы версий игр и бейдж NEW (hub v3.35–3.36):** источник — `versions.json`
+- **Чипы версий игр и бейдж NEW (hub v3.35–3.36, v3.52 — тройной фолбэк):** источник — `versions.json`
   (`games[id].version`, `games[id].addedAt` из реестра `games-added.json`, сид 2026-10-01;
-  NEW живёт 7 суток с даты добавления игры). Чтение манифеста (v3.36) двойное:
+  NEW живёт 7 суток с даты добавления игры). Чтение манифеста:
   сначала локально `./versions.json` (Pages web / паки android / паки desktop),
-  при любой ошибке (404-страница оболочек, HTML вместо JSON) — фолбэк на абсолютный
-  Pages-URL (`Access-Control-Allow-Origin: *`); оба fail → чипы молча скрываются.
+  при ошибке — абсолютный Pages-URL, **при ошибке — зеркало `MIRROR_REMOTE/versions.json` (v3.52)**;
+  все fail → чипы молча скрываются.
   **Чип/NEW есть ТОЛЬКО у игр, присутствующих в манифесте** — см. правило GAMES генератора (6.3).
 - **📤 Вирусный шеринг (platform.js v3.0–3.1, VK-санитизация v3.5):**
   - `Platform.gameDeepLink(key)` = `CANONICAL_ORIGIN + '/?game=' + key` — получатель открывается
@@ -301,21 +305,25 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl, **isVK
   ссылку → автообновление оболочки получает **HTTP 404** на этапе загрузки (кейс v0.10.0).
   **ПРАВИЛО РЕЛИЗА:** каждый релиз содержит ВСЕ три ассета под этими именами, иначе
   `latest/download/*` сломается на том, чего нет в свежем релизе.
+  **Грабля «latest 404, а тег работает» (2026-11-21):** `releases/latest/download/*` редиректит на
+  релиз с меткой **Latest**; если свежий релиз помечен Pre-release/Draft или latest указывает на другой
+  тег — стабильные ссылки 404, а `…/download/vN.N.N/…` работают. Лечение: в Edit release выбрать
+  **Release label = Latest** (не Pre-release/Draft) → Update. Фолбэк на зеркало (4.3) страхует и при 404.
 - **Умная сортировка списка игр (hub v3.28):** локальная статистика запусков `localStorage['hub_sort_stats']`
   `{key:{n,t}}`; score = `n × 0.5^(дней простоя/30)`; пересортировка DOM при загрузке хаба;
   нулевые — в кураторском порядке; «Скоро» всегда последняя; сброс `?sort=reset`.
   Ключ нормализуется из пути папки (`./trend-catch/` → `trend_catch`), работает и для диплинков.
 - Описания витрин без чисел игр (лимиты платформ).
 
-### 4.1 Каскадное скачивание ассетов (platform.js v3.4, hub v3.44, VK-заглушка v3.5)
+### 4.1 Каскадное скачивание ассетов (platform.js v3.4/v3.8, hub v3.44, VK-заглушка v3.5)
 
 `Platform.downloadAsset(url, fileName, opts)` — единая точка входа для бинарников из оболочек и web:
 
 | Среда | Механизм | Фолбэк |
 |---|---|---|
 | Android-оболочка ≥0.9.0 | `AppBridge.downloadFile` → системный `DownloadManager` (уведомление, `Downloads/`) | `ACTION_VIEW` браузер |
-| ПК-оболочка ≥0.3.6 | IPC `bridge:download-file` → `node:https` с редиректами (до 5) → `app.getPath('downloads')` + `shell.showItemInFolder` | `AppBridge.openExternal` |
-| Web-браузер desktop | `fetch` → `blob` → `<a download>` (blob same-origin обходит Chrome-игнор download-атрибута на кросс-оригин редиректе GitHub) | `window.open` |
+| ПК-оболочка ≥0.10.5 | IPC `bridge:download-file` → `node:https` с редиректами (до 5) → `app.getPath('downloads')` + `shell.showItemInFolder`; **при ошибке — зеркало** | `AppBridge.openExternal` |
+| Web-браузер desktop | `fetch` → `blob` → `<a download>` (blob same-origin обходит Chrome-игнор download-атрибута на кросс-оригин редиректе GitHub); **при ошибке fetch — зеркало (v3.8)** | `window.open` |
 | TG/MAX WebApp | **без fetch** (CORS-блок): сразу ВНЕШНИЙ браузер (`WebApp.openLink` / `Telegram.WebApp.openLink`), mobile сначала пробует `navigator.share({files})` | `location.href` |
 | **VK (любой контекст, п.4.1.8)** | **заглушка: тост «Загрузка приложений недоступна в этой версии»** | **—** |
 | MAX во внешнем браузере | `location.href = url` (GitHub отдаёт `Content-Disposition: attachment` → загрузка стартует сама) | — |
@@ -359,6 +367,38 @@ maxClientReal, isMaxExternal, maxNavMode, goToHub, hubBase, canonicalUrl, **isVK
 - **Логи пользователя:** при жалобе «не работает» первым делом запрашивать консоль с фильтром `[XX]`;
   цепочка маркеров (pointerdown → pointerup → SINGLE/DOUBLE-TAP → onHandClick → FB OK/FAIL)
   показывает точный этап обрыва.
+
+### 4.3 Зеркало обновлений (RF, обход блокировок GitHub) — v2.15
+
+- **Зеркало:** `https://igrovoj-centr-mirror.ru` — статический хостинг **per.ru «Хост-А»**
+  (РФ, доступен без VPN), домен `igrovoj-centr-mirror.ru`, A-запись → `37.140.192.82`,
+  бесплатный SSL (Let's Encrypt/GlobalSign) + редирект HTTP→HTTPS. DNS-серверы `ns1.reg.ru/ns2.reg.ru`,
+  A-записи `@` и `www` → IP хостинга (менять в «DNS-серверы и управление зоной» у регистратора).
+- **Структура = те же пути, что GitHub Pages** + установщики в корне:
+  `versions.json`, `android-update.json`, `desktop/latest.yml`, `js/`, `legal/`, `<game>/…`,
+  `IgrovojCentr-Setup.exe`, `IgrovojCentr.apk`, `.htaccess`.
+- **`.htaccess` (корень зеркала):** `Options -Indexes`, `DirectoryIndex index.html`,
+  MIME для `.json/.yml/.apk/.exe`, **CORS `Access-Control-Allow-Origin *`** (обязателен для
+  браузерного fetch манифеста), no-cache для манифестов/html/exe/apk, long-cache для картинок.
+  **Грабля имени:** редактор/браузер сохраняет файл как `Qwen_…htaccess`/`*.htaccess` — переименовать
+  в ровно `.htaccess` (`ren "Qwen_….htaccess" ".htaccess"`) и перезаписать на сервере (curl FTP / FileZilla).
+  **Грабля CORS:** если `curl -sI …/versions.json` без `Access-Control-Allow-Origin` — на сервере дефолтный
+  `.htaccess` (290 байт); перезаписать нашим (~1 КБ).
+- **Цепочка фолбэка (GitHub → зеркало)** во всех загрузчиках:
+  desktop `updater.js` **v1.5** (манифест+файлы), `shell-updater.js` **v4.1** (3-й фид + exe-fallback),
+  `main.js` **v0.10.5** (bridge:download-file), Android `ContentUpdater` **v1.6** / `AppUpdater` **v1.1**,
+  hub **v3.52** (manifest 3-й fallback), `platform.js` **v3.8** (web fetch fallback).
+  При манифесте с зеркала `baseUrl`/`downloadUrl` подменяются на зеркало.
+- **Синхронизация зеркала:** `C:\Telegram\sync-mirror.bat` (curl FTP, логин `u3736055_mirrorftp`,
+  пароль только локально в bat) после КАЖДОГО релиза/деплоя: контент games + exe + apk + `.htaccess` +
+  `desktop/latest.yml` + `android-update.json`.
+- **Правило релиза (+зеркало):** после Publish и push контента — запустить sync-mirror.bat и проверить:
+  `versions.json` содержит новую HUB_VER, `latest.yml` = новая версия оболочки, `android-update.json` =
+  новый versionName, exe/apk = 200, CORS-заголовок присутствует.
+- **Проверки зеркала (cmd):**
+  `curl -s …/versions.json | findstr "<HUB_VER>"`; `curl -sI …/versions.json | findstr /i "access-control"`;
+  `curl -s …/desktop/latest.yml | findstr version`; `curl -s …/android-update.json | findstr versionName`;
+  `curl -sI …/IgrovojCentr-Setup.exe | findstr "HTTP/"`; `curl -sI …/IgrovojCentr.apk | findstr "HTTP/"`.
 
 ---
 
@@ -578,7 +618,7 @@ waiting ──[host: «▶ Начать» / автостарт при 2-м иг�
   `state.lastSixesOnMe[defender]` — инкремент на каждую шестёрку в атаке/подкидывании,
   сброс в 0 при назначении нового защитника в `resolveRound` (новый раунд).
 - Финал: 1 шестёрка = «на лоб», 2 = «на погоны», 3+ = «на лоб и погоны»;
-  проигравшему — «Вам прилипили…», победителю — «Вы прилипили сопернику…»; при ничьей — без бейджа.
+  проигравшему — «Вам прилипили…», победителю — «Вы прилепили сопернику…»; при ничьей — без бейджа.
 - Бейдж `.six-badge` в endOverlay + отдельный звук `sSix()`.
 
 ### 5.18 Покер (Холдем No-Limit, v0.2) — специфика движка
@@ -608,14 +648,14 @@ waiting ──[host: «▶ Начать» / автостарт при 2-м иг�
 
 ---
 
-## 6. Desktop-оболочка (Windows, Electron 22) — v0.10.4 (офлайн-first)
+## 6. Desktop-оболочка (Windows, Electron 22) — v0.10.5 (офлайн-first + зеркало)
 
 ### 6.1 Состав и расположение
 
 - Проект **локальный**: `C:\Telegram\gc-desktop\` (в репо НЕ коммитится).
-- `src/main/`: `main.js` (окно, протокол, меню, IPC, скачивание, **офлайн-first bootstrap v0.10.4**),
-  `config.js` (JSON в userData), `updater.js` (контент, **v1.4.2**),
-  `shell-updater.js` (**v4: собственный node-https апдейтер, electron-updater удалён**).
+- `src/main/`: `main.js` (окно, протокол, меню, IPC, скачивание, **офлайн-first bootstrap v0.10.4 + mirror-download v0.10.5**),
+  `config.js` (JSON в userData), `updater.js` (контент, **v1.5 mirror-fallback**),
+  `shell-updater.js` (**v4.1: собственный node-https апдейтер + зеркало, electron-updater удалён**).
 - `src/preload/preload.js` → `window.AppBridge` (platform='pc'): share/openExternal/notify/
   getProfile/getVersions/quit/onBack/onToast/getUpdateWarnings/getShellInfo/setProfile/
   setUpdateMode/setContentSource/openPath/checkUpdates/getShellUpdateStatus/shellUpdateCheck/
@@ -630,6 +670,8 @@ waiting ──[host: «▶ Начать» / автостарт при 2-м иг�
   Пишет `release/latest.yml` и копию `games/desktop/latest.yml`. Запуск ПОСЛЕ `npm run dist`.
 - `assets/icons/` — вывод electron-icon-builder (`win/icon.ico`, `png/*`).
 - `electron-builder.yaml`, `package.json` (version = версия оболочки; **см. правило package.json в 6.2**).
+  **v0.10.5: `dependencies: {}` (пусто)** — runtime-модулей нет; `files:` в yaml = `src/**/*`, `assets/**/*`,
+  `package.json` (без node_modules), чтобы leftover-модули не попадали в asar.
 - **Electron 22.3.27** — последняя линейка с поддержкой Windows 7 SP1/8/8.1 (Chromium 108, Node 16).
   Electron 23+ требует Windows 10 (см. 8.3). electron-builder 24.x: NSIS per-user,
   `artifactName: IgrovojCentr-Setup.exe`, `compression: maximum`, `electronLanguages: [ru, en]`,
@@ -649,25 +691,26 @@ waiting ──[host: «▶ Начать» / автостарт при 2-м иг�
   buffer/handle-протоколы в оболочке на Electron 22.
 - Паки: `%APPDATA%\igrovoj-centr\packs\{current,staging,old}` + `installed.json`;
   скачивание в staging → проверка sha256 каждого файла → атомарный swap current↔staging → old удаляется.
-- **Копия манифеста в паках (updater v1.4.2):** при каждом успешном sync `versions.json`
+- **Копия манифеста в паках (updater v1.4.2+):** при каждом успешном sync `versions.json`
   записывается в `packs/current/versions.json` (при пустом diff — напрямую в current,
   при swap — через staging). Хаб v3.35+ читает его локально → чипы версий и NEW работают
   в desktop **без сети**. Ошибка копирования манифеста не ломает sync (warn в консоль).
 - **🔒 API-КОНТРАКТ `updater.js` (НЕ НАРУШАТЬ):** main.js ожидает
   `const { Updater } = require('./updater')`; `new Updater(app, config)`; методы
   `syncChanged(onProgress) → {man, changed, total}`, `fetchManifest()`, `computeWarnings(man)`,
-  `readInstalled()`; поля `currentDir`, `warnings`; экспорт `{ Updater, sha256buf, MANIFEST_URL }`.
+  `readInstalled()`; поля `currentDir`, `warnings`; экспорт `{ Updater, sha256buf, MANIFEST_URL }` (+`MIRROR` в v1.5).
   Любая замена имени класса/сигнатур/экспорта = TypeError в `whenReady` ДО создания окна:
   процессы висят в диспетчере, окна нет, автообновление не стартует (кейс v1.4.1, фикс v1.4.2).
   Менять можно только внутренности методов.
-- **🔒 API-КОНТРАКТ `shell-updater.js` v4 (НЕ НАРУШАТЬ):** main.js зовёт
+- **🔒 API-КОНТРАКТ `shell-updater.js` v4/v4.1 (НЕ НАРУШАТЬ):** main.js зовёт
   `shellUpdater.init({mode, toast, onState})` (а НЕ `init(app, config, hooks)`);
   методы `check(silent)`, `menuAction()`, `getStatus()`. Любое отклонение = молчащее автообновление.
-  **v4 (2026-11-11): собственный апдейтер на `node:https`** (electron-updater УДАЛЁН):
-  - Фиды в порядке приоритета: Pages `desktop/latest.yml` → GitHub `releases/latest/download/latest.yml`.
+  **v4 (2026-11-11): собственный апдейтер на `node:https`** (electron-updater УДАЛЁН);
+  **v4.1 (2026-11-21): + зеркало** (3-й фид `MIRROR/latest.yml`, exe-fallback на зеркало):
+  - Фиды в порядке приоритета: Pages `desktop/latest.yml` → GitHub `releases/latest/download/latest.yml` → **зеркало `/latest.yml`**.
   - Парсинг `version:`/`path:`/`sha512:` из yml-файда (generic provider).
   - Скачивание exe через `node:https` с редиректами (до 5 hop, `Accept-Encoding: identity`, таймаут 60 с)
-    во временный файл, затем spawn нового процесса и quit текущего.
+    во временный файл; **при ошибке — повтор с зеркала**; затем spawn нового процесса и quit текущего.
   - Ошибки **тихие**: короткий тост + автоповтор через 10 минут (никакого полноэкранного полотна `fullscreenerror`).
 - **🔒 API-КОНТРАКТ `config.js` (НЕ НАРУШАТЬ):** main.js зовёт
   `const { makeConfig, DEFAULT_ROOT } = require('./config')` (НЕ объект с `get/set` напрямую);
@@ -675,14 +718,14 @@ waiting ──[host: «▶ Начать» / автостарт при 2-м иг�
   **`packsRoot` = текущая папка контента** (pages: `userData/packs/current`; local: `DEFAULT_ROOT`);
   не путать с внутренним `updater.currentDir`. Несовпадение семантик = страница 404 при живых паках
   (кейс реконструкции main.js v0.3.5, см. 6.9).
-- **🔒 ПРАВИЛО `package.json` (кейс v0.3.6→v0.3.7, обновлено v0.10.3):** runtime-зависимости (`electron-updater`
-  и любые, которые `require`-ятся в main.js) держать **ТОЛЬКО** в секции `dependencies`.
-  `devDependencies` (electron, electron-builder) electron-builder **НЕ пакует** в `app.asar`.
-  Потеря зависимости = краш main-процесса на первом же `require` в runtime.
-  **v0.10.3: `electron-updater` полностью удалён из `dependencies`** (заменён на `node:https` в shell-updater v4).
-  `devDependencies` содержат только electron и electron-builder.
-  **Контроль сборки:** `npx @electron/asar list release/win-unpacked/resources/app.asar | findstr electron-updater`
-  — для v0.10.3+ вывод должен быть **пустой** (модуля больше нет); для более старых релизов — непустой.
+- **🔒 ПРАВИЛО `package.json` (кейс v0.3.6→v0.3.7, обновлено v0.10.5):** runtime-зависимости держать
+  **ТОЛЬКО** в `dependencies`; `devDependencies` (electron, electron-builder) НЕ пакуются в asar.
+  **v0.10.5: `dependencies: {}`** — electron-updater удалён полностью (shell-updater v4 на node:https).
+  **Грабля leftover (2026-11-21):** даже при пустых deps asar мог содержать electron-updater, если
+  `electron-builder.yaml` `files: "**/*"` тащил весь node_modules. Лечение: `files:` = `src/**/*`,
+  `assets/**/*`, `package.json` (без node_modules) + `rmdir /s /q node_modules\electron-updater` + `npm prune`.
+  **Контроль сборки:** `npx --yes @electron/asar list release/win-unpacked/resources/app.asar | findstr electron-updater`
+  — для v0.10.5+ вывод **пустой**.
 - Источники: `local` (dev: паки = рабочая копия репо) | `pages` (боевой: GitHub Pages).
   В установленном exe дефолт `pages`, если локального репо нет.
 - **🔒 ОФЛАЙН-FIRST БУТСТРАП (v0.10.4, как Android silentSync):** окно создаётся **СРАЗУ** из валидных
@@ -691,7 +734,8 @@ waiting ──[host: «▶ Начать» / автостарт при 2-м иг�
   реальных изменениях; если паков не было и они появились — перезагрузка окна; если паки были —
   не перезагружаем mid-game (применится при перезагрузке/следующем запуске). При ошибке сети — тихий
   повтор (60 с если паков нет, иначе 30 мин). Если паков нет вовсе и нет интернета — окно сразу показывает
-  статическую «Контент не найден» + «Повторить» (не висит 60 с), фон сам докачает при появлении сети.
+  статическую «Контент не найден» + «Повторить» (не висит 60 с), фон сам докачает при появлении сети
+  (**в т.ч. с зеркала, updater v1.5**).
   **Старое поведение (≤0.10.3): блокирующий `await syncChanged(60s)` + `await refreshWarnings()` до окна →
   без интернета окно не появлялось / висело ~60 с. Убрано в 0.10.4.**
 - Самовосстановление `packsRoot` при старте: local-репо → packs/current → pages.
@@ -708,15 +752,16 @@ waiting ──[host: «▶ Начать» / автостарт при 2-м иг�
   `d===t` не троттлится); финал «✅ Приложения обновлены: N/N файлов» до перезагрузки окна и повторно
   после (`did-finish-load`). Ошибка = тост + системное `Notification`. **Фоновый sync прогресс не рисует.**
 - Service worker в оболочке НЕ регистрируется (platform.js gated по host github.io и AppBridge).
-- **Нативное скачивание установщиков (main.js v0.3.6+):** IPC `bridge:download-file` через
+- **Нативное скачивание установщиков (main.js v0.3.6+, v0.10.5 mirror):** IPC `bridge:download-file` через
   `node:https` с редиректами (до 5 hop, `Accept-Encoding: identity`, таймаут 120 с) →
-  `app.getPath('downloads')/fileName` → `shell.showItemInFolder(dest)` + тост. Браузер не открывается.
-  preload: `downloadFile:(url,fileName)=>ipcRenderer.invoke('bridge:download-file',{url,fileName})`.
+  `app.getPath('downloads')/fileName` → `shell.showItemInFolder(dest)` + тост; **при ошибке — зеркало**.
+  Браузер не открывается. preload: `downloadFile:(url,fileName)=>ipcRenderer.invoke('bridge:download-file',{url,fileName})`.
 
 ### 6.3 Манифест versions.json, грабля хэшей, 🔒 ПРАВИЛО HUB_VER и 🔒 ПРАВИЛО GAMES
 
-- Лежит в корне репо, публикуется на Pages; структура: `hub{version,files[]}`,
-  `games{id:{version,online,addedAt,files[]}}`, каждый файл `{path, sha256, size}`; `baseUrl` = Pages.
+- Лежит в корне репо, публикуется на Pages **и на зеркале (4.3)**; структура: `hub{version,files[]}`,
+  `games{id:{version,online,addedAt,files[]}}`, каждый файл `{path, sha256, size}`; `baseUrl` = Pages
+  (при чтении с зеркала загрузчики подменяют baseUrl на зеркало).
 - **🔒 ПРАВИЛО HUB_VER:** селективная синхронизация оболочек сравнивает **строку версии хаба**
   (`HUB_VER` в `index.html`), а не хэши файлов. Поэтому ЛЮБОЕ изменение hub-файлов —
   `js/platform.js`, `sw.js`, `js/snd.js`, `icon-512/32/180.png` — обязано сопровождаться
@@ -730,7 +775,7 @@ waiting ──[host: «▶ Начать» / автостарт при 2-м иг�
   т.к. fallback в сеть у desktop-протокола НЕТ), хаб не рисует чип версии и NEW;
   при этом web/мессенджеры и Android (сетевой fallback перехватчика) работают — диагностика сбивает с толку.
   Лечение: добавить `['<id>', online?]` в GAMES → реген ПОСЛЕ коммита игры → коммит
-  `versions.json` + `games-added.json` → push → синхронизация оболочек.
+  `versions.json` + `games-added.json` → push → синхронизация оболочек **и зеркала (4.3)**.
   **v1.6 (2026-11-11): добавлен `['poker', true]`; 20-я игра.**
 - **🔒 ПРАВИЛО «МАНИФЕСТ НЕ ОБГОНЯЕТ КОНТЕНТ» (кейс HTTP 404 при синхронизации, 2026-11-06):**
   `versions.json` ссылается на байты из `git show HEAD:path`; если реген сделан по РАБОЧЕЙ папке
@@ -747,26 +792,27 @@ waiting ──[host: «▶ Начать» / автостарт при 2-м иг�
   коммита без регенерации). **Лечение (gen-versions v1.2): байты берутся из `git show HEAD:path`**;
   незакоммиченные файлы → фолбэк на рабочую папку + предупреждение в консоли.
 - **Правило деплоя:** коммит контента → `node tools/gen-versions.js` → коммит `versions.json`
-  (+`games-added.json` при первом добавлении игры) → push одним пакетом.
+  (+`games-added.json` при первом добавлении игры) → push одним пакетом → **sync-mirror.bat (4.3)**.
 
-### 6.4 Обновление оболочки (v4, node-https generic фид, 2026-11-11)
+### 6.4 Обновление оболочки (v4.1, node-https generic фид + зеркало, 2026-11-21)
 
-- **v4 (shell-updater.js):** electron-updater УДАЛЁН; апдейтер собственный на `node:https` (generic provider).
+- **v4/v4.1 (shell-updater.js):** electron-updater УДАЛЁН; апдейтер собственный на `node:https` (generic provider).
 - Фиды в порядке приоритета:
   1. `https://ip19760118-code.github.io/games/desktop/latest.yml` (собственная копия на Pages);
-  2. `https://github.com/ip19760118-code/games/releases/latest/download/latest.yml` (фолбэк).
+  2. `https://github.com/ip19760118-code/games/releases/latest/download/latest.yml` (фолбэк);
+  3. **`https://igrovoj-centr-mirror.ru/latest.yml` (зеркало, v4.1)**; при фиде с зеркала exe качается с зеркала.
 - Парсинг yml: `version:`, `path:`, `sha512:` — строковый разбор, не YAML-либа (в main-процессе без зависимостей).
 - **`latest.yml` генерируется `tools/make-latest.js` (v1), НЕ electron-builder** (без `publish` он его не делает).
   `path` — абсолютная ссылка на GitHub-ассет, чтобы оба фида вели на один exe. **Грабля (2026-11-12):**
   после сборки в `release\latest.yml` оставался СТАРЫЙ leftover (0.10.2) → автообновление не видело 0.10.4;
   лечение — всегда `node tools\make-latest.js` после `npm run dist` и коммит `games/desktop/latest.yml`.
-- Скачивание: `node:https` через `httpGetBuffer`-хелпер, редиректы до 5 hop, `Accept-Encoding: identity`,
-  таймаут 60 с, ретраи по ошибке. Запись во временный файл `app.getPath('temp')/IgrovojCentr-Update.exe`.
+- Скачивание: `node:https`, редиректы до 5 hop, `Accept-Encoding: identity`, таймаут 60 с, ретраи;
+  **при ошибке — повтор с зеркала `MIRROR/IgrovojCentr-Setup.exe` (v4.1)**. Запись во временный файл.
 - Установка: `child_process.spawn(exePath, …, {detached:true, stdio:'ignore'})` + `app.quit()`.
 - **Грабля «504 Gateway Timeout» (кейс 2026-11-11, electron-updater v5):** electron-updater парсил
   HTML-страницу releases/latest как yml → `fullscreenerror` + зелёное полотно ошибки поверх окна;
   лечение — переход на generic-фид с собственным парсером yml.
-- **Режимы из конфига контента:** `auto` — тихая закачка + диалог «Перезапустить сейчас?»;
+- **Режимы из конфига контента:** `auto` — тихая закачка + диалог «Перезапустить сейчас?`;
   `manual` — тост «Доступна новая версия оболочки» + «Файл → Обновить приложение…».
 - Тихая проверка через 6 c после старта (только `app.isPackaged`); в dev — заглушка с пояснением.
 - При ошибке закачки/парсинга — короткий тост + автоповтор через 10 минут (без полноэкранного полотна).
@@ -785,16 +831,17 @@ waiting ──[host: «▶ Начать» / автостарт при 2-м иг�
   **🔒 Имена БЕЗ версий и суффиксов** (правило раздела 4, кейс 2026-11-06: ассет
   `IgrovojCentr-0.10.0.apk` → стабильная ссылка `releases/latest/download/IgrovojCentr.apk` = 404 →
   автообновление Android-оболочки падало на загрузке).
+  **Release label = Latest** (не Pre-release/Draft) — иначе `latest/download/*` = 404 (кейс 2026-11-21).
 - **`latest.yml` = результат `tools/make-latest.js`** (version из package.json + абсолютный path на exe).
-  Копия `games/desktop/latest.yml` коммитится в репо и пушится (Pages-фид).
+  Копия `games/desktop/latest.yml` коммитится в репо и пушится (Pages-фид); **зеркало получает её через sync-mirror.bat**.
 - `artifactName: IgrovojCentr-Setup.exe` (без версии) в конфиге сборки; для APK имя выставляется
   вручную при загрузке ассета (gradle-выход `app-release.apk` → переименовать в `IgrovojCentr.apk`).
 - Кнопка хаба «📥 Приложение для ПК и Android» (v3.44): модалка действий (отправить/скопировать ссылку)
   и платформ; прямая закачка из хаба убрана (4.1).
 - Подписи нет → SmartScreen предупреждает («Подробнее → Выполнить всё равно»); ожидаемо до сертификата/Store.
 - **Контроль перед Publish:** открыть в браузере обе стабильные ссылки
-  (`…/releases/latest/download/IgrovojCentr.apk` и `…/IgrovojCentr-Setup.exe`) — обе должны качать,
-  не давать 404; и `…/games/desktop/latest.yml` должен показывать новую version.
+  (`…/releases/latest/download/IgrovojCentr.apk` и `…/IgrovojCentr-Setup.exe`) — обе должны качать (302→тег),
+  не 404; `…/games/desktop/latest.yml` = новая version. **После Publish — sync-mirror.bat + проверки зеркала (4.3).**
 
 ### 6.6 Иконки и процедура замены логотипа
 
@@ -818,7 +865,7 @@ waiting ──[host: «▶ Начать» / автостарт при 2-м иг�
   4. Desktop: `electron-icon-builder` → `npm run dist`.
   5. Коммит иконок → **bump HUB_VER** (иконки — hub-файлы!, правило 6.3) → `gen-versions.js`
      (иконки входят в хэши паков) → коммит versions.json → push.
-  6. Релиз с тремя ассетами; на устройствах — кэш иконок: Android удалить старую версию/перезагрузка,
+  6. Релиз с тремя ассетами; **sync-mirror.bat**; на устройствах — кэш иконок: Android удалить старую версию/перезагрузка,
      Windows `ie4uinit.exe -show` или перезапуск explorer.
   7. Аватары ботов TG/VK/MAX обновляются ВРУЧНУЮ в порталах (из файла не подтягиваются).
 - **Грабля «иконка вернулась к атому»:** `signAndEditExecutable: false` в yml отключает rcedit —
@@ -886,30 +933,33 @@ packsRoot (404 при живых паках), неверный вызов shell-
 | Версия | Дата | Ключевые изменения | Артефакты / команды | Грабли / примечания |
 |---|---|---|---|---|
 | v0.3.0 | 2026-10-31 | Electron 22 baseline; паки + `app://`; самовосстановление packsRoot | `npm run dist` → `release\IgrovojCentr-Setup.exe` | bufferProtocol → «HTML как текст» на Win10 (лечится v0.11 registerFileProtocol) |
-| v0.3.3 | 2026-11-03 | манифест versions.json в паках (офлайн-чипы/NEW); updater v1.4.x |同上 | контракт updater.js v1.4.1 сломан → v1.4.2 восстановлен |
+| v0.3.3 | 2026-11-03 | манифест versions.json в паках (офлайн-чипы/NEW); updater v1.4.x | 同上 | контракт updater.js v1.4.1 сломан → v1.4.2 восстановлен |
 | v0.3.5 | 2026-11-04 | **НЕ ИСПОЛЬЗОВАТЬ:** реконструкция main.js вслепую | — | settings «vundefined», packsRoot 404; возврат оригиналов |
 | v0.3.6 | 2026-11-04 | нативное скачивание `bridge:download-file`; возврат оригиналов main/preload/config | `release\IgrovojCentr-Setup.exe` | правило package.json (deps) |
 | v0.3.7 | 2026-11-04 | package.json: runtime-зависимости только в `dependencies`; контроль asar | `npx @electron/asar list … \| findstr electron-updater` | electron-updater тогда ещё в deps |
 | v0.10.0–0.10.1 | 2026-11-06 | выравнивание тегов с Android; shell-updater на electron-updater generic | 3 ассета | имена ассетов без версий (кейс 404 apk) |
 | v0.10.2 | 2026-11-11 | electron-updater generic-фид | `release\latest.yml` (electron-builder) | **504 GitHub + fullscreenerror** → заменён v4 |
 | v0.10.3 | 2026-11-11 | **shell-updater v4** (node-https generic-фид, тихие ошибки, retry 10 мин); удалён `publish` из yaml; удалён electron-updater из deps | `npm run dist`; asar-контроль пустой | ValidationError схемы publish устранён |
-| **v0.10.4** | **2026-11-12** | **офлайн-first bootstrap** (окно сразу из паков, backgroundSync тихо; без интернета играет мгновенно); **`tools/make-latest.js`** генерирует latest.yml (electron-builder без publish его не делает) | `npm run dist` → `node tools\make-latest.js` → 3 ассета + коммит `games/desktop/latest.yml` | leftover latest.yml 0.10.2 → не забывать make-latest; без паков+без сети окно сразу показывает «Контент не найден»+Повторить |
+| v0.10.4 | 2026-11-12 | **офлайн-first bootstrap** (окно сразу из паков, backgroundSync тихо; без интернета играет мгновенно); **`tools/make-latest.js`** генерирует latest.yml (electron-builder без publish его не делает) | `npm run dist` → `node tools\make-latest.js` → 3 ассета + коммит `games/desktop/latest.yml` | leftover latest.yml 0.10.2 → не забывать make-latest; без паков+без сети окно сразу показывает «Контент не найден»+Повторить |
+| **v0.10.5** | **2026-11-21** | **mirror-fallback** (updater v1.5, shell-updater v4.1, main download-file); `dependencies:{}` + yaml `files` без node_modules | dist → make-latest → 3 ассета (Latest) → sync-mirror | leftover electron-updater в asar лечится yaml files + prune; latest 404 лечится label=Latest |
 
-**Команды сборки/релиза desktop (v0.10.4+):**
+**Команды сборки/релиза desktop (v0.10.5+):**
 ```cmd
 cd /d C:\Telegram\gc-desktop
+npm prune
 npm run dist
 node tools\make-latest.js
 type release\latest.yml | findstr version   :: должна быть новая версия
-npx @electron/asar list release/win-unpacked/resources/app.asar | findstr electron-updater  :: пусто
-:: Release GitHub tag vN.N.N: IgrovojCentr-Setup.exe + latest.yml + IgrovojCentr.apk
+npx --yes @electron/asar list release/win-unpacked/resources/app.asar | findstr electron-updater  :: пусто
+:: Release GitHub tag vN.N.N, label=Latest: IgrovojCentr-Setup.exe + latest.yml + IgrovojCentr.apk
 cd /d C:\Telegram\games
 git add desktop/latest.yml && git commit -m "desktop/latest.yml vN.N.N" && git push origin main
+C:\Telegram\sync-mirror.bat
 ```
 
 ---
 
-## 7. Android-оболочка (system WebView) — v0.10.0 (офлайн-first)
+## 7. Android-оболочка (system WebView) — v0.10.1 (офлайн-first + зеркало)
 
 ### 7.1 Состав и расположение
 
@@ -917,8 +967,8 @@ git add desktop/latest.yml && git commit -m "desktop/latest.yml vN.N.N" && git p
 - `app/build.gradle` (Groovy; namespace `ru.ip19760118.igrovojcentr`; minSdk 26 = Android 8.0;
   compile/targetSdk 34; `buildFeatures { buildConfig = true }`; signingConfigs.release из локального keystore).
 - `app/src/main/java/ru/ip19760118/igrovojcentr/`: `MainActivity.java` (**v0.10.0**), `AppBridge.java`,
-  `ContentUpdater.java` (**v1.5**), `AppUpdater.java`, `ApkProvider.java`, `SettingsActivity.java` (**v1.1**),
-  `PrefsStore.java`, `MimeUtils.java`.
+  `ContentUpdater.java` (**v1.6 mirror**), `AppUpdater.java` (**v1.1 mirror**), `ApkProvider.java`,
+  `SettingsActivity.java` (**v1.1**), `PrefsStore.java`, `MimeUtils.java`.
 - `app/src/main/AndroidManifest.xml`: INTERNET / ACCESS_NETWORK_STATE / VIBRATE /
   REQUEST_INSTALL_PACKAGES; activity `singleTask` + `configChanges`; SettingsActivity (exported=false);
   provider `ApkProvider` (authorities `${applicationId}.apk`); intent-filter VIEW
@@ -927,7 +977,8 @@ git add desktop/latest.yml && git commit -m "desktop/latest.yml vN.N.N" && git p
   `res/values/strings.xml` = «Игровой центр»; иконки `res/mipmap-*/ic_launcher.png`.
 - `keystore/release.keystore` — ключ подписи, **локально + резервная копия на накопителе**
   (потеря ключа = невозможность обновлять APK поверх).
-- Зависимостей НОЛЬ: только системный WebView → APK ~2–4 МБ.
+- **Зависимостей НОЛЬ: только системный WebView → APK ~100 КБ** (не 2–4 МБ! враппер без bundled-библиотек;
+  размер ~100 КБ — норма, всё ставится и работает).
 - Тулчейн на рабочем ПК: Android Studio (папка программы и JBR) **ИЛИ отдельный JDK 17**
   (Eclipse Adoptium); `JAVA_HOME=<studio>\jbr` или `JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-17…`;
   `local.properties:sdk.dir=<реальный SDK>` (см. грабли 8.4).
@@ -950,7 +1001,8 @@ git add desktop/latest.yml && git commit -m "desktop/latest.yml vN.N.N" && git p
   прогресс не рисуется, тост «✅ Игры обновлены» только при `lastChanged()`, ошибки молча игнорируются).
   Блокирующий оверлей с прогрессом остаётся ТОЛЬКО для случая «паков нет вовсе» (+ретрай по тапу).
 - Паки: `context.filesDir/packs/{current,staging,old}` + `installed.json`.
-  `ContentUpdater` = порт десктопного updater: `versions.json`, селективная закачка по версиям
+  `ContentUpdater` = порт десктопного updater (**v1.6: манифест и файлы с фолбэком на зеркало**):
+  `versions.json`, селективная закачка по версиям
   (hub — по `hub.version`, игры — по `games[id].version`; **правило HUB_VER действует и здесь**, 6.3),
   sha256 каждого файла, атомарный swap; синхронизация при КАЖДОМ запуске.
 - **Офлайн-старт (ContentUpdater v1.3):** манифест недоступен (DNS/сеть), но `packsValid()` →
@@ -966,7 +1018,7 @@ git add desktop/latest.yml && git commit -m "desktop/latest.yml vN.N.N" && git p
   `old→current`; без отката устройство оставалось с пустым current и офлайн-ошибкой бутстрапа.
 - **Манифест в паках (v1.2):** `versions.json` перезаписывается в `current/` при каждом sync
   (включая пустой diff) и кладётся в staging при swap → хаб v3.35+ рисует чипы версий и NEW офлайн.
-- Источника «local repo» нет: всегда `pages`.
+- Источника «local repo» нет: всегда `pages` (+ зеркало как фолбэк).
 - SW не регистрируется (platform.js v2.9+: гейт по `window.AppBridge`).
 
 ### 7.3 Мост AppBridge (platform='android')
@@ -1017,23 +1069,25 @@ git add desktop/latest.yml && git commit -m "desktop/latest.yml vN.N.N" && git p
   `IgrovojCentr-Setup.exe` + `latest.yml` (правило раздела 4: ссылки `latest/download/*` живут
   только в свежем релизе; **кейс 2026-11-06:** ассет `IgrovojCentr-0.10.0.apk` → 404 на стабильной
   ссылке → автообновление падало на загрузке; лечение — перезалить под именем `IgrovojCentr.apk`).
+  **Release label = Latest** (кейс 2026-11-21).
 - Hub v3.31+: кнопка 🤖 «Android 8 и новее» активна; действия модалки работают и для APK
   (share → Platform.share, «скачать ссылку» → буфер; прямая закачка убрана в v3.44).
 - Теги релизов общие для проекта (`v0.N.N`); **versionName APK ведётся отдельно** в build.gradle
   и сверяется с `android-update.json` (7.8).
 
-### 7.8 Автообновление APK (v0.5.0+)
+### 7.8 Автообновление APK (v0.5.0+, v1.1 mirror)
 
 - **Манифест обновления:** `android-update.json` в корне репо **games** → Pages
   (`https://ip19760118-code.github.io/games/android-update.json`); **НЕ в gc-desktop/gc-android** —
   локальные проекты оболочек вне git (графля 2026-11-06: попытка коммита из gc-desktop =
   «fatal: not a git repository»). Содержимое:
-  `{"versionName":"0.10.0","versionCode":8,"notes":"…"}`. Приложение сравнивает `versionName`
+  `{"versionName":"0.10.1","versionCode":9,"notes":"…"}`. Приложение сравнивает `versionName`
   с `BuildConfig.VERSION_NAME` (почленный числовой cmp). GitHub API НЕ используется
   (rate-limits, User-Agent) — только Pages-json + стабильная ссылка ассета.
+  **AppUpdater v1.1: при ошибке Pages — фолбэк на зеркало `/android-update.json`.**
 - **Ссылка загрузки:** `APK_URL = …/releases/latest/download/IgrovojCentr.apk` →
-  `cacheDir/update/IgrovojCentr.apk`; прогресс — тосты (`pageToast` в MainActivity,
-  `Toast` в SettingsActivity).
+  `cacheDir/update/IgrovojCentr.apk`; **при ошибке — зеркало `/IgrovojCentr.apk` (v1.1)**;
+  прогресс — тосты (`pageToast` в MainActivity, `Toast` в SettingsActivity).
 - **Когда проверяем:** при старте после готовности контента, если режим `auto`
   (PrefsStore.updateMode) и прошло ≥6 ч (pref `apkCheckAt`); вручную — кнопка в настройках (7.9)
   и `AppBridge.checkAppUpdate()` (троттлинг игнорирует).
@@ -1047,7 +1101,7 @@ git add desktop/latest.yml && git commit -m "desktop/latest.yml vN.N.N" && git p
 - **Подтверждение:** нативный AlertDialog «Доступна версия X. Установить сейчас?» (Обновить/Позже).
 - **Правило деплоя android-update.json:** коммит/пуш json — строго ПОСЛЕ Publish релиза
   (иначе устройства скачают старый ассет под новой версией). Порядок: bump versionName/versionCode →
-  assembleRelease → Release (3 ассета) → push json.
+  assembleRelease → Release (3 ассета) → push json → **sync-mirror.bat**.
 - **Историческая оговорка:** сборки ≤0.4.x апдейтера не содержат — обновляются вручную один раз
   (модалка хаба 🤖); цепочка замкнута с 0.5.0.
 
@@ -1080,20 +1134,20 @@ git add desktop/latest.yml && git commit -m "desktop/latest.yml vN.N.N" && git p
 | v0.1.0 | 2026-11-02 | WebView + intercept под Pages-origin; ContentUpdater; AppBridge; диплинки; mipmap; keystore | `gradlew assembleRelease` → `IgrovojCentr.apk` | JAVA_HOME / sdk.dir / Material3 / mipmap-anydpi (8.4) |
 | v0.4.0 | 2026-11-02 | правило трёх ассетов; релиз-процесс | 3 ассета | имена без версий |
 | v0.5.0 | 2026-11-03 | автообновление APK (android-update.json, ApkProvider, гейт REQUEST_INSTALL_PACKAGES, троттлинг 6 ч) | `IgrovojCentr.apk` + android-update.json ПОСЛЕ Publish | FileUriExposedException → content:// |
-| v0.6.0 | 2026-11-03 | нативный SettingsActivity; openSettings/getUpdateMode/setUpdateMode/checkAppUpdate |同上 | шестерёнка только android |
-| v0.7.1/0.7.2 | 2026-11-03 | динамическое «О приложении» (без хардкодов чисел) |同上 | «16 игр» устаревало |
-| v0.8.0 | 2026-11-03 | installedGamesCount() из installed.json |同上 | — |
-| v0.9.0 | 2026-11-04 | `downloadFile` → DownloadManager |同上 | скачивание без браузера |
-| **v0.10.0** | **2026-11-06** | **silentSync офлайн-first**; intercept директорий→index.html; presence-repair полноты паков; безопасный swap с откатом; sanity staging | `IgrovojCentr.apk` + android-update.json | ассет с версией в имени → 404 (кейс); ERR_INTERNET_DISCONNECTED при полных паках до фикса директорий |
+| v0.6.0 | 2026-11-03 | нативный SettingsActivity; openSettings/getUpdateMode/setUpdateMode/checkAppUpdate | 同上 | шестерёнка только android |
+| v0.7.1/0.7.2 | 2026-11-03 | динамическое «О приложении» (без хардкодов чисел) | 同上 | «16 игр» устаревало |
+| v0.8.0 | 2026-11-03 | installedGamesCount() из installed.json | 同上 | — |
+| v0.9.0 | 2026-11-04 | `downloadFile` → DownloadManager | 同上 | скачивание без браузера |
+| v0.10.0 | 2026-11-06 | **silentSync офлайн-first**; intercept директорий→index.html; presence-repair полноты паков; безопасный swap с откатом; sanity staging | `IgrovojCentr.apk` + android-update.json | ассет с версией в имени → 404 (кейс); ERR_INTERNET_DISCONNECTED при полных паках до фикса директорий |
+| **v0.10.1** | **2026-11-21** | **mirror-fallback** (ContentUpdater v1.6, AppUpdater v1.1) | apk + json → sync-mirror | APK ~100 КБ — норма (WebView-враппер) |
 
 **Команды сборки/релиза Android:**
 ```cmd
 cd /d C:\Telegram\gc-android
 set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-17…   :: или <studio>\jbr
 gradlew.bat assembleRelease
-:: app\build\outputs\apk\release\app-release.apk → переименовать в IgrovojCentr.apk
-:: Release GitHub tag v0.N.N: IgrovojCentr.apk + IgrovojCentr-Setup.exe + latest.yml
-:: ПОСЛЕ Publish: коммит android-update.json из C:\Telegram\games
+copy /Y app\build\outputs\apk\release\app-release.apk C:\Telegram\gc-desktop\release\IgrovojCentr.apk
+:: Release (3 ассета, label=Latest) → ПОСЛЕ Publish: коммит android-update.json из games → sync-mirror.bat
 ```
 
 ---
@@ -1169,6 +1223,9 @@ gradlew.bat assembleRelease
 | **«Ошибка обновления оболочки» + зелёное полотно / 504 GitHub** | **electron-updater парсит HTML-страницу releases/latest как yml → `fullscreenerror`** | **shell-updater v4 (2026-11-11): собственный node-https generic-фид, yml-парсер, тихие ошибки + retry 10 мин; удалить блок `publish` из electron-builder.yaml; удалить `electron-updater` из `dependencies` (package.json v0.10.3)** |
 | **«Оболочка актуальна», хотя релиз свежий; `release\latest.yml` показывает старую версию** | **electron-builder без `publish` НЕ генерирует latest.yml → в release остаётся leftover старой версии** | **`node tools\make-latest.js` после `npm run dist` (v0.10.4); коммит `games/desktop/latest.yml`; сверить version** |
 | **Без интернета ПК-оболочка не загружается / висит ~60 с** | **бутстрап ≤0.10.3: блокирующий `await syncChanged(60s)` + `await refreshWarnings()` до createWindow** | **v0.10.4 офлайн-first: окно сразу из паков, backgroundSync тихо; без паков+без сети — страница «Контент не найден»+Повторить сразу** |
+| **asar содержит electron-updater при deps:{}** | **yaml files:"**/*" тащит node_modules** | **files: src/assets/package.json + rmdir electron-updater + npm prune (v0.10.5)** |
+| **latest/download 404, тег работает** | **релиз не Latest (Pre-release/Draft)** | **Edit release → label=Latest; фолбэк зеркало** |
+| **GitHub заблокирован провайдером** | **блокировка github.io/IP** | **фолбэк на зеркало (4.3); DNS 8.8.8.8 как временная мера** |
 | Кнопка шеринга в игре молчит (TypeError: shareGame is not a function) в оболочках | в паках старый platform.js (см. правило HUB_VER) | bump HUB_VER + regen + push + синхронизация оболочек |
 | Шеринг с ПК-web уходит «голой ссылкой» без текста | navigator.share → OS share-sheet: таргет (Telegram) берёт только url | platform.js v3.1: web + pointer:fine → полное сообщение в буфер + тост |
 | Иконка exe/ярлыка «вернулась к атому Electron» | `signAndEditExecutable: false` отключает rcedit (встраивание иконки) | флаг убрать; winCodeSign чинить распаковкой кэша; кэш иконок Windows: `ie4uinit.exe -show` / перезапуск explorer (6.6) |
@@ -1220,6 +1277,7 @@ gradlew.bat assembleRelease
 | `FileUriExposedException` при install-intent | `Uri.fromFile` запрещён с API 24 | свой `ApkProvider` + `content://` URI (7.8) |
 | Шестерёнка ⚙️ не появляется в хабе | hub < v3.34 или в оболочке нет `AppBridge.openSettings` | обновить контент (versions.json) И оболочку ≥0.6.0 |
 | Имя из настроек не видно в уже открытой комнате | игры читают `Platform.user()`/getProfile при инициализации | пересоздать/перезайти в комнату после сохранения имени |
+| **GitHub заблокирован** | **блокировка** | **mirror-fallback ContentUpdater v1.6/AppUpdater v1.1 (4.3)** |
 
 ### 8.5 Игры и хаб (геймплейные и игровые грабли 2026-10/11)
 
@@ -1267,6 +1325,18 @@ gradlew.bat assembleRelease
 | **ПК-оболочка: скачивание открывает браузер** | **`<a download>` в Electron 22 на `app://`-origin тоже игнорируется** | **IPC `bridge:download-file` (node:https → Downloads + showItemInFolder); main.js v0.3.6+** |
 | **TG/VK/MAX: «Загрузка не удалась» → внутренний браузер мессенджера зависает** | **fetch на внешний домен в WebApp блокируется CORS; внутренний браузер VK зависает на редиректах GitHub** | **🔒 правило мессенджеров (platform.js v3.4): НЕ пытаться fetch, сразу ВНЕШНИЙ системный браузер (`openLink`/`VKWebAppOpenExternalLink`); mobile сначала `navigator.share({files})`; hub v3.44 вообще убрал прямую закачку из хаба — только ссылки; VK — заглушка** |
 | **Android-оболочка: скачивание открывает браузер** | **`AppBridge.downloadFile` отсутствовал (<0.9.0), фолбэк в `openExternal`** | **v0.9.0: нативный `DownloadManager.enqueue` → уведомление + `Downloads/`, браузер не открывается** |
+| **GitHub заблокирован при скачивании** | **блокировка** | **mirror-fallback platform v3.8 / main v0.10.5 (4.3)** |
+
+### 8.7 Зеркало (RF)
+
+| Симптом | Причина | Лечение |
+|---|---|---|
+| **нет CORS на зеркале** | дефолтный .htaccess (290б) | перезаписать нашим .htaccess (~1КБ) |
+| **.htaccess не применяется** | имя `Qwen_…htaccess`/`*.htaccess` | ren в `.htaccess` + перезапись |
+| **домен Non-existent domain** | не зарегистрирован/не делегирован | регистрация + NS ns1/ns2 + A→IP; propagate 15–60 мин |
+| **DNS таймаут через роутер** | роутерный DNS режет | nslookup … 8.8.8.8; DNS 8.8.8.8/8.8.4.4 на ПК |
+| **SSL «отложен»** | домен не делегирован на момент проверки | дождаться resolve → авто/ручной выпуск |
+| **зеркало отдаёт старую версию** | не запущен sync-mirror.bat | sync-mirror после каждого релиза |
 
 ---
 
@@ -1320,25 +1390,27 @@ gradlew.bat assembleRelease
 1. Bump `version` в `package.json` (**без этого автообновление считает релиз «актуальным»!**).
 2. **Проверить секцию `dependencies`: все модули, которые `require`-ятся в runtime,
    должны быть в `dependencies`, а НЕ в `devDependencies`** (🔒 правило 6.2).
-   **v0.10.3: `electron-updater` полностью удалён из deps (shell-updater v4).**
-3. `npm install` → `npm run dist`.
+   **v0.10.5: `dependencies: {}` (electron-updater удалён, shell-updater v4).**
+3. `npm prune` → `npm run dist`.
 4. **`node tools\make-latest.js`** (v0.10.4+): генерирует `release/latest.yml` (version из package.json +
    абсолютный path на exe) и копию `games/desktop/latest.yml`. **Без этого latest.yml остаётся старым leftover.**
 5. `type release\latest.yml | findstr version` = новой версии.
-6. **Контроль упаковки (v0.10.3):** `npx @electron/asar list release/win-unpacked/resources/app.asar | findstr electron-updater` —
-   **должен быть ПУСТОЙ вывод** (модуля больше нет). Для более старых релизов — непустой.
-7. **Убедиться, что в `electron-builder.yaml` НЕТ блока `publish`** (v0.10.3: ValidationError схемы).
+6. **Контроль упаковки (v0.10.5):** `npx --yes @electron/asar list release/win-unpacked/resources/app.asar | findstr electron-updater` —
+   **должен быть ПУСТОЙ вывод**. Для более старых релизов — непустой.
+7. **Убедиться, что в `electron-builder.yaml` НЕТ блока `publish`** (v0.10.3: ValidationError схемы);
+   `files:` = src/assets/package.json (без node_modules).
 8. Проверить иконку exe в проводнике ДО загрузки ассета (rcedit не сломан, 6.6).
-9. Release: tag `vN.N.N`, ассеты **три под точными именами**: `IgrovojCentr-Setup.exe` + `latest.yml` +
+9. Release: tag `vN.N.N`, **label=Latest**, ассеты **три под точными именами**: `IgrovojCentr-Setup.exe` + `latest.yml` +
    `IgrovojCentr.apk` (БЕЗ версий в именах!, правило 4/6.5).
 10. Коммит+пуш `games/desktop/latest.yml` (Pages-фид).
-11. Publish → hub-кнопки подхватят через `latest/download` автоматически; shell-updater v4 возьмёт
-    фид с Pages `desktop/latest.yml` → GitHub `releases/latest/download/latest.yml`.
+11. Publish → hub-кнопки подхватят через `latest/download` автоматически; shell-updater v4.1 возьмёт
+    фид с Pages `desktop/latest.yml` → GitHub `releases/latest/download/latest.yml` → **зеркало**.
 12. **Контроль стабильных ссылок:** обе URL `…/releases/latest/download/IgrovojCentr.apk` и
-    `…/IgrovojCentr-Setup.exe` открываются в браузере и качают файл (не 404); `…/games/desktop/latest.yml` = новая version.
+    `…/IgrovojCentr-Setup.exe` открываются в браузере и качают файл (302→тег, не 404); `…/games/desktop/latest.yml` = новая version.
 13. Проверка автообновления с предыдущей установленной версии (Win10) + установка на Win 8.1.
 14. **Офлайн-тест (v0.10.4):** отключить интернет → перезапуск → окно сразу, игры офлайн из паков.
-15. Сломанную сборку (если main.js падал) автообновление не лечит — таким машинам ручная установка.
+15. **sync-mirror.bat + проверки зеркала (4.3/8.7/9.10).**
+16. Сломанную сборку (если main.js падал) автообновление не лечит — таким машинам ручная установка.
 
 ### 9.4 Деплой контента
 1. Коммит контента. **Если коммит трогает `js/platform.js`, `sw.js`, `js/snd.js`, `icon-*.png` —
@@ -1356,6 +1428,7 @@ gradlew.bat assembleRelease
    диплинки `?game=`, шестерёнка ⚙️ (android); при одновременной смерти всех — подозревать формат/целостность
    JS хаба (8.5, кейс v3.45).
 8. **VK: после деплоя проверить consent-gate и отсутствие внешних ссылок в VK-сборке (3.4).**
+9. **sync-mirror.bat + проверки зеркала (4.3/9.10).**
 
 ### 9.5 Новая платформа (бот) / переезд
 1. Вебхук на Vercel; ответ ДО/ПОСЛЕ обработки по freeze-модели. 2. Реестр: подписка + секрет + confirmation.
@@ -1369,7 +1442,7 @@ gradlew.bat assembleRelease
    (без JAVA_HOME gradlew падает «JAVA_HOME is not set», 8.4) → `gradlew.bat assembleRelease` →
    `app\build\outputs\apk\release\app-release.apk` → **переименовать в `IgrovojCentr.apk` (имя без версии!)**.
 3. Release GitHub: **три ассета под точными именами** (`IgrovojCentr.apk` + `IgrovojCentr-Setup.exe` +
-   `latest.yml`), tag общий `v0.N.N`; **контроль стабильной ссылки APK в браузере до анонса** (кейс 404 v0.10.0).
+   `latest.yml`), tag общий `v0.N.N`, **label=Latest**; **контроль стабильной ссылки APK в браузере до анонса** (кейс 404 v0.10.0).
 4. **ПОСЛЕ Publish:** коммит+пуш `android-update.json` **из репо games** с новой `versionName`/`versionCode`
    (7.8; gc-desktop/gc-android — не git-репозитории); сверить, что json.versionName == versionName внутри APK.
 5. Тест: устройство с предыдущей версией → авто-диалог обновления (режим auto) или
@@ -1380,16 +1453,17 @@ gradlew.bat assembleRelease
    диплинк комнаты, шеринг, иконка (кэш лаунчера!), ⚙️ и все секции настроек (7.9, без хардкодов чисел).
 7. Фоновая синхронизация с интернетом: хаб мгновенно, без «Обновление: N/M»; тост «✅ Игры обновлены»
    только при фактических изменениях (silentSync, 7.2).
+8. **sync-mirror.bat + проверки зеркала (4.3/9.10).**
 
 ### 9.7 Добавление скачивания ассетов через `Platform.downloadAsset`
 1. В `platform.js` (≥v3.4) вызов `Platform.downloadAsset(url, fileName, {shareText, shareTitle})`.
 2. В оболочках: `AppBridge.downloadFile(url, fileName)` должен быть в preload + main (IPC).
-   - **ПК:** IPC `bridge:download-file` через `node:https` с редиректами → `app.getPath('downloads')/fileName` → `shell.showItemInFolder(dest)` + тост (main.js ≥v0.3.6).
+   - **ПК:** IPC `bridge:download-file` через `node:https` с редиректами → `app.getPath('downloads')/fileName` → `shell.showItemInFolder(dest)` + тост (main.js ≥v0.3.6; mirror v0.10.5).
    - **Android:** `@JavascriptInterface downloadFile` → `DownloadManager.enqueue` в `DIRECTORY_DOWNLOADS` + `VISIBILITY_VISIBLE_NOTIFY_COMPLETED` + фолбэк `ACTION_VIEW` (AppBridge.java ≥v0.9.0).
 3. **В мессенджерах (TG/VK/MAX) — НЕ пытаться fetch из WebApp** (CORS-блок = ложные «загрузка не удалась»);
    сразу переход во внешний браузер: TG `Telegram.WebApp.openLink(url)`; MAX `window.WebApp.openLink(url)`; MAX во внешнем браузере `location.href=url`.
    **VK: НЕ пытаться ни fetch, ни openLink — заглушка с тостом «недоступна в этой версии» (п.4.1.8).**
-4. Обычный web-браузер (desktop): `fetch` → `blob` → `<a href=URL.createObjectURL(blob) download>`.
+4. Обычный web-браузер (desktop): `fetch` → `blob` → `<a href=URL.createObjectURL(blob) download>` (+mirror v3.8).
 5. Мобильный web (pointer:coarse): попытка `navigator.share({files:[new File([blob],fileName)]})` — системный chooser; фолбэк `window.open`.
 6. Тосты честные: «Начинаю загрузку…» в момент старта, «Загрузка запущена…» только после успешной попытки; при fallback в браузер — «Открываем браузер для загрузки…».
 7. **Hub (v3.44):** прямая закачка бинарников из хаба НЕ используется вовсе — модалка только отправляет/копирует ссылки на установщики (4.1).
@@ -1400,7 +1474,7 @@ gradlew.bat assembleRelease
    компактный стиль без лишних переносов/пробелов (4.2).
    **Исключение для hub `index.html`: полный файл допускается ТОЛЬКО в исходном читаемом формате
    (v3.44+), компактификация запрещена (4.2); предпочтительны точечные диффы.**
-   **Исключение для спеки/документов: всегда одним блоком-контейнером.**
+   **Исключение для спеки/документов: всегда одним блоком-контейнером, БЕЗ сокращения разделов.**
 3. Точечные правки (1–5 строк) — только как исключение, таблицей «Найти → Заменить» с пометкой.
 4. Bump `VER` игры (+ метки в футере/модалках); синтаксический контроль после компактификации (4.2).
 5. Деплой: коммит игры → `gen-versions.js` → коммит `versions.json` → push (9.4).
@@ -1416,6 +1490,11 @@ gradlew.bat assembleRelease
 7. Подать на модерацию ОДИН раз; при reject — читать пункт правил и править точечно.
 8. APP_ID (54850501) не путать с ID сообщества (242534673); Callback API сообщества использует group_id, Mini App — vk_app_id.
 
+### 9.10 Синхронизация зеркала (после каждого релиза/деплоя)
+1. `C:\Telegram\sync-mirror.bat` (пароль только локально).
+2. Проверки: versions.json=HUB_VER; CORS *; latest.yml=версия оболочки; android-update.json=versionName; exe/apk 200.
+3. При отсутствии CORS — перезаписать .htaccess; при старой версии — повторить sync.
+
 ---
 
 ## 10. Справочник конфигурации
@@ -1423,6 +1502,9 @@ gradlew.bat assembleRelease
 | Ключ | Значение |
 |---|---|
 | Hub URL | `https://ip19760118-code.github.io/games/` |
+| **Зеркало URL** | **`https://igrovoj-centr-mirror.ru`** (per.ru Хост-А, IP 37.140.192.82, NS ns1/ns2.reg.ru) |
+| **sync-mirror** | `C:\Telegram\sync-mirror.bat` (curl FTP u3736055_mirrorftp) |
+| **Зеркало .htaccess** | CORS * + MIME + no-cache манифесты/exe/apk + long-cache картинки |
 | Диплинк игры | `https://ip19760118-code.github.io/games/?game=<key>` (handleDeepLink хаба; key из GAME_MAP) |
 | **VK APP_ID** | **54850501** (`app54850501`); сообщество **club242534673** (group_id 242534673) |
 | **VK placement URL** | `https://ip19760118-code.github.io/games/?plat=vk` (mobile + desktop) |
@@ -1439,11 +1521,11 @@ gradlew.bat assembleRelease
 | Бренд-строка шеринга | «🎮 Игровой центр — классика и новинки, онлайн и офлайн» (без чисел!) |
 | EXE (стабильная ссылка) | `…/releases/latest/download/IgrovojCentr-Setup.exe` |
 | APK (стабильная ссылка) | `…/releases/latest/download/IgrovojCentr.apk` |
-| **Имена релиз-ассетов** | **строго `IgrovojCentr.apk`, `IgrovojCentr-Setup.exe`, `latest.yml` — без версий (кейс 404 v0.10.0)** |
-| **Desktop-фид shell-updater v4** | `https://ip19760118-code.github.io/games/desktop/latest.yml` (основной) → `releases/latest/download/latest.yml` (фолбэк) |
+| **Имена релиз-ассетов** | **строго `IgrovojCentr.apk`, `IgrovojCentr-Setup.exe`, `latest.yml` — без версий (кейс 404 v0.10.0); label=Latest** |
+| **Desktop-фид shell-updater v4.1** | `https://ip19760118-code.github.io/games/desktop/latest.yml` (основной) → `releases/latest/download/latest.yml` (фолбэк) → **зеркало latest.yml** |
 | **Генератор фида** | `gc-desktop\tools\make-latest.js` (v1): version из package.json + абсолютный path на exe; пишет release/latest.yml + games/desktop/latest.yml |
-| Манифест контента | `…/games/versions.json` (+ копия в паках оболочек, 6.2/7.2) |
-| Манифест автообновления APK | `…/games/android-update.json` (в репо **games**, коммит строго ПОСЛЕ Publish релиза) |
+| Манифест контента | `…/games/versions.json` (+ копия в паках оболочек, 6.2/7.2; + зеркало) |
+| Манифест автообновления APK | `…/games/android-update.json` (в репо **games**, коммит строго ПОСЛЕ Publish релиза; + зеркало) |
 | Реестр дат добавления игр | `…/games/games-added.json` (сид 2026-10-01; NEW = 7 суток) |
 | GAMES генератора | **20 id** в `gc-desktop\tools\gen-versions.js` (**v1.6**, +poker); новая игра — добавить ДО регена |
 | Паки desktop | `%APPDATA%\igrovoj-centr\packs\current` (+`versions.json`) |
@@ -1453,13 +1535,13 @@ gradlew.bat assembleRelease
 | JAVA_HOME сборки android | `<Android Studio>\jbr` ИЛИ `C:\Program Files\Eclipse Adoptium\jdk-17…` |
 | Ключи localStorage игр | `pyatnashki_set` {vol,diff,skin}, `pyatnashki_stats`; `tt_set` {aiLvl,first,vol,skin}, `tt_stats`, `tt_name`; картинки `tictactoe/img/{x,o}.png` (512×512, ASCII!); `durak_set` {diff,transfer,allAdd,throwPause}, `durak_name`, `durak_uid_fallback`, `lastSixesOnMe` (5.17); `sol_set` {diff,skin,back,assist,vol,voice}, `sol_stats`; рубашки `solitaire/img/back1..5.png` (300×420); `tetris_set` {skin,speed,ghost,vib,vol}, `tetris_stats`; `crystals_set` {mode,diff,skin,vol,voice}, `crystals_stats`; `findpair_set` {lvl,pics,skin,vol}, `findpair_stats`; `findpair/img/start.png`; **`poker_set` {diff,back}, `poker_name`, `poker_uid_fb`** |
 | Троттлинг автопроверки APK | 6 часов (ручной вызов игнорирует) |
-| Desktop: runtime | Electron 22.3.27 (Win 7 SP1–11), electron-builder 24, NSIS per-user |
+| Desktop: runtime | Electron 22.3.27 (Win 7 SP1–11), electron-builder 24, NSIS per-user; **deps:{}** |
 | Desktop: контракт updater | 6.2 — НЕ НАРУШАТЬ (имя класса/экспорт/сигнатуры) |
-| Desktop: контракт shell-updater v4 | 6.2 — НЕ НАРУШАТЬ (`init({mode,toast,onState})` / `check(silent)` / `menuAction()` / `getStatus()`; node-https generic-фид, тихие ошибки) |
+| Desktop: контракт shell-updater v4.1 | 6.2 — НЕ НАРУШАТЬ (`init({mode,toast,onState})` / `check(silent)` / `menuAction()` / `getStatus()`; node-https generic-фид + зеркало, тихие ошибки) |
 | Desktop: контракт config | 6.2 — `makeConfig(app)` + `DEFAULT_ROOT`; `packsRoot` = текущая папка контента |
-| Desktop: package.json | 6.2 — runtime-зависимости только в `dependencies`; **electron-updater удалён** (v0.10.3) |
-| **Desktop: бутстрап** | **v0.10.4 офлайн-first: окно сразу из паков + backgroundSync тихо; ≤0.10.3 блокирующий 60 с** |
-| Android: runtime | system WebView; minSdk 26 (Android 8.0), compile/targetSdk 34, AGP 8.9.1+, Gradle 9.6 |
+| Desktop: package.json | 6.2 — runtime-зависимости только в `dependencies`; **v0.10.5 deps:{}**; yaml files без node_modules |
+| **Desktop: бутстрап** | **v0.10.4 офлайн-first: окно сразу из паков + backgroundSync тихо; ≤0.10.3 блокирующий 60 с; v0.10.5 mirror-download** |
+| Android: runtime | system WebView; minSdk 26 (Android 8.0), compile/targetSdk 34, AGP 8.9.1+, Gradle 9.6; **APK ~100 КБ** |
 | Android: подписи | `gc-android\keystore\release.keystore` (alias igrovoj) + резервная копия |
 | HEARTBEAT_INTERVAL / TTL | 5000 / 15000 мс |
 | Watchdog комнат | тик 5 с, порог неактивности 30 с |
@@ -1468,7 +1550,7 @@ gradlew.bat assembleRelease
 | BOT_ADD_GAP (Дурак) | 2000 мс на бота-подкидывателя |
 | Тапы: пороги | drag 6px; тап elapsed<400ms; double-tap окно 300ms; single-tap задержка 250ms (5.15) |
 | Hub smart-sort | полураспад 30 дней, ключ `hub_sort_stats`, сброс `?sort=reset` |
-| Формат поставки кода | полный файл одним контейнером, компактно (ИГРЫ); hub — только читаемый формат v3.44+ (4.2); спека — одним контейнером |
+| Формат поставки кода | полный файл одним контейнером, компактно (ИГРЫ); hub — только читаемый формат v3.44+ (4.2); спека — одним контейнером БЕЗ сокращений |
 
 > 🔒 Значения секретов — только Vercel Environment Variables и локальные `.env`.
 
@@ -1493,7 +1575,8 @@ gradlew.bat assembleRelease
 | 2.11 | 2026-11-05 | **Hub v3.45→v3.46 регресс**: ручная компактификация JS-блока хаба убила чипы/NEW/сортировку/модалку/диплинки/⚙️ в оболочках ПК и Android (подписи игр при этом применились — HTML жил, JS молчал); hub = единая точка отказа 18 игр и всех оболочек; **🔒 правило «хаб не компактить»** (4.2): JS хаба только в читаемом формате v3.44+, правки хаба точечными диффами, компактный стиль — только файлы игр; строка в 8.5; шаги регресс-чека фишек витрины в 9.4; исключение формата поставки хаба в 9.8; hub v3.46 (формат v3.44 + новые подписи 12 игр) |
 | 2.12 | 2026-11-06 | **Android v0.10.0 + ContentUpdater v1.5 полным циклом кейсов релиза:** (а) **🔒 имена релиз-ассетов без версий** — ассет `IgrovojCentr-0.10.0.apk` дал HTTP 404 на стабильной ссылке `releases/latest/download/IgrovojCentr.apk` и уронил автообновление оболочки (4/6.5/7.7/9.3/9.6); (б) **shouldInterceptRequest: директория→index.html** — офлайн-игры падали `ERR_INTERNET_DISCONNECTED` при полных паках (7.2/8.4); (в) **самовосстановление полноты паков + безопасный swap с откатом + sanity staging** — installed.json маскировал отсутствующие файлы, «хаб есть, игр нет» (7.2/8.4); (г) **тихий фоновый бутстрап silentSync** — оверлей «Обновление: N/M» больше не блокирует старт (7.2/9.6); (д) `android-update.json` живёт в репо **games**, коммит из gc-desktop = «not a git repository» (7.8/8.4); (е) JAVA_HOME для gradlew: Adoptium JDK 17 как альтернатива JBR студии (7.6/8.4); **🔒 правило «манифест не обгоняет контент»** (6.3, кейс HTTP 404 в синхронизации); игры: hub v3.47 + Найди пару v1.0–1.5 (дебют 19-й игры, GAMES v1.5), Тетрис v1.3–1.4 (старт со стакана, светлая тема), Кристаллы v4.17 (шторка инструментов, шеринг), Косынка v2.3–2.17 (решатель с ходом wt, скрытая подгонка закрытых карт + настройка частоты помощи, рубашки back1–5 с жёлтоватым листом, светлый скин, dragHide-фикс драга из дома, layout по замеру экрана), Нарды v2.9–2.10 (правила сброса/блока по классике) |
 | 2.13 | 2026-11-11 | **VK-политика и модерация (раздел 3.4, платформа v3.5–3.7, hub v3.49–3.50):** п.4.1.8 — vkCompliance хаба (скрытие кнопки/модалки ПК-Android, переписывание подзаголовка/описания/og), `vkSafeUrl/vkSafeText`, шаринг только vk.com, downloadAsset-заглушка; п.4.2.6 — тексты без чужих платформ; п.2.2.5 — реестр AudioContext + suspend/resume по `VKWebAppViewHide/Show`; п.1.1.4 — `legal/terms.html`+`legal/privacy.html` на Pages, URLs в кабинете «Правовые документы», **consent-gate** platform.js v3.6 (`igc_consent_v1`); APP_ID 54850501 + автодетект `vk_app_id`/`vk_user_id` (platform.js v3.7) + лечение «Ошибка загрузки» при placement без `?plat=vk`; чек-лист 9.9; **Покер v0.2** (Холдем No-Limit, 52 карты без джокеров, до 9 игроков seats p0..p8, сайд-поты, олл-ин, шоудаун, боты, онлайн-комнаты) + **gen-versions v1.6** (`['poker',true]`) + hub v3.50 (кнопка Покер/GAME_MAP/префетч); **Дурак v3.38.1**: фикс SyntaxError в `ensureFirebase` + стрелки-навигаторы руки v3.36 + значок-шеринг v3.37; **Shell v0.10.3**: shell-updater v4 (собственный node-https generic-фид вместо electron-updater, тихие ошибки, retry 10 мин, удаление блока `publish`, артефакты в `release\`, electron-updater удалён из deps); rules Firebase расширены seats/p4..p8 для покера |
-| **2.14** | **2026-11-12** | **Журналы сборок оболочек (6.10 desktop, 7.10 android)** — каждая сборка: версия/дата/изменения/артефакты/команды/грабли. **Desktop v0.10.4 офлайн-first:** окно создаётся сразу из валидных паков без сетевых await, `backgroundSync()` тихо синхронизирует (тост только при изменениях; без паков+без сети — страница «Контент не найден»+Повторить сразу, фон докачает при сети); убраны блокирующие `await syncChanged(60s)`/`refreshWarnings` (кейс «без интернета не загружается»). **`tools/make-latest.js` v1:** electron-builder без `publish` НЕ генерирует latest.yml → фид генерируется вручную (version из package.json + абсолютный path на GitHub-ассет), пишется в `release/latest.yml` + `games/desktop/latest.yml` (кейс leftover 0.10.2). **Дурак v3.41:** QR/инвайт = прямая ссылка на игру с `game+room` (браузер сразу в комнате), освобождение места вышедшего (leaveRoom удаляет seat + onDisconnect remove). **Hub v3.51:** `openGame` пробрасывает `room` в игру (кейс «QR открывает хаб»). Чек-листы 9.2/9.3 дополнены (освобождение места, QR-маршрут, make-latest, офлайн-тест). |
+| 2.14 | 2026-11-12 | **Журналы сборок оболочек (6.10 desktop, 7.10 android)** — каждая сборка: версия/дата/изменения/артефакты/команды/грабли. **Desktop v0.10.4 офлайн-first:** окно создаётся сразу из валидных паков без сетевых await, `backgroundSync()` тихо синхронизирует (тост только при изменениях; без паков+без сети — страница «Контент не найден»+Повторить сразу, фон докачает при сети); убраны блокирующие `await syncChanged(60s)`/`refreshWarnings` (кейс «без интернета не загружается»). **`tools/make-latest.js` v1:** electron-builder без `publish` НЕ генерирует latest.yml → фид генерируется вручную (version из package.json + абсолютный path на GitHub-ассет), пишется в `release/latest.yml` + `games/desktop/latest.yml` (кейс leftover 0.10.2). **Дурак v3.41:** QR/инвайт = прямая ссылка на игру с `game+room` (браузер сразу в комнате), освобождение места вышедшего (leaveRoom удаляет seat + onDisconnect remove). **Hub v3.51:** `openGame` пробрасывает `room` в игру (кейс «QR открывает хаб»). Чек-листы 9.2/9.3 дополнены (освобождение места, QR-маршрут, make-latest, офлайн-тест). |
+| **2.15** | **2026-11-21** | **Зеркало обновлений RF (per.ru Хост-А, igrovoj-centr-mirror.ru): статика+SSL+CORS; фолбэк GitHub→зеркало во всех загрузчиках (updater v1.5, shell-updater v4.1, main v0.10.5, ContentUpdater v1.6, AppUpdater v1.1, hub v3.52, platform v3.8); sync-mirror.bat; правило синхронизации зеркала после релиза; раздел 4.3 + 8.7 + 9.10; desktop v0.10.5 (deps:{}, yaml files без node_modules, asar-контроль); android v0.10.1 (APK ~100 КБ норма); грабли: leftover electron-updater в asar, latest 404 при не-Latest, .htaccess имя/CORS, DNS/делегирование/SSL зеркала. Восстановлены ВСЕ разделы v2.14 без сокращений (исправлена потеря объёма при генерации 2.15).** |
 
 ---
 
