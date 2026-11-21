@@ -118,11 +118,12 @@
         <button class="game-btn" data-game="pyatnashki" id="pyatnashkiBtn"><span class="game-emoji">🧩</span><span class="game-text"><b>Пятнашки</b><small>Классическая головоломка</small></span></button>
         <button class="game-btn" data-game="tictactoe" id="tictactoeBtn"><span class="game-emoji">❌</span><span class="game-text"><b>Крестики-нолики <span class="tag-online">ONLINE</span></b><small>Игра с ИИ или с другом онлайн</small></span></button>
         <button class="game-btn" data-game="findpair" id="findpairBtn"><span class="game-emoji">🎴</span><span class="game-text"><b>Найди пару</b><small>Тренировка памяти: запомни картинки и собери все пары</small></span></button>
+        <button class="game-btn" data-game="spider" id="spiderBtn"><span class="game-emoji">🕷</span><span class="game-text"><b>Паук</b><small>Пасьянс: 104 карты, 1–4 масти, отмена и подсказки</small></span></button>
         <button class="game-btn disabled" disabled><span class="game-emoji">🚧</span><span class="game-text"><b>Скоро</b><small>Здесь появится новая игра</small></span></button>
       </div>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.53 · <span class="plat" id="platTag">web</span></p>
+      <p class="hub-ver" id="hubVer">hub v3.54 · <span class="plat" id="platTag">web</span></p>
     </div>
   </div>
 
@@ -172,7 +173,7 @@
   </div>
 
   <script>
-    const HUB_VER = '3.53';
+    const HUB_VER = '3.54';
     const WIN_EXE_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr-Setup.exe';
     const APK_URL = 'https://github.com/ip19760118-code/games/releases/latest/download/IgrovojCentr.apk';
     const WIN_EXE_MIRROR = 'https://igrovoj-centr-mirror.ru/IgrovojCentr-Setup.exe';
@@ -355,7 +356,7 @@
       try {
         if (navigator.connection && navigator.connection.saveData) return;
         setTimeout(function(){
-          ['chess','seabattle','durak','poker','tetris','tictactoe','findpair'].forEach(function(g){
+          ['chess','seabattle','durak','poker','tetris','tictactoe','findpair','spider'].forEach(function(g){
             var l = document.createElement('link');
             l.rel = 'prefetch';
             l.href = './' + g + '/';
@@ -374,6 +375,7 @@
       'poker': './poker/', 'holdem': './poker/', 'холдем': './poker/', 'покер': './poker/', 'texas': './poker/',
       'minesweeper': './minesweeper/', 'mines': './minesweeper/',
       'crystals': './crystals/', 'solitaire': './solitaire/',
+      'spider': './spider/', 'паук': './spider/', 'spider_solitaire': './spider/',
       'seabattle': './seabattle/', 'mahjong': './mahjong/',
       'tetris': './tetris/', 'tetris_classic': './tetris/',
       'pyatnashki': './pyatnashki/', '15': './pyatnashki/', 'fifteen': './pyatnashki/',
@@ -401,6 +403,7 @@
     document.getElementById('pyatnashkiBtn').addEventListener('click', () => openGame('./pyatnashki/', 'pyatnashki'));
     document.getElementById('tictactoeBtn').addEventListener('click', () => openGame('./tictactoe/', 'tictactoe'));
     document.getElementById('findpairBtn').addEventListener('click', () => openGame('./findpair/', 'findpair'));
+    document.getElementById('spiderBtn').addEventListener('click', () => openGame('./spider/', 'spider'));
 
     document.getElementById('hubVer').innerHTML = 'hub v' + HUB_VER + ' · <span class="plat">' + Platform.name + '</span>';
 
