@@ -56,7 +56,6 @@ input[type=range]{width:100%;accent-color:#ff5b3a}
 .sw button.on{border-color:#ffd23f;box-shadow:0 0 12px rgba(255,210,63,.55);transform:scale(1.08)}
 .stats{color:#ffd9a0;font-size:14px;line-height:1.7}.stats b{color:#fff}
 .btns{display:flex;gap:10px;margin-top:18px;justify-content:flex-end}
-/* v1.2: переключатель режима без мин */
 .toggle{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
 .toggle input{display:none}
 .toggle .track{width:48px;height:28px;background:rgba(255,255,255,.12);border-radius:14px;position:relative;transition:.25s}
@@ -67,7 +66,10 @@ input[type=range]{width:100%;accent-color:#ff5b3a}
 .ver{font:400 10px monospace;color:#c9a06a;opacity:.6;letter-spacing:.1em;margin-top:6px}
 #hud{position:fixed;inset:0;z-index:4;pointer-events:none;padding:max(12px,env(safe-area-inset-top)) 16px}
 #score{position:absolute;left:16px;top:max(12px,env(safe-area-inset-top));font:400 clamp(28px,7vw,42px) "Russo One";color:#fff;text-shadow:0 3px 0 #b34a1e,0 7px 18px rgba(0,0,0,.6)}
-#best{position:absolute;right:16px;top:max(18px,env(safe-area-inset-top));font:700 clamp(11px,2.8vw,14px) Rubik;color:#ffd23f;letter-spacing:.12em;text-shadow:0 2px 6px #000}
+/* v1.3: рекорд сдвинут влево, справа кнопка паузы */
+#best{position:absolute;right:70px;top:max(18px,env(safe-area-inset-top));font:700 clamp(11px,2.8vw,14px) Rubik;color:#ffd23f;letter-spacing:.12em;text-shadow:0 2px 6px #000}
+#pauseBtn{position:absolute;right:16px;top:max(12px,env(safe-area-inset-top));width:44px;height:44px;border-radius:12px;border:1px solid rgba(255,210,63,.45);background:rgba(26,14,8,.72);color:#ffd23f;font:400 18px "Russo One";display:flex;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4);transition:.12s}
+#pauseBtn:active{transform:scale(.94)}
 #lives{position:absolute;left:18px;top:calc(max(12px,env(safe-area-inset-top)) + clamp(38px,9vw,56px));display:flex;gap:6px}
 #lives i{width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff9a80,#e8443a 70%);box-shadow:0 0 8px rgba(255,80,50,.55),0 2px 3px #000;transition:.3s}
 #lives i.dead{background:#3a2a22;box-shadow:none;transform:scale(.7)}
@@ -77,7 +79,7 @@ input[type=range]{width:100%;accent-color:#ff5b3a}
 @keyframes shine{50%{opacity:.35;transform:rotate(-3deg) scaleX(.72)}}
 </style></head><body>
 <canvas id="c"></canvas>
-<div id="hud" class="hide"><div id="score">0</div><div id="best">РЕКОРД 0</div><div id="lives"><i></i><i></i><i></i></div><div id="missInfo">промахи: 0/10</div></div>
+<div id="hud" class="hide"><div id="score">0</div><div id="best">РЕКОРД 0</div><button id="pauseBtn" aria-label="Пауза">⏸</button><div id="lives"><i></i><i></i><i></i></div><div id="missInfo">промахи: 0/10</div></div>
 
 <div class="ov" id="menu">
   <button class="btn-hub" id="hubBtnMenu">← В меню игр</button>
@@ -85,7 +87,7 @@ input[type=range]{width:100%;accent-color:#ff5b3a}
   <div class="tag">режь фрукты · 10 промахов = −1 жизнь · не трогай бомбы · лови звёзды</div>
   <div class="mrow"><button class="btn ghost" id="setBtn">⚙ НАСТРОЙКИ</button><button class="btn ghost" id="advBtn">📤 СКИНУТЬ ССЫЛКУ</button></div>
   <div class="go">КОСНИСЬ ИЛИ МАХНИ, ЧТОБЫ НАЧАТЬ</div><div class="mb" id="mBest"></div>
-  <div class="ver" id="verTag">v1.2</div>
+  <div class="ver" id="verTag">v1.3</div>
 </div>
 
 <div class="ov hide" id="set">
@@ -97,7 +99,7 @@ input[type=range]{width:100%;accent-color:#ff5b3a}
     <div class="srow"><label>Громкость · <span id="volV"></span></label><input type="range" id="vol" min="0" max="100"></div>
     <div class="srow"><label>Фон</label><div class="sw" id="bgSw"></div></div>
     <div class="srow"><label>Статистика</label><div class="stats" id="statsBox"></div></div>
-    <div class="ver">v1.2</div>
+    <div class="ver">v1.3</div>
     <div class="btns"><button class="btn ghost" id="resetBtn">СБРОСИТЬ ПРОГРЕСС</button><button class="btn" id="setClose">ГОТОВО</button></div>
   </div>
 </div>
@@ -116,13 +118,31 @@ input[type=range]{width:100%;accent-color:#ff5b3a}
   </div>
 </div>
 
+<!-- v1.3: оверлей паузы -->
+<div class="ov hide" id="pause">
+  <div class="card">
+    <div class="ot sm">⏸ ПАУЗА</div>
+    <div class="st" id="pScore"></div>
+    <div class="mrow">
+      <button class="btn" id="resumeBtn">▶ ПРОДОЛЖИТЬ</button>
+      <button class="btn ghost" id="pauseRetryBtn">🔄 ЗАНОВО</button>
+      <button class="btn ghost" id="pauseSetBtn">⚙ НАСТРОЙКИ</button>
+    </div>
+    <div class="mrow">
+      <button class="btn ghost" id="pauseMenuBtn">🏠 В МЕНЮ ИГРЫ</button>
+      <button class="btn-hub" id="hubBtnPause" style="margin:0">← В МЕНЮ ИГР</button>
+    </div>
+  </div>
+</div>
+
 <script>
-var VER = '1.2';
+var VER = '1.3';
 
 /* ========== ЕДИНЫЙ СЛОЙ ПЛАТФОРМ (TG / VK / MAX / web) ========== */
 function backButtonHandler() {
   try {
-    if (!setEl.classList.contains('hide')) { setEl.classList.add('hide'); return; }
+    if (!pauseEl.classList.contains('hide')) { resumeGame(); return; }
+    if (!setEl.classList.contains('hide')) { setEl.classList.add('hide'); if (paused) pauseEl.classList.remove('hide'); return; }
     if (!overEl.classList.contains('hide')) {
       overEl.classList.add('hide');
       menuEl.classList.remove('hide');
@@ -130,12 +150,7 @@ function backButtonHandler() {
       state = 0;
       return;
     }
-    if (state === 1) {
-      state = 0;
-      hudEl.classList.add('hide');
-      menuEl.classList.remove('hide');
-      return;
-    }
+    if (state === 1) { pauseGame(); return; }
     if (!menuEl.classList.contains('hide')) { goToHub(); return; }
   } catch (_) {}
   goToHub();
@@ -173,7 +188,7 @@ const bc = document.createElement('canvas');
 const B = bc.getContext('2d');
 const $ = id => document.getElementById(id);
 const scoreEl = $('score'), bestEl = $('best'), livesEl = $('lives'), missInfoEl = $('missInfo');
-const menuEl = $('menu'), overEl = $('over'), hudEl = $('hud'), setEl = $('set');
+const menuEl = $('menu'), overEl = $('over'), hudEl = $('hud'), setEl = $('set'), pauseEl = $('pause');
 
 const hap = s => Platform.haptic(s);
 
@@ -201,6 +216,8 @@ let state = 0, score = 0, lives = 3, chain = 0, lastCut = 0, maxCh = 0, cutN = 0
 let spT = 1, shake = 0, flashA = 0, flashC = '255,230,180', overT = 0, tNow = 0, newRec = false;
 let bonusTimer = 20;
 let starsCollected = 0;
+/* v1.3: флаг паузы */
+let paused = false;
 
 let missCount = 0;
 const MISS_PER_LIFE = 10;
@@ -340,7 +357,6 @@ const sBonus = () => {
   setTimeout(() => tone(784, 1568, .25, 'sine', .14), 120);
 };
 
-/* v1.2: spawn с учётом режима без мин (set.noBombs) */
 function spawn(bomb, bonus) {
   if (set.noBombs && bomb) bomb = false;
   const r = Math.min(W, H) * (bomb ? .052 : (bonus ? .065 : rnd(.055, .078)));
@@ -501,6 +517,8 @@ function miss(x) {
 
 function endGame(bomb) {
   state = 2;
+  paused = false;
+  pauseEl.classList.add('hide');
   overT = tNow + (bomb ? 900 : 500);
   newRec = score > best;
   if (newRec) { best = score; localStorage.fs_b = best; }
@@ -545,6 +563,8 @@ function startGame() {
   missCount = 0;
   bonusTimer = 20;
   spT = .5; state = 1; newRec = false;
+  paused = false;
+  pauseEl.classList.add('hide');
   localStorage.fs_games = +(localStorage.fs_games || 0) + 1;
   scoreEl.textContent = '0';
   bestEl.textContent = 'РЕКОРД ' + best;
@@ -561,6 +581,8 @@ function startGame() {
 
 function goToMainMenu() {
   state = 0;
+  paused = false;
+  pauseEl.classList.add('hide');
   overEl.classList.add('hide');
   setEl.classList.add('hide');
   hudEl.classList.add('hide');
@@ -569,11 +591,27 @@ function goToMainMenu() {
   bestEl.textContent = 'РЕКОРД ' + best;
 }
 
+/* v1.3: пауза / продолжение */
+function pauseGame() {
+  if (state != 1 || paused) return;
+  paused = true;
+  trails.clear();
+  $('pScore').innerHTML = 'счёт: <b>' + score + '</b> · лучшее комбо: <b>×' + maxCh + '</b>';
+  pauseEl.classList.remove('hide');
+  trackEvent('game_pause', { game_name: 'fruit_samurai', score: score });
+}
+function resumeGame() {
+  if (!paused) return;
+  paused = false;
+  pauseEl.classList.add('hide');
+  last = performance.now();
+  trackEvent('game_resume', { game_name: 'fruit_samurai', score: score });
+}
+
 function share(text) {
   Platform.share(location.href, text);
 }
 
-/* v1.2: "Скинуть ссылку на игру" — шеринг диплинка через Platform.shareGame */
 $('advBtn').onclick = () => {
   trackEvent('game_share', { game_name: 'fruit_samurai', type: 'link' });
   if (typeof Platform.shareGame === 'function') {
@@ -584,7 +622,6 @@ $('advBtn').onclick = () => {
   }
 };
 
-/* v1.2: "Отправить результат" — шеринг с результатом */
 $('sendBtn').onclick = () => {
   trackEvent('game_share', { game_name: 'fruit_samurai', type: 'result', score: score });
   var txt = '🍉 «Фруктовый самурай»: мой результат ' + score + ' (рекорд ' + best + ', звёзд ' + starsCollected + '). Побьёшь?';
@@ -603,6 +640,19 @@ $('retryBtn').onclick = () => {
 $('menuBtnOver').onclick = () => {
   goToMainMenu();
 };
+
+/* v1.3: кнопки паузы */
+$('pauseBtn').onclick = e => { e.stopPropagation(); pauseGame(); };
+$('resumeBtn').onclick = e => { e.stopPropagation(); resumeGame(); };
+$('pauseRetryBtn').onclick = e => { e.stopPropagation(); paused = false; pauseEl.classList.add('hide'); startGame(); };
+$('pauseSetBtn').onclick = e => {
+  e.stopPropagation();
+  showStats(); updSeg(); updSw(); $('noBombsChk').checked = !!set.noBombs;
+  pauseEl.classList.add('hide');
+  setEl.classList.remove('hide');
+};
+$('pauseMenuBtn').onclick = e => { e.stopPropagation(); paused = false; pauseEl.classList.add('hide'); goToMainMenu(); };
+$('hubBtnPause').onclick = e => { e.stopPropagation(); goToHub(); };
 
 function showStats() {
   $('statsBox').innerHTML = 'игр сыграно: <b>' + (+(localStorage.fs_games || 0)) + '</b><br>фруктов разрезано: <b>' + (+(localStorage.fs_cuts || 0)) + '</b><br>звёзд собрано: <b>' + (+(localStorage.fs_stars || 0)) + '</b><br>рекорд: <b>' + best + '</b><br>лучшее комбо: <b>×' + (+(localStorage.fs_mch || 0)) + '</b>';
@@ -628,7 +678,6 @@ THEMES.forEach((th, i) => {
   trackEvent('settings_change', { game_name: 'fruit_samurai', setting: 'difficulty', value: DIFF[set.d].n });
 });
 
-/* v1.2: переключатель режима без мин */
 $('noBombsChk').checked = !!set.noBombs;
 $('noBombsChk').onchange = (e) => {
   set.noBombs = e.target.checked; save();
@@ -645,7 +694,7 @@ $('vol').oninput = e => {
 };
 
 $('setBtn').onclick = () => { showStats(); updSeg(); updSw(); $('noBombsChk').checked = !!set.noBombs; setEl.classList.remove('hide'); };
-$('setClose').onclick = () => setEl.classList.add('hide');
+$('setClose').onclick = () => { setEl.classList.add('hide'); if (paused) pauseEl.classList.remove('hide'); };
 $('resetBtn').onclick = () => {
   if (confirm('Сбросить весь прогресс и статистику?')) {
     ['fs_b', 'fs_cuts', 'fs_games', 'fs_mch', 'fs_stars'].forEach(k => localStorage.removeItem(k));
@@ -660,7 +709,7 @@ $('hubBtnGameOver').addEventListener('click', (e) => { e.stopPropagation(); goTo
 $('hubBtnSettings').addEventListener('click', (e) => { e.stopPropagation(); goToHub(); });
 
 function segCut(ax, ay, bx, by) {
-  if (state != 1 || Math.hypot(bx - ax, by - ay) < 5) return;
+  if (state != 1 || paused || Math.hypot(bx - ax, by - ay) < 5) return;
   const ang = Math.atan2(by - ay, bx - ax);
   for (let i = fr.length; i--;) {
     const f = fr[i], dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy;
@@ -677,7 +726,8 @@ function segCut(ax, ay, bx, by) {
 
 addEventListener('pointerdown', e => {
   audio();
-  if (e.target.closest('button,.btn-hub,#set')) return;
+  if (e.target.closest('button,.btn-hub,#set,#pause')) return;
+  if (paused) return;
   if (state == 0) { startGame(); return; }
   if (state == 2 && tNow > overT) { startGame(); return; }
   trails.set(e.pointerId, [{ x: e.clientX, y: e.clientY, t: tNow }]);
@@ -685,6 +735,7 @@ addEventListener('pointerdown', e => {
 }, { passive: false });
 
 addEventListener('pointermove', e => {
+  if (paused) return;
   const tr = trails.get(e.pointerId);
   if (!tr) return;
   const p = tr[tr.length - 1];
@@ -1003,7 +1054,6 @@ function update(dt) {
       for (let i = 0; i < n; i++) {
         pend.push({
           t: tNow + i * 150 + rnd(0, 90),
-          /* v1.2: бомбы не спавнятся в режиме без мин */
           bomb: !set.noBombs && score > 6 && Math.random() < dc().bomb
         });
       }
@@ -1151,6 +1201,8 @@ function render() {
 let last = performance.now();
 function loop(ts) {
   requestAnimationFrame(loop);
+  /* v1.3: на паузе физика/спавн/время заморожены */
+  if (paused) { last = ts; return; }
   const dt = Math.min(.033, (ts - last) / 1000);
   last = ts;
   tNow = ts;
