@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-21T12:30:45.163Z",
+ "generatedAt": "2026-11-21T12:57:23.470Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.53",
@@ -149,14 +149,14 @@
    ]
   },
   "domino": {
-   "version": "2.3",
+   "version": "2.4",
    "online": true,
    "addedAt": "2026-10-01",
    "files": [
     {
      "path": "domino/index.html",
-     "sha256": "77bf1a5b75d3cfe8f22a7649d4b0080ed9c87a900cc143bc676a21e20fcc21b0",
-     "size": 77870
+     "sha256": "f675ec92f0fe7eb948ea89c13934dba649303c0887088efbbe626b0a9019f6e8",
+     "size": 86330
     }
    ]
   },
