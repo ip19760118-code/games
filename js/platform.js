@@ -1,9 +1,7 @@
-/* tg-games: единый слой платформ v3.7 — TG / VK / MAX / web / PC / Android.
-   v3.7: VK определяется не только по ?plat=vk, но и по параметрам запуска vk_app_id/vk_user_id,
-         которые VK добавляет к адресу сам — хаб работает даже если в настройках URL без ?plat=vk.
-   v3.6: экран согласия (п.1.1.4): до «Принимаю и играю» приложение заблокировано оверлеем.
-   v3.5: VK-комплаенс (п.4.1.8 / 4.2.6 / 2.2.5): ссылки только внутри VK, звук глушится по ViewHide.
-   v3.4: downloadAsset в мессенджерах — внешний браузер; ПК/Android — нативно; web — fetch+blob. */
+/* tg-games: единый слой платформ v3.8 — TG / VK / MAX / web / PC / Android.
+   v3.8: downloadAsset (web fetch) — фолбэк GitHub → зеркало при ошибке загрузки.
+   v3.7: VK по ?plat=vk и по vk_app_id/vk_user_id; v3.6: consent-gate; v3.5: VK-комплаенс;
+   v3.4: downloadAsset мессенджеры внешний браузер / ПК/Android нативно / web fetch+blob. */
 var Platform=(function(){
  var MAX_SDK_URL='https://st.max.ru/js/max-web-app.js';
  var VK_SDK_URL='https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
@@ -11,6 +9,7 @@ var Platform=(function(){
  var MAX_DEEPLINK='https://max.ru/se14729332_bot';
  var MAX_NAV_MODE='external';
  var CANONICAL_ORIGIN='https://ip19760118-code.github.io/games';
+ var MIRROR_ORIGIN='https://igrovoj-centr-mirror.ru';
  var BRAND_LINE='\n🎮 Игровой центр — классика и новинки, онлайн и офлайн';
  var VK_FALLBACK_LINK='https://vk.com/club242534673';
  var VK_APP_ID_FALLBACK='54850501';
@@ -341,6 +340,12 @@ var Platform=(function(){
   return share(isVK()?vkAppLink():gameDeepLink(key),text,opts);
  }
 
+ function mirrorOf(url){
+  return String(url)
+   .replace('https://github.com/ip19760118-code/games/releases/latest/download/',MIRROR_ORIGIN+'/')
+   .replace('https://ip19760118-code.github.io/games/',MIRROR_ORIGIN+'/');
+ }
+
  function downloadAsset(url,fileName,opts){
   opts=opts||{};
   if(isVK()){platToast('Загрузка приложений недоступна в этой версии');return;}
@@ -393,13 +398,13 @@ var Platform=(function(){
   }
   function fetchBlob(onOk){
    platToast('Начинаю загрузку '+fileName+'…');
-   fetch(url,{cache:'no-store'})
-    .then(function(r){ if(!r.ok)throw new Error('HTTP '+r.status); return r.blob(); })
-    .then(onOk)
-    .catch(function(err){
-     console.warn('[Platform] fetch failed:',err);
-     openBrowser();
-    });
+   function tryFetch(u){ return fetch(u,{cache:'no-store'}).then(function(r){ if(!r.ok)throw new Error('HTTP '+r.status); return r.blob(); }); }
+   var mUrl=mirrorOf(url);
+   tryFetch(url).then(onOk).catch(function(err){
+    console.warn('[Platform] fetch failed, try mirror:',err);
+    if(mUrl!==url){ tryFetch(mUrl).then(onOk).catch(function(){ openBrowser(); }); }
+    else openBrowser();
+   });
   }
   if(name==='android'&&window.AppBridge&&typeof AppBridge.downloadFile==='function'){
    platToast('Начинаю загрузку '+fileName+'…');
