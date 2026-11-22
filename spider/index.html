@@ -17,6 +17,7 @@ body{background:var(--bg1);background:radial-gradient(ellipse at 50% 30%,var(--b
 .hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:22px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .hbtn:active{transform:scale(.95)}
 .hbtn.muted{border-color:rgba(255,107,107,.5);color:#ffb3b3}
+body.mobile #zenBtn{display:none}
 .hud{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:6px}
 .hud .box{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:3px 10px;font-size:11px;display:flex;gap:5px;align-items:center}
 .hud .box b{color:var(--accent);font-size:13px;font-variant-numeric:tabular-nums}
@@ -75,6 +76,7 @@ body.bk5fail[data-back="5"] .bf{background-image:repeating-linear-gradient(45deg
 .status{text-align:center;font-size:12.5px;font-weight:600;color:var(--accent);min-height:18px;margin-top:5px}
 .status.warn{color:var(--red)}
 .ver{text-align:center;font-size:9px;opacity:.4;margin-top:4px;font-family:monospace;letter-spacing:1px}
+/* v1.7: режим поля включается САМ при горизонтальном повороте телефона */
 body.zen .header,body.zen .hud,body.zen .bar,body.zen .actions,body.zen .status,body.zen .ver{display:none!important}
 body.zen{padding:2px}
 body.zen .wrap{padding:4px;border-radius:10px}
@@ -140,7 +142,7 @@ body.zen .zenDeck{display:flex}
 <button class="btn icon" id="shareBtn" aria-label="Скинуть ссылку на игру" title="Скинуть ссылку на игру"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.9" x2="15.7" y2="6.1"/><line x1="8.3" y1="13.1" x2="15.7" y2="17.9"/></svg></button>
 </div>
 <div class="status" id="statusEl">Выбери сложность</div>
-<div class="ver" id="verTag">v1.6</div>
+<div class="ver" id="verTag">v1.7</div>
 </div>
 
 <button class="zenDeck" id="zenDeck" aria-label="Раздать из колоды" title="Раздать из колоды"><span class="mini bf"></span><span class="cnt" id="zenCnt">5</span></button>
@@ -148,7 +150,7 @@ body.zen .zenDeck{display:flex}
 
 <div class="overlay" id="menuOverlay"><div class="cardbox">
 <div class="mhdr"><button class="hbtn" id="menuHubBtn">← В меню игр</button></div>
-<h2>🕷 Паук <span style="font-size:11px;opacity:.6;font-family:monospace" id="verTag2">v1.6</span></h2>
+<h2>🕷 Паук <span style="font-size:11px;opacity:.6;font-family:monospace" id="verTag2">v1.7</span></h2>
 <div class="sub">Собери 8 последовательностей от Короля до Туза одной масти</div>
 <div class="mode-choice">
 <button class="mode-btn primary" data-suits="1"><div class="icon">♠</div><div><b>1 масть · лёгкий</b><small>Все пики — для освоения</small></div></button>
@@ -165,7 +167,7 @@ body.zen .zenDeck{display:flex}
 <div class="srow"><label>Рубашка карт</label><select id="backSel"><option value="1">Классическая</option><option value="2">Красный узор</option><option value="3">Зелёное сукно</option><option value="4">Фиолетовая волна</option><option value="5">Золотая вязь</option></select></div>
 <div class="srow"><label>Раскладка</label><select id="leftSel"><option value="0">Резерв справа</option><option value="1">Резерв слева (левша)</option></select></div>
 <div class="btns"><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note" style="margin-top:10px">Очки: старт 500, −1 за ход, +100 за собранную последовательность. При повороте экрана карты не увеличиваются — растут промежутки. Поле двигается: удерживай пустое место и тяни ⇔. Двойной тап по пустому месту — режим поля (колода справа внизу раздаёт карты). 🔊 в шапке глушит весь звук.</div>
+<div class="note" style="margin-top:10px">Очки: старт 500, −1 за ход, +100 за собранную последовательность. При повороте экрана карты не увеличиваются — растут промежутки. Поле двигается: удерживай пустое место и тяни ⇔. <b>На телефоне в горизонтальном положении панели убираются автоматически</b> — остаётся поле и колода справа внизу; поверни обратно вертикально — все кнопки вернутся. 🔊 в шапке глушит весь звук.</div>
 </div></div>
 
 <div class="overlay" id="statsOverlay"><div class="cardbox"><h2>📊 Статистика</h2>
@@ -179,7 +181,7 @@ body.zen .zenDeck{display:flex}
 </div></div>
 
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Две колоды — 104 карты. Цель: собрать <b>8 последовательностей К→А одной масти</b>; готовая последовательность сама улетает в «дом».<br>• Расклад: 10 столбцов (4 по 6 и 6 по 5 карт), верхняя открыта. Резерв — 5 раздач по 10 карт.<br>• Карту кладут на карту <b>на ранг старше</b> — масть не важна.<br>• Группой двигают только <b>одномастную непрерывную</b> последовательность.<br>• На пустой столбец — любую карту или одномастную группу.<br>• Освободившаяся закрытая карта переворачивается сама.<br>• Раздача — по карте в каждый столбец, <b>только без пустых столбцов</b>.<br>• Управление: тап — выделить, тап по столбцу — перенести; двойной тап по карте — лучший ход; перетаскивание — карта в руке следует за пальцем и возвращается, если не подошла.<br>• Поле шире экрана: <b>удерживай пустое место и тяни</b> ⇔.<br>• <b>Двойной тап по пустому месту</b> — режим поля; раздача в нём — значком колоды справа внизу.<br>• «↩️ Отмена» — вернуть ход (штраф очков), «💡 Подсказка» — подсветить лучший ход.</div>
+<div class="note">• Две колоды — 104 карты. Цель: собрать <b>8 последовательностей К→А одной масти</b>; готовая последовательность сама улетает в «дом».<br>• Расклад: 10 столбцов (4 по 6 и 6 по 5 карт), верхняя открыта. Резерв — 5 раздач по 10 карт.<br>• Карту кладут на карту <b>на ранг старше</b> — масть не важна.<br>• Группой двигают только <b>одномастную непрерывную</b> последовательность.<br>• На пустой столбец — любую карту или одномастную группу.<br>• Освободившаяся закрытая карта переворачивается сама.<br>• Раздача — по карте в каждый столбец, <b>только без пустых столбцов</b>.<br>• Управление: тап — выделить, тап по столбцу — перенести; двойной тап по карте — лучший ход; перетаскивание — карта в руке следует за пальцем и возвращается, если не подошла.<br>• Поле шире экрана: <b>удерживай пустое место и тяни</b> ⇔.<br>• <b>Горизонтальный поворот телефона</b> — режим поля: панели скрываются сами, раздача — маленькой колодой справа внизу; вертикальный поворот возвращает все кнопки.<br>• «↩️ Отмена» — вернуть ход (штраф очков), «💡 Подсказка» — подсветить лучший ход.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div>
 </div></div>
 
@@ -187,10 +189,9 @@ body.zen .zenDeck{display:flex}
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏆</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 
 <script>
-const VER='1.6',COLS=10,RANKS=['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const VER='1.7',COLS=10,RANKS=['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const SUITS={s:{ch:'♠',red:false},h:{ch:'♥',red:true},d:{ch:'♦',red:true},c:{ch:'♣',red:false}};
 const $=id=>document.getElementById(id);
-/* v1.6: на Android символы мастей в системном шрифте вдвое крупнее — компенсируем */
 const IS_ANDROID=(function(){try{if(Platform&&Platform.name==='android')return true}catch(e){}return /Android/i.test(navigator.userAgent||'')})();
 const SUIT_K=IS_ANDROID?.5:1;
 try{document.documentElement.style.setProperty('--pipk',String(SUIT_K))}catch(e){}
@@ -199,19 +200,38 @@ const saveSet=()=>localStorage.spider_set=JSON.stringify(set);
 let ST=Object.assign({g:0,w:0,best:0,bestTime:0,suits:0},JSON.parse(localStorage.spider_stats||'{}'));
 const saveST=()=>localStorage.spider_stats=JSON.stringify(ST);
 let cols=[],stock=[],founds=[],score=500,moves=0,timeSec=0,timer=null,history=[],seed=0,started=false,over=false,suitsNow=1;
-let sel=null,hint=null,hintT=null,undoN=0,hintN=0,lastTap=null,lastEmptyTap=0,toastT=null,cfRes=null;
+let sel=null,hint=null,hintT=null,undoN=0,hintN=0,lastTap=null,toastT=null,cfRes=null;
 let CW=54,CH=77,GAP=6,boardOffset=0,boardPad=0,colGap=[],pan=null,drag=null,ghost=null,ghostGx=0,ghostGy=0,dragHideKeys=[];
 let zen=false,busy=false,dealing=false,hiddenKeys=new Set();
 (function(){for(var n=1;n<=5;n++){(function(k){var im=new Image();im.onerror=function(){document.body.classList.add('bk'+k+'fail')};im.src='./img/back'+k+'.png'})(n)}})();
 function trk(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p)}catch(e){}}
 (function(){try{const k='spider_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trk('game_open',{game_name:'spider',source:Platform.name,ver:VER,android:IS_ANDROID?1:0})}}catch(e){}})();
+/* v1.7: режим поля — только по ориентации телефона (двойной тап убран) */
+function isMobileDevice(){
+  try{if(Platform&&Platform.name==='pc')return false;if(Platform&&Platform.name==='android')return true;}catch(e){}
+  try{if(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)return true;}catch(e){}
+  return /Android|iPhone|iPad|iPod|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent||'');
+}
+function isLandscape(){return window.innerWidth>window.innerHeight;}
+function autoZenWanted(){return isMobileDevice()&&isLandscape();}
+function setZen(on,silent){
+  if(zen===on)return;
+  zen=on;document.body.classList.toggle('zen',zen);
+  setTimeout(()=>{layout();render()},70);
+  if(!silent)toast(zen?'Режим поля · колода справа внизу · поверни вертикально — вернутся кнопки':'Панели возвращены');
+  trk('game_zen',{game_name:'spider',on:zen?1:0,auto:autoZenWanted()?1:0});
+}
+function applyOrientation(){
+  document.body.classList.toggle('mobile',isMobileDevice());
+  setZen(autoZenWanted(),true);
+}
 function backHandler(){
  try{
   if($('confirmOverlay').classList.contains('show')){cfResolve(false);return}
   const ov=['endOverlay','rulesOverlay','statsOverlay','setOverlay'];
   for(const id of ov){if($(id).classList.contains('show')){$(id).classList.remove('show');return}}
   if($('menuOverlay').classList.contains('show')){if(started&&!over){$('menuOverlay').classList.remove('show');return}goToHub();return}
-  if(zen){toggleZen();return}
+  if(zen&&!autoZenWanted()){setZen(false);return}
   if(started&&!over){askConfirm('Выйти в меню паука? Партия сохранится до новой игры.').then(v=>{if(v)openMenu()});return}
  }catch(e){}
  goToHub();
@@ -339,7 +359,7 @@ function animateInitialDeal(){
  const from=stockRect();
  let i=0;
  const step=()=>{
-  if(i>=flat.length){dealing=false;render();startTimer();setStatus('Партия началась · '+suitsNow+' '+(suitsNow===1?'масть':'масти')+'. Поле тянется ⇔, двойной тап — режим поля.');return}
+  if(i>=flat.length){dealing=false;render();startTimer();setStatus('Партия началась · '+suitsNow+' '+(suitsNow===1?'масть':'масти')+'. Поле тянется ⇔, поворот телефона — режим поля.');return}
   const f=flat[i],cd=cols[f.c][f.k],key=f.c+':'+f.k,top=(f.k===cols[f.c].length-1);
   flyCard({r:cd.r,s:cd.s,u:top},from,targets[i]||from,190,()=>{hiddenKeys.delete(key);render()});
   if(i%2===0)sOne();
@@ -452,7 +472,7 @@ function win(){
  const b=$('endBtns');b.innerHTML='';
  addBtn(b,'🔄 Новая партия',()=>{$('endOverlay').classList.remove('show');newGame(suitsNow)},true,true);
  addBtn(b,'🎯 Ещё раз этот расклад',()=>{$('endOverlay').classList.remove('show');restartSame()});
- addBtn(b,'🎆 Смотреть салют',()=>{$('endOverlay').classList.remove('show');toast('Салют! Двойной тап по полю — панели, «🏠 Меню» — новая партия')});
+ addBtn(b,'🎆 Смотреть салют',()=>{$('endOverlay').classList.remove('show');toast('Салют! «🏠 Меню» в шапке — новая партия')});
  addBtn(b,'📤 Отправить результат',shareResult);
  addBtn(b,'🏠 Меню паука',openMenu);
  addBtn(b,'← В меню игр',goToHub);
@@ -463,7 +483,7 @@ function plural(n){return n===1?'масть':(n<5?'масти':'мастей')}
 function addBtn(box,text,fn,primary,pulse){const b=document.createElement('button');b.className='btn'+(primary?' primary':'')+(pulse?' pulse':'');b.textContent=text;b.onclick=fn;box.appendChild(b);return b}
 function layout(){
  const wrap=$('boardWrap'),wrapW=wrap.clientWidth||window.innerWidth-24;
- const coarse=(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)||Math.min(window.innerWidth,window.innerHeight)<560;
+ const coarse=isMobileDevice();
  const basis=coarse?Math.min(window.innerWidth,window.innerHeight):wrapW;
  const fit=Math.floor((basis-12-(COLS-1)*6)/COLS);
  CW=Math.max(54,Math.min(88,fit));CH=Math.round(CW*1.42);
@@ -629,18 +649,11 @@ function handleTap(c,i){
  if(sel){if(doMove(sel.c,sel.i,c))return;sDeny();setStatus('❌ Сюда нельзя: нужна карта на ранг старше или пустой столбец.',true);return}
  sel=null;render();
 }
+/* v1.7: тап по пустому месту только переносит/снимает выделение — режим поля больше не переключается тапом */
 function handleEmptyTap(e){
- const c=colOf(e.target),now=Date.now();
- if(now-lastEmptyTap<330){lastEmptyTap=0;toggleZen();return}
- lastEmptyTap=now;
+ const c=colOf(e.target);
  if(sel&&c>=0&&c!==sel.c){if(doMove(sel.c,sel.i,c))return}
  if(sel){sel=null;render()}
-}
-function toggleZen(){
- zen=!zen;document.body.classList.toggle('zen',zen);
- setTimeout(()=>{layout();render()},80);
- toast(zen?'Режим поля · 🂠 справа внизу — раздача · двойной тап — вернуть панели':'Панели возвращены');
- trk('game_zen',{game_name:'spider',on:zen?1:0});
 }
 function buildGhost(c,i,x,y){
  const col=cols[c],src=$('board').children[c],items=[];
@@ -819,7 +832,7 @@ function bind(){
  $('dealBtn').onclick=()=>{ensureAudio();dealStock()};
  $('undoBtn').onclick=undo;
  $('hintBtn').onclick=showHint;
- $('zenBtn').onclick=()=>{sClick();toggleZen()};
+ $('zenBtn').onclick=()=>{sClick();setZen(!zen)};
  $('muteBtn').onclick=()=>{set.mute=!set.mute;saveSet();updateMuteBtn();if(!set.mute){ensureAudio();sClick()}toast(set.mute?'🔇 Звук выключен':'🔊 Звук включён')};
  $('newBtn').onclick=async()=>{ensureAudio();if(started&&!over){if(await askConfirm('Начать новую партию? Текущая будет потеряна.'))newGame(suitsNow)}else newGame(suitsNow)};
  $('menuBtn').onclick=()=>{sClick();openMenu()};
@@ -847,9 +860,10 @@ function bind(){
  $('cfYes').onclick=()=>cfResolve(true);
  $('cfNo').onclick=()=>cfResolve(false);
  let rt=null;
- const relayout=()=>{clearTimeout(rt);rt=setTimeout(()=>{layout();render();if(fxOn)fxResize()},60)};
+ const relayout=()=>{clearTimeout(rt);rt=setTimeout(()=>{applyOrientation();layout();render();if(fxOn)fxResize()},70)};
  window.addEventListener('resize',relayout);
- window.addEventListener('orientationchange',()=>{setTimeout(relayout,120);setTimeout(relayout,420)});
+ window.addEventListener('orientationchange',()=>{setTimeout(relayout,120);setTimeout(relayout,450)});
+ try{const mq=window.matchMedia('(orientation: landscape)');if(mq.addEventListener)mq.addEventListener('change',relayout);else if(mq.addListener)mq.addListener(relayout);}catch(e){}
 }
 function showStats(){$('stG').textContent=ST.g;$('stW').textContent=ST.w;$('stP').textContent=ST.g?Math.round(ST.w/ST.g*100)+'%':'—';$('stB').textContent=ST.best||0;$('stT').textContent=ST.bestTime?fmt(ST.bestTime):'—';$('stS').textContent=ST.suits||0}
 function applySkins(){document.documentElement.setAttribute('data-table',set.table);document.body.setAttribute('data-back',String(set.back||1))}
@@ -870,7 +884,11 @@ function shareResult(){
   applySkins();updateMuteBtn();bind();showStats();
   $('verTag').textContent='v'+VER;$('verTag2').textContent='v'+VER;
   cols=[];for(let i=0;i<COLS;i++)cols.push([]);
-  layout();render();openMenu();
+  document.body.classList.toggle('mobile',isMobileDevice());
+  zen=false;document.body.classList.remove('zen');
+  layout();render();
+  applyOrientation();
+  openMenu();
   window.__BOOT_OK=true;
  }catch(e){window.__ERR='boot: '+e.message}
 })();
