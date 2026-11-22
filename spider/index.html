@@ -4,12 +4,12 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
 <style>
-:root{--bg1:#0b2a1c;--bg2:#12492f;--bg3:#05130d;--panel:rgba(9,32,22,.9);--text:#e9f5ee;--accent:#7cffc4;--gold:#ffd166;--red:#ff6b6b;--cyan:#33d6ff;--cw:54px;--ch:calc(var(--cw)*1.42);--gap:6px;--felt1:#1a6b45;--felt2:#0d3a26}
+:root{--bg1:#0b2a1c;--bg2:#12492f;--bg3:#05130d;--panel:rgba(9,32,22,.9);--text:#e9f5ee;--accent:#7cffc4;--gold:#ffd166;--red:#ff6b6b;--cyan:#33d6ff;--cw:54px;--ch:calc(var(--cw)*1.42);--gap:6px;--pipk:1;--felt1:#1a6b45;--felt2:#0d3a26}
 [data-table="blue"]{--felt1:#1c4f7a;--felt2:#0b2740;--bg1:#0a1c2b;--bg2:#123a56;--bg3:#050f18}
 [data-table="graphite"]{--felt1:#3a3f45;--felt2:#1b1f24;--bg1:#14171a;--bg2:#23282e;--bg3:#0a0c0e}
 [data-table="wine"]{--felt1:#6b2440;--felt2:#33122a;--bg1:#2a0f1c;--bg2:#4a1a30;--bg3:#14060f}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overscroll-behavior:none}
+html,body{height:100%;overscroll-behavior:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{background:var(--bg1);background:radial-gradient(ellipse at 50% 30%,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:stretch;padding:6px;padding-top:calc(6px + env(safe-area-inset-top));padding-bottom:calc(6px + env(safe-area-inset-bottom));overflow:hidden}
 .wrap{width:100%;max-width:1060px;display:flex;flex-direction:column;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:8px;box-shadow:0 18px 50px rgba(0,0,0,.55);min-height:0}
 .header{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;flex-wrap:nowrap}
@@ -28,7 +28,7 @@ body{background:var(--bg1);background:radial-gradient(ellipse at 50% 30%,var(--b
 .col{position:relative;width:var(--cw);flex:0 0 auto;border-radius:8px;height:100%}
 .col.empty{border:2px dashed rgba(255,255,255,.18);background:rgba(255,255,255,.03)}
 .col.dropok{box-shadow:inset 0 0 0 3px rgba(124,255,196,.75)}
-.card{position:absolute;left:0;width:var(--cw);height:var(--ch);border-radius:calc(var(--cw)*.13);background:linear-gradient(160deg,#fffef8,#e9e2cf);border:1px solid #b9ae95;box-shadow:0 2px 5px rgba(0,0,0,.4);color:#16181c;touch-action:none}
+.card{position:absolute;left:0;width:var(--cw);height:var(--ch);border-radius:calc(var(--cw)*.13);background:linear-gradient(160deg,#fffef8,#e9e2cf);border:1px solid #b9ae95;box-shadow:0 2px 5px rgba(0,0,0,.4);color:#16181c;touch-action:none;overflow:hidden}
 .card.down{border-color:#2a2a3a;background-color:#ece2c4}
 .bf{background-color:#ece2c4}
 body[data-back="1"] .bf{background-image:url('./img/back1.png'),linear-gradient(160deg,#f5eed6,#ece2c4);background-size:cover,cover}
@@ -44,7 +44,7 @@ body.bk5fail[data-back="5"] .bf{background-image:repeating-linear-gradient(45deg
 .card .cn{position:absolute;font-weight:800;line-height:1;font-size:calc(var(--cw)*.25);white-space:nowrap}
 .card .cn.tl{top:calc(var(--cw)*.055);left:calc(var(--cw)*.075)}
 .card .cn.br{bottom:calc(var(--cw)*.055);right:calc(var(--cw)*.075);transform:rotate(180deg)}
-.card .pip{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cw)*.5);opacity:.85;line-height:1}
+.card .pip{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cw)*.5*var(--pipk));opacity:.85;line-height:1}
 .card.red{color:#c62828}
 .card.down .cn,.card.down .pip{display:none}
 .card.movable{cursor:pointer}
@@ -56,7 +56,7 @@ body.bk5fail[data-back="5"] .bf{background-image:repeating-linear-gradient(45deg
 .bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;padding:4px 6px;flex-wrap:nowrap;overflow:hidden}
 .bar.left{flex-direction:row-reverse}
 .founds{display:flex;flex:0 0 auto;min-width:0;align-items:center;gap:2px}
-.fslot{flex:0 0 auto;position:relative;border-radius:5px;border:1px dashed rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;text-align:center;background:rgba(0,0,0,.22);font-weight:800;line-height:1;padding:0}
+.fslot{flex:0 0 auto;position:relative;border-radius:5px;border:1px dashed rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;text-align:center;background:rgba(0,0,0,.22);font-weight:800;line-height:1;padding:0;overflow:hidden}
 .fslot.on{border:1px solid var(--gold);background:linear-gradient(160deg,#fffef8,#e6dcc4);color:#16181c;box-shadow:0 2px 9px rgba(0,0,0,.5)}
 .fslot.on.red{color:#c62828}
 .stock{position:relative;flex:0 0 auto;cursor:pointer;display:flex;align-items:center}
@@ -140,7 +140,7 @@ body.zen .zenDeck{display:flex}
 <button class="btn icon" id="shareBtn" aria-label="Скинуть ссылку на игру" title="Скинуть ссылку на игру"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.9" x2="15.7" y2="6.1"/><line x1="8.3" y1="13.1" x2="15.7" y2="17.9"/></svg></button>
 </div>
 <div class="status" id="statusEl">Выбери сложность</div>
-<div class="ver" id="verTag">v1.5</div>
+<div class="ver" id="verTag">v1.6</div>
 </div>
 
 <button class="zenDeck" id="zenDeck" aria-label="Раздать из колоды" title="Раздать из колоды"><span class="mini bf"></span><span class="cnt" id="zenCnt">5</span></button>
@@ -148,7 +148,7 @@ body.zen .zenDeck{display:flex}
 
 <div class="overlay" id="menuOverlay"><div class="cardbox">
 <div class="mhdr"><button class="hbtn" id="menuHubBtn">← В меню игр</button></div>
-<h2>🕷 Паук <span style="font-size:11px;opacity:.6;font-family:monospace" id="verTag2">v1.5</span></h2>
+<h2>🕷 Паук <span style="font-size:11px;opacity:.6;font-family:monospace" id="verTag2">v1.6</span></h2>
 <div class="sub">Собери 8 последовательностей от Короля до Туза одной масти</div>
 <div class="mode-choice">
 <button class="mode-btn primary" data-suits="1"><div class="icon">♠</div><div><b>1 масть · лёгкий</b><small>Все пики — для освоения</small></div></button>
@@ -187,9 +187,13 @@ body.zen .zenDeck{display:flex}
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏆</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 
 <script>
-const VER='1.5',COLS=10,RANKS=['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const VER='1.6',COLS=10,RANKS=['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const SUITS={s:{ch:'♠',red:false},h:{ch:'♥',red:true},d:{ch:'♦',red:true},c:{ch:'♣',red:false}};
 const $=id=>document.getElementById(id);
+/* v1.6: на Android символы мастей в системном шрифте вдвое крупнее — компенсируем */
+const IS_ANDROID=(function(){try{if(Platform&&Platform.name==='android')return true}catch(e){}return /Android/i.test(navigator.userAgent||'')})();
+const SUIT_K=IS_ANDROID?.5:1;
+try{document.documentElement.style.setProperty('--pipk',String(SUIT_K))}catch(e){}
 let set=Object.assign({suits:1,vol:.7,undoPen:5,table:'green',back:1,left:0,mute:false},JSON.parse(localStorage.spider_set||'{}'));
 const saveSet=()=>localStorage.spider_set=JSON.stringify(set);
 let ST=Object.assign({g:0,w:0,best:0,bestTime:0,suits:0},JSON.parse(localStorage.spider_stats||'{}'));
@@ -200,7 +204,7 @@ let CW=54,CH=77,GAP=6,boardOffset=0,boardPad=0,colGap=[],pan=null,drag=null,ghos
 let zen=false,busy=false,dealing=false,hiddenKeys=new Set();
 (function(){for(var n=1;n<=5;n++){(function(k){var im=new Image();im.onerror=function(){document.body.classList.add('bk'+k+'fail')};im.src='./img/back'+k+'.png'})(n)}})();
 function trk(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p)}catch(e){}}
-(function(){try{const k='spider_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trk('game_open',{game_name:'spider',source:Platform.name,ver:VER})}}catch(e){}})();
+(function(){try{const k='spider_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trk('game_open',{game_name:'spider',source:Platform.name,ver:VER,android:IS_ANDROID?1:0})}}catch(e){}})();
 function backHandler(){
  try{
   if($('confirmOverlay').classList.contains('show')){cfResolve(false);return}
@@ -302,7 +306,6 @@ function checkComplete(){
  busy=true;runComplete(hit);
  return true;
 }
-/* v1.5: непрерывная цепочка — вся стопка и следующие за ней уходят без пауз */
 function runComplete(hit){
  const ci=hit.ci,c=cols[ci],st=hit.st,cards=c.slice(st),rects=[];
  for(let k=st;k<c.length;k++){const el=cardEl(ci,k);rects.push(el?el.getBoundingClientRect():null);hiddenKeys.add(ci+':'+k)}
@@ -466,7 +469,7 @@ function layout(){
  CW=Math.max(54,Math.min(88,fit));CH=Math.round(CW*1.42);
  const spare=Math.floor((wrapW-12-COLS*CW)/(COLS-1));
  GAP=Math.max(6,Math.min(30,spare));
- const rs=document.documentElement.style;rs.setProperty('--cw',CW+'px');rs.setProperty('--gap',GAP+'px');
+ const rs=document.documentElement.style;rs.setProperty('--cw',CW+'px');rs.setProperty('--gap',GAP+'px');rs.setProperty('--pipk',String(SUIT_K));
 }
 function cardHTML(c){const s=SUITS[c.s].ch;return '<span class="cn tl">'+RANKS[c.r]+s+'</span><span class="pip">'+s+'</span><span class="cn br">'+RANKS[c.r]+s+'</span>'}
 function cardEl(c,i){const col=$('board').children[c];return col?col.querySelector('[data-i="'+i+'"]'):null}
@@ -511,7 +514,6 @@ function render(){
  }
  setOffset(boardOffset);renderBar();updateHud();paintHint();
 }
-/* v1.5: дом — крупная масть ПО ЦЕНТРУ, слоты подогнаны так, чтобы колода влезала */
 function renderBar(){
  const bar=$('bar'),usable=Math.max(190,(bar.clientWidth||300)-12);
  const n=Math.floor(stock.length/10);
@@ -523,7 +525,7 @@ function renderBar(){
  let slotW=Math.floor((usable-stockW-8-14)/8);
  if(slotW<Math.round(CW*.5)&&n>3){shown=3;spread=.12;stockW=stockCalc();slotW=Math.floor((usable-stockW-8-14)/8)}
  slotW=Math.max(20,Math.min(baseSlot,slotW));
- const slotH=Math.round(slotW*1.42),fs=Math.round(slotW*.9);
+ const slotH=Math.round(slotW*1.42),fs=Math.max(9,Math.round(slotW*.9*SUIT_K));
  const f=$('founds');f.innerHTML='';
  for(let i=0;i<8;i++){
   const d=document.createElement('div'),s=founds[i];
@@ -575,8 +577,6 @@ function foundRect(i){
  if(r&&r.width>0)return r;
  return{left:window.innerWidth-CW*.7,top:8,width:Math.round(CW*.6),height:Math.round(CH*.6)};
 }
-/* v1.5: масть на летящей карте = как на поле (--cw от ширины старта);
-   WAAPI + принудительный reflow — облёт виден и в Android WebView */
 function flyCard(cd,from,to,ms,cb){
  if(!from||!to||!to.width){cb&&cb();return}
  const w=Math.max(8,from.width||CW),h=Math.max(10,from.height||CH);
@@ -585,6 +585,7 @@ function flyCard(cd,from,to,ms,cb){
  el.innerHTML=cd.u?cardHTML(cd):'';
  el.style.setProperty('--cw',w+'px');
  el.style.setProperty('--ch',h+'px');
+ el.style.setProperty('--pipk',String(SUIT_K));
  el.style.left=from.left+'px';el.style.top=from.top+'px';
  el.style.width=w+'px';el.style.height=h+'px';
  el.style.transform='translate(0px,0px) scale(1)';
@@ -653,6 +654,7 @@ function buildGhost(c,i,x,y){
   d.innerHTML=it.cd.u?cardHTML(it.cd):'';
   d.style.setProperty('--cw',it.rect.width+'px');
   d.style.setProperty('--ch',it.rect.height+'px');
+  d.style.setProperty('--pipk',String(SUIT_K));
   d.style.left=(it.rect.left-x)+'px';d.style.top=(it.rect.top-y)+'px';d.style.width=it.rect.width+'px';d.style.height=it.rect.height+'px';
   ghost.appendChild(d);
  });
@@ -693,7 +695,6 @@ function endDrag(x,y,moved){
   if(t!==d.c){sDeny();setStatus('❌ Сюда нельзя: нужна карта на ранг старше.',true)}
  }
 }
-/* ---------- салют: ярче, крупнее, ПОВЕРХ окна победы ---------- */
 const FXC=['#7cffc4','#ffd166','#ff5b6b','#33d6ff','#c084fc','#ff9f45','#ffffff','#8affd8'];
 let fxCv=null,fxCtx=null,fxRaf=null,fxOn=false,fxParts=[],fxRockets=[],fxFlashes=[],fxLast=0,fxNext=0;
 function fxResize(){if(!fxCv||!fxCtx)return;const d=Math.min(2,window.devicePixelRatio||1);fxCv.width=Math.floor(innerWidth*d);fxCv.height=Math.floor(innerHeight*d);fxCtx.setTransform(d,0,0,d,0,0)}
