@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-22T08:30:36.249Z",
+ "generatedAt": "2026-11-22T08:45:13.465Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.54",
@@ -43,14 +43,14 @@
  },
  "games": {
   "chess": {
-   "version": "3.0",
+   "version": "3.1",
    "online": true,
    "addedAt": "2026-10-01",
    "files": [
     {
      "path": "chess/index.html",
-     "sha256": "faa1711646ccceb36f4a61a672b2781d17e090e8acef2f3774d36ba2b9b9cea4",
-     "size": 61057
+     "sha256": "0de404d09581e9b2e60308664d452e0de7ce52de6869a7ef2d045db767eafc0d",
+     "size": 75711
     }
    ]
   },
