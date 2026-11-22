@@ -60,7 +60,6 @@ body::-webkit-scrollbar-thumb:hover,.modal-content::-webkit-scrollbar-thumb:hove
 .chip.turn{border-color:var(--accent);color:var(--accent);font-weight:700}
 .chip .dot{width:7px;height:7px;border-radius:50%;background:#57c85b;box-shadow:0 0 5px #57c85b}
 .chip .dot.off{background:#777;box-shadow:none}
-/* ===== сцена доски: подсветка стороны ходящего из-под доски + подписи ===== */
 .boardStage{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px}
 .boardStage[data-bottom="w"]{--glowBottom:var(--glowW);--glowTop:var(--glowB)}
 .boardStage[data-bottom="b"]{--glowBottom:var(--glowB);--glowTop:var(--glowW)}
@@ -73,8 +72,8 @@ body::-webkit-scrollbar-thumb:hover,.modal-content::-webkit-scrollbar-thumb:hove
 #board{position:relative;z-index:1;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:var(--bs);height:var(--bs);border-radius:8px;overflow:hidden;box-shadow:0 10px 30px var(--shadow),0 0 0 3px rgba(255,255,255,.1);transition:box-shadow .4s ease}
 .boardStage.turn-bottom #board{box-shadow:0 10px 30px var(--shadow),0 0 0 3px rgba(255,255,255,.18),0 20px 46px -10px var(--glowBottom)}
 .boardStage.turn-top #board{box-shadow:0 10px 30px var(--shadow),0 0 0 3px rgba(255,255,255,.18),0 -20px 46px -10px var(--glowTop)}
-.sideBar{position:relative;z-index:2;width:var(--bs);max-width:100%;display:flex;align-items:center;gap:9px;padding:6px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.28);transition:border-color .3s,box-shadow .3s,background .3s,opacity .3s;opacity:.62}
-.sideBar .disc{font-size:21px;line-height:1;flex:0 0 auto}
+.sideBar{position:relative;z-index:2;width:var(--bs);max-width:100%;display:flex;align-items:center;gap:9px;padding:6px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.28);transition:border-color .3s,box-shadow .3s,background .3s,opacity .3s,transform .3s ease;opacity:.62}
+.sideBar .disc{font-size:21px;line-height:1;flex:0 0 auto;display:block}
 .sideBar.w .disc{color:#fff;text-shadow:0 2px 3px rgba(0,0,0,.65)}
 .sideBar.b .disc{color:#151515;text-shadow:0 0 4px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.5)}
 .sideBar .nm{display:flex;flex-direction:column;line-height:1.15;min-width:0;flex:1 1 auto}
@@ -89,6 +88,8 @@ body::-webkit-scrollbar-thumb:hover,.modal-content::-webkit-scrollbar-thumb:hove
 .sideBar.b.active .badge{opacity:1;transform:scale(1);background:var(--glowB);color:#04182c;animation:badgeP 1.5s ease-in-out infinite}
 .sideBar.w.active .nm b{color:#fff6e2}
 .sideBar.b.active .nm b{color:#e6f4ff}
+/* v3.2: переворот верхней стороны в режиме «вдвоём» на телефоне */
+.sideBar.rot{transform:rotate(180deg)}
 @keyframes badgeP{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.35)}50%{box-shadow:0 0 0 7px rgba(255,255,255,0)}}
 .sq{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;overflow:hidden}
 .sq.light{background:var(--sq-light)}
@@ -99,7 +100,8 @@ body::-webkit-scrollbar-thumb:hover,.modal-content::-webkit-scrollbar-thumb:hove
 .sq.chk{box-shadow:inset 0 0 0 4px rgba(255,60,60,.9)}
 .sq.tgt::after{content:'';position:absolute;inset:36%;border-radius:50%;background:rgba(60,180,110,.55);box-shadow:0 0 8px rgba(60,180,110,.5)}
 .sq.capT::after{content:'';position:absolute;inset:6%;border-radius:50%;border:4px solid rgba(255,80,80,.75);background:transparent}
-.pc{font-size:calc(var(--bs)/8*.78);line-height:1;pointer-events:none}
+.pc{display:block;font-size:calc(var(--bs)/8*.78);line-height:1;pointer-events:none;transition:transform .25s ease}
+.pc.rot{transform:rotate(180deg)}
 .pc.w{color:#fff;text-shadow:0 2px 3px rgba(0,0,0,.65)}
 .pc.b{color:#141414;text-shadow:0 0 4px rgba(255,255,255,.35),0 2px 3px rgba(0,0,0,.4)}
 .controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
@@ -113,16 +115,17 @@ body::-webkit-scrollbar-thumb:hover,.modal-content::-webkit-scrollbar-thumb:hove
 .board-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
 .overlay.show{display:flex}
-.card{background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:22px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px var(--shadow);position:relative;max-height:88vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--accent) rgba(0,0,0,.35)}
+.card{background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:22px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px var(--shadow);position:relative;max-height:88vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--accent) rgba(0,0,0,.35);transition:transform .3s ease}
 .card h2{font-size:25px;margin-bottom:8px}
 .card .sub{opacity:.82;margin-bottom:14px;font-size:14px;line-height:1.5}
 .card .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
-/* v3.1: кнопка «В меню игр» — отдельный ряд НАД заголовком (absolute запрещён) */
+#promoOverlay .card.rot{transform:rotate(180deg)}
 .mhdr{display:flex;justify-content:flex-start;margin-bottom:8px}
 .promo-row{display:flex;gap:10px;justify-content:center;margin:14px 0}
 .promo-btn{width:64px;height:64px;font-size:44px;border-radius:14px;border:2px solid rgba(255,255,255,.25);background:var(--sq-light);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s,border-color .15s}
 .promo-btn:hover{border-color:var(--accent)}
 .promo-btn:active{transform:scale(.94)}
+.promo-btn .pc{font-size:44px}
 .mode-choice{display:flex;flex-direction:column;gap:10px;margin:10px 0}
 .mode-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:18px;padding:14px;cursor:pointer;font-family:inherit;text-align:left;display:flex;gap:14px;align-items:center;transition:background .15s,border-color .15s,transform .1s}
 .mode-btn:hover{background:rgba(124,255,196,.1);border-color:rgba(124,255,196,.4)}
@@ -147,6 +150,9 @@ body::-webkit-scrollbar-thumb:hover,.modal-content::-webkit-scrollbar-thumb:hove
 .srow select,.srow input[type=range]{width:100%;padding:7px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);color:var(--text);font-size:14px;font-family:inherit}
 .srow select option{background:#1c2430;color:#e8ecf2}
 .srow select:disabled{opacity:.4;cursor:not-allowed}
+.srow label.chk{display:flex;align-items:center;gap:9px;text-transform:none;letter-spacing:0;font-size:13px;font-weight:600;opacity:1;cursor:pointer;margin-bottom:0}
+.srow input[type=checkbox]{width:19px;height:19px;flex:0 0 auto;accent-color:var(--accent);cursor:pointer}
+.srow .hint{font-size:11px;opacity:.62;margin-top:5px;line-height:1.45}
 .stat-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px}
 .stat-row b{color:var(--accent)}
 .modal-close{text-align:center;margin-top:16px}
@@ -192,7 +198,7 @@ body::-webkit-scrollbar-thumb:hover,.modal-content::-webkit-scrollbar-thumb:hove
     <button class="btn primary" id="newBtn">🔄 Новая игра</button>
     <button class="btn" id="undoBtn">↩️ Отменить ход</button>
   </div>
-  <div class="ver" id="verTag">v3.1</div>
+  <div class="ver" id="verTag">v3.2</div>
 </div>
 <div class="fieldViewBar" id="fieldViewBar"><span class="title">👁 Просмотр партии</span><button class="btn" id="closeFieldView">Закрыть</button></div>
 
@@ -203,7 +209,7 @@ body::-webkit-scrollbar-thumb:hover,.modal-content::-webkit-scrollbar-thumb:hove
     <div class="sub">Выбери режим игры</div>
     <div class="mode-choice">
       <button class="mode-btn" id="modeAi"><div class="icon">🖥</div><div class="txt"><b>Против компьютера</b><small>4 уровня сложности (до гроссмейстера)</small></div></button>
-      <button class="mode-btn" id="modeHot"><div class="icon">👥</div><div class="txt"><b>Вдвоём на одном устройстве</b><small>Доска не переворачивается, ход по очереди</small></div></button>
+      <button class="mode-btn" id="modeHot"><div class="icon">👥</div><div class="txt"><b>Вдвоём на одном устройстве</b><small>Телефон: фигуры соперника повёрнуты к нему</small></div></button>
       <button class="mode-btn primary" id="modeHost"><div class="icon">🌐</div><div class="txt"><b>Играть с другом онлайн</b><small>Создать комнату · вход по коду или QR</small></div></button>
       <button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div class="txt"><b>Зайти по коду</b><small>Уже есть код комнаты</small></div></button>
     </div>
@@ -212,7 +218,7 @@ body::-webkit-scrollbar-thumb:hover,.modal-content::-webkit-scrollbar-thumb:hove
       <button class="btn" id="joinCancel">Отмена</button>
       <button class="btn primary pulse" id="joinGo">Войти</button>
     </div>
-    <div class="ver" id="verTag2" style="margin-top:14px">v3.1</div>
+    <div class="ver" id="verTag2" style="margin-top:14px">v3.2</div>
   </div>
 </div>
 
@@ -235,7 +241,7 @@ body::-webkit-scrollbar-thumb:hover,.modal-content::-webkit-scrollbar-thumb:hove
 </div>
 
 <div class="overlay" id="promoOverlay">
-  <div class="card">
+  <div class="card" id="promoCard">
     <h2>Превращение пешки</h2>
     <div class="sub">Выбери фигуру</div>
     <div class="promo-row" id="promoRow"></div>
@@ -262,7 +268,7 @@ body::-webkit-scrollbar-thumb:hover,.modal-content::-webkit-scrollbar-thumb:hove
 <div class="overlay" id="rulesOverlay">
   <div class="card" style="text-align:left">
     <h2 style="text-align:center">📖 Описание</h2>
-    <div class="rules-text">• Классические шахматы: белые ходят первыми, цель — мат королю соперника.<br>• Управление: тап по своей фигуре = выбрать, тап по подсвеченной клетке = ход. Подсветка показывает доступные ходы и взятия.<br>• Рокировка, взятие на проходе и превращение пешки поддерживаются.<br>• <b>Вдвоём на одном устройстве</b>: доска не переворачивается — сторона ходящего подсвечивается из-под доски и подписана сверху/снизу; «↩️ Отменить ход» откатывает один ход.<br>• Онлайн: создай комнату → 📤 Пригласить или 📱 QR → партия стартует при входе второго. Ничья, сдача и реванш — в шторке комнаты и в окне окончания.<br>• Оффлайн: 4 уровня ИИ — Лёгкая, Средняя, Сложная и Гроссмейстер.<br>• «📤 Скинуть ссылку на игру» под доской делится игрой; «📤 Отправить результат» появляется после партии.</div>
+    <div class="rules-text">• Классические шахматы: белые ходят первыми, цель — мат королю соперника.<br>• Управление: тап по своей фигуре = выбрать, тап по подсвеченной клетке = ход. Подсветка показывает доступные ходы и взятия.<br>• Рокировка, взятие на проходе и превращение пешки поддерживаются.<br>• <b>Вдвоём на одном устройстве</b>: доска не переворачивается; на телефоне фигуры верхней стороны и её подпись с индикатором «ХОД» повёрнуты к сидящему напротив сопернику (на ПК переворота нет — отключается в ⚙️). Сторона ходящего подсвечивается из-под доски. «↩️ Отменить ход» откатывает один ход.<br>• Онлайн: создай комнату → 📤 Пригласить или 📱 QR → партия стартует при входе второго. Ничья, сдача и реванш — в шторке комнаты и в окне окончания.<br>• Оффлайн: 4 уровня ИИ — Лёгкая, Средняя, Сложная и Гроссмейстер.<br>• «📤 Скинуть ссылку на игру» под доской делится игрой; «📤 Отправить результат» появляется после партии.</div>
     <div class="btns" style="justify-content:center"><button class="btn primary" id="rulesClose">Понятно</button></div>
   </div>
 </div>
@@ -273,6 +279,10 @@ body::-webkit-scrollbar-thumb:hover,.modal-content::-webkit-scrollbar-thumb:hove
     <div class="srow"><label>Сложность (против компьютера)</label><select id="diffSelect"><option value="easy">Лёгкая</option><option value="medium" selected>Средняя</option><option value="hard">Сложная</option><option value="grandmaster">Гроссмейстер</option></select></div>
     <div class="srow"><label>Играть за (одиночный)</label><select id="sideSelect"><option value="w" selected>Белых</option><option value="b">Чёрных</option></select></div>
     <div class="srow"><label>Тема доски</label><select id="themeSelect"><option value="classic" selected>Классика</option><option value="green">Зелёная</option><option value="neon">Неон</option></select></div>
+    <div class="srow"><label>Режим «вдвоём на одном устройстве»</label>
+      <label class="chk"><input type="checkbox" id="hotFlipChk"> Переворачивать верхние фигуры и подпись</label>
+      <div class="hint">На телефоне включено автоматически: соперник сидит напротив и видит свои фигуры правильно. На ПК по умолчанию выключено. В остальных режимах фигуры никогда не переворачиваются.</div>
+    </div>
     <div class="srow"><label>Громкость · <span id="volV">50%</span></label><input type="range" id="volSlider" min="0" max="100" value="50"></div>
     <div class="srow"><label>📊 Статистика (против компьютера)</label>
       <div class="stat-row"><span>Побед:</span><b id="stW">0</b></div>
@@ -285,7 +295,7 @@ body::-webkit-scrollbar-thumb:hover,.modal-content::-webkit-scrollbar-thumb:hove
 </div>
 
 <script>
-const VER='3.1';
+const VER='3.2';
 const HEARTBEAT_INTERVAL=5000, HEARTBEAT_TTL=15000;
 let heartbeatTimer=null, myRound=0, fieldViewMode=false;
 let confirmResolver=null, lastRoomStatus=null;
@@ -343,6 +353,15 @@ let set=Object.assign({diff:'medium',side:'w',theme:'classic',vol:.5},JSON.parse
 const saveSet=()=>localStorage.chess_set=JSON.stringify(set);
 let stats=Object.assign({w:0,l:0,d:0},JSON.parse(localStorage.chess_stats||'{}'));
 const saveStats=()=>localStorage.chess_stats=JSON.stringify(stats);
+/* v3.2: переворот верхней стороны — только hot-seat и только на телефоне (ПК не переворачиваем) */
+function isMobileDevice(){
+  try{if(Platform.name==='pc')return false;if(Platform.name==='android')return true;}catch(e){}
+  try{if(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)return true;}catch(e){}
+  return /Android|iPhone|iPad|iPod|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent||'');
+}
+function hotFlipOn(){return (typeof set.hotFlip==='boolean')?set.hotFlip:isMobileDevice();}
+function topSideOf(){return orientSide==='w'?'b':'w';}
+function rotSide(side){return hotSeat&&hotFlipOn()&&side===topSideOf();}
 const GLYPH_W={K:'♔',Q:'♕',R:'♖',B:'♗',N:'♘',P:'♙'};
 const GLYPH_B={K:'♚',Q:'♛',R:'♜',B:'♝',N:'♞',P:'♟'};
 function glyphOf(p){return (p.c==='w'?GLYPH_W:GLYPH_B)[p.t];}
@@ -427,7 +446,6 @@ async function getUserNameAsync(){
   const s=localStorage.chess_name;if(s){MYNAME=s;return s;}
   const n='Игрок'+Math.floor(Math.random()*900+100);localStorage.chess_name=n;MYNAME=n;return n;}
 function genRoomCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
-/* v3.1: инвайт/QR = прямая ссылка на игру с game+room */
 function inviteLink(code){return 'https://ip19760118-code.github.io/games/chess/?game=chess&room='+encodeURIComponent(code||'');}
 function intentJoinUrl(code){const https=inviteLink(code);return 'intent://ip19760118-code.github.io/games/chess/?game=chess&room='+encodeURIComponent(code)+'&plat=android#Intent;scheme=https;package=ru.ip19760118.igrovojcentr;S.browser_fallback_url='+encodeURIComponent(https)+';end';}
 function isPresenceFresh(p){return !!(p&&p.at&&(Date.now()-p.at)<HEARTBEAT_TTL);}
@@ -562,7 +580,6 @@ function updateRoomActions(){const box=$('roomActions');[...box.children].forEac
   const rb=document.createElement('button');rb.className='rbtn accept pulse';rb.textContent='🔄 Реванш';rb.onclick=requestRematch;box.appendChild(rb);
  }
  const lb=document.createElement('button');lb.className='rbtn danger';lb.textContent='🚪 Выйти';lb.onclick=async()=>{if(await askConfirm('Выйти из комнаты? Место освободится.')){leaveRoom();resetBoard();started=false;modeOverlay.classList.add('show');}};box.appendChild(lb);}
-/* v3.1: QR комнаты */
 function ensureQrLib(){if(window.qrcode)return Promise.resolve(true);if(qrLibLoading)return qrLibLoading;qrLibLoading=loadScriptTag('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js').then(()=>!!window.qrcode).catch(()=>{qrLibLoading=null;return false;});return qrLibLoading;}
 function showQr(){
   if(!roomCode){showStatus('Сначала создай комнату',true);return;}
@@ -627,12 +644,12 @@ function subOf(side){
 function countSide(side){let n=0;for(const p of board)if(p&&p.c===side)n++;return n;}
 function capsBy(side){let s='';for(const m of moveLog)if(m.captured&&m.piece.c===side)s+=glyphOf(m.captured);return s;}
 function fillSide(el,side,turnSide){
-  el.className='sideBar '+side+(turnSide===side?' active':'');
+  el.className='sideBar '+side+(turnSide===side?' active':'')+(rotSide(side)?' rot':'');
   const cap=capsBy(side);
   const wins=onlineMode?(((roomDataCache&&roomDataCache.scores)||{})[side]||0):0;
   el.innerHTML='<span class="disc">'+(side==='w'?'♔':'♚')+'</span><span class="nm"><b>'+esc(nameOf(side))+'</b><small>'+esc(subOf(side))+(wins?' · 🏆'+wins:'')+(cap?' · съел '+cap:'')+'</small></span><span class="cnt">'+countSide(side)+'</span><span class="badge">ХОД</span>';}
 function renderSides(){
-  const stage=$('boardStage'),bottom=orientSide,top=bottom==='w'?'b':'w';
+  const stage=$('boardStage'),bottom=orientSide,top=topSideOf();
   stage.setAttribute('data-bottom',bottom);
   const t=(started&&!gameOver)?turn:null;
   fillSide($('sideTop'),top,t);fillSide($('sideBottom'),bottom,t);
@@ -657,7 +674,7 @@ function render(){
   if(idx===chkSq)cls+=' chk';
   if(sel>=0&&legalCache.some(m=>m.from===sel&&m.to===idx))cls+=p?' capT':' tgt';
   el.className=cls;el.innerHTML='';
-  if(p){const s=document.createElement('span');s.className='pc '+p.c;s.textContent=glyphOf(p);el.appendChild(s);}}
+  if(p){const s=document.createElement('span');s.className='pc '+p.c+(rotSide(p.c)?' rot':'');s.textContent=glyphOf(p);el.appendChild(s);}}
  $('undoBtn').disabled=onlineMode||gameOver||thinking||(hotSeat?!moveLog.length:!(moveLog.length>=2&&turn===playerSide));
  if(started&&!gameOver&&turn!==prevTurn){if(prevTurn!==null&&(hotSeat||onlineMode))sTurn();prevTurn=turn;}
  if(!started||gameOver)prevTurn=null;
@@ -743,10 +760,11 @@ function checkEnd(){
  return false;}
 function openPromo(cands){
  promoPending=cands;const row=$('promoRow');row.innerHTML='';const side=activeSide();
+ $('promoCard').classList.toggle('rot',rotSide(side));
  for(const pr of['Q','R','B','N']){const b=document.createElement('button');b.className='promo-btn';const s=document.createElement('span');s.className='pc '+side;s.textContent=(side==='w'?GLYPH_W:GLYPH_B)[pr];b.appendChild(s);
   b.addEventListener('click',()=>{const m=cands.find(x=>x.promo===pr);hidePromo();if(m){onlineMode?doPlayerMoveOnline(m):doPlayerMove(m);}});row.appendChild(b);}
  promoOverlay.classList.add('show');}
-function hidePromo(){promoPending=null;promoOverlay.classList.remove('show');}
+function hidePromo(){promoPending=null;promoOverlay.classList.remove('show');$('promoCard').classList.remove('rot');}
 function cancelPromo(){hidePromo();sel=-1;render();}
 $('promoCancel').onclick=cancelPromo;
 function resetGameAI(){
@@ -755,12 +773,11 @@ function resetGameAI(){
  resetBoard();showStatus('Ваш ход');updateControlsVisibility();updateBoardActions();
  trackEvent('game_start',{game_name:'chess',mode:'ai',difficulty:set.diff,side:playerSide});
  if(turn!==playerSide)aiTurn();}
-/* v3.1: hot-seat — доска не переворачивается, ход по очереди */
 function startHotSeat(){
  if(onlineMode)leaveRoom();
  hotSeat=true;started=true;playerSide='w';aiSide='b';orientSide='w';
  resetBoard();showStatus(statusText());updateControlsVisibility();updateBoardActions();
- trackEvent('game_start',{game_name:'chess',mode:'hotseat'});}
+ trackEvent('game_start',{game_name:'chess',mode:'hotseat',flip:hotFlipOn()?1:0});}
 function toChessMenu(){
  if(onlineMode)leaveRoom();
  hotSeat=false;started=false;resetBoard();showStatus('Выбери режим');
@@ -776,7 +793,7 @@ $('chessMenuBtn').onclick=goChessMenu;
 $('modeHubBtn').onclick=goToHub;
 $('closeFieldView').onclick=closeFieldView;
 $('rbToggle').onclick=()=>{const bar=$('roomBar'),ex=$('rbExtra');const open=ex.style.display!=='none';ex.style.display=open?'none':'flex';bar.classList.toggle('open',!open);sClick();};
-$('settingsBtn').onclick=()=>{ensureAudio();sClick();displayStats();$('diffSelect').disabled=onlineMode||hotSeat;$('sideSelect').disabled=onlineMode||hotSeat;settingsModal.classList.add('show');};
+$('settingsBtn').onclick=()=>{ensureAudio();sClick();displayStats();$('diffSelect').disabled=onlineMode||hotSeat;$('sideSelect').disabled=onlineMode||hotSeat;$('hotFlipChk').checked=hotFlipOn();settingsModal.classList.add('show');};
 $('closeSettingsBtn').onclick=()=>{settingsModal.classList.remove('show');render();};
 settingsModal.addEventListener('click',e=>{if(e.target===settingsModal)settingsModal.classList.remove('show');});
 $('resetStatsBtn').onclick=async()=>{if(await askConfirm('Сбросить статистику?')){stats={w:0,l:0,d:0};saveStats();displayStats();}};
@@ -795,6 +812,7 @@ function applyTheme(){const colors={classic:'#101418',green:'#20301c',neon:'#141
 $('diffSelect').onchange=e=>{set.diff=e.target.value;saveSet();render();trackEvent('settings_change',{game_name:'chess',setting:'difficulty',value:set.diff});};
 $('sideSelect').onchange=e=>{set.side=e.target.value;saveSet();trackEvent('settings_change',{game_name:'chess',setting:'side',value:set.side});if(!onlineMode&&!hotSeat)showStatus('Сторона применится в новой игре');};
 $('themeSelect').onchange=e=>{set.theme=e.target.value;saveSet();applyTheme();trackEvent('settings_change',{game_name:'chess',setting:'theme',value:set.theme});};
+$('hotFlipChk').onchange=e=>{set.hotFlip=!!e.target.checked;saveSet();render();if(promoPending)$('promoCard').classList.toggle('rot',rotSide(activeSide()));trackEvent('settings_change',{game_name:'chess',setting:'hot_flip',value:set.hotFlip});};
 $('volSlider').oninput=e=>{set.vol=e.target.value/100;$('volV').textContent=e.target.value+'%';saveSet();if(MASTER)MASTER.gain.value=set.vol;};
 $('modeAi').onclick=()=>{ensureAudio();sClick();modeOverlay.classList.remove('show');resetGameAI();};
 $('modeHot').onclick=()=>{ensureAudio();sClick();modeOverlay.classList.remove('show');startHotSeat();};
@@ -803,7 +821,7 @@ $('modeJoin').onclick=()=>{$('joinCodeBox').style.display='flex';$('joinCodeActi
 $('joinCancel').onclick=()=>{$('joinCodeBox').style.display='none';$('joinCodeActions').style.display='none';};
 $('joinGo').onclick=async()=>{const c=$('joinCodeInput').value.trim().toUpperCase();if(c.length!==6){alert('Введи 6 символов');return;}await joinRoom(c);};
 (function loadSettings(){$('diffSelect').value=set.diff;$('sideSelect').value=set.side;$('themeSelect').value=set.theme;
- $('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';applyTheme();displayStats();
+ $('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';$('hotFlipChk').checked=hotFlipOn();applyTheme();displayStats();
  $('verTag').textContent='v'+VER;$('verTag2').textContent='v'+VER;})();
 (async function initStart(){
  try{
@@ -814,7 +832,8 @@ $('joinGo').onclick=async()=>{const c=$('joinCodeInput').value.trim().toUpperCas
  }catch(e){console.error('[CH] init error:',e);modeOverlay.classList.add('show');}
 })();
 window.addEventListener('beforeunload',()=>{stopHeartbeat();removePresence();});
-window.addEventListener('resize',()=>{renderSides();});
+window.addEventListener('resize',()=>{render();});
+window.addEventListener('orientationchange',()=>setTimeout(render,220));
 </script>
 </body>
 </html>
