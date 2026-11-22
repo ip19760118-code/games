@@ -2,7 +2,7 @@
 <script src="../js/platform.js"></script><script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
 <style>
-:root{--bg1:#241a10;--bg2:#3a2a18;--bg3:#150e07;--panel:rgba(46,32,18,.92);--text:#f0e6d2;--accent:#e6b366;--cyan:#7cd9ff;--pt1:#c89b6a;--pt2:#8a5a33;--shadow:rgba(0,0,0,.6);--glowW:#ffe6a8;--glowB:#7cc4ff;--danger:#ff8f8f}
+:root{--bg1:#241a10;--bg2:#3a2a18;--bg3:#150e07;--panel:rgba(46,32,18,.92);--text:#f0e6d2;--accent:#e6b366;--pt1:#c89b6a;--pt2:#8a5a33;--shadow:rgba(0,0,0,.6);--glowW:#ffe6a8;--glowB:#7cc4ff;--danger:#ff8f8f;--panelH:78px}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
 html{min-height:100%;scrollbar-width:thin;scrollbar-color:var(--accent) rgba(0,0,0,.35)}
 body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at 50% 20%,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;padding:10px;padding-top:calc(10px + env(safe-area-inset-top));padding-bottom:calc(10px + env(safe-area-inset-bottom));overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--accent) rgba(0,0,0,.35)}
@@ -47,8 +47,10 @@ body::-webkit-scrollbar-thumb:hover,.cardbox::-webkit-scrollbar-thumb:hover{back
 .chip.turn{border-color:var(--accent);color:var(--accent);font-weight:700}
 .chip .dot{width:7px;height:7px;border-radius:50%;background:#57c85b;box-shadow:0 0 5px #57c85b}
 .chip .dot.off{background:#777;box-shadow:none}
-/* ===== сцена доски: сторона ходящего подсвечивается из-под доски ===== */
-.slot{width:100%}
+/* v2.12: слоты панели хода фиксированы в hot-seat — доска НЕ прыгает при смене хода */
+.slot{width:100%;display:flex;align-items:center;justify-content:center}
+#topSlot{height:0}
+body.hot #topSlot,body.hot #botSlot{height:var(--panelH);flex:0 0 auto}
 .boardStage{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px}
 .boardStage[data-bottom="w"]{--glowBottom:var(--glowW);--glowTop:var(--glowB)}
 .boardStage[data-bottom="b"]{--glowBottom:var(--glowB);--glowTop:var(--glowW)}
@@ -74,8 +76,9 @@ body::-webkit-scrollbar-thumb:hover,.cardbox::-webkit-scrollbar-thumb:hover{back
 .sideBar.b.active .badge{opacity:1;transform:scale(1);background:var(--glowB);color:#04182c;animation:badgeP 1.5s ease-in-out infinite}
 .sideBar.rot{transform:rotate(180deg)}
 @keyframes badgeP{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.35)}50%{box-shadow:0 0 0 7px rgba(255,255,255,0)}}
-.turnPanel{display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 0;transition:transform .3s ease}
+.turnPanel{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:4px 0;width:100%;transition:transform .3s ease}
 .turnPanel.rot{transform:rotate(180deg)}
+.tpRow{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:nowrap;min-height:34px}
 .dice{display:flex;gap:6px;align-items:center;min-height:32px}
 .die{width:32px;height:32px;border-radius:7px;background:#fff;color:#222;font-weight:900;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.5)}
 .die.used{opacity:.28}
@@ -84,7 +87,7 @@ body::-webkit-scrollbar-thumb:hover,.cardbox::-webkit-scrollbar-thumb:hover{back
 .bear{font-size:12px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:4px 10px;cursor:pointer;white-space:nowrap;transition:box-shadow .2s}
 .bear.dst{box-shadow:0 0 0 3px rgba(90,220,130,.85)}
 .bear.combo::after{content:attr(data-sum);margin-left:5px;background:rgba(230,179,102,.96);color:#241505;font-size:10px;font-weight:900;padding:1px 5px;border-radius:6px}
-.board{--ck:clamp(9px,min(calc((100vw - 76px)/13),calc((100vh - 330px)/16)),30px);--ph:min(calc(var(--ck)*7.4),calc((100vh - 330px)/2));position:relative;z-index:1;display:flex;gap:6px;width:100%;max-width:660px;margin:0 auto;background:linear-gradient(160deg,#5a3d22,#4a3018);border-radius:12px;padding:8px;box-shadow:inset 0 2px 14px rgba(0,0,0,.6),0 8px 24px rgba(0,0,0,.45);transition:box-shadow .4s}
+.board{--ck:clamp(9px,min(calc((100vw - 76px)/13),calc((100vh - 336px)/16)),30px);--ph:min(calc(var(--ck)*7.4),calc((100vh - 336px)/2));position:relative;z-index:1;display:flex;gap:6px;width:100%;max-width:660px;margin:0 auto;background:linear-gradient(160deg,#5a3d22,#4a3018);border-radius:12px;padding:8px;box-shadow:inset 0 2px 14px rgba(0,0,0,.6),0 8px 24px rgba(0,0,0,.45);transition:box-shadow .4s;touch-action:manipulation}
 .boardStage.turn-bottom .board{box-shadow:inset 0 2px 14px rgba(0,0,0,.6),0 18px 40px -12px var(--glowBottom)}
 .boardStage.turn-top .board{box-shadow:inset 0 2px 14px rgba(0,0,0,.6),0 -18px 40px -12px var(--glowTop)}
 .half{flex:1;min-width:0;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(2,var(--ph));gap:2px}
@@ -108,7 +111,7 @@ body::-webkit-scrollbar-thumb:hover,.cardbox::-webkit-scrollbar-thumb:hover{back
 .ck.b{background:radial-gradient(circle at 35% 30%,#4a4a4a,#111)}
 .ckn{font-size:10px;font-weight:800;color:#fff;text-shadow:0 1px 2px #000}
 .ckfly{position:fixed;z-index:300;pointer-events:none;box-shadow:0 6px 16px rgba(0,0,0,.65);will-change:transform}
-.status{text-align:center;font-size:14px;font-weight:700;min-height:20px;color:var(--accent)}
+.status{text-align:center;font-size:14px;font-weight:700;min-height:18px;color:var(--accent)}
 .status.warn{color:var(--danger)}
 .actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px;align-items:center}
 .btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--text);padding:9px 18px;border-radius:30px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:box-shadow .2s ease,background .15s,border-color .15s,transform .1s}
@@ -117,14 +120,18 @@ body::-webkit-scrollbar-thumb:hover,.cardbox::-webkit-scrollbar-thumb:hover{back
 .btn.primary{background:linear-gradient(135deg,#e6b366,#c98a3e);color:#241505;border:none}
 .btn.icon{padding:9px 12px;min-width:44px;display:inline-flex;align-items:center;justify-content:center}
 .btn.icon svg{width:20px;height:20px;display:block}
+#rollBtn{padding:7px 16px;font-size:13px;white-space:nowrap}
 @keyframes btnPulse{0%,100%{box-shadow:0 0 0 0 rgba(230,179,102,.55),0 2px 6px rgba(0,0,0,.2)}50%{box-shadow:0 0 0 9px rgba(230,179,102,0),0 4px 18px rgba(230,179,102,.45)}}
 .pulse{animation:btnPulse 1.4s ease-in-out infinite}
+/* v2.12: режим поля — двойной тап по пустому месту доски */
+body.zen .header,body.zen .actions,body.zen .ver,body.zen .room-bar{display:none!important}
+body.zen{padding:6px}
+body.zen .wrap{padding:8px}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.74);backdrop-filter:blur(6px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
 .overlay.show{display:flex}
 .cardbox{background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:22px;max-width:430px;width:100%;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6);max-height:88vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--accent) rgba(0,0,0,.35)}
 .cardbox h2{font-size:24px;margin-bottom:8px}.cardbox .sub{opacity:.85;margin-bottom:14px;font-size:14px;line-height:1.5}
 .cardbox .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
-/* v2.11: кнопка «В меню игр» — отдельный ряд НАД заголовком (absolute запрещён) */
 .mhdr{display:flex;justify-content:flex-start;margin-bottom:8px}
 .stat-row{display:flex;justify-content:space-between;padding:6px 2px;border-bottom:1px solid rgba(255,255,255,.08);font-size:14px}
 .stat-row b{color:var(--accent)}
@@ -150,8 +157,8 @@ body::-webkit-scrollbar-thumb:hover,.cardbox::-webkit-scrollbar-thumb:hover{back
 .fieldViewBar{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:200;background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:8px 16px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;align-items:center;gap:12px}
 .fieldViewBar.show{display:flex}
 .fieldViewBar .title{font-size:13px;font-weight:800;color:var(--accent);-webkit-text-fill-color:var(--accent)}
-@media(max-width:520px){.title{font-size:17px}.hbtn{padding:5px 9px;font-size:11px}.btn{padding:8px 14px;font-size:13px}}
-@media(max-height:640px){.board{--ck:clamp(8px,min(calc((100vw - 76px)/13),calc((100vh - 236px)/16)),30px);--ph:min(calc(var(--ck)*7.4),calc((100vh - 236px)/2))}.header{margin-bottom:4px}.title{font-size:15px}.boardHolder{padding:9px 0}.glow{height:40px}.sideBar{padding:4px 10px}.sideBar .disc{width:15px;height:15px}.sideBar .nm b{font-size:12px}.sideBar .nm small{font-size:9.5px}.bear{font-size:11px;padding:3px 8px}.turnPanel{gap:4px;padding:2px 0}.die{width:27px;height:27px;font-size:16px}.status{font-size:12px;min-height:16px}.actions{margin-top:5px;gap:6px}.btn{padding:6px 12px;font-size:12px}.btn.icon{padding:6px 10px;min-width:38px}.btn.icon svg{width:17px;height:17px}.ver{display:none}.wrap{padding:9px}}
+@media(max-width:520px){.title{font-size:17px}.hbtn{padding:5px 9px;font-size:11px}.btn{padding:8px 14px;font-size:13px}#rollBtn{padding:6px 13px;font-size:12px}}
+@media(max-height:640px){:root{--panelH:62px}.board{--ck:clamp(8px,min(calc((100vw - 76px)/13),calc((100vh - 250px)/16)),30px);--ph:min(calc(var(--ck)*7.4),calc((100vh - 250px)/2))}.header{margin-bottom:4px}.title{font-size:15px}.boardHolder{padding:9px 0}.glow{height:40px}.sideBar{padding:4px 10px}.sideBar .disc{width:15px;height:15px}.sideBar .nm b{font-size:12px}.sideBar .nm small{font-size:9.5px}.bear{font-size:11px;padding:3px 8px}.turnPanel{gap:3px;padding:2px 0}.tpRow{min-height:28px;gap:8px}.die{width:27px;height:27px;font-size:16px}.status{font-size:12px;min-height:15px}.actions{margin-top:5px;gap:6px}.btn{padding:6px 12px;font-size:12px}#rollBtn{padding:5px 11px;font-size:11.5px}.btn.icon{padding:6px 10px;min-width:38px}.btn.icon svg{width:17px;height:17px}.ver{display:none}.wrap{padding:9px}}
 </style></head><body>
 <div class="wrap">
 <div class="header"><button class="hbtn" id="hubBtn">← В меню игр</button><div class="title">🎲 НАРДЫ</div><div style="display:flex;gap:6px"><button class="hbtn" id="statsBtn">📊</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
@@ -166,28 +173,28 @@ body::-webkit-scrollbar-thumb:hover,.cardbox::-webkit-scrollbar-thumb:hover{back
 <div class="slot" id="botSlot"></div>
 
 <div class="actions"><button class="btn" id="menuBtn" style="display:none">🏠 Меню нарды</button><button class="btn" id="newBtn" style="display:none">🔄 Новая игра</button><button class="btn icon" id="shareLinkBtn" aria-label="Отправить ссылку на игру" title="Отправить ссылку на игру"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.9" x2="15.7" y2="6.1"/><line x1="8.3" y1="13.1" x2="15.7" y2="17.9"/></svg></button></div>
-<div class="ver" id="verTag">v2.11</div>
+<div class="ver" id="verTag">v2.12</div>
 </div>
 
-<div class="turnPanel" id="turnPanel"><div class="dice" id="diceBox"></div><button class="btn primary" id="rollBtn" style="display:none">🎲 Бросить кости</button><div class="status" id="statusEl">Выбери режим</div></div>
+<div class="turnPanel" id="turnPanel"><div class="tpRow"><div class="dice" id="diceBox"></div><button class="btn primary" id="rollBtn" style="display:none">🎲 Бросить кости</button></div><div class="status" id="statusEl">Выбери режим</div></div>
 <span class="bear" id="bearW" style="display:none">⚪ снято: 0</span><span class="bear" id="bearB" style="display:none">⚫ снято: 0</span>
 
 <div class="fieldViewBar" id="fieldViewBar"><span class="title">👁 Просмотр партии</span><button class="btn" id="closeFieldView">Закрыть</button></div>
 
 <div class="overlay" id="modeOverlay"><div class="cardbox">
 <div class="mhdr"><button class="hbtn" id="modeHubBtn">← В меню игр</button></div>
-<h2>🎲 Нарды <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.11</span></h2>
+<h2>🎲 Нарды <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.12</span></h2>
 <div class="sub">Классические длинные · против часовой</div>
 <div class="seg-label">Цвет для игры против компьютера</div>
 <div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div>
 <div class="mode-choice">
 <button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button>
-<button class="mode-btn" id="modeHot"><div class="icon">👥</div><div><b>Вдвоём на одном устройстве</b><small>Панель хода поворачивается к сопернику</small></div></button>
+<button class="mode-btn" id="modeHot"><div class="icon">👥</div><div><b>Вдвоём на одном устройстве</b><small>Доска неподвижна, панель хода у стороны игрока</small></div></button>
 <button class="mode-btn primary" id="modeHost"><div class="icon">🌐</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока · вход по коду или QR</small></div></button>
 <button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button>
 </div>
 <label class="chkrow"><input type="checkbox" id="hotFlipChk"> Поворачивать панель хода и подпись соперника</label>
-<div class="hint">На телефоне включено автоматически: соперник сидит напротив. На ПК по умолчанию выключено. В остальных режимах ничего не переворачивается.</div>
+<div class="hint">На телефоне включено автоматически: соперник сидит напротив. На ПК по умолчанию выключено. Двойной тап по пустому месту доски — режим поля (без лишних кнопок).</div>
 <div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div>
 <div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div>
 </div></div>
@@ -214,17 +221,19 @@ body::-webkit-scrollbar-thumb:hover,.cardbox::-webkit-scrollbar-thumb:hover{back
 <b>Механики и режимы:</b><br>
 • <b>Комбо-ход:</b> сумма костей одной шашкой; золотой бейдж с цифрой = комбо, зелёная точка = обычный ход.<br>
 • <b>Частичный дубль:</b> оставшиеся кости суммируются на любую фишку.<br>
-• <b>Вдвоём на одном устройстве:</b> доска не переворачивается; панель хода (кубики + «🎲 Бросить кости» + подпись чей ход) переезжает к стороне ходящего и на телефоне поворачивается к нему; сторона ходящего подсвечивается из-под доски.<br>
+• <b>Вдвоём на одном устройстве:</b> доска неподвижна и всегда по центру; панель хода (кубики + «🎲 Бросить кости» в одну строку) переезжает к стороне ходящего и на телефоне поворачивается к нему; сторона ходящего подсвечивается из-под доски.<br>
+• <b>Режим поля:</b> двойной тап по пустому месту доски (или по средней перегородке) скрывает верхний и нижний ряды кнопок — остаются доска, панели игроков, кубики с кнопкой и подсказка. Повторный двойной тап возвращает кнопки.<br>
 • <b>Онлайн:</b> создай комнату → 📤 Пригласить или 📱 QR → «▶ Начать». Реванш — по согласию обоих.<br>
 • «🏠 Меню нарды» прерывает партию и возвращает к выбору режима; «🚪 Выйти» освобождает место в комнате.<br>
 • После партии доступна «📤 Отправить результат».
 </div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 
 <script>
-const VER='2.11',FLIGHT_DUR=340;
+const VER='2.12',FLIGHT_DUR=340;
 const HEARTBEAT_INTERVAL=5000,HEARTBEAT_TTL=15000;
 let heartbeatTimer=null,myRound=0,fieldViewMode=false,lastEndInfo=null;
 let hotSeat=false,orientSide='w',MYNAME='',qrLibLoading=null,pendingJoinCode=null,prevRoomStatus=null,confirmResolver=null;
+let zen=false,lastBoardTap=0;
 let NSET=Object.assign({},JSON.parse(localStorage.nardy_set||'{}'));
 const saveNSET=()=>localStorage.nardy_set=JSON.stringify(NSET);
 const $=id=>document.getElementById(id);
@@ -239,6 +248,18 @@ function topSideOf(){return orientSide==='w'?'b':'w';}
 function rotSide(side){return hotSeat&&hotFlipOn()&&side===topSideOf();}
 function askConfirm(msg,title){return new Promise(res=>{confirmResolver=res;$('confirmMsg').textContent=msg;$('confirmTitle').textContent=title||'❓ Подтверждение';$('confirmOverlay').classList.add('show');});}
 function resolveConfirm(v){const r=confirmResolver;confirmResolver=null;$('confirmOverlay').classList.remove('show');if(r)r(!!v);}
+function toast(t){try{Platform.toast(t);return;}catch(e){}setStatus(t);}
+function applyModeClass(){document.body.classList.toggle('hot',!!hotSeat);}
+function toggleZen(){
+  zen=!zen;document.body.classList.toggle('zen',zen);
+  toast(zen?'Режим поля · двойной тап по доске — вернуть кнопки':'Кнопки возвращены');
+  trackEvent('game_zen',{game_name:'nardy',on:zen?1:0});
+}
+function boardTapGesture(){
+  const now=Date.now();
+  if(now-lastBoardTap<330){lastBoardTap=0;toggleZen();return true;}
+  lastBoardTap=now;return false;
+}
 
 function backHandler(){
   try{
@@ -248,10 +269,11 @@ function backHandler(){
     if(fieldViewMode){closeFieldView();return;}
     if(rulesOverlay.classList.contains('show')){rulesOverlay.classList.remove('show');return;}
     if(statsOverlay.classList.contains('show')){statsOverlay.classList.remove('show');return;}
-    if(endOverlay.classList.contains('show')){endOverlay.classList.remove('show');if(onlineMode)return;toNardyMenu(true);return;}
+    if(endOverlay.classList.contains('show')){endOverlay.classList.remove('show');if(onlineMode)return;toNardyMenu();return;}
     if(modeOverlay.classList.contains('show')){modeOverlay.classList.remove('show');goToHub();return;}
+    if(zen){toggleZen();return;}
     const s=S();
-    if(s&&!s.result){askConfirm('Прервать партию и вернуться в меню нарды?').then(v=>{if(v)toNardyMenu(true);});return;}
+    if(s&&!s.result){askConfirm('Прервать партию и вернуться в меню нарды?').then(v=>{if(v)toNardyMenu();});return;}
   }catch(e){}
   goToHub();
 }
@@ -432,13 +454,8 @@ async function getUserNameAsync(){
 function genRoomCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
 function inviteLink(c){return 'https://ip19760118-code.github.io/games/nardy/?game=nardy&room='+encodeURIComponent(c||'');}
 function intentJoinUrl(code){const https=inviteLink(code);return 'intent://ip19760118-code.github.io/games/nardy/?game=nardy&room='+encodeURIComponent(code)+'&plat=android#Intent;scheme=https;package=ru.ip19760118.igrovojcentr;S.browser_fallback_url='+encodeURIComponent(https)+';end';}
-function copyText(t){
-  try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).catch(()=>fallbackCopy(t));return;}}catch(e){}
-  fallbackCopy(t);
-}
-function fallbackCopy(t){
-  try{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();document.execCommand('copy');ta.remove();}catch(e){}
-}
+function copyText(t){try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).catch(()=>fallbackCopy(t));return;}}catch(e){}fallbackCopy(t);}
+function fallbackCopy(t){try{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();document.execCommand('copy');ta.remove();}catch(e){}}
 function S(){if(!onlineMode)return G?normState(G):null;return (roomData&&roomData.state)?normState(roomData.state):null;}
 function meSide(){return onlineMode?mySide:(hotSeat?(G?G.turn:'w'):playerViewSide);}
 function nameOf(side){
@@ -513,14 +530,10 @@ function statusText(){
     return s.result.winner===meSide()?'🏆 Вы победили!':'🏁 Победил: '+esc(nameOf(s.result.winner));
   }
   const me=meSide();
-  if(hotSeat){
-    const who=s.turn==='w'?'белых':'чёрных';
-    if(!s.dice.length)return '🎲 Ход '+who+' — брось кости';
-    return anyMove(s,me)?('⚔️ Ход '+who+': зелёные шашки могут ходить'):('⚔️ Ход '+who+' — ходов нет, передаю…');
-  }
+  if(hotSeat)return 'Ход '+(s.turn==='w'?'белых':'чёрных');
   if(s.turn!==me)return '🎲 Ходит '+esc(nameOf(s.turn));
-  if(!s.dice.length)return '🎲 Нажми «Бросить кости»';
-  return anyMove(s,me)?'⚔️ Твой ход: зелёные шашки могут ходить':'⚔️ Ходов нет — передаю ход…';
+  if(!s.dice.length)return '🎲 Брось кости';
+  return anyMove(s,me)?'Твой ход':'Ходов нет — передаю ход…';
 }
 function renderSides(){
   const s=S(),stage=$('boardStage'),bottom=orientSide,top=topSideOf();
@@ -566,7 +579,7 @@ async function createRoom(){
  await ensureAuth();if(!fbDb){alert('Не удалось загрузить Firebase — проверь сеть.');return;}
  myUid=getUid();myName=await getUserNameAsync();mySide='w';roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);myRound=1;prevRoomStatus=null;
  try{const st=newState();await roomRef.set({game:'nardy',host:mySide,createdAt:Date.now(),round:1,status:'waiting',players:{w:{name:myName,uid:myUid}},presence:{},rematch:{},state:st});
- onlineMode=true;hotSeat=false;orientSide=mySide;playerViewSide=mySide;
+ onlineMode=true;hotSeat=false;orientSide=mySide;playerViewSide=mySide;applyModeClass();
  $('roomBar').style.display='block';$('roomCode').textContent=roomCode;modeOverlay.classList.remove('show');buildBoard();
  expandCurtain();
  setTimeout(()=>{setPresenceHooks();startHeartbeat();subscribeRoom();},400);
@@ -584,7 +597,7 @@ async function joinRoom(code){
   mySide=side;myRound=r.round||1;prevRoomStatus=null;
   await roomRef.child('players/'+mySide).set({name:myName,uid:myUid});
   if(!r.state||!r.state.W)await roomRef.child('state').set(newState());
- onlineMode=true;hotSeat=false;orientSide=mySide;playerViewSide=mySide;
+ onlineMode=true;hotSeat=false;orientSide=mySide;playerViewSide=mySide;applyModeClass();
  $('roomBar').style.display='block';$('roomCode').textContent=roomCode;modeOverlay.classList.remove('show');buildBoard();
  if(r.status==='playing')collapseCurtain();else expandCurtain();
  setTimeout(()=>{setPresenceHooks();startHeartbeat();subscribeRoom();},400);
@@ -606,10 +619,7 @@ function subscribeRoom(){
  roomData.state=normState(roomData.state);
  const st=roomData.status||'waiting';
  if(st==='waiting')showLobbyInBar();else hideLobbyInBar();
- if(st!==prevRoomStatus){
-   if(st==='playing')collapseCurtain();else expandCurtain();
-   prevRoomStatus=st;
- }
+ if(st!==prevRoomStatus){if(st==='playing')collapseCurtain();else expandCurtain();prevRoomStatus=st;}
  const s=roomData.state,lm=s.lastMove;
  if(lm&&lm.by&&lm.by!==mySide&&lm.from!=null&&lm.at&&lm.at!==seenFlyAt){
   seenFlyAt=lm.at;flight={side:lm.by,from:lm.from,to:lm.to};
@@ -738,16 +748,20 @@ let watchdog=null;function startWatchdog(){if(watchdog)clearInterval(watchdog);w
 function startOffline(side){
  if(onlineMode)leaveRoom();
  hotSeat=false;G=newState();flight=null;playerViewSide=side;orientSide=side;prevTurnMe=null;lastEndInfo=null;sel=-1;dests=[];
+ applyModeClass();
  modeOverlay.classList.remove('show');endOverlay.classList.remove('show');buildBoard();renderAll();setStatus(statusText());
  trackEvent('game_start',{game_name:'nardy',mode:'ai',side});maybeAi();updatePulse();}
 function startHotSeat(){
  if(onlineMode)leaveRoom();
  hotSeat=true;G=newState();flight=null;playerViewSide='w';orientSide='w';prevTurnMe=null;lastEndInfo=null;sel=-1;dests=[];
+ applyModeClass();
  modeOverlay.classList.remove('show');endOverlay.classList.remove('show');buildBoard();renderAll();setStatus(statusText());
  trackEvent('game_start',{game_name:'nardy',mode:'hotseat',flip:hotFlipOn()?1:0});updatePulse();}
-function toNardyMenu(skipConfirm){
+function toNardyMenu(){
  if(onlineMode)leaveRoom();
  hotSeat=false;G=null;flight=null;sel=-1;dests=[];prevTurnMe=null;lastEndInfo=null;
+ applyModeClass();
+ if(zen){zen=false;document.body.classList.remove('zen');}
  endOverlay.classList.remove('show');buildBoard();renderAll();modeOverlay.classList.add('show');updatePulse();}
 function maybeAi(){if(onlineMode||hotSeat||!G||G.result)return;if(G.turn===playerViewSide)return;
  if(aiTimer)clearTimeout(aiTimer);
@@ -777,7 +791,7 @@ function aiSteps(){if(!G||G.result)return;
  })();}
 function renderAll(){
  const s=S();
- renderSides();placeTurnPanel();
+ applyModeClass();renderSides();placeTurnPanel();
  if(!s){$('rollBtn').style.display='none';$('menuBtn').style.display='none';$('newBtn').style.display='none';setStatus(onlineMode?'Ожидание партии…':'Выбери режим');renderPlayersBar();updatePulse();return;}
  const me=meSide(),isActive=isGameActive();
  if(!s.result&&isActive&&s.turn===me&&prevTurnMe!==true)sTurn();
@@ -806,16 +820,16 @@ function renderAll(){
 function scheduleAutoEnd(){const s=S();if(autoEndTimer){clearTimeout(autoEndTimer);autoEndTimer=null;}if(!s||s.result||!isGameActive())return;const me=meSide();
  if(s.turn===me&&s.dice.length&&!anyMove(s,me)){autoEndTimer=setTimeout(()=>{autoEndTimer=null;const s2=S();if(!s2||s2.result||!isGameActive()||s2.turn!==me||!s2.dice.length||anyMove(s2,me))return;
    if(onlineMode){const ns=clone(s2);endTurn(ns);ns.lastMove={name:myName,action:'нет ходов — авто-передача',at:Date.now()};roomRef.update({state:ns});}
-   else{endTurn(G);renderAll();setStatus('⚔️ Ходов нет — ход передан');updatePulse();maybeAi();}},700);}}
+   else{endTurn(G);renderAll();setStatus('Ходов нет — ход передан');updatePulse();maybeAi();}},700);}}
 function renderPlayersBar(){const bar=$('playersBar');bar.innerHTML='';if(!onlineMode)return;const s=S();playersList().forEach(p=>{const chip=document.createElement('span');chip.className='chip'+(s&&s.turn===p.side&&!s.result?' turn':'');chip.innerHTML='<span class="dot'+(p.connected?'':' off')+'"></span>'+esc(p.name)+(p.side===mySide?' (вы)':'')+' · '+(p.side==='w'?'⚪':'⚫')+' · '+p.wins;bar.appendChild(chip);});}
 function onPt(idx){
   unlockAudio();
   const s=S();if(!s||s.result||flight||fieldViewMode)return;
   if(!isGameActive()){sDeny();setStatus('⏳ Игра ещё не началась',true);return;}
-  const me=meSide();if(s.turn!==me)return;
+  const me=meSide();if(s.turn!==me){boardTapGesture();return;}
  if(sel===idx){sel=-1;dests=[];renderAll();return;}
  const d=dests.find(x=>x.t===idx);
- if(d&&sel>=0){const from=sel;sel=-1;dests=[];
+ if(d&&sel>=0){const from=sel;sel=-1;dests=[];lastBoardTap=0;
   if(onlineMode){
    flyArc(me,from,d.t);
    const ns=clone(s);
@@ -836,18 +850,18 @@ function onPt(idx){
     else maybeAi();},FLIGHT_DUR);
   }
   return;}
- if(own(s,me)[idx]>0&&s.dice.length){sel=idx;dests=allDests(s,me,idx);if(!dests.length){sDeny();sel=-1;}renderAll();return;}
- sel=-1;dests=[];renderAll();}
+ if(own(s,me)[idx]>0&&s.dice.length){sel=idx;dests=allDests(s,me,idx);if(!dests.length){sDeny();sel=-1;}lastBoardTap=0;renderAll();return;}
+ sel=-1;dests=[];renderAll();boardTapGesture();}
 $('bearW').onclick=()=>tapOff('w');$('bearB').onclick=()=>tapOff('b');
 function tapOff(side){
   const s=S();if(!s||s.result||s.turn!==side||side!==meSide()||sel<0||flight||fieldViewMode)return;
   if(!isGameActive()){sDeny();setStatus('⏳ Игра ещё не началась',true);return;}
-  const d=dests.find(x=>x.t==='off');if(!d)return;const from=sel;sel=-1;dests=[];
+  const d=dests.find(x=>x.t==='off');if(!d)return;const from=sel;sel=-1;dests=[];lastBoardTap=0;
  flyArc(side,from,'off');
  if(onlineMode){const ns=clone(s);if(d.combo)applyComboMove(ns,side,from,d.combo);else applyMove(ns,side,from,'off',d.v);checkWin(ns);if(!ns.result&&(!ns.dice.length||!anyMove(ns,side)))endTurn(ns);ns.lastMove={by:side,name:myName,action:d.combo?'сброс-комбо':'сброс',from:from,to:'off',combo:d.combo||null,v:d.v,at:Date.now()};flight={side:side,from:from,to:'off'};roomRef.update({state:ns});renderAll();setTimeout(()=>{flight=null;sBear();renderAll();},FLIGHT_DUR);}
  else{if(d.combo)applyComboMove(G,side,from,d.combo);else applyMove(G,side,from,'off',d.v);checkWin(G);flight={side:side,from:from,to:'off'};renderAll();setTimeout(()=>{flight=null;sBear();renderAll();updatePulse();if(G.result){showEnd();return;}if(!G.dice.length||!anyMove(G,side)){endTurn(G);renderAll();setStatus(statusText());updatePulse();maybeAi();}},FLIGHT_DUR);}}
 $('rollBtn').onclick=()=>{
-  unlockAudio();
+  unlockAudio();lastBoardTap=0;
   const s=S();if(!s||s.result||s.turn!==meSide()||s.dice.length||diceAnim||flight||fieldViewMode)return;
   if(!isGameActive()){sDeny();setStatus('⏳ Игра ещё не началась',true);return;}
  const d1=1+Math.floor(Math.random()*6),d2=1+Math.floor(Math.random()*6);
@@ -918,6 +932,7 @@ $('joinCancel').onclick=()=>{$('joinBox').style.display='none';$('joinActions').
 $('joinGo').onclick=async()=>{const c=$('joinInput').value.trim().toUpperCase();if(c.length!==6){alert('6 символов');return;}await joinRoom(c);};
 $('hotFlipChk').onchange=e=>{NSET.hotFlip=!!e.target.checked;saveNSET();renderAll();trackEvent('settings_change',{game_name:'nardy',setting:'hot_flip',value:NSET.hotFlip});};
 $('rbToggle').onclick=()=>{const bar=$('roomBar'),ex=$('rbExtra');const open=ex.style.display!=='none';ex.style.display=open?'none':'flex';bar.classList.toggle('open',!open);sClick();};
+$('board').addEventListener('pointerup',e=>{if(e.target.closest('.pt'))return;boardTapGesture();});
 window.addEventListener('beforeunload',()=>{stopHeartbeat();removePresence();});
 window.addEventListener('resize',()=>{renderSides();placeTurnPanel();});
 window.addEventListener('orientationchange',()=>setTimeout(()=>{renderSides();placeTurnPanel();},220));
