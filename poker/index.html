@@ -7,14 +7,15 @@
 :root{--bg1:#0d1b2a;--bg2:#1b263b;--bg3:#070d15;--panel:rgba(20,32,48,.88);--text:#e0e1dd;--accent:#ffd166;--red:#e63946;--cw:clamp(34px,8vw,52px)}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
 body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:10px;padding-top:calc(10px + env(safe-area-inset-top));padding-bottom:calc(10px + env(safe-area-inset-bottom))}
-.wrap{max-width:860px;width:100%;background:var(--panel);border-radius:24px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;min-height:calc(100vh - 20px)}
-.header{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+/* v0.5: стол вписан в экран, ряд действий ВСЕГДА видим (sticky), ставка — нижний лист */
+.wrap{max-width:860px;width:100%;background:var(--panel);border-radius:24px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;height:calc(100vh - 20px);height:calc(100dvh - 20px);min-height:470px}
+.header{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;flex:0 0 auto}
 .title{font-size:20px;font-weight:700;text-align:center}
 .hrow{display:flex;gap:6px;justify-content:center;flex-wrap:nowrap}
 .hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:30px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .hbtn:active{transform:scale(.95)}
-.ver{text-align:center;font-size:10px;opacity:.45;margin-top:6px;font-family:monospace;letter-spacing:1px}
-.room-bar{background:rgba(0,0,0,.25);border:1px solid rgba(255,209,102,.25);border-radius:14px;padding:6px;margin-bottom:8px;font-size:12px}
+.ver{text-align:center;font-size:10px;opacity:.45;margin-top:4px;font-family:monospace;letter-spacing:1px;flex:0 0 auto}
+.room-bar{background:rgba(0,0,0,.25);border:1px solid rgba(255,209,102,.25);border-radius:14px;padding:6px;margin-bottom:8px;font-size:12px;flex:0 0 auto}
 .rb-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,209,102,.2);border-radius:10px;padding:6px 6px 6px 12px;color:var(--text);font-family:inherit;font-size:12px;cursor:pointer;text-align:left}
 .rb-toggle .code{font-family:monospace;letter-spacing:2px;font-size:15px;color:var(--accent);background:rgba(0,0,0,.3);padding:2px 8px;border-radius:6px;font-weight:700}
 .rb-chevron{flex:0 0 auto;display:flex;align-items:center;gap:7px;height:32px;padding:0 12px;border-radius:19px;background:rgba(255,209,102,.14);border:2px solid var(--accent);color:var(--accent);box-shadow:0 0 12px rgba(255,209,102,.3)}
@@ -31,12 +32,14 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .rbtn.accept{border-color:rgba(124,255,196,.5);color:var(--accent)}
 .rbtn.pulse,.btn.pulse{animation:btnPulse 1.5s ease-in-out infinite}
 @keyframes btnPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,209,102,.5)}50%{box-shadow:0 0 0 8px rgba(255,209,102,0)}}
-.roles{text-align:center;font-size:12px;opacity:.9;margin:0 0 4px;min-height:16px;color:var(--text)}
-.felt-oval{position:relative;width:min(100%,820px);margin:calc(var(--cw)*1.5) auto 12px;min-height:300px;background:radial-gradient(ellipse at center,#2a8c4f 0%,#1d7a3f 40%,#14532d 75%,#0d3a1f 100%);border-radius:50% / 50%;box-shadow:inset 0 4px 20px rgba(0,0,0,.55),0 10px 30px rgba(0,0,0,.5),0 0 0 6px #2b2b2b,0 0 0 8px rgba(255,255,255,.08);border:2px solid rgba(255,209,102,.22)}
+.roles{text-align:center;font-size:12px;opacity:.9;margin:0 0 2px;min-height:16px;color:var(--text);flex:0 0 auto}
+.felt-oval{position:relative;width:min(100%,820px);flex:1 1 auto;min-height:170px;margin:calc(var(--cw)*1.3) auto 8px;background:radial-gradient(ellipse at center,#2a8c4f 0%,#1d7a3f 40%,#14532d 75%,#0d3a1f 100%);border-radius:50% / 50%;box-shadow:inset 0 4px 20px rgba(0,0,0,.55),0 10px 30px rgba(0,0,0,.5),0 0 0 6px #2b2b2b,0 0 0 8px rgba(255,255,255,.08);border:2px solid rgba(255,209,102,.22)}
 #seatsEl{position:absolute;inset:0;pointer-events:none;z-index:3}
 .seat{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;pointer-events:none}
 .seat .opponent-hand{display:flex;gap:2px;justify-content:center;height:calc(var(--cw)*.9)}
 .seat .opponent-hand .card{width:calc(var(--cw)*.62);height:calc(var(--cw)*.87)}
+/* v0.5: на смартфонах рубашки соперников втрое менее скруглённые (свои карты не трогаем) */
+body.is-mobile .seat .opponent-hand .card{border-radius:2.7px}
 .potbadge{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);background:rgba(0,0,0,.5);border:1px solid rgba(255,209,102,.4);color:var(--accent);font-weight:800;font-size:13px;border-radius:16px;padding:4px 14px;z-index:2;white-space:nowrap}
 .board{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);display:flex;gap:5px;justify-content:center;align-items:center;z-index:1;min-height:calc(var(--cw)*1.4)}
 .board .card{flex:0 0 auto}
@@ -60,6 +63,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .card.back.skin-5{background-image:url('../durak/img/back5.png'),linear-gradient(160deg,#f5eed6,#ece2c4);background-size:cover,cover}
 .card.dim{filter:brightness(.5) saturate(.5)}
 .card.win{box-shadow:0 0 0 3px var(--accent),0 3px 10px rgba(0,0,0,.5)}
+.seat .opponent-hand .card .corner,.seat .opponent-hand .card .center{display:none}
 .player-chip{pointer-events:auto;display:flex;align-items:center;gap:5px;background:rgba(13,27,42,.92);border:2px solid rgba(255,255,255,.15);border-radius:14px;padding:4px 10px;font-size:11px;font-weight:600;min-width:80px;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:all .25s}
 .player-chip .dot{width:7px;height:7px;border-radius:50%;background:#57c85b;box-shadow:0 0 5px #57c85b}
 .player-chip .dot.off{background:#777;box-shadow:none}
@@ -72,11 +76,12 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .role-tag.sb{background:rgba(120,220,255,.2);color:#9be2ff;border:1px solid #9be2ff}
 .role-tag.bb{background:rgba(255,209,102,.2);color:var(--accent);border:1px solid var(--accent)}
 .role-tag.ai{background:rgba(230,57,70,.22);color:#ff9a9a;border:1px solid var(--red)}
-.status{text-align:center;font-size:14px;font-weight:600;margin:6px 0;min-height:20px;color:var(--accent)}
+.status{text-align:center;font-size:14px;font-weight:600;margin:4px 0;min-height:20px;color:var(--accent);flex:0 0 auto}
 .status.warn{color:#ff8f8f}
-.my-seat{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;padding:8px 6px 2px;flex:1 1 auto}
+.my-seat{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;padding:4px 6px 2px;flex:0 0 auto}
 .hand{display:flex;gap:6px;justify-content:center;min-height:calc(var(--cw)*1.45)}
-.actions{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:6px;min-height:46px}
+.actions{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;min-height:46px;flex:0 0 auto;position:sticky;bottom:0;z-index:30;padding:6px 4px;margin-top:4px;background:linear-gradient(180deg,rgba(20,32,48,0),rgba(20,32,48,.97) 45%);border-radius:14px}
+.actions.myturn{border-top:1px solid rgba(255,209,102,.35)}
 .btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--text);padding:9px 16px;border-radius:30px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
 .btn:active{transform:scale(.96)}
 .btn:disabled{opacity:.35;cursor:not-allowed}
@@ -84,7 +89,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .btn.danger{border-color:rgba(255,80,80,.5);color:#ff9a9a}
 .btn-icon{padding:9px 12px;min-width:44px;display:inline-flex;align-items:center;justify-content:center}
 .btn-icon svg{width:20px;height:20px;display:block}
-.betpanel{display:none;flex-direction:column;gap:8px;align-items:center;margin-top:8px;background:rgba(0,0,0,.3);border:1px solid rgba(255,209,102,.3);border-radius:16px;padding:12px}
+.betpanel{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom));width:min(94vw,470px);z-index:95;flex-direction:column;gap:8px;align-items:center;background:rgba(13,27,42,.98);border:1px solid rgba(255,209,102,.45);border-radius:18px;padding:14px;box-shadow:0 -8px 40px rgba(0,0,0,.7)}
 .betpanel.show{display:flex}
 .betpanel input[type=range]{width:100%;max-width:420px;accent-color:var(--accent)}
 .betval{font-size:16px;font-weight:800;color:var(--accent)}
@@ -120,7 +125,8 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .note{font-size:12px;opacity:.7;line-height:1.45;margin-bottom:10px}
 .winrow{display:flex;justify-content:space-between;gap:8px;background:rgba(0,0,0,.25);border-radius:10px;padding:8px 10px;font-size:13px;margin:4px 0;text-align:left}
 .winrow b{color:var(--accent)}
-@media (max-width:520px){.felt-oval{margin:calc(var(--cw)*1.4) 4px 10px;min-height:260px}.player-chip{min-width:64px;padding:3px 7px;font-size:10px}.role-tag{font-size:8px;padding:1px 4px}.hbtn{padding:4px 7px;font-size:10px}.actions .btn{padding:8px 12px;font-size:13px}.my-seat{padding:6px 4px 2px}.status{margin:5px 0;font-size:13px}.seat .opponent-hand .card{width:calc(var(--cw)*.55);height:calc(var(--cw)*.78)}}
+@media (max-width:520px){.felt-oval{margin:calc(var(--cw)*1.25) 4px 6px;min-height:160px}.player-chip{min-width:64px;padding:3px 7px;font-size:10px}.role-tag{font-size:8px;padding:1px 4px}.hbtn{padding:4px 7px;font-size:10px}.actions .btn{padding:8px 12px;font-size:13px}.my-seat{padding:2px 4px}.status{margin:3px 0;font-size:13px}.seat .opponent-hand .card{width:calc(var(--cw)*.55);height:calc(var(--cw)*.78);border-radius:2.7px}.title{font-size:17px}}
+@media (max-height:640px){.title{font-size:16px}.header{gap:4px;margin-bottom:5px}.ver{display:none}.felt-oval{min-height:140px;margin:calc(var(--cw)*1.15) auto 6px}.hand{min-height:calc(var(--cw)*1.3)}.actions{min-height:42px;padding:4px}.status{font-size:12.5px;min-height:16px}}
 </style></head><body>
 <div class="wrap">
 <div class="header"><div class="title">♠️ ПОКЕР · ХОЛДЕМ</div><div class="hrow"><button class="hbtn" id="hubBtn">← В меню игр</button><button class="hbtn" id="gameMenuBtn">🏠 Меню покера</button><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
@@ -134,12 +140,14 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div>
 <div class="status" id="statusEl">Выбери режим</div>
 <div class="my-seat" id="mySeatEl"><div class="player-chip me" id="myChip"></div><div class="hand" id="handEl"></div></div>
-<div class="actions">
+<div class="actions" id="actionsRow">
   <button class="btn danger" id="foldBtn" style="display:none">🙅 Фолд</button>
   <button class="btn" id="checkCallBtn" style="display:none">✅ Чек</button>
   <button class="btn primary" id="raiseBtn" style="display:none">⬆ Рейз</button>
   <button class="btn danger" id="allinBtn" style="display:none">💰 Олл-ин</button>
   <button class="btn btn-icon" id="shareLinkBtn" aria-label="Отправить ссылку" title="Отправить ссылку на игру"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.9" x2="15.7" y2="6.1"/><line x1="8.3" y1="13.1" x2="15.7" y2="17.9"/></svg></button>
+</div>
+<div class="ver" id="verTag">v0.5</div>
 </div>
 <div class="betpanel" id="betPanel">
   <div class="betval" id="betVal">0</div>
@@ -147,21 +155,25 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
   <div class="betpresets"><button class="rbtn" id="bpMin">Мин</button><button class="rbtn" id="bpHalf">½ банка</button><button class="rbtn" id="bpPot">Банк</button><button class="rbtn" id="bpAll">Олл-ин</button></div>
   <div class="btns" style="margin-top:0"><button class="btn" id="betCancel">Отмена</button><button class="btn primary" id="betConfirm">Поставить</button></div>
 </div>
-<div class="ver" id="verTag">v0.4</div>
-</div>
 <div class="overlay" id="exitOverlay"><div class="cardbox"><h2>🚪 Выход</h2><div class="sub" id="exitSub">Вернуться в меню покера?</div><div class="btns"><button class="btn" id="exitNo">Отмена</button><button class="btn danger" id="exitYes">Выйти</button></div></div></div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><div class="mhdr"><button class="hbtn" id="modeHubBtn">← В меню игр</button></div><h2>♠️ Покер <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v0.4</span></h2><div class="sub">Техасский Холдем · No-Limit · 52 карты · до 9 игроков</div><div class="selrow">Игроков за столом<select id="playersSel"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Боты заполнят стол, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">🌐</div><div><b>Создать комнату</b><small>Онлайн: до 9 игроков · вход по коду или QR</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><div class="mhdr"><button class="hbtn" id="modeHubBtn">← В меню игр</button></div><h2>♠️ Покер <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v0.5</span></h2><div class="sub">Техасский Холдем · No-Limit · 52 карты · до 9 игроков</div><div class="selrow">Игроков за столом<select id="playersSel"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Боты заполнят стол, сложность в ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">🌐</div><div><b>Создать комнату</b><small>Онлайн: до 9 игроков · вход по коду или QR</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="lobbyOverlay"><div class="cardbox"><h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2><div class="sub">Ожидание игроков (2–9). Друг рядом может отсканировать QR. Хост запускает партию.</div><div class="lobby-list" id="lobbyList"></div><div class="btns"><button class="btn" id="lobbyInvite">📤 Пригласить</button><button class="btn" id="lobbyQr">📱 QR</button><button class="btn primary" id="lobbyStart">▶ Начать</button><button class="btn" id="lobbyLeave">🚪 Выйти</button></div></div></div>
 <div class="overlay" id="qrOverlay"><div class="cardbox"><h2>📱 QR-код комнаты</h2><div class="sub">Соперник наводит камеру — открывается покер и вход в комнату.</div><div class="qrbox" id="qrBox"></div><div class="qrcode-text" id="qrCodeText"></div><div class="btns"><button class="btn" id="qrCopy">📋 Скопировать код</button><button class="btn primary" id="qrClose">Закрыть</button></div></div></div>
 <div class="overlay" id="joinChoiceOverlay"><div class="cardbox"><h2>🎮 Как играть?</h2><div class="sub">Комната <span id="jcCode" style="color:var(--accent);font-family:monospace"></span>. Выбери, где открыть партию.</div><div class="btns"><button class="btn primary" id="jcApp">📱 В приложении</button><button class="btn" id="jcBrowser">🌐 В браузере</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div id="endRows"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="setOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">⚙️ Настройки</h2><div class="selrow">Сложность ботов<select id="diffSel"><option value="easy">Лёгкая</option><option value="medium" selected>Средняя</option><option value="hard">Сложная</option></select></div><div class="note">Лёгкие боты чаще ошибаются, сложные считают силу руки и банк-оддсы.</div><div class="selrow">Рубашка карт<select id="backSel"><option value="1">Классическая</option><option value="2">Красный узор</option><option value="3">Зелёное сукно</option><option value="4">Фиолетовая волна</option><option value="5">Золотая вязь</option></select></div><div class="note">Колода 52 карты без джокеров. Стартовый стек 1000, блайнды 10/20. Выбывшие (стек 0) пропускают раздачи.</div><div class="btns"><button class="btn primary" id="setClose">Готово</button></div></div></div>
-<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (No-Limit Hold'em)</h2><div class="sub">• Колода 52 карты без джокеров. До 9 игроков за столом.<br>• Цель — лучшая комбинация из 5 карт: любые из 2 своих + 5 общих, либо банк если все соперники сфолдили.<br>• Блайнды: SB=10, BB=20 слева от дилера (кнопка D). Heads-up дилер=SB.<br>• Улицы: префлоп → флоп (3) → тёрн (1) → ривер (1) → шоудаун.<br>• Действия: чек, бет, колл, рейз, фолд, олл-ин. Безлимит: можно ставить всё вплоть до олл-ина.<br>• Комбинации (сильнее→слабее): роял-флеш, стрит-флеш, каре, фулл-хаус, флеш, стрит, тройка, две пары, пара, старшая карта.<br>• Олл-ин создаёт сайд-поты: каждый пот разыгрывается только между теми, кто в него вложился.<br>• Кнопки действий появляются только в твой ход; рейз открывает слайдер ставки.<br>• <b>Онлайн-вход:</b> создай комнату → «📤 Пригласить» или «📱 QR». Скан QR открывает покер сразу в комнате; на Android предлагается «В приложении» / «В браузере».<br>• Вышедший игрок освобождает место автоматически; следующая раздача идёт без него.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
+<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (No-Limit Hold'em)</h2><div class="sub">• Колода 52 карты без джокеров. До 9 игроков за столом.<br>• Цель — лучшая комбинация из 5 карт: любые из 2 своих + 5 общих, либо банк если все соперники сфолдили.<br>• Блайнды: SB=10, BB=20 слева от дилера (кнопка D). Heads-up дилер=SB.<br>• Улицы: префлоп → флоп (3) → тёрн (1) → ривер (1) → шоудаун.<br>• Действия: чек, бет, колл, рейз, фолд, олл-ин. Безлимит: можно ставить всё вплоть до олл-ина.<br>• Комбинации (сильнее→слабее): роял-флеш, стрит-флеш, каре, фулл-хаус, флеш, стрит, тройка, две пары, пара, старшая карта.<br>• Олл-ин создаёт сайд-поты: каждый пот разыгрывается только между теми, кто в него вложился.<br>• Кнопки действий всегда закреплены внизу экрана и появляются только в твой ход; рейз открывает нижнюю панель ставки.<br>• <b>Онлайн-вход:</b> создай комнату → «📤 Пригласить» или «📱 QR». Скан QR открывает покер сразу в комнате; на Android предлагается «В приложении» / «В браузере».<br>• Вышедший игрок освобождает место автоматически; следующая раздача идёт без него.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='0.4',HEARTBEAT_INTERVAL=5000,HEARTBEAT_TTL=15000,MAX_PLAYERS=9,SEAT_KEYS=['p0','p1','p2','p3','p4','p5','p6','p7','p8'];
+const VER='0.5',HEARTBEAT_INTERVAL=5000,HEARTBEAT_TTL=15000,MAX_PLAYERS=9,SEAT_KEYS=['p0','p1','p2','p3','p4','p5','p6','p7','p8'];
 const START_STACK=1000,BB=20,SB=10,SEAT_STALE_MS=45000;
 const $=id=>document.getElementById(id);
 let qrLibLoading=null,pendingJoinCode=null,stallTimer=null;
+function isMobileDevice(){
+ try{if(Platform&&Platform.name==='pc')return false;if(Platform&&Platform.name==='android')return true;}catch(e){}
+ try{if(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)return true;}catch(e){}
+ return /Android|iPhone|iPad|iPod|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent||'');
+}
+function applyDeviceClass(){try{document.body.classList.toggle('is-mobile',isMobileDevice());}catch(e){}}
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 let set=Object.assign({diff:'medium',back:2},(function(){try{return JSON.parse(lsGet('poker_set','{}'))||{};}catch(e){return{};}})());
@@ -180,10 +192,10 @@ const sDeny=()=>tone(150,90,.16,'sawtooth',.12);
 function backHandler(){try{
  if($('qrOverlay').classList.contains('show')){$('qrOverlay').classList.remove('show');return;}
  if($('joinChoiceOverlay').classList.contains('show')){$('joinChoiceOverlay').classList.remove('show');return;}
+ if($('betPanel').classList.contains('show')){$('betPanel').classList.remove('show');return;}
  if($('exitOverlay').classList.contains('show')){$('exitOverlay').classList.remove('show');return;}
  if($('rulesOverlay').classList.contains('show')){$('rulesOverlay').classList.remove('show');return;}
  if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}
- if($('betPanel').classList.contains('show')){$('betPanel').classList.remove('show');return;}
  if($('lobbyOverlay').classList.contains('show')){leaveRoom();showMode();return;}
  if($('modeOverlay').classList.contains('show')){hideMode();goToHub();return;}
 }catch(e){}goToHub();}
@@ -228,10 +240,7 @@ function cmpEval(a,b){const n=Math.max(a.length,b.length);for(let i=0;i<n;i++){c
 function best7(cs){if(!cs||cs.length<5)return null;let best=null;const n=cs.length;for(let a=0;a<n-4;a++)for(let b=a+1;b<n-3;b++)for(let c=b+1;c<n-2;c++)for(let d=c+1;d<n-1;d++)for(let e=d+1;e<n;e++){const ev=eval5([cs[a],cs[b],cs[c],cs[d],cs[e]]);if(!best||cmpEval(ev,best)>0)best=ev;}return best;}
 const HAND_NAMES=['Старшая карта','Пара','Две пары','Тройка','Стрит','Флеш','Фулл-хаус','Каре','Стрит-флеш'];
 function handName(ev){if(!ev)return '';if(ev[0]===8&&ev[1]===14)return 'Роял-флеш';return HAND_NAMES[ev[0]];}
-/* ---------- v0.4: НОРМАЛИЗАЦИЯ состояния из Firebase ----------
-   RTDB ВЫБРАСЫВАЕТ пустые массивы: board:[] на префлопе приходит как undefined,
-   из-за чего renderBoard падал и весь renderAll обрывался (статус «Выбери режим»,
-   нет карт и кнопок). Плюс массивы могут приехать объектом — приводим обе формы. */
+/* ---------- нормализация состояния из Firebase (пустые массивы RTDB выбрасывает) ---------- */
 function normState(s){
  if(!s||typeof s!=='object')return null;
  const toArr=v=>{
@@ -366,11 +375,10 @@ function maybeJoinChoice(code){
 function startHeartbeat(){stopHeartbeat();if(!roomRef||!mySeat)return;const beat=()=>{try{roomRef.child('presence/'+mySeat).set({uid:myUid,name:myName,at:Date.now()}).catch(()=>{});}catch(e){}};beat();heartbeatTimer=setInterval(beat,HEARTBEAT_INTERVAL);}
 function stopHeartbeat(){if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}}
 function removePresence(){if(!roomRef||!mySeat)return;try{roomRef.child('presence/'+mySeat).remove();}catch(e){}}
-/* v0.4: при обрыве/закрытии освобождаем и presence, и МЕСТО (спека 5.5) */
 function setPresence(){
  if(!roomRef||!mySeat)return;
  try{const p=roomRef.child('presence/'+mySeat);p.set({uid:myUid,name:myName,at:Date.now()}).catch(()=>{});p.onDisconnect().remove();}catch(e){}
- try{const st=roomRef.child('seats/'+mySeat);st.onDisconnect().remove();}catch(e){}
+ try{roomRef.child('seats/'+mySeat).onDisconnect().remove();}catch(e){}
  startHeartbeat();
 }
 function recoverSeat(){const m=seatsMap();for(const k of SEAT_KEYS){if(m[k]&&m[k].uid===myUid)return k;}return null;}
@@ -448,7 +456,7 @@ function startWatchdog(){
 }
 function mutateOnline(fn){return new Promise(res=>{roomRef.child('state').transaction(cur=>{if(!cur)return undefined;const base=normState(clone(cur));const ns=fn(base);if(!ns)return undefined;return ns;},(err,committed)=>{if(committed){res({ok:true});return;}roomRef.child('state').once('value').then(sn=>{const base=normState(sn.val());if(!base){res({ok:false});return;}const ns=fn(clone(base));if(!ns){res({ok:false});return;}roomRef.child('state').set(ns).then(()=>res({ok:true})).catch(()=>res({ok:false}));}).catch(()=>res({ok:false}));},false);});}
 function applyAction(action,amount){const me=meUid();if(onlineMode){mutateOnline(st=>actPoker(st,me,action,amount)).then(r=>{if(r.ok){if(action==='fold')sFold();else sChip();}else{updateMessage('❌ Действие недоступно',true);sDeny();}});return;}const ns=actPoker(G,me,action,amount);if(!ns){updateMessage('❌ Действие недоступно',true);sDeny();return;}G=ns;if(action==='fold')sFold();else sChip();renderAll();if(G.result)showEnd();else{updateMessage(statusText());botThink();}}
-/* ---------- боты (v0.4: суммы клампятся в легальный диапазон + fallback, стол не встаёт) ---------- */
+/* ---------- боты ---------- */
 function handStrength(s,seat){const hole=s.hands[seat]||[];if(hole.length<2)return 0.2;if(!s.board.length){const a=pval(hole[0]),b=pval(hole[1]);const pair=a===b;let sc=(a+b)/28;if(pair)sc=0.5+(a/14)*0.4;if(psuit(hole[0])===psuit(hole[1]))sc+=0.05;if(Math.abs(a-b)===1)sc+=0.03;return Math.min(1,sc);}const ev=best7(hole.concat(s.board));if(!ev)return 0.2;return [0.15,0.35,0.5,0.6,0.7,0.78,0.86,0.93,0.98][ev[0]];}
 function botAction(s,seat){
  const toCall=s.currentBet-(s.bets[seat]||0),stack=s.stacks[seat],d=DIFF();
@@ -489,7 +497,6 @@ function botStep(){
 /* ---------- офлайн ---------- */
 function startOffline(n){onlineMode=false;botCount=n;const order=['p0'];for(let i=1;i<n;i++)order.push('b'+i);const stacks={};order.forEach(u=>stacks[u]=START_STACK);G=dealHand(order,stacks,'p0',BB,1);hideMode();$('endOverlay').classList.remove('show');renderAll();updateMessage(statusText());sCard();trackEvent('game_start',{game_name:'poker',mode:'ai',players:n});botThink();}
 function nextHandOffline(){if(!G)return;const order=G.order;const stacks=G.stacks;const dealer=nextLive(order,G.dealer,{folded:{}})||order[0];G=dealHand(order,stacks,dealer,BB,(G.handNo||1)+1);$('endOverlay').classList.remove('show');renderAll();updateMessage(statusText());sCard();botThink();}
-/* v0.4: следующая раздача — только по актуальным местам (ушедшие исключаются) */
 function nextHandOnline(){
  if(!isHost()||!roomData||!roomData.state)return;
  const s=normState(clone(roomData.state)),seats=seatsMap();
@@ -508,7 +515,7 @@ function nextHandOnline(){
 }
 function goPokerMenu(){sClickUi();$('exitSub').textContent=onlineMode?'Покинуть комнату и вернуться в меню покера?':((G&&!G.result)?'Покинуть текущую партию?':'Вернуться в меню покера?');$('exitOverlay').classList.add('show');}
 function doExitToMenu(){$('exitOverlay').classList.remove('show');sClickUi();if(onlineMode){try{roomRef.child('flags/leftNotice').set({name:myName,at:Date.now()});}catch(e){}setTimeout(()=>{leaveRoom();showMode();},120);return;}if(botTimer)clearTimeout(botTimer);if(stallTimer)clearTimeout(stallTimer);G=null;renderAll();showMode();}
-/* ---------- рендер (v0.4: секции изолированы — сбой одной не убивает статус/кнопки) ---------- */
+/* ---------- рендер ---------- */
 function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function updateMessage(t,w){const e=$('statusEl');if(!e)return;e.innerHTML=t;e.classList.toggle('warn',!!w);}
 function cardEl(c,faceDown,dim,win){const d=document.createElement('div');const su=psuit(c);d.className='card '+(faceDown?'back skin-'+set.back:(P_SUITCLASS[su]||'spade'))+(dim?' dim':'')+(win?' win':'');if(!faceDown){d.innerHTML='<span class="corner tl">'+prand(c)+'<br>'+(P_SUITS[su]||'')+'</span><span class="center">'+(P_SUITS[su]||'')+'</span><span class="corner br">'+prand(c)+'<br>'+(P_SUITS[su]||'')+'</span>';}return d;}
@@ -543,6 +550,7 @@ $('checkCallBtn').textContent=toCall>0?('📞 Колл '+Math.min(toCall,stack))
 $('raiseBtn').style.display=(my&&stack>toCall)?'inline-flex':'none';
 $('raiseBtn').textContent=(s&&s.currentBet>0)?'⬆ Рейз':'⬆ Бет';
 $('allinBtn').style.display=my?'inline-flex':'none';
+const row=$('actionsRow');if(row)row.classList.toggle('myturn',my);
 if(!my)$('betPanel').classList.remove('show');}
 function renderAll(){
  try{renderPlayers();}catch(e){console.warn('[PK] renderPlayers:',e&&e.message);}
@@ -551,7 +559,7 @@ function renderAll(){
  try{renderActions();}catch(e){console.warn('[PK] renderActions:',e&&e.message);}
  try{updateMessage(statusText());}catch(e){console.warn('[PK] status:',e&&e.message);}
 }
-/* ---------- ставка слайдером ---------- */
+/* ---------- ставка ---------- */
 function openBetPanel(){const s=S();const me=meUid();if(!s||s.turn!==me)return;const minT=s.currentBet+s.minRaise;const maxT=(s.bets[me]||0)+s.stacks[me];const lo=Math.min(minT,maxT);const sl=$('betSlider');sl.min=lo;sl.max=maxT;sl.step=1;sl.value=lo;updateBetVal();$('betPanel').classList.add('show');}
 function updateBetVal(){$('betVal').textContent='Поставить: '+$('betSlider').value;}
 function confirmBet(){const s=S();const v=+$('betSlider').value;$('betPanel').classList.remove('show');const act=(s&&s.currentBet>0)?'raise':'bet';applyAction(act,v);}
@@ -609,8 +617,9 @@ $('betCancel').onclick=()=>$('betPanel').classList.remove('show');
 $('betConfirm').onclick=confirmBet;
 }
 try{attachUI();}catch(e){window.__ERR2='ui: '+e.message;}
-try{$('diffSel').value=DIFF();$('backSel').value=String(set.back||2);$('verTag').textContent='v'+VER;$('verTag2').textContent='v'+VER;const r=new URL(location.href).searchParams.get('room');if(r&&r.length===6){window.__ROOM_OK=true;maybeJoinChoice(r.toUpperCase());}else showMode();renderAll();window.__BOOT_OK=true;}catch(e){window.__ERR=(window.__ERR||'')+' init: '+e.message;try{showMode();updateMessage('⚠️ Ошибка: '+e.message,true);}catch(e2){}}
-window.addEventListener('resize',()=>renderAll());
+try{applyDeviceClass();$('diffSel').value=DIFF();$('backSel').value=String(set.back||2);$('verTag').textContent='v'+VER;$('verTag2').textContent='v'+VER;const r=new URL(location.href).searchParams.get('room');if(r&&r.length===6){window.__ROOM_OK=true;maybeJoinChoice(r.toUpperCase());}else showMode();renderAll();window.__BOOT_OK=true;}catch(e){window.__ERR=(window.__ERR||'')+' init: '+e.message;try{showMode();updateMessage('⚠️ Ошибка: '+e.message,true);}catch(e2){}}
+window.addEventListener('resize',()=>{applyDeviceClass();renderAll();});
+window.addEventListener('orientationchange',()=>setTimeout(()=>{applyDeviceClass();renderAll();},220));
 window.addEventListener('beforeunload',()=>{stopHeartbeat();removePresence();});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&onlineMode&&roomRef&&mySeat){try{roomRef.child('presence/'+mySeat).set({uid:myUid,name:myName,at:Date.now()}).catch(()=>{});}catch(e){}}});
 </script>
