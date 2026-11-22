@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-22T12:00:58.116Z",
+ "generatedAt": "2026-11-22T12:23:14.751Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.54",
@@ -207,7 +207,7 @@
    ]
   },
   "poker": {
-   "version": "0.2",
+   "version": "0.3",
    "online": true,
    "addedAt": "2026-11-11",
    "files": [
@@ -238,8 +238,8 @@
     },
     {
      "path": "poker/index.html",
-     "sha256": "bf3920dca40eba9a9475c3d39686c93b09a69eb1a9121226abe3b1408cdb2732",
-     "size": 62505
+     "sha256": "af0d878a30e259b0ca374f17cab1a26ca8d935c42b9a7bbf3f328fc0eabf3108",
+     "size": 69386
     }
    ]
   },
