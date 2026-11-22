@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-22T06:34:07.635Z",
+ "generatedAt": "2026-11-22T08:30:36.249Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.54",
@@ -161,14 +161,14 @@
    ]
   },
   "shashki": {
-   "version": "1.9",
+   "version": "1.10",
    "online": true,
    "addedAt": "2026-10-01",
    "files": [
     {
      "path": "shashki/index.html",
-     "sha256": "17c8db253cf6404f4c764e595074641a43f10d6ef8a284380b14b3f675cf92f0",
-     "size": 65697
+     "sha256": "330203113c2b33b05c3ba0511cd90e6bcb83cdca60484b45fba8369184070dbb",
+     "size": 72633
     }
    ]
   },
