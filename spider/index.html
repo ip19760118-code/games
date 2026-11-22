@@ -53,15 +53,15 @@ body.bk5fail[data-back="5"] .bf{background-image:repeating-linear-gradient(45deg
 .card.hintdst{box-shadow:0 0 0 3px var(--gold),0 4px 12px rgba(0,0,0,.5)}
 .col.hintdst{box-shadow:inset 0 0 0 3px var(--gold)}
 @keyframes hintP{0%,100%{box-shadow:0 0 0 3px rgba(124,255,196,.9),0 0 14px rgba(124,255,196,.6)}50%{box-shadow:0 0 0 5px rgba(124,255,196,.4),0 0 22px rgba(124,255,196,.25)}}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px;padding:4px 6px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;padding:4px 6px;flex-wrap:nowrap;overflow:hidden}
 .bar.left{flex-direction:row-reverse}
-.founds{display:flex;gap:4px;flex-wrap:nowrap}
-.fslot{width:calc(var(--cw)*.6);height:calc(var(--ch)*.6);border-radius:6px;border:1px dashed rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:calc(var(--cw)*.3);background:rgba(0,0,0,.2)}
-.fslot.on{border:1px solid var(--gold);background:linear-gradient(160deg,#fffef8,#e6dcc4);color:#16181c;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.founds{display:flex;flex:0 0 auto;min-width:0;align-items:center}
+.fslot{flex:0 0 auto;position:relative;border-radius:6px;border:1px dashed rgba(255,255,255,.22);display:flex;align-items:center;justify-content:flex-start;padding-left:4px;background:rgba(0,0,0,.22);font-weight:800}
+.fslot.on{border:1px solid var(--gold);background:linear-gradient(160deg,#fffef8,#e6dcc4);color:#16181c;box-shadow:0 2px 8px rgba(0,0,0,.45)}
 .fslot.on.red{color:#c62828}
-.stock{position:relative;height:calc(var(--ch)*.7);min-width:calc(var(--cw)*1.1);cursor:pointer;display:flex;align-items:center}
-.stock .sc{position:absolute;width:calc(var(--cw)*.6);height:calc(var(--ch)*.6);border-radius:6px;border:1px solid #2a2a3a;box-shadow:0 2px 6px rgba(0,0,0,.45)}
-.stock .cnt{position:absolute;right:-6px;bottom:-6px;background:var(--gold);color:#1a1206;border-radius:12px;font-size:11px;font-weight:800;padding:1px 7px;z-index:9}
+.stock{position:relative;flex:0 0 auto;cursor:pointer;display:flex;align-items:center}
+.stock .sc{position:absolute;border-radius:6px;border:1px solid #2a2a3a;box-shadow:0 2px 6px rgba(0,0,0,.45)}
+.stock .cnt{position:absolute;right:-4px;bottom:-5px;background:var(--gold);color:#1a1206;border-radius:12px;font-size:11px;font-weight:800;padding:1px 6px;z-index:20}
 .stock.off{opacity:.4;cursor:default}
 .stock.pulse{animation:hintP 1.2s ease-in-out infinite;border-radius:8px}
 .actions{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:6px}
@@ -118,15 +118,16 @@ body.zen .zenDeck{display:flex}
 .cardbox::-webkit-scrollbar-thumb{background:rgba(124,255,196,.35);border-radius:8px}
 .cardbox::-webkit-scrollbar-thumb:hover{background:rgba(124,255,196,.6)}
 @media(max-width:520px){.title{font-size:15px}.btn{padding:7px 11px;font-size:12px}.hud .box{font-size:10px;padding:2px 8px}.hbtn{padding:5px 8px;font-size:10.5px}}
+@media(max-height:470px){.header{margin-bottom:3px}.title{font-size:14px}.hud{gap:4px;margin-bottom:3px}.hud .box{padding:1px 7px;font-size:10px}.hud .box b{font-size:11.5px}.actions{margin-top:3px;gap:5px}.btn{padding:5px 10px;font-size:11.5px}.btn.icon{padding:5px 9px;min-width:36px}.btn.icon svg{width:16px;height:16px}.status{min-height:14px;font-size:11px;margin-top:2px}.ver{display:none}.bar{margin-top:3px;padding:2px 6px}}
 </style></head><body data-back="1">
 <div class="wrap">
 <div class="header"><button class="hbtn" id="menuBtn">🏠 Меню</button><div class="title">🕷 ПАУК</div><div style="display:flex;gap:5px"><button class="hbtn" id="muteBtn">🔊</button><button class="hbtn" id="zenBtn">⛶</button><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="statsBtn">📊</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
 <div class="hud">
-<div class="box">🏅 Очки <b id="hScore">500</b></div>
-<div class="box">🔁 Ходы <b id="hMoves">0</b></div>
+<div class="box">🏅 <b id="hScore">500</b></div>
+<div class="box">🔁 <b id="hMoves">0</b></div>
 <div class="box">⏱ <b id="hTime">00:00</b></div>
-<div class="box">🏠 Дома <b id="hFound">0/8</b></div>
-<div class="box">🂠 Резерв <b id="hStock">5</b></div>
+<div class="box">🏠 <b id="hFound">0/8</b></div>
+<div class="box">🂠 <b id="hStock">5</b></div>
 </div>
 <div class="boardWrap" id="boardWrap"><div class="board" id="board"></div></div>
 <div class="bar" id="bar"><div class="founds" id="founds"></div><div class="stock" id="stock"></div></div>
@@ -138,7 +139,7 @@ body.zen .zenDeck{display:flex}
 <button class="btn icon" id="shareBtn" aria-label="Скинуть ссылку на игру" title="Скинуть ссылку на игру"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.9" x2="15.7" y2="6.1"/><line x1="8.3" y1="13.1" x2="15.7" y2="17.9"/></svg></button>
 </div>
 <div class="status" id="statusEl">Выбери сложность</div>
-<div class="ver" id="verTag">v1.3</div>
+<div class="ver" id="verTag">v1.4</div>
 </div>
 
 <button class="zenDeck" id="zenDeck" aria-label="Раздать из колоды" title="Раздать из колоды"><span class="mini bf"></span><span class="cnt" id="zenCnt">5</span></button>
@@ -146,7 +147,7 @@ body.zen .zenDeck{display:flex}
 
 <div class="overlay" id="menuOverlay"><div class="cardbox">
 <div class="mhdr"><button class="hbtn" id="menuHubBtn">← В меню игр</button></div>
-<h2>🕷 Паук <span style="font-size:11px;opacity:.6;font-family:monospace" id="verTag2">v1.3</span></h2>
+<h2>🕷 Паук <span style="font-size:11px;opacity:.6;font-family:monospace" id="verTag2">v1.4</span></h2>
 <div class="sub">Собери 8 последовательностей от Короля до Туза одной масти</div>
 <div class="mode-choice">
 <button class="mode-btn primary" data-suits="1"><div class="icon">♠</div><div><b>1 масть · лёгкий</b><small>Все пики — для освоения</small></div></button>
@@ -163,7 +164,7 @@ body.zen .zenDeck{display:flex}
 <div class="srow"><label>Рубашка карт</label><select id="backSel"><option value="1">Классическая</option><option value="2">Красный узор</option><option value="3">Зелёное сукно</option><option value="4">Фиолетовая волна</option><option value="5">Золотая вязь</option></select></div>
 <div class="srow"><label>Раскладка</label><select id="leftSel"><option value="0">Резерв справа</option><option value="1">Резерв слева (левша)</option></select></div>
 <div class="btns"><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note" style="margin-top:10px">Очки: старт 500, −1 за ход, +100 за собранную последовательность. Отмена хода возвращает позицию со штрафом. Поле двигается: удерживай пустое место и тяни ⇔. Двойной тап по пустому месту — режим поля (значок колоды справа внизу раздаёт карты, не выходя из режима). Кнопка 🔊 в шапке глушит весь звук.</div>
+<div class="note" style="margin-top:10px">Очки: старт 500, −1 за ход, +100 за собранную последовательность. При повороте экрана карты не увеличиваются — растут промежутки между столбцами. Поле двигается: удерживай пустое место и тяни ⇔. Двойной тап по пустому месту — режим поля (колода справа внизу раздаёт карты). 🔊 в шапке глушит весь звук.</div>
 </div></div>
 
 <div class="overlay" id="statsOverlay"><div class="cardbox"><h2>📊 Статистика</h2>
@@ -185,7 +186,7 @@ body.zen .zenDeck{display:flex}
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏆</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 
 <script>
-const VER='1.3',COLS=10,RANKS=['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const VER='1.4',COLS=10,RANKS=['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const SUITS={s:{ch:'♠',red:false},h:{ch:'♥',red:true},d:{ch:'♦',red:true},c:{ch:'♣',red:false}};
 const $=id=>document.getElementById(id);
 let set=Object.assign({suits:1,vol:.7,undoPen:5,table:'green',back:1,left:0,mute:false},JSON.parse(localStorage.spider_set||'{}'));
@@ -194,7 +195,7 @@ let ST=Object.assign({g:0,w:0,best:0,bestTime:0,suits:0},JSON.parse(localStorage
 const saveST=()=>localStorage.spider_stats=JSON.stringify(ST);
 let cols=[],stock=[],founds=[],score=500,moves=0,timeSec=0,timer=null,history=[],seed=0,started=false,over=false,suitsNow=1;
 let sel=null,hint=null,hintT=null,undoN=0,hintN=0,lastTap=null,lastEmptyTap=0,toastT=null,cfRes=null;
-let CW=54,CH=77,GAP=6,boardOffset=0,colGap=[],pan=null,drag=null,ghost=null,ghostGx=0,ghostGy=0,dragHideKeys=[];
+let CW=54,CH=77,GAP=6,boardOffset=0,boardPad=0,colGap=[],pan=null,drag=null,ghost=null,ghostGx=0,ghostGy=0,dragHideKeys=[];
 let zen=false,busy=false,dealing=false,hiddenKeys=new Set();
 (function(){for(var n=1;n<=5;n++){(function(k){var im=new Image();im.onerror=function(){document.body.classList.add('bk'+k+'fail')};im.src='./img/back'+k+'.png'})(n)}})();
 function trk(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p)}catch(e){}}
@@ -338,7 +339,6 @@ function animateInitialDeal(){
  };
  step();
 }
-/* v1.3: цель замера ДО скрытия карты — иначе облёт не виден */
 function dealStock(){
  ensureAudio();
  if(!started||over||busy||dealing)return;
@@ -453,30 +453,39 @@ function win(){
 }
 function plural(n){return n===1?'масть':(n<5?'масти':'мастей')}
 function addBtn(box,text,fn,primary,pulse){const b=document.createElement('button');b.className='btn'+(primary?' primary':'')+(pulse?' pulse':'');b.textContent=text;b.onclick=fn;box.appendChild(b);return b}
+/* v1.4: размер карты НЕ растёт при повороте (база — короткая сторона экрана на мобильных);
+   лишняя ширина уходит в промежутки между столбцами */
 function layout(){
- const wrap=$('boardWrap'),w=wrap.clientWidth||window.innerWidth-24;
- const fit=Math.floor((w-12-(COLS-1)*GAP)/COLS);
+ const wrap=$('boardWrap'),wrapW=wrap.clientWidth||window.innerWidth-24;
+ const coarse=(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)||Math.min(window.innerWidth,window.innerHeight)<560;
+ const basis=coarse?Math.min(window.innerWidth,window.innerHeight):wrapW;
+ const fit=Math.floor((basis-12-(COLS-1)*6)/COLS);
  CW=Math.max(54,Math.min(88,fit));CH=Math.round(CW*1.42);
+ const spare=Math.floor((wrapW-12-COLS*CW)/(COLS-1));
+ GAP=Math.max(6,Math.min(30,spare));
  const rs=document.documentElement.style;rs.setProperty('--cw',CW+'px');rs.setProperty('--gap',GAP+'px');
 }
 function cardHTML(c){const s=SUITS[c.s].ch;return '<span class="cn tl">'+RANKS[c.r]+s+'</span><span class="pip">'+s+'</span><span class="cn br">'+RANKS[c.r]+s+'</span>'}
 function cardEl(c,i){const col=$('board').children[c];return col?col.querySelector('[data-i="'+i+'"]'):null}
 function boardW(){return COLS*CW+(COLS-1)*GAP+12}
 function setOffset(v){
- const wrap=$('boardWrap'),min=Math.min(0,(wrap.clientWidth||0)-boardW());
+ const wrap=$('boardWrap'),wrapW=wrap.clientWidth||0,bw=boardW();
+ const min=Math.min(0,wrapW-bw-boardPad);
  boardOffset=Math.max(min,Math.min(0,v));
  $('board').style.transform='translateX('+boardOffset+'px)';
- wrap.classList.toggle('panL',boardOffset<0);
+ wrap.classList.toggle('panL',boardOffset<-1);
  wrap.classList.toggle('panR',boardOffset>min+1);
 }
 function panToColumn(c){
- const wrap=$('boardWrap'),x=c*(CW+GAP)+6,w=wrap.clientWidth;
+ const wrap=$('boardWrap'),x=boardPad+c*(CW+GAP)+6,w=wrap.clientWidth;
  if(x+boardOffset<0)setOffset(-x+10);
  else if(x+CW+boardOffset>w)setOffset(w-x-CW-10);
 }
 function render(){
- const board=$('board'),wrap=$('boardWrap'),bh=wrap.clientHeight||300;
- board.style.width=boardW()+'px';
+ const board=$('board'),wrap=$('boardWrap'),bh=wrap.clientHeight||300,wrapW=wrap.clientWidth||0,bw=boardW();
+ board.style.width=bw+'px';
+ boardPad=bw<wrapW?Math.round((wrapW-bw)/2):0;
+ board.style.marginLeft=boardPad+'px';
  if(board.children.length!==COLS){board.innerHTML='';for(let i=0;i<COLS;i++){const d=document.createElement('div');d.className='col';d.dataset.c=i;board.appendChild(d)}}
  for(let i=0;i<COLS;i++){
   const el=board.children[i],c=cols[i];
@@ -499,16 +508,38 @@ function render(){
  }
  setOffset(boardOffset);renderBar();updateHud();paintHint();
 }
+/* v1.4: дом с перехлёстом + узкая колода — резерв больше не вылезает за экран */
 function renderBar(){
+ const bar=$('bar'),barW=Math.max(200,(bar.clientWidth||300)-12);
+ const slotW=Math.round(CW*.6),slotH=Math.round(CH*.6);
+ const n=Math.floor(stock.length/10);
+ const spread=barW<380?.22:.3;
+ const stockW=n?Math.round(slotW+(n-1)*slotW*spread+10):Math.round(slotW*.85);
+ const availF=Math.max(slotW*2.2,barW-stockW-8);
+ let step=slotW+4;
+ if(slotW+7*step>availF)step=Math.max(slotW*.5,(availF-slotW)/7);
  const f=$('founds');f.innerHTML='';
- for(let i=0;i<8;i++){const d=document.createElement('div'),s=founds[i];d.className='fslot'+(s?' on':'')+(s&&SUITS[s].red?' red':'');d.textContent=s?SUITS[s].ch:'';f.appendChild(d)}
- const st=$('stock'),n=Math.floor(stock.length/10);
+ for(let i=0;i<8;i++){
+  const d=document.createElement('div'),s=founds[i];
+  d.className='fslot'+(s?' on':'')+(s&&SUITS[s].red?' red':'');
+  d.style.width=slotW+'px';d.style.height=slotH+'px';
+  d.style.marginLeft=(i?Math.round(step-slotW):0)+'px';
+  d.style.zIndex=i+1;d.style.fontSize=Math.round(CW*.26)+'px';
+  d.textContent=s?SUITS[s].ch:'';
+  f.appendChild(d);
+ }
+ const st=$('stock');
  st.innerHTML='';st.className='stock'+(n?'':' off');
- const sw=Math.round(CW*.6);
- for(let i=0;i<n;i++){const d=document.createElement('div');d.className='sc bf';d.style.left=(i*Math.round(sw*.3))+'px';d.style.zIndex=i+1;st.appendChild(d)}
- st.style.minWidth=(sw+Math.max(0,n-1)*Math.round(sw*.3)+8)+'px';
- if(n){const b=document.createElement('div');b.className='cnt';b.textContent=n;st.appendChild(b)}
- $('bar').classList.toggle('left',!!set.left);
+ st.style.width=stockW+'px';st.style.minWidth=stockW+'px';st.style.height=Math.round(CH*.7)+'px';
+ for(let i=0;i<n;i++){
+  const d=document.createElement('div');d.className='sc bf';
+  d.style.width=slotW+'px';d.style.height=slotH+'px';
+  d.style.left=Math.round(i*slotW*spread)+'px';d.style.zIndex=i+1;
+  st.appendChild(d);
+ }
+ if(!n){const d=document.createElement('div');d.className='sc';d.style.width=slotW+'px';d.style.height=slotH+'px';d.style.left='0px';d.style.opacity='.25';d.style.background='rgba(255,255,255,.05)';st.appendChild(d)}
+ else{const b=document.createElement('div');b.className='cnt';b.textContent=n;st.appendChild(b)}
+ bar.classList.toggle('left',!!set.left);
 }
 function updateZenDeck(){
  const z=$('zenDeck');if(!z)return;
@@ -529,6 +560,8 @@ function updateHud(){
 }
 function stockRect(){
  if(zen){const z=$('zenDeck').getBoundingClientRect();if(z.width>0)return{left:z.left+10,top:z.top+8,width:Math.round(CW*.6),height:Math.round(CH*.6)}}
+ const sc=$('stock').querySelector('.sc');
+ if(sc){const r=sc.getBoundingClientRect();if(r.width>0)return r}
  const r=$('stock').getBoundingClientRect();
  if(r.width>0)return{left:r.left,top:r.top,width:Math.round(CW*.6),height:Math.round(CH*.6)};
  return{left:window.innerWidth-CW*.8,top:window.innerHeight-CH*.8,width:Math.round(CW*.6),height:Math.round(CH*.6)};
@@ -634,7 +667,6 @@ function endDrag(x,y,moved){
   if(t!==d.c){sDeny();setStatus('❌ Сюда нельзя: нужна карта на ранг старше.',true)}
  }
 }
-/* ---------- салют после победы ---------- */
 const FXC=['#7cffc4','#ffd166','#ff6b6b','#33d6ff','#c084fc','#ffa94d','#ffffff'];
 let fxCv=null,fxCtx=null,fxRaf=null,fxOn=false,fxParts=[],fxRockets=[],fxLast=0,fxNext=0;
 function fxResize(){if(!fxCv||!fxCtx)return;const d=Math.min(2,window.devicePixelRatio||1);fxCv.width=Math.floor(innerWidth*d);fxCv.height=Math.floor(innerHeight*d);fxCtx.setTransform(d,0,0,d,0,0)}
@@ -767,8 +799,10 @@ function bind(){
  $('rulesClose').onclick=()=>$('rulesOverlay').classList.remove('show');
  $('cfYes').onclick=()=>cfResolve(true);
  $('cfNo').onclick=()=>cfResolve(false);
- window.addEventListener('resize',()=>{layout();render();if(fxOn)fxResize()});
- window.addEventListener('orientationchange',()=>setTimeout(()=>{layout();render();if(fxOn)fxResize()},220));
+ let rt=null;
+ const relayout=()=>{clearTimeout(rt);rt=setTimeout(()=>{layout();render();if(fxOn)fxResize()},60)};
+ window.addEventListener('resize',relayout);
+ window.addEventListener('orientationchange',()=>{setTimeout(relayout,120);setTimeout(relayout,420)});
 }
 function showStats(){$('stG').textContent=ST.g;$('stW').textContent=ST.w;$('stP').textContent=ST.g?Math.round(ST.w/ST.g*100)+'%':'—';$('stB').textContent=ST.best||0;$('stT').textContent=ST.bestTime?fmt(ST.bestTime):'—';$('stS').textContent=ST.suits||0}
 function applySkins(){document.documentElement.setAttribute('data-table',set.table);document.body.setAttribute('data-back',String(set.back||1))}
