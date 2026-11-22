@@ -99,7 +99,7 @@ body.zen .table{border-radius:10px}
 </div>
 <div class="actions"><button class="btn" id="newBtn">🔄 Новая</button><button class="btn" id="hintBtn">💡 Подсказка (5)</button><button class="btn" id="undoBtn">↩️ Отмена</button><button class="btn" id="autoBtn" style="display:none">⚡ Автодоводка</button><button class="btn" id="giveBtn">🏳️ Сдаться</button></div>
 <div class="actions"><button class="btn" id="shareLinkBtn">📤 Скинуть ссылку на игру</button></div>
-<div class="ver" id="verTag">v2.19</div>
+<div class="ver" id="verTag">v2.20</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Сложность<select id="diffSel"><option value="easy">Новичок · 1 карта, 5 подсказок</option><option value="medium">Среднее · 3 карты, 3 подсказки</option><option value="hard">Сложное · 3 карты, 1 перезаход, 1 подсказка</option></select></div>
@@ -115,14 +115,14 @@ body.zen .table{border-radius:10px}
 <div class="stat-row"><span>Лучшее время</span><b id="stTime">—</b></div>
 <div class="stat-row"><span>Лучший счёт</span><b id="stScore">—</b></div>
 <div class="btns"><button class="btn" id="stReset">Сбросить</button><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note">Подсказки: 5 / 3 / 1 на партию. «Помощь при разборе»: каждый ход / через ход / через два хода / без помощи. Рубашки: свои картинки клади в img/back1.png … img/back5.png (PNG/WEBP, ~300×420); под загруженной картинкой — чистый слегка жёлтый лист, без файлов работает цветной узор.<br><b>Поворот телефона горизонтально</b> — автоматически остаётся только поле с картами; поверни обратно вертикально — все кнопки вернутся. Колода и дома остаются на поле, тап и перетаскивание работают.</div>
+<div class="note">Подсказки: 5 / 3 / 1 на партию. «Помощь при разборе»: каждый ход / через ход / через два хода / без помощи. Рубашки: свои картинки клади в img/back1.png … img/back5.png (PNG/WEBP, ~300×420); под загруженной картинкой — чистый слегка жёлтый лист, без файлов работает цветной узор.<br><b>Размеры карт и промежутков меняются ТОЛЬКО на смартфоне в горизонтальном положении</b> (карты +15%, узкие промежутки, минимальный отступ до колонн, только поле без кнопок). Вертикально и на ПК — прежние размеры.</div>
 </div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Цель — собрать 4 дома по мастям от туза до короля.<br>• В колоннах кладём по убыванию, чередуя цвета; на пустую колонну — только король.<br>• Из колоды берём по 1 или 3 карты; пустая колода перезаряжается сбросом (на «Сложном» — 1 раз).<br>• Управление: тяни карту/стопку целиком; неверный бросок вернёт её; ИЛИ тап = выбрать, тап = ход.<br>• 💡 Подсказки: Новичок 5, Среднее 3, Сложное 1.<br>• 😵 Когда полезных ходов не останется (и цикл колоды исчерпан) — сообщение появится сразу.<br>• 🧩 Расклады решаемые; помощь настраивается в ⚙️ (вплоть до полного отключения).<br>• 🎨 Скины поля и рубашки карт выбираются в ⚙️.<br>• ⚡ Автодоводка появится, когда колода и сброс пусты и все карты открыты.<br>• 🎆 При победе салют идёт до новой игры или выхода в меню.<br>• 📱 <b>Горизонтальный поворот телефона</b> — режим поля: кнопки и счётчики скрываются сами, ряд колоды/домов прижат к верху поля с минимальным отступом до колонн; вертикальный поворот возвращает интерфейс. На ПК режим поля включается кнопкой ⛶.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
+<div class="note">• Цель — собрать 4 дома по мастям от туза до короля.<br>• В колоннах кладём по убыванию, чередуя цвета; на пустую колонну — только король.<br>• Из колоды берём по 1 или 3 карты; пустая колода перезаряжается сбросом (на «Сложном» — 1 раз).<br>• Управление: тяни карту/стопку целиком; неверный бросок вернёт её; ИЛИ тап = выбрать, тап = ход.<br>• 💡 Подсказки: Новичок 5, Среднее 3, Сложное 1.<br>• 😵 Когда полезных ходов не останется (и цикл колоды исчерпан) — сообщение появится сразу.<br>• 🧩 Расклады решаемые; помощь настраивается в ⚙️ (вплоть до полного отключения).<br>• 🎨 Скины поля и рубашки карт выбираются в ⚙️.<br>• ⚡ Автодоводка появится, когда колода и сброс пусты и все карты открыты.<br>• 🎆 При победе салют идёт до новой игры или выхода в меню.<br>• 📱 <b>Смартфон горизонтально</b> — режим поля: кнопки и счётчики скрываются сами, карты чуть крупнее, промежутки узкие, ряд колоды/домов прижат к верху; вертикально и на ПК размеры прежние. На ПК режим поля включается кнопкой ⛶.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='2.19';
+var VER='2.20';
 var SUITS=['♠','♥','♦','♣'];
 var DIFFS={easy:{draw:1,redeal:9999,hints:5,name:'Новичок'},medium:{draw:3,redeal:9999,hints:3,name:'Среднее'},hard:{draw:3,redeal:1,hints:1,name:'Сложное'}};
 var zen=false;
@@ -260,24 +260,32 @@ function rankTxt(r){return r===1?'A':(r===11?'J':(r===12?'Q':(r===13?'K':r)));}
 function pileArr(n){if(n==='stock')return G.stock;if(n==='waste')return G.waste;if(n[0]==='f')return G.found[+n[1]];return G.tab[+n[1]];}
 function downOff(){return Math.round(ch*0.12);}
 function upOff(){return Math.round(ch*0.30);}
-/* v2.19: карты +15% (с клампом по ширине), горизонтальные промежутки ÷2,
-   вертикальный отступ ряд колоды/домов → колонны = 20% от прежнего (vgap).
-   Всё центрируется по горизонтали и прижато к верху поля. */
+/* v2.20: базовые размеры/промежутки — как в v2.18 (вертикаль, ПК, web).
+   Только смартфон ГОРИЗОНТАЛЬНО: карты +15%, промежутки ещё вдвое уже (gapOld/4),
+   отступ ряд колоды/домов → колонны = 20% прежнего (vgap). Всё по центру, прижато к верху. */
 function layout(){
  var vw=window.innerWidth,vh=window.innerHeight;
  var mobile=isMobileDevice();
+ var tight=mobile&&isLandscape();
  var pad=zen?12:36;
  var availW=Math.min(vw-pad,760);
  var basis=mobile?Math.min(Math.min(vw,vh)-36,720):availW;
- var baseCw=Math.min(110,Math.floor((basis-6*6)/7));
- var want=Math.round(baseCw*1.15);
- var fit=Math.floor((availW-6*3)/7);
- cw=Math.max(34,Math.min(want,fit,126));
- ch=Math.round(cw*1.4);
- var spareOld=Math.floor((availW-7*cw)/6);
- var gapOld=Math.max(6,Math.min(zen?44:26,spareOld));
- var gap=Math.max(3,Math.round(gapOld/2));
- var vgap=Math.max(2,Math.round(gapOld*0.2));
+ var baseCw=Math.max(34,Math.min(110,Math.floor((basis-6*6)/7)));
+ var gap,vgap;
+ if(tight){
+  var fit=Math.floor((availW-6*2)/7);
+  cw=Math.max(34,Math.min(Math.round(baseCw*1.15),fit,126));
+  ch=Math.round(cw*1.4);
+  var spareOld=Math.floor((availW-7*cw)/6);
+  var gapOld=Math.max(6,Math.min(44,spareOld));
+  gap=Math.max(2,Math.round(gapOld/4));
+  vgap=Math.max(2,Math.round(gapOld*0.2));
+ }else{
+  cw=baseCw;ch=Math.round(cw*1.4);
+  var spare=Math.floor((availW-7*cw)/6);
+  gap=Math.max(6,Math.min(zen?44:26,spare));
+  vgap=gap;
+ }
  function hOf(sel){var e=document.querySelector(sel);return e?e.offsetHeight:0;}
  var fixed=hOf('.header')+hOf('.hud')+hOf('.ver');
  var acts=document.querySelectorAll('.actions');
