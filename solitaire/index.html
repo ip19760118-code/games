@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/><title>Косынка</title>
+<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/><link rel="icon" type="image/png" sizes="32x32" href="../icon-32.png"><title>Косынка</title>
 <script src="../js/platform.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
@@ -12,6 +12,7 @@
 [data-skin="light"] .slot.recycle{color:#333;background:rgba(0,0,0,.06)}
 [data-skin="light"] .table{box-shadow:inset 0 2px 14px rgba(0,0,0,.15)}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{overscroll-behavior:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:8px;padding-top:calc(8px + env(safe-area-inset-top));padding-bottom:calc(8px + env(safe-area-inset-bottom))}
 .wrap{max-width:760px;width:100%;background:var(--panel);border-radius:20px;padding:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08)}
 .header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
@@ -54,19 +55,28 @@ body.bk5ok .card.back[data-back="5"]{background-image:url("img/back5.png"),linea
 .btn.primary{background:linear-gradient(135deg,#7cffc4,#33d6ff);color:#061019;border:none}
 .btn:disabled{opacity:.4;cursor:default}
 .ver{text-align:center;font-size:10px;opacity:.45;margin-top:6px;font-family:monospace;letter-spacing:1px}
+/* v2.18: горизонтальный поворот телефона → только поле и карты (автоматически) */
+body.zen{align-items:center;padding:2px;padding-top:calc(2px + env(safe-area-inset-top));padding-bottom:calc(2px + env(safe-area-inset-bottom))}
+body.zen .wrap{padding:4px;border-radius:10px;max-width:none}
+body.zen .header,body.zen .hud,body.zen .actions,body.zen .ver{display:none!important}
+body.zen .table{border-radius:10px}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
 .overlay.show{display:flex}
-.cardbox{background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:22px;max-width:420px;width:100%;text-align:center;max-height:88vh;overflow-y:auto;color:var(--text)}
+.cardbox{background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:22px;max-width:420px;width:100%;text-align:center;max-height:88vh;overflow-y:auto;color:var(--text);scrollbar-width:thin;scrollbar-color:var(--accent) rgba(0,0,0,.35)}
+.cardbox::-webkit-scrollbar{width:9px}
+.cardbox::-webkit-scrollbar-track{background:rgba(0,0,0,.35);border-radius:9px}
+.cardbox::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#7cffc4,#33d6ff);border-radius:9px;border:2px solid rgba(0,0,0,.3)}
 .cardbox h2{font-size:24px;margin-bottom:10px}
 .selrow{margin:12px 0 4px;font-size:14px;font-weight:600;text-align:left}
 .selrow select{width:100%;margin-top:6px;padding:7px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);color:var(--text);font-size:14px}
+.selrow select option{background:#152036;color:#eef2ff}
 .selrow label{display:flex;gap:8px;align-items:center}
 .selrow input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
-.selrow input[type=range]{width:100%}
+.selrow input[type=range]{width:100%;accent-color:var(--accent)}
 .stat-row{display:flex;justify-content:space-between;padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.08);font-size:14px}
 .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
 .note{font-size:12px;opacity:.7;line-height:1.45;margin-top:8px;text-align:left}
-.toast{position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(30,150,90,.95);color:#fff;font-weight:800;font-size:13px;padding:9px 18px;border-radius:30px;z-index:600;pointer-events:none;opacity:0;transition:opacity .25s}
+.toast{position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(30,150,90,.95);color:#fff;font-weight:800;font-size:13px;padding:9px 18px;border-radius:30px;z-index:600;pointer-events:none;opacity:0;transition:opacity .25s;max-width:92vw;text-align:center}
 .toast.show{opacity:1}
 .salut{position:fixed;inset:0;pointer-events:none;z-index:400;overflow:hidden}
 .salut-p{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none;box-shadow:0 0 8px currentColor;animation:salutFly 2s ease-out forwards}
@@ -76,7 +86,7 @@ body.bk5ok .card.back[data-back="5"]{background-image:url("img/back5.png"),linea
 @media (max-width:480px){.title{font-size:16px}.hud{font-size:11px}.btn{font-size:12px;padding:7px 10px}.hbtn{padding:5px 9px;font-size:11px}}
 </style></head><body>
 <div class="wrap" id="wrap">
-<div class="header"><button class="hbtn" id="hubBtn">← В меню игр</button><div class="title">♠️ КОСЫНКА</div><div style="display:flex;gap:6px"><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
+<div class="header"><button class="hbtn" id="hubBtn">← В меню игр</button><div class="title">♠️ КОСЫНКА</div><div style="display:flex;gap:6px"><button class="hbtn" id="zenBtn">⛶</button><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
 <div class="hud"><span>⏱ <b id="hTime">00:00</b></span><span>Ходы: <b id="hMoves">0</b></span><span>Очки: <b id="hScore">0</b></span><span><b id="hDiff">Новичок</b></span></div>
 <div class="table" id="table">
  <div class="row top">
@@ -89,7 +99,7 @@ body.bk5ok .card.back[data-back="5"]{background-image:url("img/back5.png"),linea
 </div>
 <div class="actions"><button class="btn" id="newBtn">🔄 Новая</button><button class="btn" id="hintBtn">💡 Подсказка (5)</button><button class="btn" id="undoBtn">↩️ Отмена</button><button class="btn" id="autoBtn" style="display:none">⚡ Автодоводка</button><button class="btn" id="giveBtn">🏳️ Сдаться</button></div>
 <div class="actions"><button class="btn" id="shareLinkBtn">📤 Скинуть ссылку на игру</button></div>
-<div class="ver" id="verTag">v2.17</div>
+<div class="ver" id="verTag">v2.18</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Сложность<select id="diffSel"><option value="easy">Новичок · 1 карта, 5 подсказок</option><option value="medium">Среднее · 3 карты, 3 подсказки</option><option value="hard">Сложное · 3 карты, 1 перезаход, 1 подсказка</option></select></div>
@@ -105,21 +115,41 @@ body.bk5ok .card.back[data-back="5"]{background-image:url("img/back5.png"),linea
 <div class="stat-row"><span>Лучшее время</span><b id="stTime">—</b></div>
 <div class="stat-row"><span>Лучший счёт</span><b id="stScore">—</b></div>
 <div class="btns"><button class="btn" id="stReset">Сбросить</button><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note">Подсказки: 5 / 3 / 1 на партию. «Помощь при разборе»: каждый ход / через ход / через два хода / без помощи. Рубашки: свои картинки клади в img/back1.png … img/back5.png (PNG/WEBP, ~300×420); под загруженной картинкой — чистый слегка жёлтый лист, без файлов работает цветной узор.</div>
+<div class="note">Подсказки: 5 / 3 / 1 на партию. «Помощь при разборе»: каждый ход / через ход / через два хода / без помощи. Рубашки: свои картинки клади в img/back1.png … img/back5.png (PNG/WEBP, ~300×420); под загруженной картинкой — чистый слегка жёлтый лист, без файлов работает цветной узор.<br><b>Поворот телефона горизонтально</b> — автоматически остаётся только поле с картами (размер карт не меняется, растут промежутки); поверни обратно вертикально — все кнопки вернутся. Колода и дома остаются на поле, тап и перетаскивание работают.</div>
 </div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Цель — собрать 4 дома по мастям от туза до короля.<br>• В колоннах кладём по убыванию, чередуя цвета; на пустую колонну — только король.<br>• Из колоды берём по 1 или 3 карты; пустая колода перезаряжается сбросом (на «Сложном» — 1 раз).<br>• Управление: тяни карту/стопку целиком; неверный бросок вернёт её; ИЛИ тап = выбрать, тап = ход.<br>• 💡 Подсказки: Новичок 5, Среднее 3, Сложное 1.<br>• 😵 Когда полезных ходов не останется (и цикл колоды исчерпан) — сообщение появится сразу.<br>• 🧩 Расклады решаемые; помощь настраивается в ⚙️ (вплоть до полного отключения).<br>• 🎨 Скины поля и рубашки карт выбираются в ⚙️.<br>• ⚡ Автодоводка появится, когда колода и сброс пусты и все карты открыты.<br>• 🎆 При победе салют идёт до новой игры или выхода в меню.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
+<div class="note">• Цель — собрать 4 дома по мастям от туза до короля.<br>• В колоннах кладём по убыванию, чередуя цвета; на пустую колонну — только король.<br>• Из колоды берём по 1 или 3 карты; пустая колода перезаряжается сбросом (на «Сложном» — 1 раз).<br>• Управление: тяни карту/стопку целиком; неверный бросок вернёт её; ИЛИ тап = выбрать, тап = ход.<br>• 💡 Подсказки: Новичок 5, Среднее 3, Сложное 1.<br>• 😵 Когда полезных ходов не останется (и цикл колоды исчерпан) — сообщение появится сразу.<br>• 🧩 Расклады решаемые; помощь настраивается в ⚙️ (вплоть до полного отключения).<br>• 🎨 Скины поля и рубашки карт выбираются в ⚙️.<br>• ⚡ Автодоводка появится, когда колода и сброс пусты и все карты открыты.<br>• 🎆 При победе салют идёт до новой игры или выхода в меню.<br>• 📱 <b>Горизонтальный поворот телефона</b> — режим поля: кнопки и счётчики скрываются сами, карты не увеличиваются (растут промежутки), колода/дома/колонны остаются; вертикальный поворот возвращает интерфейс. На ПК режим поля включается кнопкой ⛶.<br>• В мессенджере кнопка «Назад» закрывает окна и возвращает в хаб.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='2.17';
+var VER='2.18';
 var SUITS=['♠','♥','♦','♣'];
 var DIFFS={easy:{draw:1,redeal:9999,hints:5,name:'Новичок'},medium:{draw:3,redeal:9999,hints:3,name:'Среднее'},hard:{draw:3,redeal:1,hints:1,name:'Сложное'}};
+var zen=false;
+function isMobileDevice(){
+ try{if(Platform&&Platform.name==='pc')return false;if(Platform&&Platform.name==='android')return true;}catch(e){}
+ try{if(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)return true;}catch(e){}
+ return /Android|iPhone|iPad|iPod|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent||'');
+}
+function isLandscape(){return window.innerWidth>window.innerHeight;}
+function autoZenWanted(){return isMobileDevice()&&isLandscape();}
+function setZen(on,silent){
+ if(zen===on)return;
+ zen=on;document.body.classList.toggle('zen',zen);
+ if(G)render();
+ if(!silent)toast(zen?'Режим поля: только карты · поверни телефон вертикально — вернутся кнопки':'Интерфейс возвращён');
+ trackEvent('game_zen',{game_name:'solitaire',on:zen?1:0,auto:autoZenWanted()?1:0});
+}
+function applyOrientation(){
+ var want=autoZenWanted();
+ if(want!==zen)setZen(want,true);
+}
 function backHandler(){
  try{
   if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}
   if($('rulesOverlay').classList.contains('show')){$('rulesOverlay').classList.remove('show');return;}
   if($('endOverlay').classList.contains('show')){$('endOverlay').classList.remove('show');return;}
+  if(zen&&!autoZenWanted()){setZen(false);return;}
  }catch(e){}
  goToHub();
 }
@@ -233,21 +263,28 @@ function rankTxt(r){return r===1?'A':(r===11?'J':(r===12?'Q':(r===13?'K':r)));}
 function pileArr(n){if(n==='stock')return G.stock;if(n==='waste')return G.waste;if(n[0]==='f')return G.found[+n[1]];return G.tab[+n[1]];}
 function downOff(){return Math.round(ch*0.12);}
 function upOff(){return Math.round(ch*0.30);}
-/* v2.17: высота колонок = остаток экрана после ЗАМЕРА реальных высот шапки, HUD,
-   обеих панелей кнопок, футера, отступов и верхнего ряда — кнопки всегда на экране */
+/* v2.18: размер карт на телефоне считается от КОРОТКОЙ стороны экрана —
+   при повороте карты НЕ увеличиваются, лишняя ширина уходит в промежутки (gap).
+   В режиме поля (zen) скрытая шапка/HUD/кнопки дают больше высоты колоннам. */
 function layout(){
- var wrapW=Math.min(window.innerWidth-36,720);var gap=6;
- cw=Math.min(110,Math.floor((wrapW-6*gap)/7));ch=Math.round(cw*1.4);
- var vh=window.innerHeight;
+ var vw=window.innerWidth,vh=window.innerHeight;
+ var mobile=isMobileDevice();
+ var pad=zen?12:36;
+ var availW=Math.min(vw-pad,760);
+ var basis=mobile?Math.min(Math.min(vw,vh)-36,720):availW;
+ var baseGap=6;
+ cw=Math.max(34,Math.min(110,Math.floor((basis-6*baseGap)/7)));
+ ch=Math.round(cw*1.4);
+ var spare=Math.floor((availW-7*cw)/6);
+ var gap=Math.max(baseGap,Math.min(zen?44:26,spare));
  function hOf(sel){var e=document.querySelector(sel);return e?e.offsetHeight:0;}
  var fixed=hOf('.header')+hOf('.hud')+hOf('.ver');
  var acts=document.querySelectorAll('.actions');
  for(var i=0;i<acts.length;i++)fixed+=acts[i].offsetHeight;
- fixed+=8*5;
- fixed+=20+16;
+ if(zen){fixed+=8+4+16+10;}
+ else{fixed+=8*5;fixed+=20+16;fixed+=24;}
  fixed+=ch+gap;
- fixed+=24;
- tabH=Math.max(Math.round(ch*1.6), vh-Math.round(fixed));
+ tabH=Math.max(Math.round(ch*1.6),vh-Math.round(fixed));
  var w=$('wrap');w.style.setProperty('--cw',cw+'px');w.style.setProperty('--ch',ch+'px');w.style.setProperty('--gap',gap+'px');
 }
 function baseDeal(){
@@ -620,6 +657,7 @@ $('undoBtn').onclick=function(){ensureAudio();doUndo();};
 $('autoBtn').onclick=function(){ensureAudio();autoFinish();};
 $('giveBtn').onclick=function(){ensureAudio();giveUp();};
 $('shareLinkBtn').onclick=shareGameLink;
+$('zenBtn').onclick=function(){setZen(!zen);};
 $('setBtn').onclick=function(){ensureAudio();$('diffSel').value=set.diff;$('assistSel').value=String(set.assist==null?1:set.assist);$('skinSel').value=set.skin;$('backSel').value=String(set.back||1);$('voiceChk').checked=!!set.voice;$('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';showStats();$('setOverlay').classList.add('show');};
 $('setClose').onclick=function(){$('setOverlay').classList.remove('show');};
 $('diffSel').onchange=function(e){set.diff=e.target.value;saveSet();};
@@ -632,8 +670,13 @@ $('stReset').onclick=function(){if(confirm('Сбросить статистик�
 $('rulesBtn').onclick=function(){$('rulesOverlay').classList.add('show');};
 $('rulesClose').onclick=function(){$('rulesOverlay').classList.remove('show');};
 $('hubBtn').onclick=function(){goToHub();};
-window.addEventListener('resize',function(){if(G)render();});
-window.addEventListener('orientationchange',function(){setTimeout(function(){if(G)render();},120);});
+var rzT=null;
+function relayout(){clearTimeout(rzT);rzT=setTimeout(function(){applyOrientation();if(G)render();},70);}
+window.addEventListener('resize',relayout);
+window.addEventListener('orientationchange',function(){setTimeout(relayout,120);setTimeout(relayout,450);});
+try{var mq=window.matchMedia('(orientation: landscape)');if(mq.addEventListener)mq.addEventListener('change',relayout);else if(mq.addListener)mq.addListener(relayout);}catch(e){}
 window.addEventListener('beforeunload',function(){stopCelebrate();});
-applySkin();$('verTag').textContent='v'+VER;newGame();
+applySkin();$('verTag').textContent='v'+VER;
+zen=autoZenWanted();document.body.classList.toggle('zen',zen);
+newGame();
 </script></body></html>
