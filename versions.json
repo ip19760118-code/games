@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-22T10:09:46.225Z",
+ "generatedAt": "2026-11-22T10:25:13.878Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.54",
@@ -523,7 +523,7 @@
    ]
   },
   "spider": {
-   "version": "1.6",
+   "version": "1.7",
    "online": false,
    "addedAt": "2026-11-21",
    "files": [
@@ -554,8 +554,8 @@
     },
     {
      "path": "spider/index.html",
-     "sha256": "b22bb36a005319470415b06af5c75d01dbb74fb9df921765ec03f9dcebde556d",
-     "size": 61493
+     "sha256": "5c308679a739479d04234f872eee1f83f62c48c7814f2567cc4a688f5414c98b",
+     "size": 62916
     }
    ]
   }
