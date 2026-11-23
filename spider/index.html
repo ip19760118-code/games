@@ -76,7 +76,6 @@ body.bk5fail[data-back="5"] .bf{background-image:repeating-linear-gradient(45deg
 .status{text-align:center;font-size:12.5px;font-weight:600;color:var(--accent);min-height:18px;margin-top:5px}
 .status.warn{color:var(--red)}
 .ver{text-align:center;font-size:9px;opacity:.4;margin-top:4px;font-family:monospace;letter-spacing:1px}
-/* v1.7: режим поля включается САМ при горизонтальном повороте телефона */
 body.zen .header,body.zen .hud,body.zen .bar,body.zen .actions,body.zen .status,body.zen .ver{display:none!important}
 body.zen{padding:2px}
 body.zen .wrap{padding:4px;border-radius:10px}
@@ -142,7 +141,7 @@ body.zen .zenDeck{display:flex}
 <button class="btn icon" id="shareBtn" aria-label="Скинуть ссылку на игру" title="Скинуть ссылку на игру"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.9" x2="15.7" y2="6.1"/><line x1="8.3" y1="13.1" x2="15.7" y2="17.9"/></svg></button>
 </div>
 <div class="status" id="statusEl">Выбери сложность</div>
-<div class="ver" id="verTag">v1.7</div>
+<div class="ver" id="verTag">v1.8</div>
 </div>
 
 <button class="zenDeck" id="zenDeck" aria-label="Раздать из колоды" title="Раздать из колоды"><span class="mini bf"></span><span class="cnt" id="zenCnt">5</span></button>
@@ -150,7 +149,7 @@ body.zen .zenDeck{display:flex}
 
 <div class="overlay" id="menuOverlay"><div class="cardbox">
 <div class="mhdr"><button class="hbtn" id="menuHubBtn">← В меню игр</button></div>
-<h2>🕷 Паук <span style="font-size:11px;opacity:.6;font-family:monospace" id="verTag2">v1.7</span></h2>
+<h2>🕷 Паук <span style="font-size:11px;opacity:.6;font-family:monospace" id="verTag2">v1.8</span></h2>
 <div class="sub">Собери 8 последовательностей от Короля до Туза одной масти</div>
 <div class="mode-choice">
 <button class="mode-btn primary" data-suits="1"><div class="icon">♠</div><div><b>1 масть · лёгкий</b><small>Все пики — для освоения</small></div></button>
@@ -167,7 +166,7 @@ body.zen .zenDeck{display:flex}
 <div class="srow"><label>Рубашка карт</label><select id="backSel"><option value="1">Классическая</option><option value="2">Красный узор</option><option value="3">Зелёное сукно</option><option value="4">Фиолетовая волна</option><option value="5">Золотая вязь</option></select></div>
 <div class="srow"><label>Раскладка</label><select id="leftSel"><option value="0">Резерв справа</option><option value="1">Резерв слева (левша)</option></select></div>
 <div class="btns"><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note" style="margin-top:10px">Очки: старт 500, −1 за ход, +100 за собранную последовательность. При повороте экрана карты не увеличиваются — растут промежутки. Поле двигается: удерживай пустое место и тяни ⇔. <b>На телефоне в горизонтальном положении панели убираются автоматически</b> — остаётся поле и колода справа внизу; поверни обратно вертикально — все кнопки вернутся. 🔊 в шапке глушит весь звук.</div>
+<div class="note" style="margin-top:10px">Очки: старт 500, −1 за ход, +100 за собранную последовательность. При повороте экрана карты не увеличиваются — растут промежутки. Поле двигается: удерживай пустое место и тяни ⇔. <b>На телефоне в горизонтальном положении панели убираются автоматически</b> — остаётся поле и колода справа внизу; поверни обратно вертикально — все кнопки вернутся. Перетаскивание ведётся одним пальцем: второе касание во время_drag игнорируется. 🔊 в шапке глушит весь звук.</div>
 </div></div>
 
 <div class="overlay" id="statsOverlay"><div class="cardbox"><h2>📊 Статистика</h2>
@@ -181,7 +180,7 @@ body.zen .zenDeck{display:flex}
 </div></div>
 
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Две колоды — 104 карты. Цель: собрать <b>8 последовательностей К→А одной масти</b>; готовая последовательность сама улетает в «дом».<br>• Расклад: 10 столбцов (4 по 6 и 6 по 5 карт), верхняя открыта. Резерв — 5 раздач по 10 карт.<br>• Карту кладут на карту <b>на ранг старше</b> — масть не важна.<br>• Группой двигают только <b>одномастную непрерывную</b> последовательность.<br>• На пустой столбец — любую карту или одномастную группу.<br>• Освободившаяся закрытая карта переворачивается сама.<br>• Раздача — по карте в каждый столбец, <b>только без пустых столбцов</b>.<br>• Управление: тап — выделить, тап по столбцу — перенести; двойной тап по карте — лучший ход; перетаскивание — карта в руке следует за пальцем и возвращается, если не подошла.<br>• Поле шире экрана: <b>удерживай пустое место и тяни</b> ⇔.<br>• <b>Горизонтальный поворот телефона</b> — режим поля: панели скрываются сами, раздача — маленькой колодой справа внизу; вертикальный поворот возвращает все кнопки.<br>• «↩️ Отмена» — вернуть ход (штраф очков), «💡 Подсказка» — подсветить лучший ход.</div>
+<div class="note">• Две колоды — 104 карты. Цель: собрать <b>8 последовательностей К→А одной масти</b>; готовая последовательность сама улетает в «дом».<br>• Расклад: 10 столбцов (4 по 6 и 6 по 5 карт), верхняя открыта. Резерв — 5 раздач по 10 карт.<br>• Карту кладут на карту <b>на ранг старше</b> — масть не важна.<br>• Группой двигают только <b>одномастную непрерывную</b> последовательность.<br>• На пустой столбец — любую карту или одномастную группу.<br>• Освободившаяся закрытая карта переворачивается сама.<br>• Раздача — по карте в каждый столбец, <b>только без пустых столбцов</b>.<br>• Управление: тап — выделить, тап по столбцу — перенести; двойной тап по карте — лучший ход; перетаскивание — карта в руке следует за пальцем и возвращается, если не подошла. <b>Веди одним пальцем</b>: случайное второе касание не ломает перенос.<br>• Поле шире экрана: <b>удерживай пустое место и тяни</b> ⇔.<br>• <b>Горизонтальный поворот телефона</b> — режим поля: панели скрываются сами, раздача — маленькой колодой справа внизу; вертикальный поворот возвращает все кнопки.<br>• «↩️ Отмена» — вернуть ход (штраф очков), «💡 Подсказка» — подсветить лучший ход.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div>
 </div></div>
 
@@ -189,7 +188,7 @@ body.zen .zenDeck{display:flex}
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏆</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 
 <script>
-const VER='1.7',COLS=10,RANKS=['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const VER='1.8',COLS=10,RANKS=['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const SUITS={s:{ch:'♠',red:false},h:{ch:'♥',red:true},d:{ch:'♦',red:true},c:{ch:'♣',red:false}};
 const $=id=>document.getElementById(id);
 const IS_ANDROID=(function(){try{if(Platform&&Platform.name==='android')return true}catch(e){}return /Android/i.test(navigator.userAgent||'')})();
@@ -203,10 +202,11 @@ let cols=[],stock=[],founds=[],score=500,moves=0,timeSec=0,timer=null,history=[]
 let sel=null,hint=null,hintT=null,undoN=0,hintN=0,lastTap=null,toastT=null,cfRes=null;
 let CW=54,CH=77,GAP=6,boardOffset=0,boardPad=0,colGap=[],pan=null,drag=null,ghost=null,ghostGx=0,ghostGy=0,dragHideKeys=[];
 let zen=false,busy=false,dealing=false,hiddenKeys=new Set();
+/* v1.8: одно-пальцевый жест + самолечение (второй палец больше не «замораживает» карты) */
+let activePid=null,flying=false,flyCount=0;
 (function(){for(var n=1;n<=5;n++){(function(k){var im=new Image();im.onerror=function(){document.body.classList.add('bk'+k+'fail')};im.src='./img/back'+k+'.png'})(n)}})();
 function trk(n,p){p=p||{};p.platform=Platform.name;try{if(typeof gtag==='function')gtag('event',n,p)}catch(e){}}
 (function(){try{const k='spider_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trk('game_open',{game_name:'spider',source:Platform.name,ver:VER,android:IS_ANDROID?1:0})}}catch(e){}})();
-/* v1.7: режим поля — только по ориентации телефона (двойной тап убран) */
 function isMobileDevice(){
   try{if(Platform&&Platform.name==='pc')return false;if(Platform&&Platform.name==='android')return true;}catch(e){}
   try{if(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)return true;}catch(e){}
@@ -227,6 +227,7 @@ function applyOrientation(){
 }
 function backHandler(){
  try{
+  if(drag||pan||flying){abortDrag();return}
   if($('confirmOverlay').classList.contains('show')){cfResolve(false);return}
   const ov=['endOverlay','rulesOverlay','statsOverlay','setOverlay'];
   for(const id of ov){if($(id).classList.contains('show')){$(id).classList.remove('show');return}}
@@ -237,7 +238,7 @@ function backHandler(){
  goToHub();
 }
 Platform.init({bg:'#0b2a1c',back:backHandler});
-function goToHub(){Platform.haptic('light');fxStop();location.href='../?plat='+Platform.name}
+function goToHub(){Platform.haptic('light');abortDrag();fxStop();location.href='../?plat='+Platform.name}
 function toast(t){let e=$('toast');if(!e){e=document.createElement('div');e.id='toast';e.className='toast';document.body.appendChild(e)}e.textContent=t;e.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),2400)}
 function setStatus(t,w){const e=$('statusEl');e.innerHTML=t;e.classList.toggle('warn',!!w)}
 function askConfirm(msg,title){return new Promise(r=>{cfRes=r;$('cfMsg').textContent=msg;$('cfTitle').textContent=title||'❓ Подтверждение';$('confirmOverlay').classList.add('show')})}
@@ -266,7 +267,7 @@ function buildDeck(suits,rand){
  return deck;
 }
 function newGame(suits,sd){
- ensureAudio();fxStop();
+ ensureAudio();abortDrag();fxStop();
  suitsNow=suits||set.suits;set.suits=suitsNow;saveSet();
  seed=(sd==null)?(Math.random()*1e9|0):sd;
  const rand=mulberry32(seed),deck=buildDeck(suitsNow,rand);
@@ -369,7 +370,7 @@ function animateInitialDeal(){
 }
 function dealStock(){
  ensureAudio();
- if(!started||over||busy||dealing)return;
+ if(!started||over||busy||dealing||drag||flying)return;
  if(stock.length<10){sDeny();setStatus('Резерв пуст — новых раздач нет.',true);toast('Резерв пуст');return}
  if(cols.some(c=>!c.length)){sDeny();setStatus('⚠️ Раздача только когда нет пустых столбцов.',true);toast('Заполни пустые столбцы');return}
  snapshot();
@@ -393,7 +394,7 @@ function dealStock(){
 }
 function undo(){
  ensureAudio();
- if(busy||dealing)return;
+ if(busy||dealing||drag||flying)return;
  if(!history.length){sDeny();setStatus('Отменять нечего.',true);return}
  const h=history.pop();
  cols=h.cols;stock=h.stock;founds=h.founds;score=h.score;moves=h.moves;
@@ -508,6 +509,13 @@ function panToColumn(c){
  else if(x+CW+boardOffset>w)setOffset(w-x-CW-10);
 }
 function render(){
+ /* v1.8: самолечение — вне жеста/анимаций скрытых карт и «призраков» быть не должно */
+ if(!drag&&!pan&&!flying&&!dealing&&!busy&&flyCount===0){
+  if(hiddenKeys.size)hiddenKeys.clear();
+  if(dragHideKeys.length)dragHideKeys=[];
+  const stray=document.querySelectorAll('.drag-layer');
+  if(stray.length)stray.forEach(n=>{try{n.remove()}catch(e){}});
+ }
  const board=$('board'),wrap=$('boardWrap'),bh=wrap.clientHeight||300,wrapW=wrap.clientWidth||0,bw=boardW();
  board.style.width=bw+'px';
  boardPad=bw<wrapW?Math.round((wrapW-bw)/2):0;
@@ -610,10 +618,11 @@ function flyCard(cd,from,to,ms,cb){
  el.style.width=w+'px';el.style.height=h+'px';
  el.style.transform='translate(0px,0px) scale(1)';
  document.body.appendChild(el);
+ flyCount++;
  const dx=to.left-from.left,dy=to.top-from.top,sc=(to.width||CW)/w;
  const end='translate('+dx+'px,'+dy+'px) scale('+sc+')';
  let done=false;
- const finish=()=>{if(done)return;done=true;try{el.remove()}catch(e){}if(cb)cb()};
+ const finish=()=>{if(done)return;done=true;flyCount=Math.max(0,flyCount-1);try{el.remove()}catch(e){}if(cb)cb()};
  if(typeof el.animate==='function'){
   try{
    const an=el.animate([{transform:'translate(0px,0px) scale(1)'},{transform:end}],{duration:ms,easing:'cubic-bezier(.25,.7,.3,1)',fill:'forwards'});
@@ -649,7 +658,6 @@ function handleTap(c,i){
  if(sel){if(doMove(sel.c,sel.i,c))return;sDeny();setStatus('❌ Сюда нельзя: нужна карта на ранг старше или пустой столбец.',true);return}
  sel=null;render();
 }
-/* v1.7: тап по пустому месту только переносит/снимает выделение — режим поля больше не переключается тапом */
 function handleEmptyTap(e){
  const c=colOf(e.target);
  if(sel&&c>=0&&c!==sel.c){if(doMove(sel.c,sel.i,c))return}
@@ -658,7 +666,7 @@ function handleEmptyTap(e){
 function buildGhost(c,i,x,y){
  const col=cols[c],src=$('board').children[c],items=[];
  for(let k=i;k<col.length;k++){const el=src.querySelector('[data-i="'+k+'"]');if(el)items.push({cd:col[k],rect:el.getBoundingClientRect()})}
- if(!items.length)return;
+ if(!items.length)return false;
  ghost=document.createElement('div');ghost.className='drag-layer';
  const first=items[0].rect;
  items.forEach(it=>{
@@ -674,6 +682,7 @@ function buildGhost(c,i,x,y){
  ghostGx=first.left-x;ghostGy=first.top-y;
  document.body.appendChild(ghost);
  ghost.style.transform='translate('+x+'px,'+y+'px)';
+ return true;
 }
 function hideDragCards(c,i){dragHideKeys=[];for(let k=i;k<cols[c].length;k++){const key=c+':'+k;hiddenKeys.add(key);dragHideKeys.push(key)}render()}
 function clearDragHide(){dragHideKeys.forEach(k=>hiddenKeys.delete(k));dragHideKeys=[]}
@@ -682,13 +691,16 @@ function destAnchor(t){
  if(cards.length){const r=cards[cards.length-1].getBoundingClientRect();return{x:r.left,y:r.top+(colGap[t]||Math.round(CW*.38))}}
  const r=colEl.getBoundingClientRect();return{x:r.left,y:r.top};
 }
-function flyGhostTo(tx,ty,ms,cb){
- if(!ghost){cb&&cb();return}
+/* v1.8: ключи скрытия передаются в полёт явно — чужой жест их не сотрёт */
+function flyGhostTo(tx,ty,ms,keys,cb){
+ const own=(keys||[]).slice();
  const g=ghost;ghost=null;
+ if(!g){own.forEach(k=>hiddenKeys.delete(k));flying=false;cb&&cb();return}
+ flying=true;
  g.style.transition='transform '+ms+'ms cubic-bezier(.25,.7,.3,1)';
  void g.offsetWidth;
  g.style.transform='translate('+(tx-ghostGx)+'px,'+(ty-ghostGy)+'px)';
- setTimeout(()=>{g.remove();cb&&cb()},ms+25);
+ setTimeout(()=>{try{g.remove()}catch(e){}own.forEach(k=>hiddenKeys.delete(k));flying=false;cb&&cb()},ms+25);
 }
 function dropTarget(x,y){const el=document.elementFromPoint(x,y);return el?colOf(el):-1}
 function markDrop(t){
@@ -698,15 +710,150 @@ function markDrop(t){
 function endDrag(x,y,moved){
  const d=drag;drag=null;
  document.querySelectorAll('.col.dropok').forEach(e=>e.classList.remove('dropok'));
- if(!moved){clearDragHide();render();handleTap(d.c,d.i);return}
+ const keys=dragHideKeys.slice();dragHideKeys=[];
+ if(!moved){keys.forEach(k=>hiddenKeys.delete(k));render();handleTap(d.c,d.i);return}
  const t=dropTarget(x,y);
  if(t>=0&&t!==d.c&&canPlace(cols[d.c][d.i],t)){
   const a=destAnchor(t);
-  flyGhostTo(a.x,a.y,150,()=>{clearDragHide();doMove(d.c,d.i,t)});
+  flyGhostTo(a.x,a.y,150,keys,()=>{doMove(d.c,d.i,t)});
  }else{
-  flyGhostTo(d.x0,d.y0,190,()=>{clearDragHide();render()});
+  flyGhostTo(d.x0,d.y0,190,keys,()=>{render()});
   if(t!==d.c){sDeny();setStatus('❌ Сюда нельзя: нужна карта на ранг старше.',true)}
  }
+}
+/* v1.8: единая аварийная уборка жеста — карты всегда возвращаются в стопку */
+function abortDrag(){
+ const keys=dragHideKeys.slice();dragHideKeys=[];
+ keys.forEach(k=>hiddenKeys.delete(k));
+ if(ghost){try{ghost.remove()}catch(e){}ghost=null;}
+ document.querySelectorAll('.drag-layer').forEach(n=>{try{n.remove()}catch(e){}});
+ document.querySelectorAll('.col.dropok').forEach(e=>e.classList.remove('dropok'));
+ drag=null;pan=null;flying=false;
+ const w=$('boardWrap');
+ if(activePid!==null&&w){try{w.releasePointerCapture(activePid)}catch(e){}}
+ activePid=null;
+ try{render()}catch(e){}
+}
+function bind(){
+ const wrap=$('boardWrap');
+ wrap.addEventListener('pointerdown',e=>{
+  ensureAudio();
+  /* второй палец во время жеста/полёта — полностью игнорируем (как в Косынке) */
+  if(drag||pan||flying||activePid!==null){e.preventDefault();return}
+  if(!started||busy||dealing||over)return;
+  activePid=e.pointerId;
+  try{wrap.setPointerCapture(e.pointerId)}catch(err){}
+  const cardE=e.target.closest('.card'),c=colOf(e.target);
+  if(cardE&&c>=0){
+   const i=+cardE.dataset.i;
+   drag={c:c,i:i,pid:e.pointerId,x0:e.clientX,y0:e.clientY,moved:false,valid:cols[c][i]&&cols[c][i].u&&isRunFrom(cols[c],i)};
+   pan=null;
+  }else{drag=null;pan={pid:e.pointerId,x0:e.clientX,off0:boardOffset,moved:false}}
+  e.preventDefault();
+ },{passive:false});
+ wrap.addEventListener('pointermove',e=>{
+  if(activePid===null||e.pointerId!==activePid)return;
+  if(drag){
+   const dx=e.clientX-drag.x0,dy=e.clientY-drag.y0;
+   if(!drag.moved){
+    if(Math.hypot(dx,dy)<8)return;
+    if(!drag.valid){pan={pid:e.pointerId,x0:drag.x0,off0:boardOffset,moved:true};drag=null;return}
+    drag.moved=true;sel=null;clearHint();
+    if(!buildGhost(drag.c,drag.i,drag.x0,drag.y0)){abortDrag();return}
+    hideDragCards(drag.c,drag.i);
+   }
+   if(ghost)ghost.style.transform='translate('+e.clientX+'px,'+e.clientY+'px)';
+   const r=wrap.getBoundingClientRect();
+   if(e.clientX<r.left+34)setOffset(boardOffset+9);
+   else if(e.clientX>r.right-34)setOffset(boardOffset-9);
+   markDrop(dropTarget(e.clientX,e.clientY));
+   return;
+  }
+  if(pan){
+   const dx=e.clientX-pan.x0;
+   if(!pan.moved&&Math.abs(dx)>6)pan.moved=true;
+   if(pan.moved)setOffset(pan.off0+dx);
+  }
+ },{passive:false});
+ wrap.addEventListener('pointerup',e=>{
+  if(activePid===null||e.pointerId!==activePid)return;
+  try{wrap.releasePointerCapture(e.pointerId)}catch(err){}
+  activePid=null;
+  if(drag){endDrag(e.clientX,e.clientY,drag.moved);return}
+  if(pan){const p=pan;pan=null;if(!p.moved)handleEmptyTap(e)}
+ });
+ wrap.addEventListener('pointercancel',e=>{
+  if(activePid!==null&&e.pointerId!==activePid)return;
+  const d=drag;
+  if(d&&d.moved&&ghost){
+   const keys=dragHideKeys.slice();dragHideKeys=[];
+   drag=null;pan=null;activePid=null;
+   try{wrap.releasePointerCapture(e.pointerId)}catch(err){}
+   flyGhostTo(d.x0,d.y0,160,keys,()=>{render()});
+   return;
+  }
+  abortDrag();
+ });
+ wrap.addEventListener('lostpointercapture',e=>{
+  if(activePid!==null&&e.pointerId===activePid&&(drag||pan))abortDrag();
+ });
+ wrap.addEventListener('wheel',e=>{const d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;if(!d)return;setOffset(boardOffset-d);e.preventDefault()},{passive:false});
+ $('stock').addEventListener('click',()=>{ensureAudio();dealStock()});
+ $('zenDeck').addEventListener('click',e=>{e.stopPropagation();ensureAudio();dealStock()});
+ $('dealBtn').onclick=()=>{ensureAudio();dealStock()};
+ $('undoBtn').onclick=undo;
+ $('hintBtn').onclick=showHint;
+ $('zenBtn').onclick=()=>{sClick();setZen(!zen)};
+ $('muteBtn').onclick=()=>{set.mute=!set.mute;saveSet();updateMuteBtn();if(!set.mute){ensureAudio();sClick()}toast(set.mute?'🔇 Звук выключен':'🔊 Звук включён')};
+ $('newBtn').onclick=async()=>{ensureAudio();if(started&&!over){if(await askConfirm('Начать новую партию? Текущая будет потеряна.'))newGame(suitsNow)}else newGame(suitsNow)};
+ $('menuBtn').onclick=()=>{sClick();abortDrag();openMenu()};
+ $('menuHubBtn').onclick=goToHub;
+ $('menuContinue').onclick=()=>$('menuOverlay').classList.remove('show');
+ $('menuShare').onclick=shareGameLink;
+ $('shareBtn').onclick=shareGameLink;
+ document.querySelectorAll('#menuOverlay .mode-btn').forEach(b=>b.onclick=async()=>{
+  const n=+b.dataset.suits;
+  if(started&&!over&&!(await askConfirm('Начать новую партию ('+n+' '+plural(n)+')? Текущая будет потеряна.')))return;
+  newGame(n);
+ });
+ $('setBtn').onclick=()=>{sClick();abortDrag();$('undoPenSel').value=String(set.undoPen);$('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';$('tableSel').value=set.table;$('backSel').value=String(set.back);$('leftSel').value=String(set.left);$('setOverlay').classList.add('show')};
+ $('setClose').onclick=()=>$('setOverlay').classList.remove('show');
+ $('undoPenSel').onchange=e=>{set.undoPen=+e.target.value;saveSet();trk('settings_change',{game_name:'spider',setting:'undo_penalty',value:set.undoPen})};
+ $('volSlider').oninput=e=>{set.vol=e.target.value/100;$('volV').textContent=e.target.value+'%';saveSet();ensureAudio()};
+ $('tableSel').onchange=e=>{set.table=e.target.value;saveSet();applySkins()};
+ $('backSel').onchange=e=>{set.back=+e.target.value;saveSet();applySkins();render()};
+ $('leftSel').onchange=e=>{set.left=+e.target.value;saveSet();render()};
+ $('statsBtn').onclick=()=>{sClick();abortDrag();showStats();$('statsOverlay').classList.add('show')};
+ $('stClose').onclick=()=>$('statsOverlay').classList.remove('show');
+ $('stReset').onclick=async()=>{if(await askConfirm('Сбросить статистику?')){ST={g:0,w:0,best:0,bestTime:0,suits:0};saveST();showStats()}};
+ $('rulesBtn').onclick=()=>{sClick();abortDrag();$('rulesOverlay').classList.add('show')};
+ $('rulesClose').onclick=()=>$('rulesOverlay').classList.remove('show');
+ $('cfYes').onclick=()=>cfResolve(true);
+ $('cfNo').onclick=()=>cfResolve(false);
+ let rt=null;
+ const relayout=()=>{clearTimeout(rt);rt=setTimeout(()=>{applyOrientation();layout();render();if(fxOn)fxResize()},70)};
+ window.addEventListener('resize',relayout);
+ window.addEventListener('orientationchange',()=>{abortDrag();setTimeout(relayout,120);setTimeout(relayout,450)});
+ try{const mq=window.matchMedia('(orientation: landscape)');if(mq.addEventListener)mq.addEventListener('change',relayout);else if(mq.addListener)mq.addListener(relayout);}catch(e){}
+ window.addEventListener('blur',()=>abortDrag());
+ window.addEventListener('pagehide',()=>abortDrag());
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)abortDrag()});
+ /* страховка: жест «потерялся» без pointerup/cancel */
+ setInterval(()=>{if((drag||pan)&&activePid===null)abortDrag()},1200);
+}
+function showStats(){$('stG').textContent=ST.g;$('stW').textContent=ST.w;$('stP').textContent=ST.g?Math.round(ST.w/ST.g*100)+'%':'—';$('stB').textContent=ST.best||0;$('stT').textContent=ST.bestTime?fmt(ST.bestTime):'—';$('stS').textContent=ST.suits||0}
+function applySkins(){document.documentElement.setAttribute('data-table',set.table);document.body.setAttribute('data-back',String(set.back||1))}
+function openMenu(){clearHint();$('menuOverlay').classList.add('show');$('menuContinue').style.display=(started&&!over)?'inline-flex':'none'}
+function shareGameLink(){
+ ensureAudio();
+ Platform.shareGame('spider','🕷 Паук — собери 8 последовательностей К→А одной масти: 1, 2 или 4 масти, отмена хода и подсказки!',{title:'Паук — играй сейчас',copiedToast:'Ссылка на игру скопирована — отправь другу!'});
+ trk('game_share',{game_name:'spider',share_type:'link'});
+}
+function shareResult(){
+ ensureAudio();
+ const txt='🕷 Паук ('+suitsNow+' '+plural(suitsNow)+'): все 8 последовательностей собраны! Очки '+score+', время '+fmt(timeSec)+', ходов '+moves+'. Сможешь лучше?';
+ Platform.shareGame('spider',txt,{title:'Паук — результат партии',copiedToast:'Результат скопирован — отправь другу!'});
+ trk('game_share',{game_name:'spider',share_type:'result',score:score});
 }
 const FXC=['#7cffc4','#ffd166','#ff5b6b','#33d6ff','#c084fc','#ff9f45','#ffffff','#8affd8'];
 let fxCv=null,fxCtx=null,fxRaf=null,fxOn=false,fxParts=[],fxRockets=[],fxFlashes=[],fxLast=0,fxNext=0;
@@ -782,103 +929,6 @@ document.addEventListener('visibilitychange',()=>{
  if(document.hidden){if(fxRaf)cancelAnimationFrame(fxRaf);fxRaf=null}
  else if(!fxRaf){fxLast=performance.now();fxRaf=requestAnimationFrame(fxLoop)}
 });
-function bind(){
- const wrap=$('boardWrap');
- wrap.addEventListener('pointerdown',e=>{
-  ensureAudio();
-  if(!started||busy||dealing)return;
-  if(over){return}
-  try{wrap.setPointerCapture(e.pointerId)}catch(err){}
-  const cardE=e.target.closest('.card'),c=colOf(e.target);
-  if(cardE&&c>=0){
-   const i=+cardE.dataset.i;
-   drag={c:c,i:i,x0:e.clientX,y0:e.clientY,moved:false,valid:cols[c][i]&&cols[c][i].u&&isRunFrom(cols[c],i)};
-   pan=null;
-  }else{drag=null;pan={x0:e.clientX,off0:boardOffset,moved:false}}
-  e.preventDefault();
- },{passive:false});
- wrap.addEventListener('pointermove',e=>{
-  if(drag){
-   const dx=e.clientX-drag.x0,dy=e.clientY-drag.y0;
-   if(!drag.moved){
-    if(Math.hypot(dx,dy)<8)return;
-    if(!drag.valid){pan={x0:drag.x0,off0:boardOffset,moved:true};drag=null;return}
-    drag.moved=true;sel=null;clearHint();
-    buildGhost(drag.c,drag.i,drag.x0,drag.y0);
-    hideDragCards(drag.c,drag.i);
-   }
-   if(ghost)ghost.style.transform='translate('+e.clientX+'px,'+e.clientY+'px)';
-   const r=wrap.getBoundingClientRect();
-   if(e.clientX<r.left+34)setOffset(boardOffset+9);
-   else if(e.clientX>r.right-34)setOffset(boardOffset-9);
-   markDrop(dropTarget(e.clientX,e.clientY));
-   return;
-  }
-  if(pan){
-   const dx=e.clientX-pan.x0;
-   if(!pan.moved&&Math.abs(dx)>6)pan.moved=true;
-   if(pan.moved)setOffset(pan.off0+dx);
-  }
- },{passive:false});
- wrap.addEventListener('pointerup',e=>{
-  try{wrap.releasePointerCapture(e.pointerId)}catch(err){}
-  if(drag){endDrag(e.clientX,e.clientY,drag.moved);return}
-  if(pan){const p=pan;pan=null;if(!p.moved)handleEmptyTap(e)}
- });
- wrap.addEventListener('pointercancel',()=>{if(drag)endDrag(drag.x0,drag.y0,drag.moved);pan=null});
- wrap.addEventListener('wheel',e=>{const d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;if(!d)return;setOffset(boardOffset-d);e.preventDefault()},{passive:false});
- $('stock').addEventListener('click',()=>{ensureAudio();dealStock()});
- $('zenDeck').addEventListener('click',e=>{e.stopPropagation();ensureAudio();dealStock()});
- $('dealBtn').onclick=()=>{ensureAudio();dealStock()};
- $('undoBtn').onclick=undo;
- $('hintBtn').onclick=showHint;
- $('zenBtn').onclick=()=>{sClick();setZen(!zen)};
- $('muteBtn').onclick=()=>{set.mute=!set.mute;saveSet();updateMuteBtn();if(!set.mute){ensureAudio();sClick()}toast(set.mute?'🔇 Звук выключен':'🔊 Звук включён')};
- $('newBtn').onclick=async()=>{ensureAudio();if(started&&!over){if(await askConfirm('Начать новую партию? Текущая будет потеряна.'))newGame(suitsNow)}else newGame(suitsNow)};
- $('menuBtn').onclick=()=>{sClick();openMenu()};
- $('menuHubBtn').onclick=goToHub;
- $('menuContinue').onclick=()=>$('menuOverlay').classList.remove('show');
- $('menuShare').onclick=shareGameLink;
- $('shareBtn').onclick=shareGameLink;
- document.querySelectorAll('#menuOverlay .mode-btn').forEach(b=>b.onclick=async()=>{
-  const n=+b.dataset.suits;
-  if(started&&!over&&!(await askConfirm('Начать новую партию ('+n+' '+plural(n)+')? Текущая будет потеряна.')))return;
-  newGame(n);
- });
- $('setBtn').onclick=()=>{sClick();$('undoPenSel').value=String(set.undoPen);$('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';$('tableSel').value=set.table;$('backSel').value=String(set.back);$('leftSel').value=String(set.left);$('setOverlay').classList.add('show')};
- $('setClose').onclick=()=>$('setOverlay').classList.remove('show');
- $('undoPenSel').onchange=e=>{set.undoPen=+e.target.value;saveSet();trk('settings_change',{game_name:'spider',setting:'undo_penalty',value:set.undoPen})};
- $('volSlider').oninput=e=>{set.vol=e.target.value/100;$('volV').textContent=e.target.value+'%';saveSet();ensureAudio()};
- $('tableSel').onchange=e=>{set.table=e.target.value;saveSet();applySkins()};
- $('backSel').onchange=e=>{set.back=+e.target.value;saveSet();applySkins();render()};
- $('leftSel').onchange=e=>{set.left=+e.target.value;saveSet();render()};
- $('statsBtn').onclick=()=>{sClick();showStats();$('statsOverlay').classList.add('show')};
- $('stClose').onclick=()=>$('statsOverlay').classList.remove('show');
- $('stReset').onclick=async()=>{if(await askConfirm('Сбросить статистику?')){ST={g:0,w:0,best:0,bestTime:0,suits:0};saveST();showStats()}};
- $('rulesBtn').onclick=()=>{sClick();$('rulesOverlay').classList.add('show')};
- $('rulesClose').onclick=()=>$('rulesOverlay').classList.remove('show');
- $('cfYes').onclick=()=>cfResolve(true);
- $('cfNo').onclick=()=>cfResolve(false);
- let rt=null;
- const relayout=()=>{clearTimeout(rt);rt=setTimeout(()=>{applyOrientation();layout();render();if(fxOn)fxResize()},70)};
- window.addEventListener('resize',relayout);
- window.addEventListener('orientationchange',()=>{setTimeout(relayout,120);setTimeout(relayout,450)});
- try{const mq=window.matchMedia('(orientation: landscape)');if(mq.addEventListener)mq.addEventListener('change',relayout);else if(mq.addListener)mq.addListener(relayout);}catch(e){}
-}
-function showStats(){$('stG').textContent=ST.g;$('stW').textContent=ST.w;$('stP').textContent=ST.g?Math.round(ST.w/ST.g*100)+'%':'—';$('stB').textContent=ST.best||0;$('stT').textContent=ST.bestTime?fmt(ST.bestTime):'—';$('stS').textContent=ST.suits||0}
-function applySkins(){document.documentElement.setAttribute('data-table',set.table);document.body.setAttribute('data-back',String(set.back||1))}
-function openMenu(){clearHint();$('menuOverlay').classList.add('show');$('menuContinue').style.display=(started&&!over)?'inline-flex':'none'}
-function shareGameLink(){
- ensureAudio();
- Platform.shareGame('spider','🕷 Паук — собери 8 последовательностей К→А одной масти: 1, 2 или 4 масти, отмена хода и подсказки!',{title:'Паук — играй сейчас',copiedToast:'Ссылка на игру скопирована — отправь другу!'});
- trk('game_share',{game_name:'spider',share_type:'link'});
-}
-function shareResult(){
- ensureAudio();
- const txt='🕷 Паук ('+suitsNow+' '+plural(suitsNow)+'): все 8 последовательностей собраны! Очки '+score+', время '+fmt(timeSec)+', ходов '+moves+'. Сможешь лучше?';
- Platform.shareGame('spider',txt,{title:'Паук — результат партии',copiedToast:'Результат скопирован — отправь другу!'});
- trk('game_share',{game_name:'spider',share_type:'result',score:score});
-}
 (function boot(){
  try{
   applySkins();updateMuteBtn();bind();showStats();
