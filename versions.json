@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-24T09:45:20.174Z",
+ "generatedAt": "2026-11-24T10:10:30.597Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.54",
@@ -185,7 +185,7 @@
    ]
   },
   "tictactoe": {
-   "version": "2.0",
+   "version": "2.1",
    "online": true,
    "addedAt": "2026-11-04",
    "files": [
@@ -201,8 +201,8 @@
     },
     {
      "path": "tictactoe/index.html",
-     "sha256": "6008c832b5c94c09928bddf305015a4bd00d90c7f4ed421d6a19cb55f9237a98",
-     "size": 92293
+     "sha256": "91f8dc1ccf92ec613818aba3992df5928fd2cfc7640b5303b498c9b033d94846",
+     "size": 96893
     }
    ]
   },
