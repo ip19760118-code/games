@@ -86,12 +86,19 @@ body.zen .zenDeck{display:flex}
 .zenDeck .cnt{position:absolute;right:-5px;bottom:-5px;background:var(--gold);color:#1a1206;border-radius:11px;font-size:11px;font-weight:800;padding:1px 6px;box-shadow:0 2px 6px rgba(0,0,0,.5)}
 .zenDeck.off{opacity:.42}
 .zenDeck.pulse{animation:hintP 1.35s ease-in-out infinite}
+/* v2.0: выход в меню из режима поля после победы (шапка скрыта) */
+.zenMenu{display:none;position:fixed;left:calc(10px + env(safe-area-inset-left));bottom:calc(10px + env(safe-area-inset-bottom));z-index:9500;width:50px;height:50px;border-radius:14px;border:1px solid rgba(124,255,196,.4);background:rgba(6,20,14,.78);backdrop-filter:blur(5px);color:var(--accent);font-size:20px;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 26px rgba(0,0,0,.6);padding:0}
+body.zen.gameover .zenMenu{display:flex}
+.zenMenu:active{transform:scale(.94)}
 .fxlayer{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:300;display:none}
 .fxlayer.on{display:block}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:14px}
 .overlay.show{display:flex}
 #endOverlay{background:rgba(3,12,8,.34);backdrop-filter:none;-webkit-backdrop-filter:none}
 #endOverlay .cardbox{background:rgba(9,32,22,.94);box-shadow:0 20px 60px rgba(0,0,0,.75),0 0 0 1px rgba(124,255,196,.18)}
+/* v2.0: меню режимов всегда поверх победного окна */
+#menuOverlay{z-index:120}
+#confirmOverlay{z-index:140}
 .cardbox{background:var(--panel);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:20px;max-width:430px;width:100%;text-align:center;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .cardbox h2{font-size:22px;margin-bottom:6px}
 .cardbox .sub{font-size:13px;opacity:.85;margin-bottom:12px;line-height:1.5}
@@ -103,8 +110,6 @@ body.zen .zenDeck{display:flex}
 .mode-btn b{display:block;font-size:14px}
 .mode-btn small{font-size:11.5px;opacity:.75}
 .mode-btn.primary{border-color:var(--accent);background:rgba(124,255,196,.1)}
-/* v1.9: ТОЛЬКО ПК-оболочка — масти в меню режимов чёрные/красные на светлой мини-карте.
-   Android/мессенджеры рисуют цветные эмодзи-глифы сами — их не трогаем (правило scoped). */
 body.is-pc .mode-btn .icon{background:linear-gradient(160deg,#fffef8,#e9e2cf);border:1px solid #b9ae95;border-radius:8px;padding:5px 7px;font-size:18px;display:flex;align-items:center;justify-content:center;gap:1px;box-shadow:0 2px 6px rgba(0,0,0,.45)}
 body.is-pc .mode-btn .icon .su{font-family:'Segoe UI Symbol','Segoe UI',sans-serif;color:#16181c;line-height:1}
 body.is-pc .mode-btn .icon .su.red{color:#c62828}
@@ -146,15 +151,16 @@ body.is-pc .mode-btn .icon .su.red{color:#c62828}
 <button class="btn icon" id="shareBtn" aria-label="Скинуть ссылку на игру" title="Скинуть ссылку на игру"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.9" x2="15.7" y2="6.1"/><line x1="8.3" y1="13.1" x2="15.7" y2="17.9"/></svg></button>
 </div>
 <div class="status" id="statusEl">Выбери сложность</div>
-<div class="ver" id="verTag">v1.9</div>
+<div class="ver" id="verTag">v2.0</div>
 </div>
 
 <button class="zenDeck" id="zenDeck" aria-label="Раздать из колоды" title="Раздать из колоды"><span class="mini bf"></span><span class="cnt" id="zenCnt">5</span></button>
+<button class="zenMenu" id="zenMenu" aria-label="Меню паука" title="Меню паука">🏠</button>
 <canvas id="fx" class="fxlayer"></canvas>
 
 <div class="overlay" id="menuOverlay"><div class="cardbox">
 <div class="mhdr"><button class="hbtn" id="menuHubBtn">← В меню игр</button></div>
-<h2>🕷 Паук <span style="font-size:11px;opacity:.6;font-family:monospace" id="verTag2">v1.9</span></h2>
+<h2>🕷 Паук <span style="font-size:11px;opacity:.6;font-family:monospace" id="verTag2">v2.0</span></h2>
 <div class="sub">Собери 8 последовательностей от Короля до Туза одной масти</div>
 <div class="mode-choice">
 <button class="mode-btn primary" data-suits="1"><div class="icon"><span class="su">♠</span></div><div><b>1 масть · лёгкий</b><small>Все пики — для освоения</small></div></button>
@@ -171,7 +177,7 @@ body.is-pc .mode-btn .icon .su.red{color:#c62828}
 <div class="srow"><label>Рубашка карт</label><select id="backSel"><option value="1">Классическая</option><option value="2">Красный узор</option><option value="3">Зелёное сукно</option><option value="4">Фиолетовая волна</option><option value="5">Золотая вязь</option></select></div>
 <div class="srow"><label>Раскладка</label><select id="leftSel"><option value="0">Резерв справа</option><option value="1">Резерв слева (левша)</option></select></div>
 <div class="btns"><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note" style="margin-top:10px">Очки: старт 500, −1 за ход, +100 за собранную последовательность. При повороте экрана карты не увеличиваются — растут промежутки. Поле двигается: удерживай пустое место и тяни ⇔. <b>На телефоне в горизонтальном положении панели убираются автоматически</b> — остаётся поле и колода справа внизу; поверни обратно вертикально — все кнопки вернутся. Перетаскивание ведётся одним пальцем: второе касание во время переноса игнорируется. 🔊 в шапке глушит весь звук.</div>
+<div class="note" style="margin-top:10px">Очки: старт 500, −1 за ход, +100 за собранную последовательность. При повороте экрана карты не увеличиваются — растут промежутки. Поле двигается: удерживай пустое место и тяни ⇔. <b>На телефоне в горизонтальном положении панели убираются автоматически</b> — остаётся поле и колода справа внизу; после победы слева внизу появляется 🏠 для выхода в меню. Перетаскивание ведётся одним пальцем. 🔊 в шапке глушит весь звук.</div>
 </div></div>
 
 <div class="overlay" id="statsOverlay"><div class="cardbox"><h2>📊 Статистика</h2>
@@ -185,7 +191,7 @@ body.is-pc .mode-btn .icon .su.red{color:#c62828}
 </div></div>
 
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Правила</h2>
-<div class="note">• Две колоды — 104 карты. Цель: собрать <b>8 последовательностей К→А одной масти</b>; готовая последовательность сама улетает в «дом».<br>• Расклад: 10 столбцов (4 по 6 и 6 по 5 карт), верхняя открыта. Резерв — 5 раздач по 10 карт.<br>• Карту кладут на карту <b>на ранг старше</b> — масть не важна.<br>• Группой двигают только <b>одномастную непрерывную</b> последовательность.<br>• На пустой столбец — любую карту или одномастную группу.<br>• Освободившаяся закрытая карта переворачивается сама.<br>• Раздача — по карте в каждый столбец, <b>только без пустых столбцов</b>.<br>• Управление: тап — выделить, тап по столбцу — перенести; двойной тап по карте — лучший ход; перетаскивание — карта в руке следует за пальцем и возвращается, если не подошла. <b>Веди одним пальцем</b>: случайное второе касание не ломает перенос.<br>• Поле шире экрана: <b>удерживай пустое место и тяни</b> ⇔.<br>• <b>Горизонтальный поворот телефона</b> — режим поля: панели скрываются сами, раздача — маленькой колодой справа внизу; вертикальный поворот возвращает все кнопки.<br>• «↩️ Отмена» — вернуть ход (штраф очков), «💡 Подсказка» — подсветить лучший ход.</div>
+<div class="note">• Две колоды — 104 карты. Цель: собрать <b>8 последовательностей К→А одной масти</b>; готовая последовательность сама улетает в «дом».<br>• Расклад: 10 столбцов (4 по 6 и 6 по 5 карт), верхняя открыта. Резерв — 5 раздач по 10 карт.<br>• Карту кладут на карту <b>на ранг старше</b> — масть не важна.<br>• Группой двигают только <b>одномастную непрерывную</b> последовательность.<br>• На пустой столбец — любую карту или одномастную группу.<br>• Освободившаяся закрытая карта переворачивается сама.<br>• Раздача — по карте в каждый столбец, <b>только без пустых столбцов</b>.<br>• Управление: тап — выделить, тап по столбцу — перенести; двойной тап по карте — лучший ход; перетаскивание — карта в руке следует за пальцем и возвращается, если не подошла. <b>Веди одним пальцем</b>.<br>• Поле шире экрана: <b>удерживай пустое место и тяни</b> ⇔.<br>• <b>Горизонтальный поворот телефона</b> — режим поля: панели скрываются сами, раздача — колодой справа внизу, выход в меню после победы — 🏠 слева внизу.<br>• Победа: салют идёт до новой партии или выхода в меню; «🏠 Меню паука» гасит салют и открывает выбор сложности.<br>• «↩️ Отмена» — вернуть ход (штраф очков), «💡 Подсказка» — подсветить лучший ход.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div>
 </div></div>
 
@@ -193,14 +199,13 @@ body.is-pc .mode-btn .icon .su.red{color:#c62828}
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏆</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 
 <script>
-const VER='1.9',COLS=10,RANKS=['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const VER='2.0',COLS=10,RANKS=['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const SUITS={s:{ch:'♠',red:false},h:{ch:'♥',red:true},d:{ch:'♦',red:true},c:{ch:'♣',red:false}};
 const $=id=>document.getElementById(id);
 const IS_ANDROID=(function(){try{if(Platform&&Platform.name==='android')return true}catch(e){}return /Android/i.test(navigator.userAgent||'')})();
 const IS_PC=(function(){try{return !!(Platform&&Platform.name==='pc')}catch(e){return false}})();
 const SUIT_K=IS_ANDROID?.5:1;
 try{document.documentElement.style.setProperty('--pipk',String(SUIT_K))}catch(e){}
-/* v1.9: класс только для ПК-оболочки — цвета мастей в меню режимов (Android/мессенджеры не трогаем) */
 function applyPlatformClass(){try{document.body.classList.toggle('is-pc',IS_PC)}catch(e){}}
 let set=Object.assign({suits:1,vol:.7,undoPen:5,table:'green',back:1,left:0,mute:false},JSON.parse(localStorage.spider_set||'{}'));
 const saveSet=()=>localStorage.spider_set=JSON.stringify(set);
@@ -221,6 +226,7 @@ function isMobileDevice(){
 }
 function isLandscape(){return window.innerWidth>window.innerHeight;}
 function autoZenWanted(){return isMobileDevice()&&isLandscape();}
+function menuIsOpen(){const m=$('menuOverlay');return !!(m&&m.classList.contains('show'))}
 function setZen(on,silent){
   if(zen===on)return;
   zen=on;document.body.classList.toggle('zen',zen);
@@ -238,10 +244,11 @@ function backHandler(){
   if(drag||pan||flying){abortDrag();return}
   if($('confirmOverlay').classList.contains('show')){cfResolve(false);return}
   const ov=['endOverlay','rulesOverlay','statsOverlay','setOverlay'];
-  for(const id of ov){if($(id).classList.contains('show')){$(id).classList.remove('show');return}}
-  if($('menuOverlay').classList.contains('show')){if(started&&!over){$('menuOverlay').classList.remove('show');return}goToHub();return}
+  for(const id of ov){if($(id).classList.contains('show')){$(id).classList.remove('show');if(id==='endOverlay'&&over&&started){openMenu()}return}}
+  if(menuIsOpen()){if(started&&!over){$('menuOverlay').classList.remove('show');return}goToHub();return}
   if(zen&&!autoZenWanted()){setZen(false);return}
-  if(started&&!over){askConfirm('Выйти в меню паука? Партия сохранится до новой игры.').then(v=>{if(v)openMenu()});return}
+  if(over&&started){openMenu();return}
+  if(started){askConfirm('Выйти в меню паука? Партия сохранится до новой игры.').then(v=>{if(v)openMenu()});return}
  }catch(e){}
  goToHub();
 }
@@ -276,6 +283,7 @@ function buildDeck(suits,rand){
 }
 function newGame(suits,sd){
  ensureAudio();abortDrag();fxStop();
+ document.body.classList.remove('gameover');
  suitsNow=suits||set.suits;set.suits=suitsNow;saveSet();
  seed=(sd==null)?(Math.random()*1e9|0):sd;
  const rand=mulberry32(seed),deck=buildDeck(suitsNow,rand);
@@ -407,7 +415,7 @@ function undo(){
  const h=history.pop();
  cols=h.cols;stock=h.stock;founds=h.founds;score=h.score;moves=h.moves;
  const pen=+set.undoPen||0;score=Math.max(0,score-pen);
- undoN++;over=false;sel=null;clearHint();hiddenKeys.clear();fxStop();
+ undoN++;over=false;document.body.classList.remove('gameover');sel=null;clearHint();hiddenKeys.clear();fxStop();
  sUndo();render();
  setStatus('↩️ Ход отменён'+(pen?' · −'+pen+' очков':''));
  trk('game_undo',{game_name:'spider',penalty:pen});
@@ -474,6 +482,7 @@ function checkStuck(){
 }
 function win(){
  over=true;stopTimer();clearHint();
+ document.body.classList.add('gameover');
  ST.w++;if(score>ST.best)ST.best=score;if(!ST.bestTime||timeSec<ST.bestTime)ST.bestTime=timeSec;saveST();
  sWin();Platform.haptic('success');fxStart();
  $('endTitle').textContent='🏆 Паук собран!';
@@ -481,7 +490,7 @@ function win(){
  const b=$('endBtns');b.innerHTML='';
  addBtn(b,'🔄 Новая партия',()=>{$('endOverlay').classList.remove('show');newGame(suitsNow)},true,true);
  addBtn(b,'🎯 Ещё раз этот расклад',()=>{$('endOverlay').classList.remove('show');restartSame()});
- addBtn(b,'🎆 Смотреть салют',()=>{$('endOverlay').classList.remove('show');toast('Салют! «🏠 Меню» в шапке — новая партия')});
+ addBtn(b,'🎆 Смотреть салют',()=>{$('endOverlay').classList.remove('show');toast(zen?'Салют! 🏠 слева внизу — меню':'Салют! «🏠 Меню» в шапке — меню и новая партия')});
  addBtn(b,'📤 Отправить результат',shareResult);
  addBtn(b,'🏠 Меню паука',openMenu);
  addBtn(b,'← В меню игр',goToHub);
@@ -596,7 +605,7 @@ function updateHud(){
  $('undoBtn').disabled=!history.length||over||lock;
  $('dealBtn').disabled=stock.length<10||over||lock;
  $('hintBtn').disabled=over||!started||lock;
- $('menuContinue').style.display=(started&&!over)?'inline-flex':'none';
+ $('menuContinue').style.display=(started&&!over&&!menuIsOpen())?'inline-flex':((started&&!over)?'inline-flex':'none');
  updateZenDeck();
 }
 function stockRect(){
@@ -804,15 +813,16 @@ function bind(){
  wrap.addEventListener('wheel',e=>{const d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;if(!d)return;setOffset(boardOffset-d);e.preventDefault()},{passive:false});
  $('stock').addEventListener('click',()=>{ensureAudio();dealStock()});
  $('zenDeck').addEventListener('click',e=>{e.stopPropagation();ensureAudio();dealStock()});
+ $('zenMenu').addEventListener('click',e=>{e.stopPropagation();sClick();openMenu()});
  $('dealBtn').onclick=()=>{ensureAudio();dealStock()};
  $('undoBtn').onclick=undo;
  $('hintBtn').onclick=showHint;
  $('zenBtn').onclick=()=>{sClick();setZen(!zen)};
  $('muteBtn').onclick=()=>{set.mute=!set.mute;saveSet();updateMuteBtn();if(!set.mute){ensureAudio();sClick()}toast(set.mute?'🔇 Звук выключен':'🔊 Звук включён')};
  $('newBtn').onclick=async()=>{ensureAudio();if(started&&!over){if(await askConfirm('Начать новую партию? Текущая будет потеряна.'))newGame(suitsNow)}else newGame(suitsNow)};
- $('menuBtn').onclick=()=>{sClick();abortDrag();openMenu()};
+ $('menuBtn').onclick=()=>{sClick();openMenu()};
  $('menuHubBtn').onclick=goToHub;
- $('menuContinue').onclick=()=>$('menuOverlay').classList.remove('show');
+ $('menuContinue').onclick=()=>{$('menuOverlay').classList.remove('show')};
  $('menuShare').onclick=shareGameLink;
  $('shareBtn').onclick=shareGameLink;
  document.querySelectorAll('#menuOverlay .mode-btn').forEach(b=>b.onclick=async()=>{
@@ -846,7 +856,14 @@ function bind(){
 }
 function showStats(){$('stG').textContent=ST.g;$('stW').textContent=ST.w;$('stP').textContent=ST.g?Math.round(ST.w/ST.g*100)+'%':'—';$('stB').textContent=ST.best||0;$('stT').textContent=ST.bestTime?fmt(ST.bestTime):'—';$('stS').textContent=ST.suits||0}
 function applySkins(){document.documentElement.setAttribute('data-table',set.table);document.body.setAttribute('data-back',String(set.back||1))}
-function openMenu(){clearHint();$('menuOverlay').classList.add('show');$('menuContinue').style.display=(started&&!over)?'inline-flex':'none'}
+/* v2.0: единый вход в меню — гасит салют, победное окно и все прочие оверлеи */
+function openMenu(){
+ abortDrag();clearHint();fxStop();
+ ['endOverlay','setOverlay','statsOverlay','rulesOverlay','confirmOverlay'].forEach(id=>{const e=$(id);if(e)e.classList.remove('show')});
+ cfRes=null;
+ $('menuOverlay').classList.add('show');
+ $('menuContinue').style.display=(started&&!over)?'inline-flex':'none';
+}
 function shareGameLink(){
  ensureAudio();
  Platform.shareGame('spider','🕷 Паук — собери 8 последовательностей К→А одной масти: 1, 2 или 4 масти, отмена хода и подсказки!',{title:'Паук — играй сейчас',copiedToast:'Ссылка на игру скопирована — отправь другу!'});
@@ -862,7 +879,7 @@ const FXC=['#7cffc4','#ffd166','#ff5b6b','#33d6ff','#c084fc','#ff9f45','#ffffff'
 let fxCv=null,fxCtx=null,fxRaf=null,fxOn=false,fxParts=[],fxRockets=[],fxFlashes=[],fxLast=0,fxNext=0;
 function fxResize(){if(!fxCv||!fxCtx)return;const d=Math.min(2,window.devicePixelRatio||1);fxCv.width=Math.floor(innerWidth*d);fxCv.height=Math.floor(innerHeight*d);fxCtx.setTransform(d,0,0,d,0,0)}
 function fxStart(){
- if(fxOn)return;
+ if(fxOn||menuIsOpen())return;
  fxCv=$('fx');fxCtx=fxCv.getContext('2d');if(!fxCtx)return;
  fxOn=true;fxParts=[];fxRockets=[];fxFlashes=[];fxResize();fxCv.classList.add('on');
  fxLast=performance.now();fxNext=0;
@@ -871,7 +888,7 @@ function fxStart(){
 }
 function fxStop(){
  fxOn=false;if(fxRaf)cancelAnimationFrame(fxRaf);fxRaf=null;fxParts=[];fxRockets=[];fxFlashes=[];
- if(fxCv){fxCv.classList.remove('on');fxCtx&&fxCtx.clearRect(0,0,innerWidth,innerHeight)}
+ if(fxCv){fxCv.classList.remove('on');if(fxCtx)fxCtx.clearRect(0,0,innerWidth,innerHeight)}
 }
 function fxLaunch(){
  const w=innerWidth,h=innerHeight;
@@ -889,6 +906,7 @@ function fxExplode(x,y,c){
 }
 function fxLoop(t){
  if(!fxOn)return;
+ if(menuIsOpen()){fxStop();return}
  fxRaf=requestAnimationFrame(fxLoop);
  const dt=Math.min(.05,(t-fxLast)/1000);fxLast=t;
  const w=innerWidth,h=innerHeight;
@@ -930,7 +948,7 @@ function fxLoop(t){
 document.addEventListener('visibilitychange',()=>{
  if(!fxOn)return;
  if(document.hidden){if(fxRaf)cancelAnimationFrame(fxRaf);fxRaf=null}
- else if(!fxRaf){fxLast=performance.now();fxRaf=requestAnimationFrame(fxLoop)}
+ else if(!fxRaf&&!menuIsOpen()){fxLast=performance.now();fxRaf=requestAnimationFrame(fxLoop)}
 });
 (function boot(){
  try{
@@ -938,7 +956,7 @@ document.addEventListener('visibilitychange',()=>{
   $('verTag').textContent='v'+VER;$('verTag2').textContent='v'+VER;
   cols=[];for(let i=0;i<COLS;i++)cols.push([]);
   document.body.classList.toggle('mobile',isMobileDevice());
-  zen=false;document.body.classList.remove('zen');
+  zen=false;document.body.classList.remove('zen');document.body.classList.remove('gameover');
   layout();render();
   applyOrientation();
   openMenu();
