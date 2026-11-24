@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-24T10:10:30.597Z",
+ "generatedAt": "2026-11-24T10:21:00.395Z",
  "baseUrl": "https://ip19760118-code.github.io/games",
  "hub": {
   "version": "3.54",
@@ -385,7 +385,7 @@
    ]
   },
   "solitaire": {
-   "version": "2.21",
+   "version": "2.22",
    "online": false,
    "addedAt": "2026-10-01",
    "files": [
@@ -416,8 +416,8 @@
     },
     {
      "path": "solitaire/index.html",
-     "sha256": "1450bec19f7e3139d3adb8f6f760baf1fc3637be4280c696bd12d9fa1838757d",
-     "size": 55486
+     "sha256": "27c21baf3a7e8ddb047990dc618b24ddbac7fae6ed243d0fa36f8c70d2c885af",
+     "size": 79590
     }
    ]
   },
